@@ -2,7 +2,7 @@ server:
   port: 8081
 spring:
   application:
-    name: mod-spring-template
+    name: mod-dcb
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}

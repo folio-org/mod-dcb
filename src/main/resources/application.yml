@@ -2,7 +2,7 @@ server:
   port: 8081
 spring:
   application:
-    name: mod-spring-template
+    name: mod-dcb
   datasource:
     username: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD:postgres}
