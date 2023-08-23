@@ -1,6 +1,24 @@
 {
   "id": "@artifactId@-@version@",
   "name": "Manage DCB related transactions in folio.",
+  "requires": [
+    {
+      "id": "mod-circulation-item",
+      "version": "1.1"
+    },
+    {
+      "id": "mod-circulation",
+      "version": "14.2"
+    },
+    {
+      "id": "users",
+      "version": "16.0"
+    },
+    {
+      "id": "inventory",
+      "version": "13.0"
+    }
+  ],
   "provides": [
     {
       "id": "mod-dcb",
@@ -11,7 +29,9 @@
             "POST"
           ],
           "pathPattern": "/transactions/{dcbTransactionId}",
-          "permissionsRequired": [],
+          "permissionsRequired": [
+            "dcb.transactions.post"
+          ],
           "modulePermissions": []
         },
         {
@@ -19,7 +39,9 @@
             "GET"
           ],
           "pathPattern": "/transactions/{dcbTransactionId}/status",
-          "permissionsRequired": [],
+          "permissionsRequired": [
+            "dcb.transactions.get"
+          ],
           "modulePermissions": []
         },
         {
@@ -27,7 +49,9 @@
             "PUT"
           ],
           "pathPattern": "/transactions/{dcbTransactionId}/status",
-          "permissionsRequired": [],
+          "permissionsRequired": [
+            "dcb.transactions.put"
+          ],
           "modulePermissions": []
         }
       ]
@@ -49,8 +73,33 @@
       ]
     }
   ],
-  "permissionSets" : [],
-  "requires": [],
+  "permissionSets" : [
+    {
+      "permissionName": "dcb.all",
+      "displayName": "DCB API module - all permissions",
+      "description": "All permissions for dcb module",
+      "subPermissions": [
+        "dcb.transactions.post",
+        "dcb.transactions.put",
+        "dcb.transactions.get"
+      ]
+    },
+    {
+      "permissionName": "dcb.post",
+      "displayName": "creates new transaction",
+      "description": "creates new transaction"
+    },
+    {
+      "permissionName": "dcb.get",
+      "displayName": "get transaction details",
+      "description": "get transaction details"
+    },
+    {
+      "permissionName": "dcb.put",
+      "displayName": "update transaction details",
+      "description": "update transaction details"
+    }
+  ],
   "launchDescriptor": {
     "dockerImage": "@artifactId@:@version@",
     "dockerPull": false,
