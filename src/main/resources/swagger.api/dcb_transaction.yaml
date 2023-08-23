@@ -1,0 +1,150 @@
+openapi: 3.0.3
+info:
+  title: mod ReShare FOLIO API
+  description: mod ReShare FOLIO API
+  version: 1.0.0
+paths:
+  /transactions/{dcbTransactionId}:
+    description: ReShare Circulation Transaction endpoint
+    parameters:
+      - in: path
+        name: dcbTransactionId
+        description: The ReShare DCB ID for the transaction being brokered.
+        schema:
+          type: string
+    post:
+      description: Create circulation request
+      operationId: createCirculationRequest
+      tags:
+        - circulation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                item:
+                  $ref: '#/components/schemas/DCBItem'
+                patron:
+                  $ref: '#/components/schemas/DCBPatron'
+      responses:
+        '201':
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionStatusResponse'
+
+  /transactions/{dcbTransactionId}/status:
+    parameters:
+      - in: path
+        name: dcbTransactionId
+        description: The ReShare DCB ID for the transaction being brokered.
+        schema:
+          type: string
+    get:
+      description: Get transaction status across circulation institutions
+      operationId: getTransactionStatus
+      tags:
+        - circulation
+      responses:
+        '200':
+          description: Status updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionStatusResponse'
+    put:
+      description: Update transaction status across circulation institutions
+      operationId: updateTransactionStatus
+      tags:
+        - circulation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionStatusResponse'
+      responses:
+        '200':
+          description: Status updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionStatusResponse'
+
+components:
+  schemas:
+    TransactionStatus:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - CREATED #Created by DCB
+            - OPEN #Created in lending library, Item is available
+            - CANCELLED #Request canceled by lending library or patron
+            - IN_TRANSIT #checked in at another service point
+            - AWAITING_PICKUP #checked in at the same service point. Item status should change from "Checked out" to "Awaiting pickup"
+            - ITEM_CHECKED_OUT #Request is fulfilled and loan is created, Item checkout by patron
+            - ITEM_CHECKED_IN #Item returned to pickup location
+            - IN_TRANSIT_TO_LENDING #Item in transit from pickup location to owning library
+            - CLOSED #Item returned to lending library
+            - ERROR #General error
+        message:
+          type: string
+    TransactionStatusResponse:
+      allOf:
+        - $ref: '#/components/schemas/TransactionStatus'
+        - type: object
+          properties:
+            item:
+              $ref: '#/components/schemas/DCBItem'
+            patron:
+              $ref: '#/components/schemas/DCBPatron'
+    DCBItem:
+      description: Item metadata required for the transaction
+      type: object
+      properties:
+        itemUUID:
+          description: The unique item identifier as known to ReShare DCB
+          type: string
+          format: uuid
+        itemTitle:
+          description: The title of the item that has been requested
+          type: string
+        itemBarcode:
+          description: The barcode of the item as specified in the lending library
+          type: string
+        pickupLocation:
+          description: The code in ReShare DCB which identifies the pickup library
+          type: string
+        dcbMaterialType:
+          description: The “hub-normalized” form of the item item type, used in the circulation rules for determining the correct loan policy.
+          type: string
+        dcbLendingLibraryCode:
+          description: The code in ReShare DCB which identifies the lending library
+          type: string
+        dcbTransactionId:
+          description: The ReShare DCB ID for the transaction being brokered.
+          type: string
+
+    DCBPatron:
+      description: Patron metadata required for the transaction
+      type: object
+      properties:
+        patronUUID:
+          description: The unique identifier for the patron making the request as known in the requesting library
+          type: string
+          format: uuid
+        dcbPatronGroup:
+          description: The patron group associated with the requesting patron as found in ReShare DCB
+          type: string
+        dcbPatronBarcode:
+          description: The barcode of the patron as found in ReShare DCB
+          type: string
+        dcbBorrowingLibraryCode:
+          description: The code in ReShare DCB which identifies the borrowing library
+          type: string
+        dcbTransactionId:
+          description: The ReShare DCB ID for the transaction being brokered.
+          type: string

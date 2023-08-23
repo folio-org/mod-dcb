@@ -1,0 +1,126 @@
+{
+  "id": "@artifactId@-@version@",
+  "name": "Manage DCB related transactions in folio.",
+  "requires": [
+    {
+      "id": "mod-circulation-item",
+      "version": "1.1"
+    },
+    {
+      "id": "mod-circulation",
+      "version": "14.2"
+    },
+    {
+      "id": "users",
+      "version": "16.0"
+    },
+    {
+      "id": "inventory",
+      "version": "13.0"
+    }
+  ],
+  "provides": [
+    {
+      "id": "mod-dcb",
+      "version": "1.0",
+      "handlers": [
+        {
+          "methods": [
+            "POST"
+          ],
+          "pathPattern": "/transactions/{dcbTransactionId}",
+          "permissionsRequired": [
+            "dcb.transactions.post"
+          ],
+          "modulePermissions": []
+        },
+        {
+          "methods": [
+            "GET"
+          ],
+          "pathPattern": "/transactions/{dcbTransactionId}/status",
+          "permissionsRequired": [
+            "dcb.transactions.get"
+          ],
+          "modulePermissions": []
+        },
+        {
+          "methods": [
+            "PUT"
+          ],
+          "pathPattern": "/transactions/{dcbTransactionId}/status",
+          "permissionsRequired": [
+            "dcb.transactions.put"
+          ],
+          "modulePermissions": []
+        }
+      ]
+    },
+    {
+      "id": "_tenant",
+      "version": "2.0",
+      "interfaceType": "system",
+      "handlers": [
+        {
+          "methods": ["POST"],
+          "pathPattern": "/_/tenant",
+          "modulePermissions": []
+        },
+        {
+          "methods": ["GET", "DELETE"],
+          "pathPattern": "/_/tenant/{id}"
+        }
+      ]
+    }
+  ],
+  "permissionSets" : [
+    {
+      "permissionName": "dcb.all",
+      "displayName": "DCB API module - all permissions",
+      "description": "All permissions for dcb module",
+      "subPermissions": [
+        "dcb.transactions.post",
+        "dcb.transactions.put",
+        "dcb.transactions.get"
+      ]
+    },
+    {
+      "permissionName": "dcb.post",
+      "displayName": "creates new transaction",
+      "description": "creates new transaction"
+    },
+    {
+      "permissionName": "dcb.get",
+      "displayName": "get transaction details",
+      "description": "get transaction details"
+    },
+    {
+      "permissionName": "dcb.put",
+      "displayName": "update transaction details",
+      "description": "update transaction details"
+    }
+  ],
+  "launchDescriptor": {
+    "dockerImage": "@artifactId@:@version@",
+    "dockerPull": false,
+    "dockerArgs": {
+      "HostConfig": {
+        "Memory": 357913941,
+        "PortBindings": { "8081/tcp": [ { "HostPort": "%p" } ] }
+      }
+    },
+    "env": [
+      { "name": "JAVA_OPTIONS",
+        "value": "-XX:MaxRAMPercentage=66.0"
+      },
+      { "name": "DB_HOST", "value": "postgres" },
+      { "name": "DB_PORT", "value": "5432" },
+      { "name": "DB_USERNAME", "value": "folio_admin" },
+      { "name": "DB_PASSWORD", "value": "folio_admin" },
+      { "name": "DB_DATABASE", "value": "okapi_modules" },
+      { "name": "DB_QUERYTIMEOUT", "value": "60000" },
+      { "name": "DB_CHARSET", "value": "UTF-8" },
+      { "name": "DB_MAXPOOLSIZE", "value": "5" }
+    ]
+  }
+}
