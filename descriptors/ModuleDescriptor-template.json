@@ -3,11 +3,11 @@
   "name": "Manage DCB related transactions in folio.",
   "requires": [
     {
-      "id": "mod-circulation-item",
+      "id": "circulation-item",
       "version": "1.1"
     },
     {
-      "id": "mod-circulation",
+      "id": "circulation",
       "version": "14.2"
     },
     {
