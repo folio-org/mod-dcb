@@ -10,6 +10,7 @@ paths:
       - in: path
         name: dcbTransactionId
         description: The ReShare DCB ID for the transaction being brokered.
+        required: true
         schema:
           type: string
     post:
@@ -40,6 +41,7 @@ paths:
       - in: path
         name: dcbTransactionId
         description: The ReShare DCB ID for the transaction being brokered.
+        required: true
         schema:
           type: string
     get:
