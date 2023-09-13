@@ -4,7 +4,7 @@ import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.entity.Transactions;
 import org.folio.dcb.repository.TransactionsRepository;
 import org.folio.spring.integration.XOkapiHeaders;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
