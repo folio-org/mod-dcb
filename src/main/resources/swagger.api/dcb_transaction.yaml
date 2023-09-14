@@ -34,7 +34,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TransactionStatusResponse'
+                $ref: '#/components/schemas/TransactionStatusDto'
 
   /transactions/{dcbTransactionId}/status:
     parameters:
@@ -44,6 +44,7 @@ paths:
         required: true
         schema:
           type: string
+          format: uuid
     get:
       description: Get transaction status across circulation institutions
       operationId: getTransactionStatus
@@ -55,7 +56,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TransactionStatusResponse'
+                $ref: '#/components/schemas/TransactionStatusDto'
     put:
       description: Update transaction status across circulation institutions
       operationId: updateTransactionStatus
@@ -65,14 +66,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TransactionStatusResponse'
+              $ref: '#/components/schemas/TransactionStatusDto'
       responses:
         '200':
           description: Status updated
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TransactionStatusResponse'
+                $ref: '#/components/schemas/TransactionStatusDto'
 
 components:
   schemas:
@@ -94,7 +95,7 @@ components:
             - ERROR #General error
         message:
           type: string
-    TransactionStatusResponse:
+    TransactionStatusDto:
       allOf:
         - $ref: '#/components/schemas/TransactionStatus'
         - type: object
