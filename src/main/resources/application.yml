@@ -38,6 +38,13 @@ folio:
   tenant:
     validation:
       enabled: true
+  system-user:
+    username: mod-dcb
+    password: ${SYSTEM_USER_PASSWORD:Mod-dcb-1-0-0}
+    lastname: System
+    permissionsFilePath: permissions/mod-dcb.csv
+  environment: ${ENV:folio}
+  okapi-url: ${OKAPI_URL:http://okapi:9130}
 management:
   endpoints:
     web:
