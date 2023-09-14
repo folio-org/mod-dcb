@@ -38,6 +38,11 @@ folio:
   tenant:
     validation:
       enabled: true
+  system-user:
+    username: mod-dcb
+    password: ${SYSTEM_USER_PASSWORD:Mod-dcb-1-0-0}
+    lastname: System
+    permissionsFilePath: permissions/mod-dcb.csv
 management:
   endpoints:
     web:
