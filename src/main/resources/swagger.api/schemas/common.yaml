@@ -1,6 +1,7 @@
 uuid:
   type: string
   format: uuid
+
 Metadata:
   type: object
   title: Metadata
