@@ -38,6 +38,10 @@ folio:
   tenant:
     validation:
       enabled: true
+  system:
+    username: dcb-system-user
+    password: ${SYSTEM_USER_PASSWORD:dcb-system-user}
+    max-active-threads: 5
 management:
   endpoints:
     web:

@@ -1,0 +1,35 @@
+package org.folio.dcb.domain.dto;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.UUID;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class SystemUserParameters {
+
+  @JsonIgnore
+  private UUID id;
+
+  private String username;
+
+  private String password;
+
+  @JsonIgnore
+  private String okapiToken;
+
+  @JsonIgnore
+  private String okapiUrl;
+
+  @JsonIgnore
+  private String tenant;
+
+  @JsonIgnore
+  private String userId;
+}
