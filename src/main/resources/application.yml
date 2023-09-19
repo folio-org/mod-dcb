@@ -64,12 +64,3 @@ management:
     readinessstate:
       enabled: true
 debug: false
-mod-dcb:
-  jwt-access-token:
-    cache:
-      ttl: 500
-      max-size: 100
-  checkout-time:
-    duration: ${DEFAULT_CHECKOUT_TIME_DURATION:1}
-test-tenant:
-  tenantname: test_mo_dcb_integration
