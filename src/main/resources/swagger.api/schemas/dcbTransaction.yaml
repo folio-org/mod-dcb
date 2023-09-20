@@ -1,0 +1,7 @@
+DcbTransaction:
+  type: object
+  properties:
+      item:
+        $ref: 'dcbItem.yaml#/DcbItem'
+      patron:
+        $ref: 'dcbPatron.yaml#/DcbPatron'

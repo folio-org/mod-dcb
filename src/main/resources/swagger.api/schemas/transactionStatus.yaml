@@ -1,0 +1,18 @@
+TransactionStatus:
+  type: object
+  properties:
+    status:
+      type: string
+      enum:
+        - CREATED #Created by DCB
+        - OPEN #Created in lending library, Item is available
+        - CANCELLED #Request canceled by lending library or patron
+        - IN_TRANSIT #checked in at another service point
+        - AWAITING_PICKUP #checked in at the same service point. Item status should change from "Checked out" to "Awaiting pickup"
+        - ITEM_CHECKED_OUT #Request is fulfilled and loan is created, Item checkout by patron
+        - ITEM_CHECKED_IN #Item returned to pickup location
+        - IN_TRANSIT_TO_LENDING #Item in transit from pickup location to owning library
+        - CLOSED #Item returned to lending library
+        - ERROR #General error
+    message:
+      type: string
