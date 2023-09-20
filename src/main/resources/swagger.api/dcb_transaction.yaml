@@ -127,14 +127,3 @@ components:
       schema:
         type: string
       required: true
-  schemas:
-    InventoryItem:
-      $ref: 'schemas/InventoryItem.yaml#/InventoryItem'
-    InventoryHolding:
-      $ref: 'schemas/InventoryHolding.yaml#/InventoryHolding'
-    UserGroupCollection:
-      $ref: 'schemas/UserGroup.yaml#/UserGroupCollection'
-    UserCollection:
-      $ref: 'schemas/User.yaml#/UserCollection'
-    CirculationRequest:
-      $ref: 'schemas/CirculationRequest.yaml#/CirculationRequest'
