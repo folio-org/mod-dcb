@@ -14,6 +14,8 @@ import org.folio.dcb.service.RequestService;
 import org.folio.dcb.service.UserService;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
+
 @Service("lendingLibraryService")
 @RequiredArgsConstructor
 @Log4j2
@@ -45,20 +47,19 @@ public class LendingLibraryServiceImpl implements LibraryService {
   }
 
   private void checkTransactionExistsAndThrow(String dcbTransactionId) {
-    log.info("checkTransactionExistsAndThrow:: checking dcbTransactionId {} already exists", dcbTransactionId);
     if(transactionRepository.existsById(dcbTransactionId)) {
-      throw new ResourceAlreadyExistException("unable to create transaction with id " + dcbTransactionId + " as it is already exists ");
+      throw new ResourceAlreadyExistException(
+        String.format("unable to create transaction with id %s as it already exists", dcbTransactionId));
     }
   }
 
   private void saveDcbTransaction(String dcbTransactionId, DcbTransaction dcbTransaction) {
     TransactionEntity transactionEntity = transactionMapper.mapToEntity(dcbTransactionId, dcbTransaction);
-    if(transactionEntity == null) {
-      throw new IllegalArgumentException("transactionEntity is null");
-    } else {
-      transactionEntity.setStatus(TransactionStatus.StatusEnum.CREATED);
-      transactionRepository.save(transactionEntity);
+    if (Objects.isNull(transactionEntity)) {
+      throw new IllegalArgumentException("Transaction Entity is null");
     }
+    transactionEntity.setStatus(TransactionStatus.StatusEnum.CREATED);
+    transactionRepository.save(transactionEntity);
   }
 
 }

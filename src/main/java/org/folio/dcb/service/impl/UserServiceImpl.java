@@ -3,12 +3,12 @@ package org.folio.dcb.service.impl;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.folio.dcb.exception.ResourceNotFoundException;
 import org.folio.dcb.client.feign.UsersClient;
 import org.folio.dcb.domain.dto.DcbPatron;
 import org.folio.dcb.domain.dto.User;
 import org.folio.dcb.service.PatronGroupService;
 import org.folio.dcb.service.UserService;
+import org.folio.spring.exception.NotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -44,7 +44,8 @@ public class UserServiceImpl implements UserService {
       .getUsers()
       .stream()
       .findFirst()
-      .orElseThrow(() -> new ResourceNotFoundException("unable to find User"));
+      .orElseThrow(() -> new NotFoundException(
+        String.format("unable to find User with barcode %s and id %s", barcode, id)));
   }
 
   private User prepareUser(DcbPatron patron, String groupId) {

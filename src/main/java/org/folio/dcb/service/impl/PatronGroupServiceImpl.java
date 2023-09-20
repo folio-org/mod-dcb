@@ -3,9 +3,9 @@ package org.folio.dcb.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dcb.domain.dto.UserGroup;
-import org.folio.dcb.exception.ResourceNotFoundException;
 import org.folio.dcb.client.feign.GroupClient;
 import org.folio.dcb.service.PatronGroupService;
+import org.folio.spring.exception.NotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -25,6 +25,6 @@ public class PatronGroupServiceImpl implements PatronGroupService {
       .filter(group -> group.getGroup().equals(groupName))
       .findFirst()
       .map(UserGroup::getId)
-      .orElseThrow(() -> new ResourceNotFoundException("Patron group not found with name " + groupName));
+      .orElseThrow(() -> new NotFoundException(String.format("Patron group not found with name %s ", groupName)));
   }
 }
