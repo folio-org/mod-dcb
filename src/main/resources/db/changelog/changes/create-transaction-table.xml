@@ -1,0 +1,71 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+  <!-- Create StatusEnum ENUM -->
+  <changeSet id="createStatusEnum" author="singhAdesh">
+    <sql>
+      <![CDATA[
+            CREATE TYPE StatusEnum as ENUM ('CREATED', 'OPEN', 'CANCELLED', 'IN_TRANSIT', 'AWAITING_PICKUP', 'ITEM_CHECKED_OUT', 'ITEM_CHECKED_IN', 'IN_TRANSIT_TO_LENDING', 'CLOSED', 'ERROR');
+            ]]>
+    </sql>
+  </changeSet>
+
+  <!-- Create CAST for character varying to StatusEnum -->
+  <changeSet id="createCast" author="singhAdesh">
+    <sql>
+      <![CDATA[
+            CREATE CAST (character varying as StatusEnum) WITH INOUT AS IMPLICIT;
+            ]]>
+    </sql>
+  </changeSet>
+
+  <!-- Create transactions table -->
+  <changeSet id="createTableTransactions" author="singhAdesh">
+    <createTable tableName="transactions">
+      <column name="id" type="UUID">
+        <constraints primaryKey="true"/>
+      </column>
+      <column name="item_id" type="UUID">
+        <constraints nullable="false"/>
+      </column>
+      <column name="item_title" type="text">
+        <constraints nullable="false"/>
+      </column>
+      <column name="item_barcode" type="text">
+        <constraints nullable="false"/>
+      </column>
+      <column name="pickup_location" type="text">
+        <constraints nullable="false"/>
+      </column>
+      <column name="material_type" type="text">
+        <constraints nullable="false"/>
+      </column>
+      <column name="lending_library_code" type="text">
+        <constraints nullable="false"/>
+      </column>
+      <column name="patron_id" type="UUID">
+        <constraints nullable="false"/>
+      </column>
+      <column name="patron_group" type="text">
+        <constraints nullable="false"/>
+      </column>
+      <column name="patron_barcode" type="text">
+        <constraints nullable="false"/>
+      </column>
+      <column name="borrowing_library_code" type="text">
+        <constraints nullable="false"/>
+      </column>
+      <column name="status" type="StatusEnum"/>
+      <column name="created_by" type="uuid"/>
+      <column name="created_date" type="timestamp without time zone" defaultValueComputed="now()">
+        <constraints nullable="false"/>
+      </column>
+      <column name="updated_by" type="uuid"/>
+      <column name="updated_date" type="timestamp without time zone"/>
+    </createTable>
+  </changeSet>
+
+</databaseChangeLog>
