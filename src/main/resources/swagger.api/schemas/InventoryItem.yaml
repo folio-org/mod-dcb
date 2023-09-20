@@ -1,0 +1,48 @@
+InventoryItem:
+  description: Item object provided by inventory
+  type: object
+  properties:
+    id:
+      description: Item id
+      $ref: "uuid.yaml"
+    holdingsRecordId:
+      description: ID of the holdings record the item is a member of
+      $ref: "uuid.yaml"
+    status:
+      $ref: "InventoryItem.yaml#/Status"
+Status:
+  type: object
+  properties:
+    name:
+      description: The status of the item
+      type: string
+      enum:
+        - Aged to lost
+        - Available
+        - Awaiting delivery
+        - Awaiting pickup
+        - Checked out
+        - Claimed returned
+        - Declared lost
+        - Lost and paid
+        - Long missing
+        - Missing
+        - In process
+        - In process (non-requestable)
+        - In transit
+        - Intellectual item
+        - On order
+        - Order closed
+        - Paged
+        - Restricted
+        - Unavailable
+        - Unknown
+        - Withdrawn
+    date:
+      description: Date of the current item state. E.g. date set when item state was changed by the Check out app
+      type: string
+      format: date-time
+
+
+
+

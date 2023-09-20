@@ -1,0 +1,13 @@
+InventoryHolding:
+  description: A holdings record
+  type: object
+  properties:
+    id:
+      description: the system assigned unique ID of the holdings record
+      $ref: "uuid.yaml"
+    holdingsTypeId:
+      description: unique ID for the type of this holdings record
+      $ref: "uuid.yaml"
+    instanceId:
+      description: Instance id
+      $ref: "uuid.yaml"
