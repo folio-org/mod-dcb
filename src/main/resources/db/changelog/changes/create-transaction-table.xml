@@ -25,7 +25,7 @@
   <!-- Create transactions table -->
   <changeSet id="createTableTransactions" author="singhAdesh">
     <createTable tableName="transactions">
-      <column name="id" type="UUID">
+      <column name="id" type="text">
         <constraints primaryKey="true"/>
       </column>
       <column name="item_id" type="UUID">

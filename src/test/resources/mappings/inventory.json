@@ -1,0 +1,30 @@
+{
+  "mappings": [
+    {
+      "request": {
+        "method": "GET",
+        "url": "/item-storage/items/5b95877d-86c0-4cb7-a0cd-7660b348ae5a"
+      },
+      "response": {
+        "status": 200,
+        "body": "{\"id\":\"5b95877d-86c0-4cb7-a0cd-7660b348ae5a\",\"holdingsRecordId\": \"fb7b70f1-b898-4924-a991-0e4b6312bb5f\",\"status\": {\n \"name\": \"Available\",\n \"date\": \"2023-09-21T01:49:50.620+00:00\"\n}}",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/holdings-storage/holdings/fb7b70f1-b898-4924-a991-0e4b6312bb5f"
+      },
+      "response": {
+        "status": 200,
+        "body": "{\"id\":\"fb7b70f1-b898-4924-a991-0e4b6312bb5f\",\"instanceId\": \"7fbd5d84-62d1-44c6-9c45-6cb173998bbd\"}}",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
+    }
+  ]
+}

@@ -1,6 +1,5 @@
 package org.folio.dcb.domain.entity;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -27,7 +26,6 @@ import org.folio.dcb.domain.dto.TransactionStatus.StatusEnum;
 @Builder
 public class TransactionEntity extends AuditableEntity {
   @Id
-  @Column(name = "transaction_id")
   private String id;
   @Convert(converter = UUIDConverter.class)
   private String itemId;

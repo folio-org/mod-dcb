@@ -1,0 +1,30 @@
+{
+  "mappings": [
+    {
+      "request": {
+        "method": "POST",
+        "url": "/users"
+      },
+      "response": {
+        "status": 200,
+        "body": "{\"id\":\"503a81cd-6c26-400f-b620-14c08943697c\", \"barcode\":\"DCB_PATRON\"}",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/groups?query=group%3D%3Dstaff"
+      },
+      "response": {
+        "status": 200,
+        "body": "{\"usergroups\": [{\"group\":\"staff\",\"id\":\"3684a786-6671-4268-8ed0-9db82ebca60b\"}], \"totalRecords\": 1}",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
+    }
+  ]
+}

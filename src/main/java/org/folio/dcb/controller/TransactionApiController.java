@@ -28,6 +28,7 @@ public class TransactionApiController implements TransactionsApi {
   @Override
   public ResponseEntity<TransactionStatusResponse> createCirculationRequest(String dcbTransactionId, DcbTransaction dcbTransaction) {
     log.info("createCirculationRequest:: creating dcbTransaction {} with id {} ", dcbTransaction, dcbTransactionId);
-    return ResponseEntity.ok(transactionsService.createCirculationRequest(dcbTransactionId, dcbTransaction));
+    return ResponseEntity.status(HttpStatus.CREATED)
+      .body(transactionsService.createCirculationRequest(dcbTransactionId, dcbTransaction));
   }
 }
