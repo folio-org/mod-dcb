@@ -9,9 +9,10 @@ import org.folio.dcb.service.impl.RequestServiceImpl;
 import org.folio.dcb.service.impl.UserServiceImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
 import static org.folio.dcb.utils.EntityUtils.createDcbItem;
@@ -25,19 +26,19 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@SpringBootTest
+@ExtendWith(MockitoExtension.class)
 class LendingLibraryServiceTest {
 
   @InjectMocks
-  LendingLibraryServiceImpl lendingLibraryService;
+  private LendingLibraryServiceImpl lendingLibraryService;
   @Mock
-  TransactionRepository transactionRepository;
+  private TransactionRepository transactionRepository;
   @Mock
-  UserServiceImpl userService;
+  private UserServiceImpl userService;
   @Mock
-  RequestServiceImpl requestService;
+  private RequestServiceImpl requestService;
   @Mock
-  TransactionMapper transactionMapper;
+  private TransactionMapper transactionMapper;
 
   @Test
   void createTransactionTest() {
@@ -46,7 +47,7 @@ class LendingLibraryServiceTest {
     var user = createUser();
 
     when(transactionRepository.existsById(DCB_TRANSACTION_ID)).thenReturn(false);
-    when(userService.createOrFetchUser(any()))
+    when(userService.fetchOrCreateUser(any()))
       .thenReturn(user);
     doNothing().when(requestService).createPageItemRequest(any(), any());
     when(transactionMapper.mapToEntity(any(), any())).thenReturn(createTransactionEntity());
@@ -55,7 +56,7 @@ class LendingLibraryServiceTest {
     verify(transactionRepository).existsById(DCB_TRANSACTION_ID);
     verify(transactionRepository).save(any());
     verify(transactionMapper).mapToEntity(DCB_TRANSACTION_ID, createDcbTransaction());
-    verify(userService).createOrFetchUser(patron);
+    verify(userService).fetchOrCreateUser(patron);
     verify(requestService).createPageItemRequest(user, item);
 
     Assertions.assertEquals(TransactionStatusResponse.StatusEnum.CREATED, response.getStatus());
@@ -71,7 +72,7 @@ class LendingLibraryServiceTest {
   @Test
   void createTransactionWithInvalidEntityTest() {
     when(transactionRepository.existsById(DCB_TRANSACTION_ID)).thenReturn(false);
-    when(userService.createOrFetchUser(any()))
+    when(userService.fetchOrCreateUser(any()))
       .thenReturn(createUser());
     doNothing().when(requestService).createPageItemRequest(any(), any());
     when(transactionMapper.mapToEntity(any(), any())).thenReturn(null);

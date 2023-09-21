@@ -3,9 +3,10 @@ package org.folio.dcb.service;
 import org.folio.dcb.service.impl.LendingLibraryServiceImpl;
 import org.folio.dcb.service.impl.TransactionsServiceImpl;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
 import static org.folio.dcb.utils.EntityUtils.createDcbTransaction;
@@ -14,14 +15,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@SpringBootTest
+@ExtendWith(MockitoExtension.class)
 class TransactionServiceTest {
 
   @InjectMocks
-  TransactionsServiceImpl transactionsService;
-
+  private TransactionsServiceImpl transactionsService;
   @Mock(name="lendingLibraryService")
-  LendingLibraryServiceImpl lendingLibraryService;
+  private LendingLibraryServiceImpl lendingLibraryService;
 
   @Test
   void createCirculationRequestTest() {

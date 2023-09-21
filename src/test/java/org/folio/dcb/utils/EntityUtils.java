@@ -6,6 +6,14 @@ import org.folio.dcb.domain.dto.DcbPatron;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.dto.User;
 import org.folio.dcb.domain.entity.TransactionEntity;
+import org.folio.dcb.domain.dto.InventoryHolding;
+import org.folio.dcb.domain.dto.InventoryItem;
+import org.folio.dcb.domain.dto.UserGroupCollection;
+import org.folio.dcb.domain.dto.UserGroup;
+import org.folio.dcb.domain.dto.UserCollection;
+
+import java.util.List;
+import java.util.UUID;
 
 public class EntityUtils {
 
@@ -57,6 +65,12 @@ public class EntityUtils {
       .build();
   }
 
+  public static UserCollection createUserCollection() {
+    return UserCollection.builder()
+      .users(List.of(createUser()))
+      .build();
+  }
+
   public static TransactionEntity createTransactionEntity() {
     return TransactionEntity.builder()
       .id(DCB_TRANSACTION_ID)
@@ -65,6 +79,35 @@ public class EntityUtils {
       .patronId(PATRON_ID)
       .patronBarcode("DCB_PATRON")
       .patronGroup("staff")
+      .build();
+  }
+
+  public static InventoryHolding createInventoryHolding() {
+    return InventoryHolding.builder()
+      .id(UUID.randomUUID().toString())
+      .instanceId(UUID.randomUUID().toString())
+      .build();
+  }
+
+  public static InventoryItem createInventoryItem() {
+    return InventoryItem.builder()
+      .id(UUID.randomUUID().toString())
+      .holdingsRecordId(UUID.randomUUID().toString())
+      .build();
+  }
+
+  public static UserGroupCollection createUserGroupCollection() {
+    return UserGroupCollection.builder()
+      .usergroups(List.of(createUserGroup()))
+      .totalRecords(1)
+      .build();
+  }
+
+  private static UserGroup createUserGroup() {
+    return UserGroup.builder()
+      .id(UUID.randomUUID().toString())
+      .group("staff")
+      .desc("staff group")
       .build();
   }
 

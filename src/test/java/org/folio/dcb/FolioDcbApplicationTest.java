@@ -17,7 +17,7 @@ import org.folio.tenant.domain.dto.TenantAttributes;
 import org.folio.tenant.rest.resource.TenantApi;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class FolioDcbApplicationTest {
+class FolioDcbApplicationTest {
 
   @EnableAutoConfiguration(exclude = {FolioLiquibaseConfiguration.class})
   @RestController("folioTenantController")

@@ -35,7 +35,7 @@ public class LendingLibraryServiceImpl implements LibraryService {
     var item = dcbTransaction.getItem();
     var patron = dcbTransaction.getPatron();
 
-    var user = userService.createOrFetchUser(patron);
+    var user = userService.fetchOrCreateUser(patron);
     requestService.createPageItemRequest(user, item);
     saveDcbTransaction(dcbTransactionId, dcbTransaction);
 
