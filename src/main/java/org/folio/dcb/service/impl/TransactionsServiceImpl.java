@@ -21,9 +21,8 @@ public class TransactionsServiceImpl implements TransactionsService {
   public TransactionStatusResponse createCirculationRequest(String dcbTransactionId, DcbTransaction dcbTransaction) {
     log.debug("createCirculationRequest:: creating new transaction request for role {} ", dcbTransaction.getRole());
     return switch (dcbTransaction.getRole()) {
-      case LENDING -> lendingLibraryService.createTransaction(dcbTransactionId, dcbTransaction);
-      case BORROWING -> throw new IllegalArgumentException("Borrowing role is not yet implemented");
-      case PICKUP -> throw new IllegalArgumentException("Pickup role is not yet implemented");
+      case LENDER -> lendingLibraryService.createTransaction(dcbTransactionId, dcbTransaction);
+      default -> throw new IllegalArgumentException("Other roles are not implemented");
     };
   }
 

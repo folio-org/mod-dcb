@@ -25,7 +25,7 @@ public class EntityUtils {
     return DcbTransaction.builder()
       .item(createDcbItem())
       .patron(createDcbPatron())
-      .role(DcbTransaction.RoleEnum.LENDING)
+      .role(DcbTransaction.RoleEnum.LENDER)
       .build();
   }
 

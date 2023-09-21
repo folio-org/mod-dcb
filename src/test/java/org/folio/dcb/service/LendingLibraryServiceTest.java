@@ -64,13 +64,15 @@ class LendingLibraryServiceTest {
 
   @Test
   void createTransactionWithExistingTransactionIdTest() {
+    var dcbTransaction = createDcbTransaction();
     when(transactionRepository.existsById(DCB_TRANSACTION_ID)).thenReturn(true);
     assertThrows(ResourceAlreadyExistException.class, () ->
-      lendingLibraryService.createTransaction(DCB_TRANSACTION_ID, createDcbTransaction()));
+      lendingLibraryService.createTransaction(DCB_TRANSACTION_ID, dcbTransaction));
   }
 
   @Test
   void createTransactionWithInvalidEntityTest() {
+    var dcbTransaction = createDcbTransaction();
     when(transactionRepository.existsById(DCB_TRANSACTION_ID)).thenReturn(false);
     when(userService.fetchOrCreateUser(any()))
       .thenReturn(createUser());
@@ -78,6 +80,6 @@ class LendingLibraryServiceTest {
     when(transactionMapper.mapToEntity(any(), any())).thenReturn(null);
 
     assertThrows(IllegalArgumentException.class, () ->
-      lendingLibraryService.createTransaction(DCB_TRANSACTION_ID, createDcbTransaction()));
+      lendingLibraryService.createTransaction(DCB_TRANSACTION_ID, dcbTransaction));
   }
 }

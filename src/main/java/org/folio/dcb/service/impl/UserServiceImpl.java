@@ -24,7 +24,7 @@ public class UserServiceImpl implements UserService {
       patronDetails.getId(), patronDetails.getBarcode());
     var user = fetchUserByBarcodeAndId(patronDetails.getBarcode(), patronDetails.getId());
     if(Objects.isNull(user)) {
-      log.info("Unable to find existing user with barcode {} and id {}. Hence, creating new user",
+      log.info("fetchOrCreateUser:: Unable to find existing user with barcode {} and id {}. Hence, creating new user",
         patronDetails.getId(), patronDetails.getBarcode());
       user = createUser(patronDetails);
     }
@@ -32,7 +32,7 @@ public class UserServiceImpl implements UserService {
   }
 
   private User createUser(DcbPatron patronDetails) {
-    log.info("createUser:: creating new user with id {} and barcode {}",
+    log.debug("createUser:: creating new user with id {} and barcode {}",
       patronDetails.getId(), patronDetails.getBarcode());
     var groupId = patronGroupService.fetchPatronGroupIdByName(patronDetails.getGroup());
     return usersClient.createUser(createVirtualUser(patronDetails, groupId));

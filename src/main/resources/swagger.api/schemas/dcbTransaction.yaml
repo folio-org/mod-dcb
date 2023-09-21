@@ -8,6 +8,7 @@ DcbTransaction:
       role:
         type: string
         enum:
-          - BORROWING
-          - LENDING
-          - PICKUP
+          - borrower
+          - lender
+          - pickup
+          - borrowing-pickup
