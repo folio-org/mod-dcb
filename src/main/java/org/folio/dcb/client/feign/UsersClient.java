@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@FeignClient(name = "users" , configuration = FeignClientConfiguration.class)
+@FeignClient(name = "users", contextId = "UsersClientDcb", configuration = FeignClientConfiguration.class)
 public interface UsersClient {
   @PostMapping
   User createUser(@RequestBody User user);
