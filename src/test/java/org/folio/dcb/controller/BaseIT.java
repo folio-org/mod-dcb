@@ -7,6 +7,7 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import lombok.SneakyThrows;
 import org.folio.spring.integration.XOkapiHeaders;
 import org.folio.tenant.domain.dto.TenantAttributes;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -54,6 +55,11 @@ public class BaseIT {
     wireMockServer = new WireMockServer(WIRE_MOCK_PORT);
     wireMockServer.start();
     setUpTenant(mockMvc);
+  }
+
+  @AfterAll
+  static void tearDown() {
+    wireMockServer.stop();
   }
 
   @SneakyThrows

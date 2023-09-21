@@ -1,5 +1,6 @@
 package org.folio.dcb.service.impl;
 
+import feign.FeignException;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dcb.client.feign.InventoryItemStorageClient;
@@ -18,8 +19,11 @@ public class ItemServiceImpl implements ItemService {
   @Override
   public InventoryItem fetchItemDetailsById(String itemId) {
     log.debug("fetchItemDetailsById:: Trying to fetch item details for itemId {}", itemId);
-    return inventoryItemStorageClient.findItem(itemId)
-      .orElseThrow(() -> new NotFoundException(String.format("Item not found for itemId %s ", itemId)));
+    try {
+      return inventoryItemStorageClient.findItem(itemId);
+    } catch (FeignException.NotFound ex) {
+      throw new NotFoundException(String.format("Item not found for itemId %s ", itemId));
+    }
   }
 
 }

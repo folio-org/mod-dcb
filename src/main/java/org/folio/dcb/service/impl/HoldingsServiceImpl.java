@@ -1,5 +1,6 @@
 package org.folio.dcb.service.impl;
 
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dcb.client.feign.InventoryHoldingsStorageClient;
@@ -18,7 +19,11 @@ public class HoldingsServiceImpl implements HoldingsService {
   @Override
   public InventoryHolding fetchInventoryHoldingDetails(String holdingsId) {
     log.debug("fetchInventoryHoldingDetails:: Trying to fetch holdings detail for holdingsId {}", holdingsId);
-    return inventoryHoldingsStorageClient.findHolding(holdingsId)
-      .orElseThrow(() -> new NotFoundException(String.format("Holdings not found for holdings id %s", holdingsId)));
+    try {
+      return inventoryHoldingsStorageClient.findHolding(holdingsId);
+    } catch (FeignException.NotFound ex) {
+      throw new NotFoundException(String.format("Holdings not found for holdings id %s", holdingsId));
+    }
   }
+
 }
