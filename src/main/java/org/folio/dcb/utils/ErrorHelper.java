@@ -52,7 +52,8 @@ public class ErrorHelper {
     VALIDATION_ERROR,
     NOT_FOUND_ERROR,
     DUPLICATE_ERROR,
-    BAD_GATEWAY
+    BAD_GATEWAY,
+    INTERNAL_SERVER_ERROR
   }
 
 }

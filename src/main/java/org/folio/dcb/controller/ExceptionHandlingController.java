@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import static org.folio.dcb.utils.ErrorHelper.ErrorCode.BAD_GATEWAY;
 import static org.folio.dcb.utils.ErrorHelper.ErrorCode.DUPLICATE_ERROR;
+import static org.folio.dcb.utils.ErrorHelper.ErrorCode.INTERNAL_SERVER_ERROR;
 import static org.folio.dcb.utils.ErrorHelper.ErrorCode.NOT_FOUND_ERROR;
 import static org.folio.dcb.utils.ErrorHelper.ErrorCode.VALIDATION_ERROR;
 import static org.folio.dcb.utils.ErrorHelper.createExternalError;
@@ -24,6 +25,13 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 @RestControllerAdvice
 @Log4j2
 public class ExceptionHandlingController {
+
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+  @ExceptionHandler(Exception.class)
+  public Errors handleGlobalException(Exception ex) {
+    logExceptionMessage(ex);
+    return createExternalError(ex.getMessage(), INTERNAL_SERVER_ERROR);
+  }
 
   @ResponseStatus(HttpStatus.NOT_FOUND)
   @ExceptionHandler(NotFoundException.class)
