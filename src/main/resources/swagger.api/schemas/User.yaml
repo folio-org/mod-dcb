@@ -1,0 +1,72 @@
+User:
+  type: object
+  title: User
+  properties:
+    username:
+      description: A unique name belonging to a user. Typically used for login
+      type: string
+    id:
+      description: A globally unique (UUID) identifier for the user
+      type: string
+    barcode:
+      description: The library barcode for this user
+      type: string
+    active:
+      description: A flag to determine if a user can log in, take out loans, etc.
+      type: boolean
+    type:
+      description: The class of user
+      type: string
+    patronGroup:
+      description: A UUID corresponding to the group the user belongs to
+      type: string
+#    personal:
+#      "$ref": "user.yaml#/Personal"
+Personal:
+  type: object
+  properties:
+    lastName:
+      description: The user's surname
+      type: string
+    firstName:
+      description: The user's given name
+      type: string
+    middleName:
+      description: The user's middle name (if any)
+      type: string
+    preferredFirstName:
+      description: The user's preferred name
+      type: string
+    email:
+      description: The user's email address
+      type: string
+    phone:
+      description: The user's primary phone number
+      type: string
+    mobilePhone:
+      description: The user's mobile phone number
+      type: string
+    dateOfBirth:
+      type: string
+      description: The user's birth date
+      format: date-time
+    preferredContactTypeId:
+      description: Id of user's preferred contact type
+      type: string
+  required:
+    - lastName
+
+UserCollection:
+  type: object
+  properties:
+    users:
+      type: array
+      description: "User collection"
+      items:
+        $ref: "User.yaml#/User"
+    totalRecords:
+      type: integer
+  additionalProperties: false
+  required:
+    - users
+    - totalRecords

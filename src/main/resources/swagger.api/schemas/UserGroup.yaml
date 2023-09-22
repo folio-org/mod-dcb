@@ -1,0 +1,26 @@
+UserGroupCollection:
+  type: object
+  properties:
+    usergroups:
+      type: array
+      description: "User Group collection"
+      items:
+        $ref: "UserGroup.yaml#/UserGroup"
+    totalRecords:
+      type: integer
+  additionalProperties: false
+  required:
+    - users
+    - totalRecords
+UserGroup:
+  type: object
+  properties:
+    id:
+      description: Item id
+      $ref: "uuid.yaml"
+    group:
+      description: name of the group
+      type: string
+    desc:
+      description: description of the group
+      type: string

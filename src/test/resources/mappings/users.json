@@ -1,0 +1,56 @@
+{
+  "mappings": [
+    {
+      "request": {
+        "method": "POST",
+        "url": "/users"
+      },
+      "response": {
+        "status": 200,
+        "body": "{\"id\":\"503a81cd-6c26-400f-b620-14c08943697c\", \"barcode\":\"DCB_PATRON\"}",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/users?query=username%3D%3Ddcb-system-user"
+      },
+      "response": {
+        "status": 200,
+        "body": "{\"users\": [], \"totalRecords\": 0, \"resultInfo\": {\"totalRecords\": 0, \"facets\": [],\"diagnostics\": []}}",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/users?query=barcode%3D%3DDCB_PATRON%20and%20id%3D%3D571b0a2c-9456-40b5-a449-d41fe6017082"
+      },
+      "response": {
+        "status": 200,
+        "body": "{\"users\": [], \"totalRecords\": 0, \"resultInfo\": {\"totalRecords\": 0, \"facets\": [],\"diagnostics\": []}}",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/groups?query=group%3D%3Dstaff"
+      },
+      "response": {
+        "status": 200,
+        "body": "{\"usergroups\": [{\"group\":\"staff\",\"id\":\"3684a786-6671-4268-8ed0-9db82ebca60b\"}], \"totalRecords\": 1}",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
+    }
+  ]
+}

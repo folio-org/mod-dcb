@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.0.2</version>
+    <version>3.0.6</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
   <groupId>org.folio</groupId>
@@ -39,8 +39,8 @@
     <mapstruct.version>1.5.2.Final</mapstruct.version>
 
     <!-- test dependencies -->
-    <wiremock.version>2.33.2</wiremock.version>
-    <testcontainers.version>1.17.2</testcontainers.version>
+    <wiremock.version>2.27.2</wiremock.version>
+    <testcontainers.version>1.17.6</testcontainers.version>
   </properties>
 
   <dependencies>
@@ -147,7 +147,7 @@
     </dependency>
     <dependency>
       <groupId>com.github.tomakehurst</groupId>
-      <artifactId>wiremock-jre8</artifactId>
+      <artifactId>wiremock-standalone</artifactId>
       <version>${wiremock.version}</version>
       <scope>test</scope>
     </dependency>
@@ -264,6 +264,7 @@
                       <dateLibrary>java</dateLibrary>
                       <interfaceOnly>true</interfaceOnly>
                       <useSpringBoot3>true</useSpringBoot3>
+                      <additionalModelTypeAnnotations>@lombok.Builder @lombok.NoArgsConstructor @lombok.AllArgsConstructor</additionalModelTypeAnnotations>
                     </configOptions>
                   </configuration>
                 </execution>

@@ -22,10 +22,28 @@
     </sql>
   </changeSet>
 
+  <!-- Create RoleEnum ENUM -->
+  <changeSet id="createRoleEnum" author="singhAdesh">
+    <sql>
+      <![CDATA[
+            CREATE TYPE RoleEnum as ENUM ('BORROWER', 'LENDER', 'PICKUP', 'BORROWING_PICKUP');
+            ]]>
+    </sql>
+  </changeSet>
+
+  <!-- Create CAST for character varying to StatusEnum -->
+  <changeSet id="createRoleCast" author="singhAdesh">
+    <sql>
+      <![CDATA[
+            CREATE CAST (character varying as RoleEnum) WITH INOUT AS IMPLICIT;
+            ]]>
+    </sql>
+  </changeSet>
+
   <!-- Create transactions table -->
   <changeSet id="createTableTransactions" author="singhAdesh">
     <createTable tableName="transactions">
-      <column name="id" type="UUID">
+      <column name="id" type="text">
         <constraints primaryKey="true"/>
       </column>
       <column name="item_id" type="UUID">
@@ -59,6 +77,7 @@
         <constraints nullable="false"/>
       </column>
       <column name="status" type="StatusEnum"/>
+      <column name="role" type="RoleEnum"/>
       <column name="created_by" type="uuid"/>
       <column name="created_date" type="timestamp without time zone" defaultValueComputed="now()">
         <constraints nullable="false"/>

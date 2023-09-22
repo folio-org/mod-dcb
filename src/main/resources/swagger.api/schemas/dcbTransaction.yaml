@@ -5,3 +5,10 @@ DcbTransaction:
         $ref: 'dcbItem.yaml#/DcbItem'
       patron:
         $ref: 'dcbPatron.yaml#/DcbPatron'
+      role:
+        type: string
+        enum:
+          - borrower
+          - lender
+          - pickup
+          - borrowing-pickup

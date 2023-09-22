@@ -1,0 +1,82 @@
+CirculationRequest:
+  description: Request for an item that might be at a different location or already checked out to another patron
+  type: object
+  properties:
+    id:
+      description: the system assigned unique ID of the holdings record
+      $ref: "uuid.yaml"
+    requestType:
+      description: Whether the item should be held upon return, recalled or paged for
+      type: string
+      enum:
+        - Hold
+        - Recall
+        - Page
+    requestLevel:
+      description: Level of the request - Item or Title
+      type: string
+      enum:
+        - Item
+    requestDate:
+      description: Date the request was made
+      type: string
+      format: date-type
+    patronComments:
+      description: Comments made by the patron
+      type: string
+    requesterId:
+      description: ID of the user who made the request
+      type: string
+      format: uuid
+    instanceId:
+      description: ID of the instance being requested
+      type: string
+      format: uuid
+    holdingsRecordId:
+      description: ID of the holdings record being requested
+      type: string
+      format: uuid
+    itemId:
+      description: ID of the item being requested
+      type: string
+      format: uuid
+    cancellationReasonId:
+      description: The id of the request reason
+      type: string
+      format: uuid
+    cancelledByUserId:
+      description: The id of the user that cancelled the request
+      type: string
+      format: uuid
+    cancellationAdditionalInformation:
+      description: Additional information about a cancellation
+      type: string
+    cancelledDate:
+      description: Date the request was cancelled
+      type: string
+      format: date-type
+    fulfillmentPreference:
+      description: How should the request be fulfilled
+      type: string
+      enum:
+        - Delivery
+        - Hold Shelf
+    pickupServicePointId:
+      description: The ID of the Service Point where this request can be picked up
+      type: string
+    item:
+      $ref: CirculationRequest.yaml#/item
+    requester:
+      $ref: CirculationRequest.yaml#/requester
+item:
+  type: object
+  properties:
+    barcode:
+      description: barcode of the item
+      type: string
+requester:
+  type: object
+  properties:
+    barcode:
+      description: barcode of the item
+      type: string
