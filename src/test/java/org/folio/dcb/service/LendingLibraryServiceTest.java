@@ -1,7 +1,7 @@
 package org.folio.dcb.service;
 
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
-import org.folio.dcb.domain.mapper.TransactionMapper;
+import org.folio.dcb.domain.mapper.TransactionEntityMapper;
 import org.folio.dcb.exception.ResourceAlreadyExistException;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.impl.LendingLibraryServiceImpl;
@@ -38,7 +38,7 @@ class LendingLibraryServiceTest {
   @Mock
   private RequestServiceImpl requestService;
   @Mock
-  private TransactionMapper transactionMapper;
+  private TransactionEntityMapper transactionMapper;
 
   @Test
   void createTransactionTest() {

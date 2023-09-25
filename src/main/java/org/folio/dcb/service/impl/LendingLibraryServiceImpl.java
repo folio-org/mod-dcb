@@ -2,7 +2,7 @@ package org.folio.dcb.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.folio.dcb.domain.mapper.TransactionMapper;
+import org.folio.dcb.domain.mapper.TransactionEntityMapper;
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
@@ -24,7 +24,7 @@ public class LendingLibraryServiceImpl implements LibraryService {
   private final UserService userService;
   private final RequestService requestService;
   private final TransactionRepository transactionRepository;
-  private final TransactionMapper transactionMapper;
+  private final TransactionEntityMapper transactionMapper;
 
   @Override
   public TransactionStatusResponse createTransaction(String dcbTransactionId, DcbTransaction dcbTransaction) {

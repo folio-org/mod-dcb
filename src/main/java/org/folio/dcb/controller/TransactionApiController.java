@@ -18,7 +18,9 @@ public class TransactionApiController implements TransactionsApi {
   private final TransactionsService transactionsService;
   @Override
   public ResponseEntity<TransactionStatusResponse> getTransactionStatus(String dcbTransactionId) {
-    return new ResponseEntity<>(HttpStatus.OK);
+    log.info("getTransactionStatus:: by id {} ", dcbTransactionId);
+    return ResponseEntity.status(HttpStatus.OK)
+      .body(transactionsService.getTransactionStatusById(dcbTransactionId));
   }
 
   @Override

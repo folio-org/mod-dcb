@@ -5,7 +5,7 @@ import org.folio.dcb.domain.dto.DcbTransaction;
 import org.springframework.stereotype.Component;
 
 @Component
-public class TransactionMapper {
+public class TransactionEntityMapper {
 
   public TransactionEntity mapToEntity(String transactionId, DcbTransaction dcbTransaction) {
     if(dcbTransaction == null || dcbTransaction.getItem() == null || dcbTransaction.getPatron() == null) {
@@ -16,16 +16,19 @@ public class TransactionMapper {
     var patron = dcbTransaction.getPatron();
     return TransactionEntity.builder()
       .id(transactionId)
+
       .itemId(item.getId())
       .itemBarcode(item.getBarcode())
       .itemTitle(item.getTitle())
       .pickupLocation(item.getPickupLocation())
       .materialType(item.getMaterialType())
       .lendingLibraryCode(item.getLendingLibraryCode())
+
       .patronBarcode(patron.getBarcode())
       .patronId(patron.getId())
       .patronGroup(patron.getGroup())
       .borrowingLibraryCode(patron.getBorrowingLibraryCode())
+
       .role(dcbTransaction.getRole())
       .build();
   }
