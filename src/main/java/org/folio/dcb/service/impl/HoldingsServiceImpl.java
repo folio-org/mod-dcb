@@ -17,7 +17,7 @@ public class HoldingsServiceImpl implements HoldingsService {
   private final InventoryHoldingsStorageClient inventoryHoldingsStorageClient;
 
   @Override
-  public InventoryHolding fetchInventoryHoldingDetails(String holdingsId) {
+  public InventoryHolding fetchInventoryHoldingDetailsByHoldingId(String holdingsId) {
     log.debug("fetchInventoryHoldingDetails:: Trying to fetch holdings detail for holdingsId {}", holdingsId);
     try {
       return inventoryHoldingsStorageClient.findHolding(holdingsId);

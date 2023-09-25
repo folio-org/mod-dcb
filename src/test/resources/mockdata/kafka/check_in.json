@@ -1,0 +1,18 @@
+{
+  "id": "091a277f-db39-4f3d-bed8-a43e145bb1c6",
+  "type": "CREATED",
+  "tenant": "dcb",
+  "timestamp": 1695390940007,
+  "data": {
+    "new": {
+      "id": "d03028bb-0116-4fbf-acd2-16397365b650",
+      "occurredDateTime": "2023-09-22T13:55:39.868+00:00",
+      "itemId": "1714f71f-b845-444b-a79e-a577487a6f7d",
+      "itemStatusPriorToCheckIn": "In transit",
+      "requestQueueSize": 1,
+      "itemLocationId": "fcd64ce1-6995-48f0-840e-89ffa2288371",
+      "servicePointId": "7c5abc9f-f3d7-4856-b8d7-6712462ca007",
+      "performedByUserId": "f4898e8c-ef61-5c0d-83a7-f5232c60e263"
+    }
+  }
+}

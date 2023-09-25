@@ -1,5 +1,6 @@
 package org.folio.dcb.service;
 
+import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.mapper.TransactionMapper;
 import org.folio.dcb.exception.ResourceAlreadyExistException;
@@ -12,22 +13,19 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
-import static org.folio.dcb.utils.EntityUtils.createDcbItem;
-import static org.folio.dcb.utils.EntityUtils.createDcbPatron;
-import static org.folio.dcb.utils.EntityUtils.createDcbTransaction;
-import static org.folio.dcb.utils.EntityUtils.createTransactionEntity;
-import static org.folio.dcb.utils.EntityUtils.createUser;
+import java.util.Optional;
+
+import static org.folio.dcb.utils.EntityUtils.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class LendingLibraryServiceTest {
+  private static final String CHECK_IN_EVENT_SAMPLE = getMockDataAsString("mockdata/kafka/check_in.json");
 
   @InjectMocks
   private LendingLibraryServiceImpl lendingLibraryService;
@@ -81,5 +79,15 @@ class LendingLibraryServiceTest {
 
     assertThrows(IllegalArgumentException.class, () ->
       lendingLibraryService.createTransaction(DCB_TRANSACTION_ID, dcbTransaction));
+  }
+
+  @Test
+  void updateTransactionTest() {
+    var transactionEntity = createTransactionEntity();
+    transactionEntity.setStatus(TransactionStatus.StatusEnum.CREATED);
+    when(transactionRepository.findByItemId(any())).thenReturn(Optional.of(transactionEntity));
+
+    lendingLibraryService.updateTransactionStatus(CHECK_IN_EVENT_SAMPLE);
+    Mockito.verify(transactionRepository, times(1)).save(transactionEntity);
   }
 }

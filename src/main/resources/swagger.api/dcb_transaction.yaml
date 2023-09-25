@@ -138,4 +138,7 @@ components:
       $ref: 'schemas/User.yaml#/UserCollection'
     CirculationRequest:
       $ref: 'schemas/CirculationRequest.yaml#/CirculationRequest'
+    CheckIn:
+      $ref: "schemas/checkIn.yaml#/CheckIn"
+
 
