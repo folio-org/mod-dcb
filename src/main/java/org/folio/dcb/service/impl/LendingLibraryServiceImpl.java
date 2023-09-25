@@ -1,6 +1,5 @@
 package org.folio.dcb.service.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -71,13 +70,15 @@ public class LendingLibraryServiceImpl implements LibraryService {
     var checkInItemId = parseCheckInEvent(checkInEvent);
     log.info("Received checkIn event for itemId: {}", checkInItemId);
 
-    transactionRepository.findByItemId(checkInItemId)
-      .ifPresent(transactionEntity -> {
-        if (transactionEntity.getStatus().equals(TransactionStatus.StatusEnum.CREATED)) {
-          transactionEntity.setStatus(TransactionStatus.StatusEnum.OPEN);
-          transactionRepository.save(transactionEntity);
-        }
-      });
+    if (Objects.nonNull(checkInItemId)) {
+      transactionRepository.findByItemId(checkInItemId)
+        .ifPresent(transactionEntity -> {
+          if (transactionEntity.getStatus().equals(TransactionStatus.StatusEnum.CREATED)) {
+            transactionEntity.setStatus(TransactionStatus.StatusEnum.OPEN);
+            transactionRepository.save(transactionEntity);
+          }
+        });
+    }
   }
 
   private String parseCheckInEvent(String eventPayload) {
@@ -89,7 +90,7 @@ public class LendingLibraryServiceImpl implements LibraryService {
       if (newDataNode != null && newDataNode.has("itemId")) {
         return newDataNode.get("itemId").asText();
       }
-    } catch (JsonProcessingException e) {
+    } catch (Exception e) {
       log.error("Could not parse input payload for processing checkIn event", e);
     }
 

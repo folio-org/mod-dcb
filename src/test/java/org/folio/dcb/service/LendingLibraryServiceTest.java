@@ -25,6 +25,7 @@ import static org.folio.dcb.utils.EntityUtils.createDcbTransaction;
 import static org.folio.dcb.utils.EntityUtils.createTransactionEntity;
 import static org.folio.dcb.utils.EntityUtils.createUser;
 import static org.folio.dcb.utils.EntityUtils.getMockDataAsString;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
@@ -35,6 +36,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class LendingLibraryServiceTest {
   private static final String CHECK_IN_EVENT_SAMPLE = getMockDataAsString("mockdata/kafka/check_in.json");
+  private static final String CHECK_IN_EVENT_ERROR_SAMPLE = getMockDataAsString("mockdata/kafka/check_in_error.json");
 
   @InjectMocks
   private LendingLibraryServiceImpl lendingLibraryService;
@@ -98,5 +100,12 @@ class LendingLibraryServiceTest {
 
     lendingLibraryService.updateTransactionStatus(CHECK_IN_EVENT_SAMPLE);
     Mockito.verify(transactionRepository, times(1)).save(transactionEntity);
+  }
+
+  @Test
+  void updateTransactionTestWithInvalidData() {
+    var transactionEntity = createTransactionEntity();
+    transactionEntity.setStatus(TransactionStatus.StatusEnum.CREATED);
+    assertDoesNotThrow(() -> lendingLibraryService.updateTransactionStatus(CHECK_IN_EVENT_ERROR_SAMPLE));
   }
 }

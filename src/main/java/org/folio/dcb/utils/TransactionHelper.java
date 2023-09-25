@@ -7,6 +7,9 @@ import java.util.Collections;
 import java.util.List;
 
 public class TransactionHelper {
+
+  private TransactionHelper(){}
+
   public static List<String> getHeaderValue(MessageHeaders headers, String headerName, String defaultValue) {
     var headerValue = headers.get(headerName);
     var value = headerValue == null
