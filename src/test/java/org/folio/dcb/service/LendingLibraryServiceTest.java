@@ -18,10 +18,19 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
-import static org.folio.dcb.utils.EntityUtils.*;
+import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
+import static org.folio.dcb.utils.EntityUtils.createDcbItem;
+import static org.folio.dcb.utils.EntityUtils.createDcbPatron;
+import static org.folio.dcb.utils.EntityUtils.createDcbTransaction;
+import static org.folio.dcb.utils.EntityUtils.createTransactionEntity;
+import static org.folio.dcb.utils.EntityUtils.createUser;
+import static org.folio.dcb.utils.EntityUtils.getMockDataAsString;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class LendingLibraryServiceTest {
