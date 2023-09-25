@@ -18,7 +18,7 @@ public class HoldingsServiceImpl implements HoldingsService {
 
   @Override
   public InventoryHolding fetchInventoryHoldingDetailsByHoldingId(String holdingsId) {
-    log.debug("fetchInventoryHoldingDetails:: Trying to fetch holdings detail for holdingsId {}", holdingsId);
+    log.debug("fetchInventoryHoldingDetailsByHoldingId:: Trying to fetch holdings detail for holdingsId {}", holdingsId);
     try {
       return inventoryHoldingsStorageClient.findHolding(holdingsId);
     } catch (FeignException.NotFound ex) {

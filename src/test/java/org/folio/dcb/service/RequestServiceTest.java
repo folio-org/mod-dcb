@@ -33,10 +33,10 @@ class RequestServiceTest {
   @Test
   void createPageItemRequestTest() {
     when(itemService.fetchItemDetailsById(any())).thenReturn(createInventoryItem());
-    when(holdingsService.fetchInventoryHoldingDetails(any())).thenReturn(createInventoryHolding());
+    when(holdingsService.fetchInventoryHoldingDetailsByHoldingId(any())).thenReturn(createInventoryHolding());
     requestService.createPageItemRequest(createUser(), createDcbItem());
     verify(itemService).fetchItemDetailsById(any());
-    verify(holdingsService).fetchInventoryHoldingDetails(any());
+    verify(holdingsService).fetchInventoryHoldingDetailsByHoldingId(any());
     verify(requestClient).createRequest(any());
   }
 
