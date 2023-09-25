@@ -39,7 +39,7 @@ public class BaseIT {
   protected MockMvc mockMvc;
   public static WireMockServer wireMockServer;
   protected static final String TOKEN = "test_token";
-  public static final String TENANT = "dcb";
+  public static final String TENANT = "diku";
   protected static PostgreSQLContainer<?> postgreDBContainer = new PostgreSQLContainer<>("postgres:12-alpine");
   public final static int WIRE_MOCK_PORT = TestSocketUtils.findAvailableTcpPort();
   protected static final ObjectMapper OBJECT_MAPPER = new ObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_NULL)

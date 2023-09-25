@@ -25,11 +25,11 @@ class CirculationCheckInEventListenerTest extends BaseIT {
   private static final String CHECK_IN_EVENT_SAMPLE = getMockDataAsString("mockdata/kafka/check_in.json");
 
   @MockBean
-  LibraryService libraryService;
+  private LibraryService libraryService;
   @Autowired
   private CirculationCheckInEventListener eventListener ;
   @Mock
-  AuthnClient authnClient;
+  private AuthnClient authnClient;
 
   @Test
   void shouldExists() {
@@ -43,5 +43,4 @@ class CirculationCheckInEventListenerTest extends BaseIT {
     header.put(XOkapiHeaders.TENANT, TENANT.getBytes());
     return new MessageHeaders(header);
   }
-
 }
