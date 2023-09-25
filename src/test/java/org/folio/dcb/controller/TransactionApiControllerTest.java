@@ -61,7 +61,7 @@ class TransactionApiControllerTest extends BaseIT {
    * then get stage verifies, the data exists.
    * */
   @Test
-  public void getTransactionStatusSuccessTest() throws Exception {
+  void getTransactionStatusSuccessTest() throws Exception {
     var id = UUID.randomUUID().toString();
     this.mockMvc.perform(
         post("/transactions/" + id)
@@ -82,7 +82,7 @@ class TransactionApiControllerTest extends BaseIT {
   }
 
   @Test
-  public void getTransactionStatusNotFoundTest() throws Exception {
+  void getTransactionStatusNotFoundTest() throws Exception {
     var id = UUID.randomUUID().toString();
     mockMvc.perform(
         get("/transactions/"+id+"/status")

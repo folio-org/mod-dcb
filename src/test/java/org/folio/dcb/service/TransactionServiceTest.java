@@ -50,7 +50,7 @@ class TransactionServiceTest {
   }
 
   @Test
-  public void shouldReturnAnyTransactionStatusById(){
+  void shouldReturnAnyTransactionStatusById(){
     var transactionIdUnique = UUID.randomUUID().toString();
     when(transactionRepository.findById(transactionIdUnique))
       .thenReturn(Optional.ofNullable(TransactionEntity.builder().status(TransactionStatus.StatusEnum.CREATED).build()));
@@ -62,7 +62,7 @@ class TransactionServiceTest {
   }
 
   @Test
-  public void getTransactionStatusByIdNotFoundExceptionTest(){
+  void getTransactionStatusByIdNotFoundExceptionTest(){
     var transactionIdUnique = UUID.randomUUID().toString();
     when(transactionRepository.findById(transactionIdUnique))
       .thenReturn(Optional.empty());
