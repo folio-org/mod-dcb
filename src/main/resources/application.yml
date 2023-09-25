@@ -52,7 +52,7 @@ folio:
     lastname: System
     permissionsFilePath: permissions/mod-dcb.csv
   environment: ${ENV:folio}
-  okapi-url: ${OKAPI_URL:http://localhost:9130}
+  okapi-url: ${OKAPI_URL:http://okapi:9130}
 management:
   endpoints:
     web:
