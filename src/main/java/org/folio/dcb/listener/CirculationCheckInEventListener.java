@@ -22,8 +22,7 @@ public class CirculationCheckInEventListener {
   @KafkaListener(
     id = CHECK_IN_LISTENER_ID,
     topicPattern = "#{folioKafkaProperties.listener['check-in'].topicPattern}",
-    concurrency = "#{folioKafkaProperties.listener['check-in'].concurrency}",
-    containerFactory = "kafkaListenerContainerFactory")
+    concurrency = "#{folioKafkaProperties.listener['check-in'].concurrency}")
   public void handleCheckingIn(String data, MessageHeaders messageHeaders) {
     String requestedTenantId = getHeaderValue(messageHeaders, XOkapiHeaders.TENANT, null).get(0);
     systemUserScopedExecutionService.executeAsyncSystemUserScoped(requestedTenantId, () -> libraryService.updateTransactionStatus(data));
