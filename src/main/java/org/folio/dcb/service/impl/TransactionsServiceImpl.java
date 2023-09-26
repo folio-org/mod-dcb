@@ -35,13 +35,18 @@ public class TransactionsServiceImpl implements TransactionsService {
   @Override
   public TransactionStatusResponse updateTransactionStatus(String dcbTransactionId, TransactionStatus transactionStatus) {
     return transactionRepository.findById(dcbTransactionId).map(dcbTransaction -> {
+      if (dcbTransaction.getStatus() == transactionStatus.getStatus()) {
+        throw new IllegalArgumentException(String.format(
+          "Current transaction status equal to new transaction status: dcbTransactionId: %s, status: %s", dcbTransactionId, transactionStatus.getStatus()
+        ));
+      }
+
       if (Objects.requireNonNull(dcbTransaction.getRole()) == DcbTransaction.RoleEnum.LENDER) {
         lendingLibraryService.updateTransactionStatus(dcbTransaction, transactionStatus);
       } else {
         throw new IllegalArgumentException("Other roles are not implemented");
       }
       return TransactionStatusResponse.builder()
-        .message("Status updated")
         .status(TransactionStatusResponse.StatusEnum.fromValue(transactionStatus.getStatus().getValue()))
         .build();
     }).orElseThrow(() -> new IllegalArgumentException(String.format("Transaction with id %s not found", dcbTransactionId)));

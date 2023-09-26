@@ -68,9 +68,9 @@ public class LendingLibraryServiceImpl implements LibraryService {
   public void updateTransactionStatus(TransactionEntity dcbTransaction, TransactionStatus transactionStatus) {
     log.info("updateTransactionStatus:: updating dcbTransaction {} to status {} ", dcbTransaction, transactionStatus);
     if (TransactionStatus.StatusEnum.OPEN.equals(dcbTransaction.getStatus())) {
+      circulationService.checkInByBarcode(dcbTransaction);
       dcbTransaction.setStatus(transactionStatus.getStatus());
       transactionRepository.save(dcbTransaction);
-      circulationService.checkInByBarcode(dcbTransaction);
     } else {
       throw new IllegalArgumentException("Other statuses are not implemented");
     }
