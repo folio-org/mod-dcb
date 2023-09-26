@@ -29,7 +29,7 @@ paths:
       - $ref: '#/components/parameters/dcbTransactionId'
     get:
       description: Get transaction status across circulation institutions
-      operationId: getTransactionStatus
+      operationId: getTransactionStatusById
       tags:
         - circulation
       responses:
