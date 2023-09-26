@@ -60,7 +60,7 @@ class TransactionServiceTest {
 
     var trnInstance = transactionsService.getTransactionStatusById(transactionIdUnique);
     assertNotNull(trnInstance);
-    assertEquals(trnInstance.getStatus(), TransactionStatusResponse.StatusEnum.CREATED);
+    assertEquals(TransactionStatusResponse.StatusEnum.CREATED, trnInstance.getStatus());
   }
 
   @Test
