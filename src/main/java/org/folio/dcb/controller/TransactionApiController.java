@@ -3,6 +3,7 @@ package org.folio.dcb.controller;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dcb.domain.dto.DcbTransaction;
+import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.rest.resource.TransactionsApi;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.service.TransactionsService;
@@ -26,5 +27,12 @@ public class TransactionApiController implements TransactionsApi {
     log.info("createCirculationRequest:: creating dcbTransaction {} with id {} ", dcbTransaction, dcbTransactionId);
     return ResponseEntity.status(HttpStatus.CREATED)
       .body(transactionsService.createCirculationRequest(dcbTransactionId, dcbTransaction));
+  }
+
+  @Override
+  public ResponseEntity<TransactionStatusResponse> updateTransactionStatus(String dcbTransactionId, TransactionStatus transactionStatus) {
+    log.info("updateTransactionStatus:: updating dcbTransaction with id {} to status {} ", dcbTransactionId, transactionStatus);
+    return ResponseEntity.status(HttpStatus.OK)
+      .body(transactionsService.updateTransactionStatus(dcbTransactionId, transactionStatus));
   }
 }

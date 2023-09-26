@@ -60,11 +60,11 @@ paths:
 components:
   requestBodies:
     TransactionStatusBody:
-      description: TransactionStatusResponse object
+      description: TransactionStatus object
       content:
         application/json:
           schema:
-            $ref: "schemas/transactionStatusResponse.yaml#/TransactionStatusResponse"
+            $ref: "schemas/transactionStatus.yaml#/TransactionStatus"
     DCBTransaction:
       description: DCB transaction object
       required: true

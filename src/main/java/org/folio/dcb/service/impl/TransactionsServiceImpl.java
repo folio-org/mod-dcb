@@ -3,7 +3,9 @@ package org.folio.dcb.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dcb.domain.dto.DcbTransaction;
+import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
+import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.LibraryService;
 import org.folio.dcb.service.TransactionsService;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -17,6 +19,8 @@ public class TransactionsServiceImpl implements TransactionsService {
   @Qualifier("lendingLibraryService")
   private final LibraryService lendingLibraryService;
 
+  private final TransactionRepository transactionRepository;
+
   @Override
   public TransactionStatusResponse createCirculationRequest(String dcbTransactionId, DcbTransaction dcbTransaction) {
     log.debug("createCirculationRequest:: creating new transaction request for role {} ", dcbTransaction.getRole());
@@ -26,4 +30,17 @@ public class TransactionsServiceImpl implements TransactionsService {
     };
   }
 
+  @Override
+  public TransactionStatusResponse updateTransactionStatus(String dcbTransactionId, TransactionStatus transactionStatus) {
+    return transactionRepository.findById(dcbTransactionId).map(dcbTransaction -> {
+      switch (dcbTransaction.getRole()) {
+        case LENDER -> lendingLibraryService.updateTransactionStatus(dcbTransaction, transactionStatus);
+        default -> throw new IllegalArgumentException("Other roles are not implemented");
+      }
+      return TransactionStatusResponse.builder()
+        .message("Status updated")
+        .status(TransactionStatusResponse.StatusEnum.fromValue(transactionStatus.getStatus().getValue()))
+        .build();
+    }).orElseThrow(() -> new IllegalArgumentException("Transaction with id " + dcbTransactionId + " not found"));
+  }
 }

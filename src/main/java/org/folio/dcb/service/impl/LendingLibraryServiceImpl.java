@@ -47,7 +47,7 @@ public class LendingLibraryServiceImpl implements LibraryService {
   }
 
   private void checkTransactionExistsAndThrow(String dcbTransactionId) {
-    if(transactionRepository.existsById(dcbTransactionId)) {
+    if (transactionRepository.existsById(dcbTransactionId)) {
       throw new ResourceAlreadyExistException(
         String.format("unable to create transaction with id %s as it already exists", dcbTransactionId));
     }
@@ -62,4 +62,13 @@ public class LendingLibraryServiceImpl implements LibraryService {
     transactionRepository.save(transactionEntity);
   }
 
+  @Override
+  public void updateTransactionStatus(TransactionEntity dcbTransaction, TransactionStatus transactionStatus) {
+    if (TransactionStatus.StatusEnum.OPEN.equals(dcbTransaction.getStatus())) {
+      dcbTransaction.setStatus(transactionStatus.getStatus());
+      transactionRepository.save(dcbTransaction);
+    } else {
+      throw new IllegalArgumentException("Other statuses are not implemented");
+    }
+  }
 }
