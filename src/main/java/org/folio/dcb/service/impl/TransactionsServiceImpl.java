@@ -44,6 +44,6 @@ public class TransactionsServiceImpl implements TransactionsService {
         .message("Status updated")
         .status(TransactionStatusResponse.StatusEnum.fromValue(transactionStatus.getStatus().getValue()))
         .build();
-    }).orElseThrow(() -> new IllegalArgumentException("Transaction with id " + dcbTransactionId + " not found"));
+    }).orElseThrow(() -> new IllegalArgumentException(String.format("Transaction with id %s not found", dcbTransactionId)));
   }
 }
