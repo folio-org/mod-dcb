@@ -2,7 +2,7 @@ package org.folio.dcb.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.folio.dcb.client.feign.RequestClient;
+import org.folio.dcb.client.feign.CirculationClient;
 import org.folio.dcb.domain.dto.CirculationRequest;
 import org.folio.dcb.domain.dto.DcbItem;
 import org.folio.dcb.domain.dto.Item;
@@ -23,7 +23,7 @@ public class RequestServiceImpl implements RequestService {
 
   private final ItemService itemService;
   private final HoldingsService holdingsService;
-  private final RequestClient requestClient;
+  private final CirculationClient circulationClient;
 
   @Override
   public void createPageItemRequest(User user, DcbItem item) {
@@ -32,7 +32,7 @@ public class RequestServiceImpl implements RequestService {
     var inventoryItem = itemService.fetchItemDetailsById(item.getId());
     var inventoryHolding = holdingsService.fetchInventoryHoldingDetails(inventoryItem.getHoldingsRecordId());
     var circulationRequest = createCirculationRequest(user, item, inventoryItem.getHoldingsRecordId(), inventoryHolding.getInstanceId());
-    requestClient.createRequest(circulationRequest);
+    circulationClient.createRequest(circulationRequest);
   }
 
   private CirculationRequest createCirculationRequest(User user, DcbItem item, String holdingsId, String instanceId) {

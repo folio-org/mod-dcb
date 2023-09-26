@@ -1,6 +1,6 @@
 package org.folio.dcb.service;
 
-import org.folio.dcb.client.feign.RequestClient;
+import org.folio.dcb.client.feign.CirculationClient;
 import org.folio.dcb.service.impl.HoldingsServiceImpl;
 import org.folio.dcb.service.impl.ItemServiceImpl;
 import org.folio.dcb.service.impl.RequestServiceImpl;
@@ -28,7 +28,7 @@ class RequestServiceTest {
   @Mock
   private HoldingsServiceImpl holdingsService;
   @Mock
-  private RequestClient requestClient;
+  private CirculationClient circulationClient;
 
   @Test
   void createPageItemRequestTest() {
@@ -37,7 +37,7 @@ class RequestServiceTest {
     requestService.createPageItemRequest(createUser(), createDcbItem());
     verify(itemService).fetchItemDetailsById(any());
     verify(holdingsService).fetchInventoryHoldingDetails(any());
-    verify(requestClient).createRequest(any());
+    verify(circulationClient).createRequest(any());
   }
 
 }
