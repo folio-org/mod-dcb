@@ -55,7 +55,7 @@ public class TransactionsServiceImpl implements TransactionsService {
 
   private TransactionEntity getTransactionEntityOrThrow(String dcbTransactionId) {
     return transactionRepository.findById(dcbTransactionId)
-      .orElseThrow(() -> new NotFoundException(DCB_TRANSACTION_NOT_FOUND_BU_ID + dcbTransactionId));
+      .orElseThrow(() -> new NotFoundException(DCB_TRANSACTION_WAS_NOT_FOUND_BY_ID + dcbTransactionId));
   }
 
   }
