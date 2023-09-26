@@ -68,7 +68,7 @@ public class LendingLibraryServiceImpl implements LibraryService {
   @Override
   public void updateTransactionStatus(String checkInEvent) {
     var checkInItemId = parseCheckInEvent(checkInEvent);
-    log.info("Received checkIn event for itemId: {}", checkInItemId);
+    log.info("updateTransactionStatus:: Received checkIn event for itemId: {}", checkInItemId);
 
     if (Objects.nonNull(checkInItemId)) {
       transactionRepository.findByItemId(checkInItemId)
