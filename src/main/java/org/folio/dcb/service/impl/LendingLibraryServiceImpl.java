@@ -1,5 +1,7 @@
 package org.folio.dcb.service.impl;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dcb.domain.mapper.TransactionMapper;
@@ -16,6 +18,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.Objects;
 
+import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
+
 @Service("lendingLibraryService")
 @RequiredArgsConstructor
 @Log4j2
@@ -25,6 +29,7 @@ public class LendingLibraryServiceImpl implements LibraryService {
   private final RequestService requestService;
   private final TransactionRepository transactionRepository;
   private final TransactionMapper transactionMapper;
+  private final ObjectMapper objectMapper = new ObjectMapper();
 
   @Override
   public TransactionStatusResponse createTransaction(String dcbTransactionId, DcbTransaction dcbTransaction) {
@@ -62,4 +67,36 @@ public class LendingLibraryServiceImpl implements LibraryService {
     transactionRepository.save(transactionEntity);
   }
 
+  @Override
+  public void updateTransactionStatus(String checkInEvent) {
+    var checkInItemId = parseCheckInEvent(checkInEvent);
+    log.info("updateTransactionStatus:: Received checkIn event for itemId: {}", checkInItemId);
+
+    if (Objects.nonNull(checkInItemId)) {
+      transactionRepository.findTransactionByItemId(checkInItemId)
+        .ifPresent(transactionEntity -> {
+          if (LENDER.equals(transactionEntity.getRole())
+            && TransactionStatus.StatusEnum.CREATED.equals(transactionEntity.getStatus())) {
+            transactionEntity.setStatus(TransactionStatus.StatusEnum.OPEN);
+            transactionRepository.save(transactionEntity);
+          }
+        });
+    }
+  }
+
+  private String parseCheckInEvent(String eventPayload) {
+    try {
+      JsonNode jsonNode = objectMapper.readTree(eventPayload);
+      JsonNode dataNode = jsonNode.get("data");
+      JsonNode newDataNode = (dataNode != null) ? dataNode.get("new") : null;
+
+      if (newDataNode != null && newDataNode.has("itemId")) {
+        return newDataNode.get("itemId").asText();
+      }
+    } catch (Exception e) {
+      log.error("Could not parse input payload for processing checkIn event", e);
+    }
+
+    return null;
+  }
 }

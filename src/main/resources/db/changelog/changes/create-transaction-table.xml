@@ -8,7 +8,7 @@
   <changeSet id="createStatusEnum" author="singhAdesh">
     <sql>
       <![CDATA[
-            CREATE TYPE StatusEnum as ENUM ('CREATED', 'OPEN', 'CANCELLED', 'IN_TRANSIT', 'AWAITING_PICKUP', 'ITEM_CHECKED_OUT', 'ITEM_CHECKED_IN', 'IN_TRANSIT_TO_LENDING', 'CLOSED', 'ERROR');
+            CREATE TYPE StatusEnum as ENUM ('CREATED', 'OPEN', 'AWAITING_PICKUP', 'ITEM_CHECKED_OUT', 'ITEM_CHECKED_IN', 'CLOSED');
             ]]>
     </sql>
   </changeSet>

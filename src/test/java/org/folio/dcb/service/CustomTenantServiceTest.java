@@ -1,5 +1,6 @@
 package org.folio.dcb.service;
 
+import org.folio.dcb.listener.kafka.KafkaService;
 import org.folio.dcb.service.impl.CustomTenantService;
 import org.folio.spring.service.PrepareSystemUserService;
 import org.folio.tenant.domain.dto.TenantAttributes;
@@ -16,8 +17,11 @@ class CustomTenantServiceTest {
 
   @Mock
   private PrepareSystemUserService systemUserService;
+  @Mock
+  private KafkaService kafkaService;
   @InjectMocks
   private CustomTenantService service;
+
   @Test
   void shouldPrepareSystemUser() {
     service.createOrUpdateTenant(new TenantAttributes());

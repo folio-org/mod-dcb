@@ -1,0 +1,41 @@
+CheckIn:
+  description: "Check-in operation"
+  type: "object"
+  properties:
+    id:
+      type: "string"
+      format: "UUID"
+      description: "Unique ID (generated UUID) of the check-in operation"
+    occurredDateTime:
+      type: "string"
+      description: "Date and time when the check-in occurred"
+      format: "date-time"
+    itemId:
+      description: "Id of item that has checked in"
+      type: "string"
+      format: "UUID"
+    itemStatusPriorToCheckIn:
+      type: "string"
+      description: "Item status prior to check-in"
+    requestQueueSize:
+      type: "integer"
+      description: "Request queue size for the item"
+      minimum: 0
+    itemLocationId:
+      type: "string"
+      format: "UUID"
+      description: "Location of the item in check-in time"
+    servicePointId:
+      type: "string"
+      format: "UUID"
+      description: "Service point where the item was checked in"
+    performedByUserId:
+      type: "string"
+      format: "UUID"
+      description: "Id of user that has performed check-in operation"
+  additionalProperties: false
+  required:
+    - "occurredDateTime"
+    - "itemId"
+    - "servicePointId"
+    - "performedByUserId"

@@ -33,7 +33,7 @@ class InventoryHoldingsServiceTest {
     var inventoryHolding = createInventoryHolding();
     var holdingId = UUID.randomUUID().toString();
     when(holdingsStorageClient.findHolding(any())).thenReturn(inventoryHolding);
-    var response = holdingsService.fetchInventoryHoldingDetails(holdingId);
+    var response = holdingsService.fetchInventoryHoldingDetailsByHoldingId(holdingId);
     verify(holdingsStorageClient).findHolding(holdingId);
     assertEquals(inventoryHolding, response);
   }
@@ -42,7 +42,7 @@ class InventoryHoldingsServiceTest {
   void fetchInventoryHoldingDetailsByInvalidIdTest() {
     var holdingId = UUID.randomUUID().toString();
     doThrow(FeignException.NotFound.class).when(holdingsStorageClient).findHolding(holdingId);
-    assertThrows(NotFoundException.class, () -> holdingsService.fetchInventoryHoldingDetails(holdingId));
+    assertThrows(NotFoundException.class, () -> holdingsService.fetchInventoryHoldingDetailsByHoldingId(holdingId));
   }
 
 }
