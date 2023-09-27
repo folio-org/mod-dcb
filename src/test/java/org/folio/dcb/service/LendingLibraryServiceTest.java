@@ -2,7 +2,6 @@ package org.folio.dcb.service;
 
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.TransactionStatus;
-import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.domain.mapper.TransactionMapper;
@@ -135,9 +134,9 @@ class LendingLibraryServiceTest {
 
   @Test
   void updateTransactionWithWrongStatusTest() {
-    TransactionEntity dcbTransaction = createTransactionEntity();
-    assertThrows(IllegalArgumentException.class, () ->
-      lendingLibraryService.updateTransactionStatus(dcbTransaction, createTransactionStatus(TransactionStatus.StatusEnum.AWAITING_PICKUP))
-    );
+    assertThrows(IllegalArgumentException.class, () -> {
+      TransactionEntity dcbTransaction = createTransactionEntity();
+      lendingLibraryService.updateTransactionStatus(dcbTransaction, createTransactionStatus(TransactionStatus.StatusEnum.AWAITING_PICKUP));
+    });
   }
 }
