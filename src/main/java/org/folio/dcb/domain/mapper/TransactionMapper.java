@@ -29,7 +29,7 @@ public class TransactionMapper {
       .patronGroup(patron.getGroup())
       .borrowingLibraryCode(patron.getBorrowingLibraryCode())
 
-      .role(dcbTransaction.getTransactionRole().getRole())
+      .role(dcbTransaction.getRole().getTransactionRole())
       .build();
   }
 

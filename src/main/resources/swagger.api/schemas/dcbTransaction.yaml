@@ -5,5 +5,5 @@ DcbTransaction:
         $ref: 'dcbItem.yaml#/DcbItem'
       patron:
         $ref: 'dcbPatron.yaml#/DcbPatron'
-      transactionRole:
-        $ref: 'transactionRole.yaml#/TransactionRole'
+      role:
+        $ref: 'role.yaml#/Role'

@@ -1,7 +1,7 @@
-TransactionRole:
+Role:
   type: object
   properties:
-    role:
+    transactionRole:
       type: string
       enum:
         - borrower

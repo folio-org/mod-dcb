@@ -1,6 +1,6 @@
 package org.folio.dcb.service;
 
-import org.folio.dcb.domain.dto.TransactionRole;
+import org.folio.dcb.domain.dto.Role;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.entity.TransactionEntity;
@@ -52,13 +52,13 @@ class TransactionServiceTest {
     when(transactionRepository.findById(transactionIdUnique))
       .thenReturn(Optional.ofNullable(TransactionEntity.builder()
         .status(TransactionStatus.StatusEnum.CREATED)
-        .role(TransactionRole.RoleEnum.LENDER)
+        .role(Role.TransactionRoleEnum.LENDER)
         .build()));
 
     var trnInstance = transactionsService.getTransactionStatusById(transactionIdUnique);
     assertNotNull(trnInstance);
     assertEquals(TransactionStatusResponse.StatusEnum.CREATED, trnInstance.getStatus());
-    assertEquals(TransactionStatusResponse.RoleEnum.LENDER, trnInstance.getRole());
+    assertEquals(TransactionStatusResponse.TransactionRoleEnum.LENDER, trnInstance.getTransactionRole());
   }
 
   @Test

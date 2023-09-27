@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Objects;
 
-import static org.folio.dcb.domain.dto.TransactionRole.RoleEnum.LENDER;
+import static org.folio.dcb.domain.dto.Role.TransactionRoleEnum.LENDER;
 
 @Service("lendingLibraryService")
 @RequiredArgsConstructor
