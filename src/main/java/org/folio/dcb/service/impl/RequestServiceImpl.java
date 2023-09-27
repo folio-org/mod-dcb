@@ -30,7 +30,7 @@ public class RequestServiceImpl implements RequestService {
     log.debug("createPageItemRequest:: creating a new page request for userBarcode {} , itemBarcode {}",
       user.getBarcode(), item.getBarcode());
     var inventoryItem = itemService.fetchItemDetailsById(item.getId());
-    var inventoryHolding = holdingsService.fetchInventoryHoldingDetails(inventoryItem.getHoldingsRecordId());
+    var inventoryHolding = holdingsService.fetchInventoryHoldingDetailsByHoldingId(inventoryItem.getHoldingsRecordId());
     var circulationRequest = createCirculationRequest(user, item, inventoryItem.getHoldingsRecordId(), inventoryHolding.getInstanceId());
     circulationClient.createRequest(circulationRequest);
   }

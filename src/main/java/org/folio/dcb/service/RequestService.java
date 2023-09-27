@@ -4,5 +4,11 @@ import org.folio.dcb.domain.dto.DcbItem;
 import org.folio.dcb.domain.dto.User;
 
 public interface RequestService {
-  void createPageItemRequest(User user, DcbItem item);
+  /**
+   * Create page item request
+   * @param user - userEntity
+   * @param dcbItem - dcbItemEntity
+   * @return
+   */
+  void createPageItemRequest(User user, DcbItem dcbItem);
 }

@@ -1,5 +1,7 @@
 package org.folio.dcb.utils;
 
+import lombok.SneakyThrows;
+import org.folio.dcb.DcbApplication;
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.DcbItem;
 import org.folio.dcb.domain.dto.DcbPatron;
@@ -12,9 +14,15 @@ import org.folio.dcb.domain.dto.InventoryItem;
 import org.folio.dcb.domain.dto.UserGroupCollection;
 import org.folio.dcb.domain.dto.UserGroup;
 import org.folio.dcb.domain.dto.UserCollection;
+import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
 
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 public class EntityUtils {
 
@@ -97,6 +105,22 @@ public class EntityUtils {
       .id(UUID.randomUUID().toString())
       .instanceId(UUID.randomUUID().toString())
       .build();
+  }
+
+  @SneakyThrows
+  public static String getMockDataAsString(String path) {
+
+    try (InputStream resourceAsStream = DcbApplication.class.getClassLoader().getResourceAsStream(path)) {
+      if (resourceAsStream != null) {
+        return IOUtils.toString(resourceAsStream, StandardCharsets.UTF_8);
+      } else {
+        StringBuilder sb = new StringBuilder();
+        try (Stream<String> lines = Files.lines(Paths.get(path))) {
+          lines.forEach(sb::append);
+        }
+        return sb.toString();
+      }
+    }
   }
 
   public static InventoryItem createInventoryItem() {

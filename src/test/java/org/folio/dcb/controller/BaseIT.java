@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import lombok.SneakyThrows;
+import org.folio.spring.config.properties.FolioEnvironment;
 import org.folio.spring.integration.XOkapiHeaders;
 import org.folio.tenant.domain.dto.TenantAttributes;
 import org.junit.jupiter.api.AfterAll;
@@ -39,7 +40,7 @@ public class BaseIT {
   protected MockMvc mockMvc;
   public static WireMockServer wireMockServer;
   protected static final String TOKEN = "test_token";
-  public static final String TENANT = "dcb";
+  public static final String TENANT = "diku";
   protected static PostgreSQLContainer<?> postgreDBContainer = new PostgreSQLContainer<>("postgres:12-alpine");
   public final static int WIRE_MOCK_PORT = TestSocketUtils.findAvailableTcpPort();
   protected static final ObjectMapper OBJECT_MAPPER = new ObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_NULL)
@@ -51,10 +52,15 @@ public class BaseIT {
   }
 
   @BeforeAll
-  static void beforeAll(@Autowired MockMvc mockMvc) {
+  static void beforeAll(@Autowired MockMvc mockMvc, @Autowired FolioEnvironment folioEnvironment) {
     wireMockServer = new WireMockServer(WIRE_MOCK_PORT);
     wireMockServer.start();
     setUpTenant(mockMvc);
+    folioEnvironment.setOkapiUrl(getOkapiUrl());
+  }
+
+  public static String getOkapiUrl() {
+    return String.format("http://localhost:%s", WIRE_MOCK_PORT);
   }
 
   @AfterAll

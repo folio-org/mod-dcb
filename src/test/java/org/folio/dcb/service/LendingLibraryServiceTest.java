@@ -1,5 +1,7 @@
 package org.folio.dcb.service;
 
+import org.folio.dcb.domain.dto.DcbTransaction;
+import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.entity.TransactionEntity;
@@ -15,7 +17,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Optional;
 
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
 import static org.folio.dcb.utils.EntityUtils.createDcbItem;
@@ -23,14 +28,19 @@ import static org.folio.dcb.utils.EntityUtils.createDcbPatron;
 import static org.folio.dcb.utils.EntityUtils.createDcbTransaction;
 import static org.folio.dcb.utils.EntityUtils.createTransactionEntity;
 import static org.folio.dcb.utils.EntityUtils.createUser;
+import static org.folio.dcb.utils.EntityUtils.getMockDataAsString;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class LendingLibraryServiceTest {
+  private static final String CHECK_IN_EVENT_SAMPLE = getMockDataAsString("mockdata/kafka/check_in.json");
+  private static final String CHECK_IN_EVENT_ERROR_SAMPLE = getMockDataAsString("mockdata/kafka/check_in_error.json");
 
   @InjectMocks
   private LendingLibraryServiceImpl lendingLibraryService;
@@ -87,6 +97,25 @@ class LendingLibraryServiceTest {
 
     assertThrows(IllegalArgumentException.class, () ->
       lendingLibraryService.createTransaction(DCB_TRANSACTION_ID, dcbTransaction));
+  }
+
+  @Test
+  void updateTransactionTest() {
+    var transactionEntity = createTransactionEntity();
+    transactionEntity.setStatus(TransactionStatus.StatusEnum.CREATED);
+    transactionEntity.setRole(DcbTransaction.RoleEnum.LENDER);
+    when(transactionRepository.findTransactionByItemId(any())).thenReturn(Optional.of(transactionEntity));
+
+    lendingLibraryService.updateTransactionStatus(CHECK_IN_EVENT_SAMPLE);
+    Mockito.verify(transactionRepository, times(1)).save(transactionEntity);
+  }
+
+  @Test
+  void updateTransactionTestWithInvalidData() {
+    var transactionEntity = createTransactionEntity();
+    transactionEntity.setStatus(TransactionStatus.StatusEnum.CREATED);
+    transactionEntity.setRole(DcbTransaction.RoleEnum.LENDER);
+    assertDoesNotThrow(() -> lendingLibraryService.updateTransactionStatus(CHECK_IN_EVENT_ERROR_SAMPLE));
   }
 
   @Test
