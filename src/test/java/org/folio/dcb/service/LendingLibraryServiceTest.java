@@ -1,9 +1,12 @@
 package org.folio.dcb.service;
 
+import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
+import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.domain.mapper.TransactionMapper;
 import org.folio.dcb.exception.ResourceAlreadyExistException;
 import org.folio.dcb.repository.TransactionRepository;
+import org.folio.dcb.service.impl.CirculationServiceImpl;
 import org.folio.dcb.service.impl.LendingLibraryServiceImpl;
 import org.folio.dcb.service.impl.RequestServiceImpl;
 import org.folio.dcb.service.impl.UserServiceImpl;
@@ -39,6 +42,9 @@ class LendingLibraryServiceTest {
   private RequestServiceImpl requestService;
   @Mock
   private TransactionMapper transactionMapper;
+
+  @Mock
+  private CirculationServiceImpl circulationService;
 
   @Test
   void createTransactionTest() {
@@ -81,5 +87,27 @@ class LendingLibraryServiceTest {
 
     assertThrows(IllegalArgumentException.class, () ->
       lendingLibraryService.createTransaction(DCB_TRANSACTION_ID, dcbTransaction));
+  }
+
+  @Test
+  void updateTransactionStatusTest() {
+    TransactionEntity dcbTransaction = createTransactionEntity();
+    dcbTransaction.setStatus(TransactionStatus.StatusEnum.OPEN);
+    doNothing().when(circulationService).checkInByBarcode(dcbTransaction);
+    when(transactionRepository.save(dcbTransaction)).thenReturn(dcbTransaction);
+    lendingLibraryService.updateTransactionStatus(dcbTransaction, TransactionStatus.builder().status(TransactionStatus.StatusEnum.AWAITING_PICKUP).build());
+
+    verify(circulationService).checkInByBarcode(dcbTransaction);
+    verify(transactionRepository).save(dcbTransaction);
+
+    Assertions.assertEquals(TransactionStatus.StatusEnum.AWAITING_PICKUP, dcbTransaction.getStatus());
+  }
+
+  @Test
+  void updateTransactionWithWrongStatusTest() {
+    TransactionEntity dcbTransaction = createTransactionEntity();
+    assertThrows(IllegalArgumentException.class, () ->
+      lendingLibraryService.updateTransactionStatus(dcbTransaction, TransactionStatus.builder().status(TransactionStatus.StatusEnum.AWAITING_PICKUP).build())
+    );
   }
 }
