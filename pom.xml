@@ -37,6 +37,7 @@
     <folio-spring-system-user.version>7.2.0-SNAPSHOT</folio-spring-system-user.version>
     <openapi-generator.version>6.2.1</openapi-generator.version>
     <mapstruct.version>1.5.2.Final</mapstruct.version>
+    <kafkaclients.version>3.4.0</kafkaclients.version>
 
     <!-- test dependencies -->
     <wiremock.version>2.27.2</wiremock.version>
@@ -44,6 +45,15 @@
   </properties>
 
   <dependencies>
+    <dependency>
+      <groupId>org.springframework.kafka</groupId>
+      <artifactId>spring-kafka</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.kafka</groupId>
+      <artifactId>kafka-clients</artifactId>
+      <version>${kafkaclients.version}</version>
+    </dependency>
     <dependency>
       <groupId>org.folio</groupId>
       <artifactId>folio-spring-base</artifactId>
@@ -118,6 +128,11 @@
     </dependency>
 
     <!-- Test dependencies -->
+    <dependency>
+      <groupId>org.springframework.kafka</groupId>
+      <artifactId>spring-kafka-test</artifactId>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
