@@ -73,7 +73,7 @@ public class LendingLibraryServiceImpl implements LibraryService {
     log.info("updateTransactionStatus:: Received checkIn event for itemId: {}", checkInItemId);
 
     if (Objects.nonNull(checkInItemId)) {
-      transactionRepository.findByItemId(checkInItemId)
+      transactionRepository.findTransactionByItemId(checkInItemId)
         .ifPresent(transactionEntity -> {
           if (LENDER.equals(transactionEntity.getRole())
             && TransactionStatus.StatusEnum.CREATED.equals(transactionEntity.getStatus())) {

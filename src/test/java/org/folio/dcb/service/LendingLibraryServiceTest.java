@@ -98,7 +98,7 @@ class LendingLibraryServiceTest {
     var transactionEntity = createTransactionEntity();
     transactionEntity.setStatus(TransactionStatus.StatusEnum.CREATED);
     transactionEntity.setRole(DcbTransaction.RoleEnum.LENDER);
-    when(transactionRepository.findByItemId(any())).thenReturn(Optional.of(transactionEntity));
+    when(transactionRepository.findTransactionByItemId(any())).thenReturn(Optional.of(transactionEntity));
 
     lendingLibraryService.updateTransactionStatus(CHECK_IN_EVENT_SAMPLE);
     Mockito.verify(transactionRepository, times(1)).save(transactionEntity);
