@@ -18,6 +18,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.Objects;
 
+import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
+
 @Service("lendingLibraryService")
 @RequiredArgsConstructor
 @Log4j2
@@ -73,7 +75,8 @@ public class LendingLibraryServiceImpl implements LibraryService {
     if (Objects.nonNull(checkInItemId)) {
       transactionRepository.findByItemId(checkInItemId)
         .ifPresent(transactionEntity -> {
-          if (transactionEntity.getStatus().equals(TransactionStatus.StatusEnum.CREATED)) {
+          if (LENDER.equals(transactionEntity.getRole())
+            && TransactionStatus.StatusEnum.CREATED.equals(transactionEntity.getStatus())) {
             transactionEntity.setStatus(TransactionStatus.StatusEnum.OPEN);
             transactionRepository.save(transactionEntity);
           }

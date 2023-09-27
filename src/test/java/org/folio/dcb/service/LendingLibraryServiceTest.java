@@ -1,5 +1,6 @@
 package org.folio.dcb.service;
 
+import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.mapper.TransactionMapper;
@@ -96,6 +97,7 @@ class LendingLibraryServiceTest {
   void updateTransactionTest() {
     var transactionEntity = createTransactionEntity();
     transactionEntity.setStatus(TransactionStatus.StatusEnum.CREATED);
+    transactionEntity.setRole(DcbTransaction.RoleEnum.LENDER);
     when(transactionRepository.findByItemId(any())).thenReturn(Optional.of(transactionEntity));
 
     lendingLibraryService.updateTransactionStatus(CHECK_IN_EVENT_SAMPLE);
@@ -106,6 +108,7 @@ class LendingLibraryServiceTest {
   void updateTransactionTestWithInvalidData() {
     var transactionEntity = createTransactionEntity();
     transactionEntity.setStatus(TransactionStatus.StatusEnum.CREATED);
+    transactionEntity.setRole(DcbTransaction.RoleEnum.LENDER);
     assertDoesNotThrow(() -> lendingLibraryService.updateTransactionStatus(CHECK_IN_EVENT_ERROR_SAMPLE));
   }
 }
