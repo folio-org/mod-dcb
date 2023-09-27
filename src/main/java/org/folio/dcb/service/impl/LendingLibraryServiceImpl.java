@@ -72,7 +72,7 @@ public class LendingLibraryServiceImpl implements LibraryService {
   @Override
   public void updateTransactionStatus(TransactionEntity dcbTransaction, TransactionStatus transactionStatus) {
     log.info("updateTransactionStatus:: updating dcbTransaction {} to status {} ", dcbTransaction, transactionStatus);
-    if (TransactionStatus.StatusEnum.OPEN.equals(dcbTransaction.getStatus())) {
+    if (TransactionStatus.StatusEnum.OPEN.equals(dcbTransaction.getStatus()) && TransactionStatus.StatusEnum.AWAITING_PICKUP.equals(transactionStatus.getStatus())) {
       circulationService.checkInByBarcode(dcbTransaction);
       dcbTransaction.setStatus(transactionStatus.getStatus());
       transactionRepository.save(dcbTransaction);
