@@ -5,7 +5,7 @@ import org.folio.dcb.domain.dto.DcbTransaction;
 import org.springframework.stereotype.Component;
 
 @Component
-public class TransactionEntityMapper {
+public class TransactionMapper {
 
   public TransactionEntity mapToEntity(String transactionId, DcbTransaction dcbTransaction) {
     if(dcbTransaction == null || dcbTransaction.getItem() == null || dcbTransaction.getPatron() == null) {
