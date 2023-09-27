@@ -1,0 +1,15 @@
+CheckInRequest:
+  description: Request to automatic check in an item
+  type: object
+  properties:
+    itemBarcode:
+      description: Barcode of the item to be checked in
+      type: string
+    servicePointId:
+      description: Service point where the item is being processed
+      type: string
+      $ref: "uuid.yaml"
+    checkInDate:
+      description: When the item was checked in
+      type: string
+      format: date-type

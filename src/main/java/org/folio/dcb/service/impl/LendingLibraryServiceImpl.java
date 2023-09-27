@@ -11,6 +11,7 @@ import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.exception.ResourceAlreadyExistException;
 import org.folio.dcb.repository.TransactionRepository;
+import org.folio.dcb.service.CirculationService;
 import org.folio.dcb.service.LibraryService;
 import org.folio.dcb.service.RequestService;
 import org.folio.dcb.service.UserService;
@@ -30,6 +31,7 @@ public class LendingLibraryServiceImpl implements LibraryService {
   private final TransactionRepository transactionRepository;
   private final TransactionMapper transactionMapper;
   private final ObjectMapper objectMapper = new ObjectMapper();
+  private final CirculationService circulationService;
 
   @Override
   public TransactionStatusResponse createTransaction(String dcbTransactionId, DcbTransaction dcbTransaction) {
@@ -65,6 +67,18 @@ public class LendingLibraryServiceImpl implements LibraryService {
     }
     transactionEntity.setStatus(TransactionStatus.StatusEnum.CREATED);
     transactionRepository.save(transactionEntity);
+  }
+
+  @Override
+  public void updateTransactionStatus(TransactionEntity dcbTransaction, TransactionStatus transactionStatus) {
+    log.info("updateTransactionStatus:: updating dcbTransaction {} to status {} ", dcbTransaction, transactionStatus);
+    if (TransactionStatus.StatusEnum.OPEN.equals(dcbTransaction.getStatus()) && TransactionStatus.StatusEnum.AWAITING_PICKUP.equals(transactionStatus.getStatus())) {
+      circulationService.checkInByBarcode(dcbTransaction);
+      dcbTransaction.setStatus(transactionStatus.getStatus());
+      transactionRepository.save(dcbTransaction);
+    } else {
+      throw new IllegalArgumentException("Other statuses are not implemented");
+    }
   }
 
   @Override

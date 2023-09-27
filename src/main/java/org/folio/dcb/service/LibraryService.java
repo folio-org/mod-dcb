@@ -1,7 +1,9 @@
 package org.folio.dcb.service;
 
 import org.folio.dcb.domain.dto.DcbTransaction;
+import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
+import org.folio.dcb.domain.entity.TransactionEntity;
 
 public interface LibraryService {
   /**
@@ -17,4 +19,6 @@ public interface LibraryService {
    * @param checkInEvent - checkIn event object from kafka
    */
   void updateTransactionStatus(String checkInEvent);
+
+  void updateTransactionStatus(TransactionEntity dcbTransaction, TransactionStatus transactionStatus);
 }

@@ -3,16 +3,18 @@ package org.folio.dcb.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dcb.domain.dto.DcbTransaction;
+import org.folio.dcb.domain.dto.Role;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.entity.TransactionEntity;
-import org.folio.dcb.domain.dto.Role;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.LibraryService;
 import org.folio.dcb.service.TransactionsService;
 import org.folio.spring.exception.NotFoundException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +32,26 @@ public class TransactionsServiceImpl implements TransactionsService {
       case LENDER -> lendingLibraryService.createTransaction(dcbTransactionId, dcbTransaction);
       default -> throw new IllegalArgumentException("Other roles are not implemented");
     };
+  }
+
+  @Override
+  public TransactionStatusResponse updateTransactionStatus(String dcbTransactionId, TransactionStatus transactionStatus) {
+    return transactionRepository.findById(dcbTransactionId).map(dcbTransaction -> {
+      if (dcbTransaction.getStatus() == transactionStatus.getStatus()) {
+        throw new IllegalArgumentException(String.format(
+          "Current transaction status equal to new transaction status: dcbTransactionId: %s, status: %s", dcbTransactionId, transactionStatus.getStatus()
+        ));
+      }
+
+      if (Objects.requireNonNull(dcbTransaction.getRole()) == Role.TransactionRoleEnum.LENDER) {
+        lendingLibraryService.updateTransactionStatus(dcbTransaction, transactionStatus);
+      } else {
+        throw new IllegalArgumentException("Other roles are not implemented");
+      }
+      return TransactionStatusResponse.builder()
+        .status(TransactionStatusResponse.StatusEnum.fromValue(transactionStatus.getStatus().getValue()))
+        .build();
+    }).orElseThrow(() -> new IllegalArgumentException(String.format("Transaction with id %s not found", dcbTransactionId)));
   }
 
   public TransactionStatusResponse getTransactionStatusById(String dcbTransactionId) {

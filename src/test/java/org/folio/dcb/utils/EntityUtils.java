@@ -7,6 +7,7 @@ import org.folio.dcb.domain.dto.DcbItem;
 import org.folio.dcb.domain.dto.DcbPatron;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.dto.User;
+import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.domain.dto.InventoryHolding;
 import org.folio.dcb.domain.dto.InventoryItem;
@@ -36,6 +37,10 @@ public class EntityUtils {
       .patron(createDcbPatron())
       .role(createTransactionRole())
       .build();
+  }
+
+  public static TransactionStatus createTransactionStatus(TransactionStatus.StatusEnum statusEnum){
+    return TransactionStatus.builder().status(statusEnum).build();
   }
 
   public static DcbItem createDcbItem() {
@@ -90,10 +95,15 @@ public class EntityUtils {
     return TransactionEntity.builder()
       .id(DCB_TRANSACTION_ID)
       .itemId(ITEM_ID)
+      .itemTitle("ITEM TITLE")
       .itemBarcode("DCB_ITEM")
       .patronId(PATRON_ID)
       .patronBarcode("DCB_PATRON")
       .patronGroup("staff")
+      .pickupLocation("PICKUP LOCATION")
+      .materialType("book")
+      .lendingLibraryCode("LEN")
+      .borrowingLibraryCode("BOR")
       .build();
   }
 
