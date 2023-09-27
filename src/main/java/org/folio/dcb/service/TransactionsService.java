@@ -11,4 +11,6 @@ public interface TransactionsService {
    * @return TransactionStatusResponse
    */
   TransactionStatusResponse createCirculationRequest(String dcbTransactionId, DcbTransaction dcbTransaction);
-}
+  TransactionStatusResponse getTransactionStatusById(String dcbTransactionId);
+
+  }

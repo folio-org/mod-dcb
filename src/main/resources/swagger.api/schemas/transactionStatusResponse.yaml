@@ -1,6 +1,7 @@
 TransactionStatusResponse:
   allOf:
     - $ref: 'transactionStatus.yaml#/TransactionStatus'
+    - $ref: 'role.yaml#/Role'
     - type: object
       properties:
         item:

@@ -16,17 +16,20 @@ public class TransactionMapper {
     var patron = dcbTransaction.getPatron();
     return TransactionEntity.builder()
       .id(transactionId)
+
       .itemId(item.getId())
       .itemBarcode(item.getBarcode())
       .itemTitle(item.getTitle())
       .pickupLocation(item.getPickupLocation())
       .materialType(item.getMaterialType())
       .lendingLibraryCode(item.getLendingLibraryCode())
+
       .patronBarcode(patron.getBarcode())
       .patronId(patron.getId())
       .patronGroup(patron.getGroup())
       .borrowingLibraryCode(patron.getBorrowingLibraryCode())
-      .role(dcbTransaction.getRole())
+
+      .role(dcbTransaction.getRole().getTransactionRole())
       .build();
   }
 
