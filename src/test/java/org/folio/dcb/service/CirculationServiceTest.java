@@ -11,7 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.folio.dcb.utils.EntityUtils.createTransactionEntity;
 
 @ExtendWith(MockitoExtension.class)
-public class CirculationServiceTest {
+class CirculationServiceTest {
 
   @InjectMocks
   private CirculationServiceImpl circulationService;

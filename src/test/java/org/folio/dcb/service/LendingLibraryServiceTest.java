@@ -29,6 +29,7 @@ import static org.folio.dcb.utils.EntityUtils.createDcbTransaction;
 import static org.folio.dcb.utils.EntityUtils.createTransactionEntity;
 import static org.folio.dcb.utils.EntityUtils.createUser;
 import static org.folio.dcb.utils.EntityUtils.getMockDataAsString;
+import static org.folio.dcb.utils.EntityUtils.createTransactionStatus;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -136,7 +137,7 @@ class LendingLibraryServiceTest {
   void updateTransactionWithWrongStatusTest() {
     TransactionEntity dcbTransaction = createTransactionEntity();
     assertThrows(IllegalArgumentException.class, () ->
-      lendingLibraryService.updateTransactionStatus(dcbTransaction, TransactionStatus.builder().status(TransactionStatus.StatusEnum.AWAITING_PICKUP).build())
+      lendingLibraryService.updateTransactionStatus(dcbTransaction, createTransactionStatus(TransactionStatus.StatusEnum.AWAITING_PICKUP))
     );
   }
 }
