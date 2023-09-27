@@ -1,0 +1,10 @@
+TransactionRole:
+  type: object
+  properties:
+    role:
+      type: string
+      enum:
+        - borrower
+        - lender
+        - pickup
+        - borrowing-pickup

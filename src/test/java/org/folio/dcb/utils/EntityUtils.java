@@ -8,6 +8,7 @@ import org.folio.dcb.domain.dto.User;
 import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.domain.dto.InventoryHolding;
 import org.folio.dcb.domain.dto.InventoryItem;
+import org.folio.dcb.domain.dto.TransactionRole;
 import org.folio.dcb.domain.dto.UserGroupCollection;
 import org.folio.dcb.domain.dto.UserGroup;
 import org.folio.dcb.domain.dto.UserCollection;
@@ -25,7 +26,7 @@ public class EntityUtils {
     return DcbTransaction.builder()
       .item(createDcbItem())
       .patron(createDcbPatron())
-      .role(DcbTransaction.RoleEnum.LENDER)
+      .transactionRole(createTransactionRole())
       .build();
   }
 
@@ -46,6 +47,12 @@ public class EntityUtils {
       .barcode("DCB_PATRON")
       .group("staff")
       .borrowingLibraryCode("E")
+      .build();
+  }
+
+  public static TransactionRole createTransactionRole(){
+    return TransactionRole.builder()
+      .role(TransactionRole.RoleEnum.LENDER)
       .build();
   }
 

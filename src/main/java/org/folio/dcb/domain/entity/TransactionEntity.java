@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.folio.dcb.domain.converter.UUIDConverter;
-import org.folio.dcb.domain.dto.DcbTransaction.RoleEnum;
+import org.folio.dcb.domain.dto.TransactionRole.RoleEnum;
 import org.folio.dcb.domain.entity.base.AuditableEntity;
 import org.folio.dcb.domain.dto.TransactionStatus.StatusEnum;
 

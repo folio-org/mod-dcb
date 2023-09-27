@@ -1,9 +1,9 @@
 package org.folio.dcb.service;
 
+import org.folio.dcb.domain.dto.TransactionRole;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.entity.TransactionEntity;
-import org.folio.dcb.domain.mapper.DcbTransactionMapper;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.impl.LendingLibraryServiceImpl;
 import org.folio.dcb.service.impl.TransactionsServiceImpl;
@@ -18,7 +18,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.folio.dcb.service.TransactionsService.DCB_TRANSACTION_WAS_NOT_FOUND_BY_ID;
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
 import static org.folio.dcb.utils.EntityUtils.createDcbTransaction;
 import static org.folio.dcb.utils.EntityUtils.createTransactionResponse;
@@ -38,9 +37,6 @@ class TransactionServiceTest {
   private LendingLibraryServiceImpl lendingLibraryService;
   @Mock
   private TransactionRepository transactionRepository;
-  @Mock
-  private DcbTransactionMapper dcbTransactionMapper;
-
 
   @Test
   void createCirculationRequestTest() {
@@ -54,13 +50,15 @@ class TransactionServiceTest {
   void shouldReturnAnyTransactionStatusById(){
     var transactionIdUnique = UUID.randomUUID().toString();
     when(transactionRepository.findById(transactionIdUnique))
-      .thenReturn(Optional.ofNullable(TransactionEntity.builder().status(TransactionStatus.StatusEnum.CREATED).build()));
-    when(dcbTransactionMapper.mapToDcbTransaction(any(TransactionEntity.class)))
-      .thenReturn(createDcbTransaction());
+      .thenReturn(Optional.ofNullable(TransactionEntity.builder()
+        .status(TransactionStatus.StatusEnum.CREATED)
+        .role(TransactionRole.RoleEnum.LENDER)
+        .build()));
 
     var trnInstance = transactionsService.getTransactionStatusById(transactionIdUnique);
     assertNotNull(trnInstance);
     assertEquals(TransactionStatusResponse.StatusEnum.CREATED, trnInstance.getStatus());
+    assertEquals(TransactionStatusResponse.RoleEnum.LENDER, trnInstance.getRole());
   }
 
   @Test
@@ -73,6 +71,6 @@ class TransactionServiceTest {
       NotFoundException.class, () -> transactionsService.getTransactionStatusById(transactionIdUnique)
     );
 
-    Assertions.assertEquals(DCB_TRANSACTION_WAS_NOT_FOUND_BY_ID + transactionIdUnique, exception.getMessage());
+    Assertions.assertEquals(String.format("DCB Transaction was not found by id= %s ", transactionIdUnique), exception.getMessage());
   }
 }
