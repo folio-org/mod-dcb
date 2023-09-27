@@ -3,11 +3,10 @@ package org.folio.dcb.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dcb.domain.dto.DcbTransaction;
+import org.folio.dcb.domain.dto.Role;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.entity.TransactionEntity;
-import org.folio.dcb.domain.dto.Role;
-import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.LibraryService;
 import org.folio.dcb.service.TransactionsService;
@@ -24,8 +23,6 @@ public class TransactionsServiceImpl implements TransactionsService {
 
   @Qualifier("lendingLibraryService")
   private final LibraryService lendingLibraryService;
-  private final TransactionRepository transactionRepository;
-
   private final TransactionRepository transactionRepository;
 
   @Override
@@ -46,7 +43,7 @@ public class TransactionsServiceImpl implements TransactionsService {
         ));
       }
 
-      if (Objects.requireNonNull(dcbTransaction.getRole()) == DcbTransaction.RoleEnum.LENDER) {
+      if (Objects.requireNonNull(dcbTransaction.getRole()) == Role.TransactionRoleEnum.LENDER) {
         lendingLibraryService.updateTransactionStatus(dcbTransaction, transactionStatus);
       } else {
         throw new IllegalArgumentException("Other roles are not implemented");

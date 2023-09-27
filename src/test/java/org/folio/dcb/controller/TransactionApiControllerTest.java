@@ -1,6 +1,6 @@
 package org.folio.dcb.controller;
 
-import org.folio.dcb.domain.dto.DcbTransaction;
+import org.folio.dcb.domain.dto.Role;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.spring.service.SystemUserScopedExecutionService;
@@ -76,7 +76,7 @@ class TransactionApiControllerTest extends BaseIT {
     var transactionID = UUID.randomUUID().toString();
     var dcbTransaction = createTransactionEntity();
     dcbTransaction.setStatus(TransactionStatus.StatusEnum.OPEN);
-    dcbTransaction.setRole(DcbTransaction.RoleEnum.LENDER);
+    dcbTransaction.setRole(Role.TransactionRoleEnum.LENDER);
     dcbTransaction.setId(transactionID);
 
     systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> transactionRepository.save(dcbTransaction));
