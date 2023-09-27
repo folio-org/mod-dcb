@@ -13,4 +13,5 @@ public interface TransactionsService {
    */
   TransactionStatusResponse createCirculationRequest(String dcbTransactionId, DcbTransaction dcbTransaction);
   TransactionStatusResponse updateTransactionStatus(String dcbTransactionId, TransactionStatus transactionStatus);
-}
+  TransactionStatusResponse getTransactionStatusById(String dcbTransactionId);
+  }

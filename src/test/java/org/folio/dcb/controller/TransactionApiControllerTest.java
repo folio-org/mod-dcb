@@ -17,6 +17,7 @@ import static org.folio.dcb.utils.EntityUtils.createDcbTransaction;
 import static org.folio.dcb.utils.EntityUtils.createTransactionEntity;
 import static org.folio.dcb.utils.EntityUtils.createTransactionStatus;
 import static org.hamcrest.Matchers.is;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -88,6 +89,41 @@ class TransactionApiControllerTest extends BaseIT {
           .accept(MediaType.APPLICATION_JSON))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.status").value("AWAITING_PICKUP"));
+  }
+
+  /**
+   * The test at the post endpoint invocation stage initiates the data generation
+   * then get stage verifies, the data exists.
+   * */
+  @Test
+  void getTransactionStatusSuccessTest() throws Exception {
+    var id = UUID.randomUUID().toString();
+    this.mockMvc.perform(
+        post("/transactions/" + id)
+          .content(asJsonString(createDcbTransaction()))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isCreated())
+      .andExpect(jsonPath("$.status").value("CREATED"))
+      .andExpect(jsonPath("$.item").value(createDcbItem()))
+      .andExpect(jsonPath("$.patron").value(createDcbPatron()));
+
+    mockMvc.perform(
+        get("/transactions/"+id+"/status")
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON))
+      .andExpect(status().isOk());
+  }
+
+  @Test
+  void getTransactionStatusNotFoundTest() throws Exception {
+    var id = UUID.randomUUID().toString();
+    mockMvc.perform(
+        get("/transactions/"+id+"/status")
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON))
+      .andExpect(status().isNotFound());
   }
 
 }
