@@ -56,7 +56,7 @@ public class UserServiceImpl implements UserService {
       .barcode(patron.getBarcode())
       .patronGroup(groupId)
       .id(patron.getId())
-      .type(dcbUserType)
+      .type(DCB)
       .build();
   }
 }
