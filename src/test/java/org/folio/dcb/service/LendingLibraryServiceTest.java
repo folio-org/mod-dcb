@@ -1,6 +1,5 @@
 package org.folio.dcb.service;
 
-import org.folio.dcb.domain.dto.Role;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.entity.TransactionEntity;
@@ -19,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
 import static org.folio.dcb.utils.EntityUtils.createDcbItem;
 import static org.folio.dcb.utils.EntityUtils.createDcbPatron;
@@ -98,7 +98,7 @@ class LendingLibraryServiceTest {
   void updateTransactionTest() {
     var transactionEntity = createTransactionEntity();
     transactionEntity.setStatus(TransactionStatus.StatusEnum.CREATED);
-    transactionEntity.setRole(Role.TransactionRoleEnum.LENDER);
+    transactionEntity.setRole(LENDER);
 
     lendingLibraryService.updateStatusByTransactionEntity(transactionEntity);
     Mockito.verify(transactionRepository, times(1)).save(transactionEntity);
@@ -108,7 +108,7 @@ class LendingLibraryServiceTest {
   void updateTransactionTestWithInvalidData() {
     var transactionEntity = createTransactionEntity();
     transactionEntity.setStatus(TransactionStatus.StatusEnum.CREATED);
-    transactionEntity.setRole(Role.TransactionRoleEnum.LENDER);
+    transactionEntity.setRole(LENDER);
     assertDoesNotThrow(() -> lendingLibraryService.updateStatusByTransactionEntity(transactionEntity));
   }
 

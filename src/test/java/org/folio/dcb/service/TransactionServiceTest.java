@@ -1,6 +1,5 @@
 package org.folio.dcb.service;
 
-import org.folio.dcb.domain.dto.Role;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.entity.TransactionEntity;
@@ -18,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
 import static org.folio.dcb.utils.EntityUtils.createDcbTransaction;
 import static org.folio.dcb.utils.EntityUtils.createTransactionResponse;
@@ -52,13 +52,12 @@ class TransactionServiceTest {
     when(transactionRepository.findById(transactionIdUnique))
       .thenReturn(Optional.ofNullable(TransactionEntity.builder()
         .status(TransactionStatus.StatusEnum.CREATED)
-        .role(Role.TransactionRoleEnum.LENDER)
+        .role(LENDER)
         .build()));
 
     var trnInstance = transactionsService.getTransactionStatusById(transactionIdUnique);
     assertNotNull(trnInstance);
     assertEquals(TransactionStatusResponse.StatusEnum.CREATED, trnInstance.getStatus());
-    assertEquals(TransactionStatusResponse.TransactionRoleEnum.LENDER, trnInstance.getTransactionRole());
   }
 
   @Test
