@@ -1,6 +1,6 @@
 CheckOutRequest:
-  type: object
   description: Request to check out an item to a loanee using barcodes
+  type: object
   properties:
     itemBarcode:
       description: Barcode of the item to be lent to the patron
