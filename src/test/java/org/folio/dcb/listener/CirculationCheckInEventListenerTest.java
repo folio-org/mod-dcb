@@ -1,6 +1,8 @@
 package org.folio.dcb.listener;
 
 import org.folio.dcb.controller.BaseIT;
+import org.folio.dcb.domain.dto.Role;
+import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.LibraryService;
 import org.folio.spring.client.AuthnClient;
 import org.folio.spring.integration.XOkapiHeaders;
@@ -14,10 +16,13 @@ import org.springframework.messaging.MessageHeaders;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
+import static org.folio.dcb.utils.EntityUtils.createTransactionEntity;
 import static org.folio.dcb.utils.EntityUtils.getMockDataAsString;
-import static org.mockito.Mockito.anyString;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 class CirculationCheckInEventListenerTest extends BaseIT {
@@ -30,12 +35,17 @@ class CirculationCheckInEventListenerTest extends BaseIT {
   private CirculationCheckInEventListener eventListener ;
   @Mock
   private AuthnClient authnClient;
+  @MockBean
+  private TransactionRepository transactionRepository;
 
   @Test
-  void shouldExists() {
+  void handleCheckingInTest() {
+    var transactionEntity = createTransactionEntity();
+    transactionEntity.setRole(Role.TransactionRoleEnum.LENDER);
     MessageHeaders messageHeaders = getMessageHeaders();
+    when(transactionRepository.findTransactionByItemId(any())).thenReturn(Optional.of(transactionEntity));
     eventListener.handleCheckingIn(CHECK_IN_EVENT_SAMPLE, messageHeaders);
-    Mockito.verify(libraryService, times(1)).updateTransactionStatus(anyString());
+    Mockito.verify(libraryService, times(1)).updateStatusByTransactionEntity(any());
   }
 
   private MessageHeaders getMessageHeaders() {

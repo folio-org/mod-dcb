@@ -1,7 +1,5 @@
 package org.folio.dcb.service.impl;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dcb.domain.mapper.TransactionMapper;
@@ -19,8 +17,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Objects;
 
-import static org.folio.dcb.domain.dto.Role.TransactionRoleEnum.LENDER;
-
 @Service("lendingLibraryService")
 @RequiredArgsConstructor
 @Log4j2
@@ -30,7 +26,6 @@ public class LendingLibraryServiceImpl implements LibraryService {
   private final RequestService requestService;
   private final TransactionRepository transactionRepository;
   private final TransactionMapper transactionMapper;
-  private final ObjectMapper objectMapper = new ObjectMapper();
   private final CirculationService circulationService;
 
   @Override
@@ -71,46 +66,28 @@ public class LendingLibraryServiceImpl implements LibraryService {
 
   @Override
   public void updateTransactionStatus(TransactionEntity dcbTransaction, TransactionStatus transactionStatus) {
-    log.info("updateTransactionStatus:: updating dcbTransaction {} to status {} ", dcbTransaction, transactionStatus);
+    log.debug("updateTransactionStatus:: Updating dcbTransaction {} to status {} ", dcbTransaction, transactionStatus);
     if (TransactionStatus.StatusEnum.OPEN.equals(dcbTransaction.getStatus()) && TransactionStatus.StatusEnum.AWAITING_PICKUP.equals(transactionStatus.getStatus())) {
+      log.info("updateTransactionStatus:: Checking in item by barcode: {} ", dcbTransaction.getPatronBarcode());
       circulationService.checkInByBarcode(dcbTransaction);
-      dcbTransaction.setStatus(transactionStatus.getStatus());
-      transactionRepository.save(dcbTransaction);
+    } else if (TransactionStatus.StatusEnum.AWAITING_PICKUP.equals(dcbTransaction.getStatus()) && TransactionStatus.StatusEnum.ITEM_CHECKED_OUT.equals(transactionStatus.getStatus())) {
+      log.info("updateTransactionStatus:: Checking out item by barcode: {} ", dcbTransaction.getPatronBarcode());
+      circulationService.checkOutByBarcode(dcbTransaction);
     } else {
-      throw new IllegalArgumentException("Other statuses are not implemented");
+      throw new IllegalArgumentException("Other statuses are not implemented yet");
     }
+
+    dcbTransaction.setStatus(transactionStatus.getStatus());
+    transactionRepository.save(dcbTransaction);
   }
 
   @Override
-  public void updateTransactionStatus(String checkInEvent) {
-    var checkInItemId = parseCheckInEvent(checkInEvent);
-    log.info("updateTransactionStatus:: Received checkIn event for itemId: {}", checkInItemId);
-
-    if (Objects.nonNull(checkInItemId)) {
-      transactionRepository.findTransactionByItemId(checkInItemId)
-        .ifPresent(transactionEntity -> {
-          if (LENDER.equals(transactionEntity.getRole())
-            && TransactionStatus.StatusEnum.CREATED.equals(transactionEntity.getStatus())) {
-            transactionEntity.setStatus(TransactionStatus.StatusEnum.OPEN);
-            transactionRepository.save(transactionEntity);
-          }
-        });
+  public void updateStatusByTransactionEntity(TransactionEntity transactionEntity) {
+    log.debug("updateTransactionStatus:: Received checkIn event for itemId: {}", transactionEntity.getItemId());
+    if (TransactionStatus.StatusEnum.CREATED.equals(transactionEntity.getStatus())) {
+      transactionEntity.setStatus(TransactionStatus.StatusEnum.OPEN);
+      transactionRepository.save(transactionEntity);
+      log.info("updateTransactionStatus:: Transaction status updated from CREATED to OPEN for itemId: {}", transactionEntity.getItemId());
     }
-  }
-
-  private String parseCheckInEvent(String eventPayload) {
-    try {
-      JsonNode jsonNode = objectMapper.readTree(eventPayload);
-      JsonNode dataNode = jsonNode.get("data");
-      JsonNode newDataNode = (dataNode != null) ? dataNode.get("new") : null;
-
-      if (newDataNode != null && newDataNode.has("itemId")) {
-        return newDataNode.get("itemId").asText();
-      }
-    } catch (Exception e) {
-      log.error("Could not parse input payload for processing checkIn event", e);
-    }
-
-    return null;
   }
 }

@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.Objects;
 
+import static org.folio.dcb.domain.dto.Role.TransactionRoleEnum.LENDER;
+
 @Service
 @RequiredArgsConstructor
 @Log4j2
@@ -37,17 +39,18 @@ public class TransactionsServiceImpl implements TransactionsService {
   @Override
   public TransactionStatusResponse updateTransactionStatus(String dcbTransactionId, TransactionStatus transactionStatus) {
     return transactionRepository.findById(dcbTransactionId).map(dcbTransaction -> {
-      if (dcbTransaction.getStatus() == transactionStatus.getStatus()) {
+      if (dcbTransaction.getStatus().equals(transactionStatus.getStatus())) {
         throw new IllegalArgumentException(String.format(
           "Current transaction status equal to new transaction status: dcbTransactionId: %s, status: %s", dcbTransactionId, transactionStatus.getStatus()
         ));
       }
 
-      if (Objects.requireNonNull(dcbTransaction.getRole()) == Role.TransactionRoleEnum.LENDER) {
+      if (Objects.requireNonNull(dcbTransaction.getRole()).equals(LENDER)) {
         lendingLibraryService.updateTransactionStatus(dcbTransaction, transactionStatus);
       } else {
         throw new IllegalArgumentException("Other roles are not implemented");
       }
+
       return TransactionStatusResponse.builder()
         .status(TransactionStatusResponse.StatusEnum.fromValue(transactionStatus.getStatus().getValue()))
         .build();

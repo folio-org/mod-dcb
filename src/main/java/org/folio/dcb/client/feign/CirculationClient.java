@@ -1,6 +1,7 @@
 package org.folio.dcb.client.feign;
 
 import org.folio.dcb.domain.dto.CheckInRequest;
+import org.folio.dcb.domain.dto.CheckOutRequest;
 import org.folio.dcb.domain.dto.CirculationRequest;
 import org.folio.spring.config.FeignClientConfiguration;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -18,4 +19,7 @@ public interface CirculationClient {
   @ResponseStatus(HttpStatus.OK)
   void checkInByBarcode(@RequestBody CheckInRequest checkInRequest);
 
+  @PostMapping("/check-out-by-barcode")
+  @ResponseStatus(HttpStatus.OK)
+  void checkOutByBarcode(@RequestBody CheckOutRequest checkOutRequest);
 }
