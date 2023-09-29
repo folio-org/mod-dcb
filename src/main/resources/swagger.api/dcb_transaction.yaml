@@ -140,4 +140,6 @@ components:
       $ref: 'schemas/CirculationRequest.yaml#/CirculationRequest'
     CheckInRequest:
       $ref: 'schemas/CheckInRequest.yaml#/CheckInRequest'
+    CheckOutRequest:
+      $ref: 'schemas/checkOutRequest.yaml#/CheckOutRequest'
 

@@ -1,6 +1,5 @@
 package org.folio.dcb.service;
 
-import org.folio.dcb.domain.dto.Role;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.entity.TransactionEntity;
@@ -19,15 +18,13 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Optional;
-
+import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
 import static org.folio.dcb.utils.EntityUtils.createDcbItem;
 import static org.folio.dcb.utils.EntityUtils.createDcbPatron;
 import static org.folio.dcb.utils.EntityUtils.createDcbTransaction;
 import static org.folio.dcb.utils.EntityUtils.createTransactionEntity;
 import static org.folio.dcb.utils.EntityUtils.createUser;
-import static org.folio.dcb.utils.EntityUtils.getMockDataAsString;
 import static org.folio.dcb.utils.EntityUtils.createTransactionStatus;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -39,8 +36,6 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class LendingLibraryServiceTest {
-  private static final String CHECK_IN_EVENT_SAMPLE = getMockDataAsString("mockdata/kafka/check_in.json");
-  private static final String CHECK_IN_EVENT_ERROR_SAMPLE = getMockDataAsString("mockdata/kafka/check_in_error.json");
 
   @InjectMocks
   private LendingLibraryServiceImpl lendingLibraryService;
@@ -100,26 +95,36 @@ class LendingLibraryServiceTest {
   }
 
   @Test
-  void updateTransactionTest() {
+  void updateTransactionTestFromCreatedToOpen() {
     var transactionEntity = createTransactionEntity();
     transactionEntity.setStatus(TransactionStatus.StatusEnum.CREATED);
-    transactionEntity.setRole(Role.TransactionRoleEnum.LENDER);
-    when(transactionRepository.findTransactionByItemId(any())).thenReturn(Optional.of(transactionEntity));
+    transactionEntity.setRole(LENDER);
 
-    lendingLibraryService.updateTransactionStatus(CHECK_IN_EVENT_SAMPLE);
+    lendingLibraryService.updateStatusByTransactionEntity(transactionEntity);
     Mockito.verify(transactionRepository, times(1)).save(transactionEntity);
+  }
+
+  @Test
+  void updateTransactionTestFromCheckInToClose() {
+    var transactionEntity = createTransactionEntity();
+    transactionEntity.setStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_IN);
+    transactionEntity.setRole(LENDER);
+
+    lendingLibraryService.updateStatusByTransactionEntity(transactionEntity);
+    Mockito.verify(transactionRepository, times(1)).save(transactionEntity);
+    Mockito.verify(circulationService, times(1)).checkInByBarcode(transactionEntity);
   }
 
   @Test
   void updateTransactionTestWithInvalidData() {
     var transactionEntity = createTransactionEntity();
     transactionEntity.setStatus(TransactionStatus.StatusEnum.CREATED);
-    transactionEntity.setRole(Role.TransactionRoleEnum.LENDER);
-    assertDoesNotThrow(() -> lendingLibraryService.updateTransactionStatus(CHECK_IN_EVENT_ERROR_SAMPLE));
+    transactionEntity.setRole(LENDER);
+    assertDoesNotThrow(() -> lendingLibraryService.updateStatusByTransactionEntity(transactionEntity));
   }
 
   @Test
-  void updateTransactionStatusTest() {
+  void transactionStatusFromOpenToAwaitingTest() {
     TransactionEntity dcbTransaction = createTransactionEntity();
     dcbTransaction.setStatus(TransactionStatus.StatusEnum.OPEN);
     doNothing().when(circulationService).checkInByBarcode(dcbTransaction);
@@ -133,10 +138,26 @@ class LendingLibraryServiceTest {
   }
 
   @Test
+  void transactionStatusFromAwaitingToCheckoutTest() {
+    TransactionEntity dcbTransaction = createTransactionEntity();
+    dcbTransaction.setStatus(TransactionStatus.StatusEnum.AWAITING_PICKUP);
+    doNothing().when(circulationService).checkOutByBarcode(dcbTransaction);
+    when(transactionRepository.save(dcbTransaction)).thenReturn(dcbTransaction);
+    lendingLibraryService.updateTransactionStatus(dcbTransaction, TransactionStatus.builder().status(TransactionStatus.StatusEnum.ITEM_CHECKED_OUT).build());
+
+    verify(circulationService).checkOutByBarcode(dcbTransaction);
+    verify(transactionRepository).save(dcbTransaction);
+
+    Assertions.assertEquals(TransactionStatus.StatusEnum.ITEM_CHECKED_OUT, dcbTransaction.getStatus());
+  }
+
+  @Test
   void updateTransactionWithWrongStatusTest() {
+    TransactionEntity transactionEntity = createTransactionEntity();
+    TransactionStatus transactionStatus = createTransactionStatus(TransactionStatus.StatusEnum.AWAITING_PICKUP);
     assertThrows(IllegalArgumentException.class, () -> {
-      TransactionEntity dcbTransaction = createTransactionEntity();
-      lendingLibraryService.updateTransactionStatus(dcbTransaction, createTransactionStatus(TransactionStatus.StatusEnum.AWAITING_PICKUP));
+      TransactionEntity dcbTransaction = transactionEntity;
+      lendingLibraryService.updateTransactionStatus(dcbTransaction, transactionStatus);
     });
   }
 }

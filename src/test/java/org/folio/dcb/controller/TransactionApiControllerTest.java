@@ -1,6 +1,5 @@
 package org.folio.dcb.controller;
 
-import org.folio.dcb.domain.dto.Role;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.spring.service.SystemUserScopedExecutionService;
@@ -10,6 +9,7 @@ import org.springframework.http.MediaType;
 
 import java.util.UUID;
 
+import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
 import static org.folio.dcb.utils.EntityUtils.createDcbItem;
 import static org.folio.dcb.utils.EntityUtils.createDcbPatron;
@@ -70,13 +70,16 @@ class TransactionApiControllerTest extends BaseIT {
         jsonPath("$.errors[0].code", is("NOT_FOUND_ERROR")));
   }
 
+  /**
+   * The test at the put endpoint invocation stage initiates stage verification from OPEN to AWAITING_PICKUP
+   * */
   @Test
-  void updateLendingDcbTransactionStatusUpdateTest() throws Exception {
+  void transactionStatusUpdateFromOpenToAwaitingTest() throws Exception {
 
     var transactionID = UUID.randomUUID().toString();
     var dcbTransaction = createTransactionEntity();
     dcbTransaction.setStatus(TransactionStatus.StatusEnum.OPEN);
-    dcbTransaction.setRole(Role.TransactionRoleEnum.LENDER);
+    dcbTransaction.setRole(LENDER);
     dcbTransaction.setId(transactionID);
 
     systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> transactionRepository.save(dcbTransaction));
@@ -89,6 +92,30 @@ class TransactionApiControllerTest extends BaseIT {
           .accept(MediaType.APPLICATION_JSON))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.status").value("AWAITING_PICKUP"));
+  }
+
+  /**
+   * The test at the put endpoint invocation stage initiates stage verification from AWAITING_PICKUP to CHECKED_OUT
+   * */
+  @Test
+  void transactionStatusUpdateFromAwaitingToCheckedOutTest() throws Exception {
+
+    var transactionID = UUID.randomUUID().toString();
+    var dcbTransaction = createTransactionEntity();
+    dcbTransaction.setStatus(TransactionStatus.StatusEnum.AWAITING_PICKUP);
+    dcbTransaction.setRole(LENDER);
+    dcbTransaction.setId(transactionID);
+
+    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> transactionRepository.save(dcbTransaction));
+
+    this.mockMvc.perform(
+        put("/transactions/" + transactionID + "/status")
+          .content(asJsonString(createTransactionStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_OUT)))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.status").value("ITEM_CHECKED_OUT"));
   }
 
   /**

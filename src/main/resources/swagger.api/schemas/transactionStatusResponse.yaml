@@ -1,10 +1,4 @@
 TransactionStatusResponse:
   allOf:
     - $ref: 'transactionStatus.yaml#/TransactionStatus'
-    - $ref: 'role.yaml#/Role'
-    - type: object
-      properties:
-        item:
-          $ref: 'dcbItem.yaml#/DcbItem'
-        patron:
-          $ref: 'dcbPatron.yaml#/DcbPatron'
+    - $ref: 'dcbTransaction.yaml#/DcbTransaction'

@@ -3,7 +3,6 @@ package org.folio.dcb.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dcb.domain.dto.DcbTransaction;
-import org.folio.dcb.domain.dto.Role;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.entity.TransactionEntity;
@@ -28,7 +27,7 @@ public class TransactionsServiceImpl implements TransactionsService {
   @Override
   public TransactionStatusResponse createCirculationRequest(String dcbTransactionId, DcbTransaction dcbTransaction) {
     log.debug("createCirculationRequest:: creating new transaction request for role {} ", dcbTransaction.getRole());
-    return switch (dcbTransaction.getRole().getTransactionRole()) {
+    return switch (dcbTransaction.getRole()) {
       case LENDER -> lendingLibraryService.createTransaction(dcbTransactionId, dcbTransaction);
       default -> throw new IllegalArgumentException("Other roles are not implemented");
     };
@@ -43,11 +42,12 @@ public class TransactionsServiceImpl implements TransactionsService {
         ));
       }
 
-      if (Objects.requireNonNull(dcbTransaction.getRole()) == Role.TransactionRoleEnum.LENDER) {
+      if (Objects.requireNonNull(dcbTransaction.getRole()) == DcbTransaction.RoleEnum.LENDER) {
         lendingLibraryService.updateTransactionStatus(dcbTransaction, transactionStatus);
       } else {
         throw new IllegalArgumentException("Other roles are not implemented");
       }
+
       return TransactionStatusResponse.builder()
         .status(TransactionStatusResponse.StatusEnum.fromValue(transactionStatus.getStatus().getValue()))
         .build();
@@ -63,13 +63,12 @@ public class TransactionsServiceImpl implements TransactionsService {
 
   private TransactionStatusResponse generateTransactionStatusResponseFromTransactionEntity(TransactionEntity transactionEntity) {
     TransactionStatus.StatusEnum transactionStatus = transactionEntity.getStatus();
-    Role.TransactionRoleEnum transactionRole = transactionEntity.getRole();
     TransactionStatusResponse.StatusEnum transactionStatusResponseStatusEnum = TransactionStatusResponse.StatusEnum.fromValue(transactionStatus.getValue());
-    TransactionStatusResponse.TransactionRoleEnum transactionStatusResponseRoleEnum = TransactionStatusResponse.TransactionRoleEnum.fromValue(transactionRole.getValue());
+    DcbTransaction.RoleEnum transactionRole = transactionEntity.getRole();
 
     return TransactionStatusResponse.builder()
       .status(transactionStatusResponseStatusEnum)
-      .transactionRole(transactionStatusResponseRoleEnum)
+      .role((TransactionStatusResponse.RoleEnum.fromValue(transactionRole.getValue())))
       .build();
   }
 

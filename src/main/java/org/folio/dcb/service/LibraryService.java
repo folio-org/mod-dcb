@@ -15,10 +15,10 @@ public interface LibraryService {
   TransactionStatusResponse createTransaction(String dcbTransactionId, DcbTransaction dcbTransaction);
 
   /**
-   * Update transaction status
-   * @param checkInEvent - checkIn event object from kafka
+   * Update transaction status based on transactionEntity
+   * @param transactionEntity - transactionEntity entity
    */
-  void updateTransactionStatus(String checkInEvent);
+  void updateStatusByTransactionEntity(TransactionEntity transactionEntity);
 
   void updateTransactionStatus(TransactionEntity dcbTransaction, TransactionStatus transactionStatus);
 }

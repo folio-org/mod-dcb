@@ -1,0 +1,14 @@
+CheckOutRequest:
+  description: Request to check out an item to a loanee using barcodes
+  type: object
+  properties:
+    itemBarcode:
+      description: Barcode of the item to be lent to the patron
+      type: string
+    userBarcode:
+      description: Barcode of the user (representing the patron) the item is to be lent to
+      type: string
+    servicePointId:
+      description: Service point where the item has been checked out
+      type: string
+      $ref: "uuid.yaml"

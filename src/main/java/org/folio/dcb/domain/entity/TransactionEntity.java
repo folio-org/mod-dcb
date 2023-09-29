@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.folio.dcb.domain.converter.UUIDConverter;
-import org.folio.dcb.domain.dto.Role.TransactionRoleEnum;
+import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.entity.base.AuditableEntity;
 import org.folio.dcb.domain.dto.TransactionStatus.StatusEnum;
 
@@ -43,6 +43,6 @@ public class TransactionEntity extends AuditableEntity {
   @Enumerated(EnumType.STRING)
   private StatusEnum status;
   @Enumerated(EnumType.STRING)
-  private TransactionRoleEnum role;
+  private DcbTransaction.RoleEnum role;
 
 }
