@@ -19,6 +19,8 @@ public class UserServiceImpl implements UserService {
   private final PatronGroupService patronGroupService;
   private final UsersClient usersClient;
 
+  private static final String DCB = "dcb";
+
   public User fetchOrCreateUser(DcbPatron patronDetails) {
     log.debug("createOrFetchUser:: Trying to create or find user for userId {}, userBarcode {}",
       patronDetails.getId(), patronDetails.getBarcode());
@@ -54,6 +56,7 @@ public class UserServiceImpl implements UserService {
       .barcode(patron.getBarcode())
       .patronGroup(groupId)
       .id(patron.getId())
+      .type(DCB)
       .build();
   }
 }
