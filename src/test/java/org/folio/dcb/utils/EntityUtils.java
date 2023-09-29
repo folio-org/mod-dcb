@@ -29,7 +29,7 @@ public class EntityUtils {
   public static String ITEM_ID = "5b95877d-86c0-4cb7-a0cd-7660b348ae5a";
   public static String PATRON_ID = "571b0a2c-9456-40b5-a449-d41fe6017082";
   public static String DCB_TRANSACTION_ID = "571b0a2c-8883-40b5-a449-d41fe6017082";
-
+  public static String DCB_USER_TYPE = "dcb";
   public static DcbTransaction createDcbTransaction() {
     return DcbTransaction.builder()
       .item(createDcbItem())
@@ -75,6 +75,7 @@ public class EntityUtils {
       .active(true)
       .patronGroup("staff")
       .id(PATRON_ID)
+      .type(DCB_USER_TYPE)
       .build();
   }
 
