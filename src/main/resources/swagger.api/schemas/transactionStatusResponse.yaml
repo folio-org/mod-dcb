@@ -1,4 +1,4 @@
 TransactionStatusResponse:
   allOf:
     - $ref: 'transactionStatus.yaml#/TransactionStatus'
-    - $ref: 'dcbTransaction.yaml'
+    - $ref: 'dcbTransaction.yaml#/DcbTransaction'

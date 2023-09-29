@@ -67,10 +67,10 @@ public class LendingLibraryServiceImpl implements LibraryService {
   @Override
   public void updateTransactionStatus(TransactionEntity dcbTransaction, TransactionStatus transactionStatus) {
     log.debug("updateTransactionStatus:: Updating dcbTransaction {} to status {} ", dcbTransaction, transactionStatus);
-    if (TransactionStatus.StatusEnum.OPEN.equals(dcbTransaction.getStatus()) && TransactionStatus.StatusEnum.AWAITING_PICKUP.equals(transactionStatus.getStatus())) {
+    if (TransactionStatus.StatusEnum.OPEN == (dcbTransaction.getStatus()) && TransactionStatus.StatusEnum.AWAITING_PICKUP == (transactionStatus.getStatus())) {
       log.info("updateTransactionStatus:: Checking in item by barcode: {} ", dcbTransaction.getPatronBarcode());
       circulationService.checkInByBarcode(dcbTransaction);
-    } else if (TransactionStatus.StatusEnum.AWAITING_PICKUP.equals(dcbTransaction.getStatus()) && TransactionStatus.StatusEnum.ITEM_CHECKED_OUT.equals(transactionStatus.getStatus())) {
+    } else if (TransactionStatus.StatusEnum.AWAITING_PICKUP == (dcbTransaction.getStatus()) && TransactionStatus.StatusEnum.ITEM_CHECKED_OUT == (transactionStatus.getStatus())) {
       log.info("updateTransactionStatus:: Checking out item by barcode: {} ", dcbTransaction.getPatronBarcode());
       circulationService.checkOutByBarcode(dcbTransaction);
     } else {
@@ -84,7 +84,7 @@ public class LendingLibraryServiceImpl implements LibraryService {
   @Override
   public void updateStatusByTransactionEntity(TransactionEntity transactionEntity) {
     log.debug("updateTransactionStatus:: Received checkIn event for itemId: {}", transactionEntity.getItemId());
-    if (TransactionStatus.StatusEnum.CREATED.equals(transactionEntity.getStatus())) {
+    if (TransactionStatus.StatusEnum.CREATED == (transactionEntity.getStatus())) {
       transactionEntity.setStatus(TransactionStatus.StatusEnum.OPEN);
       transactionRepository.save(transactionEntity);
       log.info("updateTransactionStatus:: Transaction status updated from CREATED to OPEN for itemId: {}", transactionEntity.getItemId());

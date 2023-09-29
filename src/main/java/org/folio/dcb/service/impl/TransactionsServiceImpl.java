@@ -36,13 +36,13 @@ public class TransactionsServiceImpl implements TransactionsService {
   @Override
   public TransactionStatusResponse updateTransactionStatus(String dcbTransactionId, TransactionStatus transactionStatus) {
     return transactionRepository.findById(dcbTransactionId).map(dcbTransaction -> {
-      if (dcbTransaction.getStatus().equals(transactionStatus.getStatus())) {
+      if (dcbTransaction.getStatus() == transactionStatus.getStatus()) {
         throw new IllegalArgumentException(String.format(
           "Current transaction status equal to new transaction status: dcbTransactionId: %s, status: %s", dcbTransactionId, transactionStatus.getStatus()
         ));
       }
 
-      if (Objects.requireNonNull(dcbTransaction.getRole()).equals(DcbTransaction.RoleEnum.LENDER)) {
+      if (Objects.requireNonNull(dcbTransaction.getRole()) == DcbTransaction.RoleEnum.LENDER) {
         lendingLibraryService.updateTransactionStatus(dcbTransaction, transactionStatus);
       } else {
         throw new IllegalArgumentException("Other roles are not implemented");
@@ -64,9 +64,11 @@ public class TransactionsServiceImpl implements TransactionsService {
   private TransactionStatusResponse generateTransactionStatusResponseFromTransactionEntity(TransactionEntity transactionEntity) {
     TransactionStatus.StatusEnum transactionStatus = transactionEntity.getStatus();
     TransactionStatusResponse.StatusEnum transactionStatusResponseStatusEnum = TransactionStatusResponse.StatusEnum.fromValue(transactionStatus.getValue());
+    DcbTransaction.RoleEnum transactionRole = transactionEntity.getRole();
 
     return TransactionStatusResponse.builder()
       .status(transactionStatusResponseStatusEnum)
+      .role((TransactionStatusResponse.RoleEnum.fromValue(transactionRole.getValue())))
       .build();
   }
 

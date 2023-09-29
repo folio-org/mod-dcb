@@ -3,7 +3,7 @@ package org.folio.dcb.listener;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dcb.repository.TransactionRepository;
-import org.folio.dcb.service.LibraryService;
+import org.folio.dcb.service.impl.LendingLibraryServiceImpl;
 import org.folio.spring.integration.XOkapiHeaders;
 import org.folio.spring.service.SystemUserScopedExecutionService;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -19,11 +19,11 @@ import static org.folio.dcb.utils.TransactionHelper.parseCheckInEvent;
 @Component
 @RequiredArgsConstructor
 public class CirculationCheckInEventListener {
-  private final LibraryService libraryService;
+  public static final String CHECK_IN_LISTENER_ID = "check-in-listener-id";
+
+  private final LendingLibraryServiceImpl lendingLibraryService;
   private final TransactionRepository transactionRepository;
   private final SystemUserScopedExecutionService systemUserScopedExecutionService;
-
-  public static final String CHECK_IN_LISTENER_ID = "check-in-listener-id";
 
   @KafkaListener(
     id = CHECK_IN_LISTENER_ID,
@@ -38,7 +38,7 @@ public class CirculationCheckInEventListener {
         transactionRepository.findTransactionByItemId(checkInItemId)
           .ifPresent(transactionEntity -> {
             switch (transactionEntity.getRole()) {
-              case LENDER ->  libraryService.updateStatusByTransactionEntity(transactionEntity);
+              case LENDER ->  lendingLibraryService.updateStatusByTransactionEntity(transactionEntity);
               default -> throw new IllegalArgumentException("Other roles are not implemented yet");
             }
           })
