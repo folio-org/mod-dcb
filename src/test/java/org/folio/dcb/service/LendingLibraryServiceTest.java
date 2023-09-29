@@ -95,13 +95,24 @@ class LendingLibraryServiceTest {
   }
 
   @Test
-  void updateTransactionTest() {
+  void updateTransactionTestFromCreatedToOpen() {
     var transactionEntity = createTransactionEntity();
     transactionEntity.setStatus(TransactionStatus.StatusEnum.CREATED);
     transactionEntity.setRole(LENDER);
 
     lendingLibraryService.updateStatusByTransactionEntity(transactionEntity);
     Mockito.verify(transactionRepository, times(1)).save(transactionEntity);
+  }
+
+  @Test
+  void updateTransactionTestFromCheckInToClose() {
+    var transactionEntity = createTransactionEntity();
+    transactionEntity.setStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_IN);
+    transactionEntity.setRole(LENDER);
+
+    lendingLibraryService.updateStatusByTransactionEntity(transactionEntity);
+    Mockito.verify(transactionRepository, times(1)).save(transactionEntity);
+    Mockito.verify(circulationService, times(1)).checkInByBarcode(transactionEntity);
   }
 
   @Test

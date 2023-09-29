@@ -86,8 +86,11 @@ public class LendingLibraryServiceImpl implements LibraryService {
     log.debug("updateTransactionStatus:: Received checkIn event for itemId: {}", transactionEntity.getItemId());
     if (TransactionStatus.StatusEnum.CREATED == (transactionEntity.getStatus())) {
       transactionEntity.setStatus(TransactionStatus.StatusEnum.OPEN);
-      transactionRepository.save(transactionEntity);
       log.info("updateTransactionStatus:: Transaction status updated from CREATED to OPEN for itemId: {}", transactionEntity.getItemId());
+    } else if (TransactionStatus.StatusEnum.ITEM_CHECKED_IN == (transactionEntity.getStatus())) {
+      circulationService.checkInByBarcode(transactionEntity);
+      transactionEntity.setStatus(TransactionStatus.StatusEnum.CLOSED);
     }
+    transactionRepository.save(transactionEntity);
   }
 }
