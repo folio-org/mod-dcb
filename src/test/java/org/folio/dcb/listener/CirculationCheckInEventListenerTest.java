@@ -2,7 +2,7 @@ package org.folio.dcb.listener;
 
 import org.folio.dcb.controller.BaseIT;
 import org.folio.dcb.repository.TransactionRepository;
-import org.folio.dcb.service.LibraryService;
+import org.folio.dcb.service.impl.LendingLibraryServiceImpl;
 import org.folio.spring.client.AuthnClient;
 import org.folio.spring.integration.XOkapiHeaders;
 import org.junit.jupiter.api.Test;
@@ -31,7 +31,7 @@ class CirculationCheckInEventListenerTest extends BaseIT {
   private static final String CHECK_IN_EVENT_SAMPLE = getMockDataAsString("mockdata/kafka/check_in.json");
 
   @MockBean
-  private LibraryService libraryService;
+  private LendingLibraryServiceImpl libraryService;
   @Autowired
   private CirculationCheckInEventListener eventListener ;
   @Mock
