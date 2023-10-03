@@ -21,7 +21,7 @@ User:
       description: A UUID corresponding to the group the user belongs to
       type: string
     personal:
-      "$ref": "user.yaml#/Personal"
+      "$ref": "User.yaml#/Personal"
 Personal:
   type: object
   properties:
