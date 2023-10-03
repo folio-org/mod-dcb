@@ -20,8 +20,8 @@ User:
     patronGroup:
       description: A UUID corresponding to the group the user belongs to
       type: string
-#    personal:
-#      "$ref": "user.yaml#/Personal"
+    personal:
+      "$ref": "user.yaml#/Personal"
 Personal:
   type: object
   properties:

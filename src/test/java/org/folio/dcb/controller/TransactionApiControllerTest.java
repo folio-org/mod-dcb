@@ -119,6 +119,31 @@ class TransactionApiControllerTest extends BaseIT {
   }
 
   /**
+   * The test at the put endpoint invocation stage initiates stage verification from CHECKED_OUT to CHECKED_IN
+   * */
+  @Test
+  void transactionStatusUpdateFromCheckOutToCheckInTest() throws Exception {
+
+    var transactionID = UUID.randomUUID().toString();
+    var dcbTransaction = createTransactionEntity();
+    dcbTransaction.setStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_OUT);
+    dcbTransaction.setRole(LENDER);
+    dcbTransaction.setId(transactionID);
+
+    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> transactionRepository.save(dcbTransaction));
+
+    this.mockMvc.perform(
+        put("/transactions/" + transactionID + "/status")
+          .content(asJsonString(createTransactionStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_IN)))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.status").value("ITEM_CHECKED_IN"));
+  }
+
+
+  /**
    * The test at the post endpoint invocation stage initiates the data generation
    * then get stage verifies, the data exists.
    * */

@@ -17,6 +17,13 @@ import org.springframework.stereotype.Service;
 
 import java.util.Objects;
 
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.AWAITING_PICKUP;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CLOSED;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_IN;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_OUT;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
+
 @Service("lendingLibraryService")
 @RequiredArgsConstructor
 @Log4j2
@@ -60,37 +67,48 @@ public class LendingLibraryServiceImpl implements LibraryService {
     if (Objects.isNull(transactionEntity)) {
       throw new IllegalArgumentException("Transaction Entity is null");
     }
-    transactionEntity.setStatus(TransactionStatus.StatusEnum.CREATED);
+    transactionEntity.setStatus(CREATED);
     transactionRepository.save(transactionEntity);
   }
 
   @Override
   public void updateTransactionStatus(TransactionEntity dcbTransaction, TransactionStatus transactionStatus) {
     log.debug("updateTransactionStatus:: Updating dcbTransaction {} to status {} ", dcbTransaction, transactionStatus);
-    if (TransactionStatus.StatusEnum.OPEN == (dcbTransaction.getStatus()) && TransactionStatus.StatusEnum.AWAITING_PICKUP == (transactionStatus.getStatus())) {
+    var currentStatus = dcbTransaction.getStatus();
+    var requestedStatus = transactionStatus.getStatus();
+    if (OPEN == currentStatus && AWAITING_PICKUP == requestedStatus) {
       log.info("updateTransactionStatus:: Checking in item by barcode: {} ", dcbTransaction.getPatronBarcode());
       circulationService.checkInByBarcode(dcbTransaction);
-    } else if (TransactionStatus.StatusEnum.AWAITING_PICKUP == (dcbTransaction.getStatus()) && TransactionStatus.StatusEnum.ITEM_CHECKED_OUT == (transactionStatus.getStatus())) {
+      updateTransactionEntity(dcbTransaction, requestedStatus);
+    } else if (AWAITING_PICKUP == currentStatus && ITEM_CHECKED_OUT == requestedStatus) {
       log.info("updateTransactionStatus:: Checking out item by barcode: {} ", dcbTransaction.getPatronBarcode());
       circulationService.checkOutByBarcode(dcbTransaction);
+      updateTransactionEntity(dcbTransaction, requestedStatus);
+    } else if (ITEM_CHECKED_OUT == currentStatus && ITEM_CHECKED_IN == requestedStatus) {
+      updateTransactionEntity(dcbTransaction, requestedStatus);
     } else {
-      throw new IllegalArgumentException("Other statuses are not implemented yet");
+      String errorMessage = String.format("updateTransactionStatus:: status update from %s to %s is not implemented",
+        currentStatus, requestedStatus);
+      log.warn(errorMessage);
+      throw new IllegalArgumentException(errorMessage);
     }
-
-    dcbTransaction.setStatus(transactionStatus.getStatus());
-    transactionRepository.save(dcbTransaction);
   }
 
   @Override
   public void updateStatusByTransactionEntity(TransactionEntity transactionEntity) {
     log.debug("updateTransactionStatus:: Received checkIn event for itemId: {}", transactionEntity.getItemId());
-    if (TransactionStatus.StatusEnum.CREATED == (transactionEntity.getStatus())) {
-      transactionEntity.setStatus(TransactionStatus.StatusEnum.OPEN);
+    if (CREATED == transactionEntity.getStatus()) {
       log.info("updateTransactionStatus:: Transaction status updated from CREATED to OPEN for itemId: {}", transactionEntity.getItemId());
-    } else if (TransactionStatus.StatusEnum.ITEM_CHECKED_IN == (transactionEntity.getStatus())) {
-      circulationService.checkInByBarcode(transactionEntity);
-      transactionEntity.setStatus(TransactionStatus.StatusEnum.CLOSED);
+      updateTransactionEntity(transactionEntity, OPEN);
+    } else if (ITEM_CHECKED_IN == transactionEntity.getStatus()) {
+      log.info("updateTransactionStatus:: Transaction status updated from CHECKED_IN to CLOSED for itemId: {}", transactionEntity.getItemId());
+      updateTransactionEntity(transactionEntity, CLOSED);
     }
+  }
+
+  private void updateTransactionEntity(TransactionEntity transactionEntity, TransactionStatus.StatusEnum transactionStatusEnum) {
+    log.info("updateTransactionEntity:: updating transaction entity from {} to {}", transactionEntity.getStatus(), transactionStatusEnum);
+    transactionEntity.setStatus(transactionStatusEnum);
     transactionRepository.save(transactionEntity);
   }
 }

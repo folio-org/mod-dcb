@@ -46,7 +46,7 @@ public class RequestServiceImpl implements RequestService {
       .requestType(CirculationRequest.RequestTypeEnum.PAGE)
       .requestLevel(CirculationRequest.RequestLevelEnum.ITEM)
       .fulfillmentPreference(CirculationRequest.FulfillmentPreferenceEnum.HOLD_SHELF)
-      .requester(Requester.builder().barcode(user.getBarcode()).build())
+      .requester(Requester.builder().barcode(user.getBarcode()).personal(user.getPersonal()).build())
       .item(Item.builder().barcode(item.getBarcode()).build())
       //As we don't know the servicePoint logic yet, proceeding with hardcoded value
       .pickupServicePointId("3a40852d-49fd-4df2-a1f9-6e2641a6e91f")

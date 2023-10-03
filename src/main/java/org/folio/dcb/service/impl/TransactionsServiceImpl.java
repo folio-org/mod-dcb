@@ -13,8 +13,6 @@ import org.folio.spring.exception.NotFoundException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import java.util.Objects;
-
 @Service
 @RequiredArgsConstructor
 @Log4j2
@@ -41,11 +39,9 @@ public class TransactionsServiceImpl implements TransactionsService {
           "Current transaction status equal to new transaction status: dcbTransactionId: %s, status: %s", dcbTransactionId, transactionStatus.getStatus()
         ));
       }
-
-      if (Objects.requireNonNull(dcbTransaction.getRole()) == DcbTransaction.RoleEnum.LENDER) {
-        lendingLibraryService.updateTransactionStatus(dcbTransaction, transactionStatus);
-      } else {
-        throw new IllegalArgumentException("Other roles are not implemented");
+      switch (dcbTransaction.getRole()) {
+        case LENDER -> lendingLibraryService.updateTransactionStatus(dcbTransaction, transactionStatus);
+        default -> throw new IllegalArgumentException("Other roles are not implemented");
       }
 
       return TransactionStatusResponse.builder()
