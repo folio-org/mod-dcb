@@ -34,7 +34,7 @@
 
     <!-- runtime dependencies -->
     <folio-spring-base.version>7.0.0</folio-spring-base.version>
-    <folio-spring-system-user.version>7.2.0-SNAPSHOT</folio-spring-system-user.version>
+    <folio-spring-system-user.version>7.2.0</folio-spring-system-user.version>
     <openapi-generator.version>6.2.1</openapi-generator.version>
     <mapstruct.version>1.5.2.Final</mapstruct.version>
     <kafkaclients.version>3.4.0</kafkaclients.version>
