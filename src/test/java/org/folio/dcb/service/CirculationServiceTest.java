@@ -9,6 +9,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.folio.dcb.utils.EntityUtils.createTransactionEntity;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class CirculationServiceTest {
@@ -22,6 +24,7 @@ class CirculationServiceTest {
   @Test
   void checkInByBarcodeTest(){
     circulationService.checkInByBarcode(createTransactionEntity());
+    verify(circulationClient).checkInByBarcode(any());
   }
 
 }

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dcb.client.feign.UsersClient;
 import org.folio.dcb.domain.dto.DcbPatron;
+import org.folio.dcb.domain.dto.Personal;
 import org.folio.dcb.domain.dto.User;
 import org.folio.dcb.service.PatronGroupService;
 import org.folio.dcb.service.UserService;
@@ -18,8 +19,8 @@ public class UserServiceImpl implements UserService {
 
   private final PatronGroupService patronGroupService;
   private final UsersClient usersClient;
-
   private static final String DCB = "dcb";
+  private static final String LAST_NAME = "DcbSystem";
 
   public User fetchOrCreateUser(DcbPatron patronDetails) {
     log.debug("createOrFetchUser:: Trying to create or find user for userId {}, userBarcode {}",
@@ -27,7 +28,7 @@ public class UserServiceImpl implements UserService {
     var user = fetchUserByBarcodeAndId(patronDetails.getBarcode(), patronDetails.getId());
     if(Objects.isNull(user)) {
       log.info("fetchOrCreateUser:: Unable to find existing user with barcode {} and id {}. Hence, creating new user",
-        patronDetails.getId(), patronDetails.getBarcode());
+        patronDetails.getBarcode(), patronDetails.getId());
       user = createUser(patronDetails);
     }
     return user;
@@ -57,6 +58,7 @@ public class UserServiceImpl implements UserService {
       .patronGroup(groupId)
       .id(patron.getId())
       .type(DCB)
+      .personal(Personal.builder().lastName(LAST_NAME).build())
       .build();
   }
 }

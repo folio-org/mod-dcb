@@ -30,7 +30,7 @@ public class CirculationCheckInEventListener {
     id = CHECK_IN_LISTENER_ID,
     topicPattern = "#{folioKafkaProperties.listener['check-in'].topicPattern}",
     concurrency = "#{folioKafkaProperties.listener['check-in'].concurrency}")
-  public void handleCheckingIn(String data, MessageHeaders messageHeaders) {
+  public void handleCheckInEvent(String data, MessageHeaders messageHeaders) {
     String tenantId = getHeaderValue(messageHeaders, XOkapiHeaders.TENANT, null).get(0);
     var checkInItemId = parseCheckInEvent(data);
     if (Objects.nonNull(checkInItemId)) {

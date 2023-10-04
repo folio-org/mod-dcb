@@ -112,7 +112,6 @@ class LendingLibraryServiceTest {
 
     lendingLibraryService.updateStatusByTransactionEntity(transactionEntity);
     Mockito.verify(transactionRepository, times(1)).save(transactionEntity);
-    Mockito.verify(circulationService, times(1)).checkInByBarcode(transactionEntity);
   }
 
   @Test
@@ -152,12 +151,21 @@ class LendingLibraryServiceTest {
   }
 
   @Test
+  void transactionStatusFromCheckoutToCheckInTest() {
+    TransactionEntity dcbTransaction = createTransactionEntity();
+    dcbTransaction.setStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_OUT);
+    when(transactionRepository.save(dcbTransaction)).thenReturn(dcbTransaction);
+    lendingLibraryService.updateTransactionStatus(dcbTransaction, TransactionStatus.builder().status(TransactionStatus.StatusEnum.ITEM_CHECKED_IN).build());
+
+    verify(transactionRepository).save(dcbTransaction);
+
+    Assertions.assertEquals(TransactionStatus.StatusEnum.ITEM_CHECKED_IN, dcbTransaction.getStatus());
+  }
+
+  @Test
   void updateTransactionWithWrongStatusTest() {
     TransactionEntity transactionEntity = createTransactionEntity();
     TransactionStatus transactionStatus = createTransactionStatus(TransactionStatus.StatusEnum.AWAITING_PICKUP);
-    assertThrows(IllegalArgumentException.class, () -> {
-      TransactionEntity dcbTransaction = transactionEntity;
-      lendingLibraryService.updateTransactionStatus(dcbTransaction, transactionStatus);
-    });
+    assertThrows(IllegalArgumentException.class, () -> lendingLibraryService.updateTransactionStatus(transactionEntity, transactionStatus));
   }
 }

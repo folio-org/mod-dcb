@@ -80,3 +80,5 @@ requester:
     barcode:
       description: barcode of the item
       type: string
+    personal:
+      "$ref": "User.yaml#/Personal"
