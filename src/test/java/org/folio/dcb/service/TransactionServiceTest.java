@@ -3,6 +3,8 @@ package org.folio.dcb.service;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.entity.TransactionEntity;
+import org.folio.dcb.domain.mapper.TransactionMapper;
+import org.folio.dcb.exception.ResourceAlreadyExistException;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.impl.LendingLibraryServiceImpl;
 import org.folio.dcb.service.impl.TransactionsServiceImpl;
@@ -20,6 +22,7 @@ import java.util.UUID;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
 import static org.folio.dcb.utils.EntityUtils.createDcbTransaction;
+import static org.folio.dcb.utils.EntityUtils.createTransactionEntity;
 import static org.folio.dcb.utils.EntityUtils.createTransactionResponse;
 import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -37,13 +40,16 @@ class TransactionServiceTest {
   private LendingLibraryServiceImpl lendingLibraryService;
   @Mock
   private TransactionRepository transactionRepository;
-
+  @Mock
+  private TransactionMapper transactionMapper;
   @Test
   void createCirculationRequestTest() {
-    when(lendingLibraryService.createTransaction(any(), any()))
+    when(transactionMapper.mapToEntity(any(), any())).thenReturn(createTransactionEntity());
+
+    when(lendingLibraryService.createCirculation(any(), any()))
       .thenReturn(createTransactionResponse());
     transactionsService.createCirculationRequest(DCB_TRANSACTION_ID, createDcbTransaction());
-    verify(lendingLibraryService).createTransaction(DCB_TRANSACTION_ID, createDcbTransaction());
+    verify(lendingLibraryService).createCirculation(DCB_TRANSACTION_ID, createDcbTransaction());
   }
 
   @Test
@@ -71,5 +77,13 @@ class TransactionServiceTest {
     );
 
     Assertions.assertEquals(String.format("DCB Transaction was not found by id= %s ", transactionIdUnique), exception.getMessage());
+  }
+
+  @Test
+  void createTransactionWithExistingTransactionIdTest() {
+    var dcbTransaction = createDcbTransaction();
+    when(transactionRepository.existsById(DCB_TRANSACTION_ID)).thenReturn(true);
+    Assertions.assertThrows(ResourceAlreadyExistException.class, () ->
+      transactionsService.createCirculationRequest(DCB_TRANSACTION_ID, dcbTransaction));
   }
 }

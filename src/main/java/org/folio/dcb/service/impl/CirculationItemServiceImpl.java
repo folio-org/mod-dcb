@@ -26,23 +26,21 @@ public class CirculationItemServiceImpl implements CirculationItemService {
 
 
   @Override
-  public DcbItem fetchOrCreateItem(DcbItem dcbItem) {
+  public void checkIfItemExistsAndCreate(DcbItem dcbItem) {
     var dcbItemId = dcbItem.getId();
-    log.debug("fetchOrCreateItem:: generate Circulation item by DcbItem with id={}", dcbItemId);
+    log.debug("checkIfItemExistsAndCreate:: generate Circulation item by DcbItem with id={} if nit doesn't exist.", dcbItemId);
 
-    CirculationItemRequest circulationItem;
     try {
       log.debug("fetchOrCreateItem:: trying to find existed Circulation item");
-      circulationItem = circulationItemClient.retrieveCirculationItemById(dcbItemId);
+      circulationItemClient.retrieveCirculationItemById(dcbItemId);
     } catch (FeignException.NotFound ex) {
       log.debug("Circulation item not found by id={}. Creating it.", dcbItemId);
-      circulationItem = createCirculationItem(dcbItem);
+      createCirculationItem(dcbItem);
     }
 
-    return mapCirculationItemRequestToDcbItem(circulationItem);
   }
 
-  private CirculationItemRequest createCirculationItem(DcbItem item){
+  private void createCirculationItem(DcbItem item){
     var materialTypeId = itemService.fetchItemMaterialTypeIdByMaterialTypeName(TEMP_VALUE_MATERIAL_TYPE_NAME_BOOK);
     var loanTypeId = itemService.fetchItemLoanTypeIdByLoanTypeName(INITIAL_CFG_LOAN_TYPE_VALUE);
 
@@ -58,19 +56,6 @@ public class CirculationItemServiceImpl implements CirculationItemService {
         .pickupLocation(item.getPickupLocation())
         .build();
 
-    return circulationItemClient.createCirculationItem(item.getId(), circulationItemRequest);
-  }
-
-  private DcbItem mapCirculationItemRequestToDcbItem(CirculationItemRequest ci) {
-//    var materialTypeName = itemService.fetchItemMaterialTypeNameByMaterialTypeId(ci.getMaterialTypeId());
-
-    return DcbItem.builder()
-      .id(ci.getId())
-      .barcode(ci.getItemBarcode())
-      .title(ci.getInstanceTitle())
-      .pickupLocation("3a40852d-49fd-4df2-a1f9-6e2641a6e91f")   // leave it as a temporary solution. checked with Magzhan. Until the field-container will be added into DcbTransaction
-//      .lendingLibraryCode()   // we don't need it for the borrowing flow
-      .materialType(TEMP_VALUE_MATERIAL_TYPE_NAME_BOOK)
-      .build();
+    circulationItemClient.createCirculationItem(item.getId(), circulationItemRequest);
   }
 }
