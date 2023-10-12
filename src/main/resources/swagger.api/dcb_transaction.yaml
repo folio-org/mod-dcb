@@ -142,4 +142,9 @@ components:
       $ref: 'schemas/CheckInRequest.yaml#/CheckInRequest'
     CheckOutRequest:
       $ref: 'schemas/checkOutRequest.yaml#/CheckOutRequest'
-
+    CirculationItemRequest:
+      $ref: 'schemas/CirculationItemRequest.yaml#/CirculationItemRequest'
+    MaterialTypeCollection:
+      $ref: 'schemas/MaterialType.yaml#/MaterialTypeCollection'
+    LoanTypeCollection:
+      $ref: 'schemas/LoanType.yaml#/LoanTypeCollection'

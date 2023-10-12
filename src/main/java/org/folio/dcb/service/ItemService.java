@@ -9,4 +9,13 @@ public interface ItemService {
    * @return InventoryItem
    */
   InventoryItem fetchItemDetailsById(String itemId);
+
+  /**
+   * Provides material type Id by material type name.
+   * @param materialTypeName  - material type name like 'book', 'sound recording', 'text' etc.
+   * @return String value of material type Id.
+   * */
+  String fetchItemMaterialTypeIdByMaterialTypeName(String materialTypeName);
+  String fetchItemMaterialTypeNameByMaterialTypeId(String materialTypeId);
+  String fetchItemLoanTypeIdByLoanTypeName(String loanTypeName);
 }

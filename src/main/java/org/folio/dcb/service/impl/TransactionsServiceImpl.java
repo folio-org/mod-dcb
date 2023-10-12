@@ -20,6 +20,8 @@ public class TransactionsServiceImpl implements TransactionsService {
 
   @Qualifier("lendingLibraryService")
   private final LibraryService lendingLibraryService;
+  @Qualifier("borrowingLibraryServiceImpl")
+  private final LibraryService borrowingLibraryServiceImpl;
   private final TransactionRepository transactionRepository;
 
   @Override
@@ -27,6 +29,7 @@ public class TransactionsServiceImpl implements TransactionsService {
     log.debug("createCirculationRequest:: creating new transaction request for role {} ", dcbTransaction.getRole());
     return switch (dcbTransaction.getRole()) {
       case LENDER -> lendingLibraryService.createTransaction(dcbTransactionId, dcbTransaction);
+      case BORROWER -> borrowingLibraryServiceImpl.createTransaction(dcbTransactionId, dcbTransaction);
       default -> throw new IllegalArgumentException("Other roles are not implemented");
     };
   }

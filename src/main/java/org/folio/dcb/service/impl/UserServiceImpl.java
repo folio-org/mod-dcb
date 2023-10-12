@@ -8,6 +8,7 @@ import org.folio.dcb.domain.dto.Personal;
 import org.folio.dcb.domain.dto.User;
 import org.folio.dcb.service.PatronGroupService;
 import org.folio.dcb.service.UserService;
+import org.folio.spring.exception.NotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
@@ -21,6 +22,22 @@ public class UserServiceImpl implements UserService {
   private final UsersClient usersClient;
   private static final String DCB = "dcb";
   private static final String LAST_NAME = "DcbSystem";
+
+  @Override
+  public User fetchUser(DcbPatron dcbPatron) {
+    var dcbPatronId = dcbPatron.getId();
+    var dcbPatronBarcode = dcbPatron.getBarcode();
+
+    log.debug("fetchUser:: Fetching user by userId {}, userBarcode {}.", dcbPatronId, dcbPatronBarcode);
+    var user = fetchUserByBarcodeAndId(dcbPatronBarcode, dcbPatronId);
+
+    if(Objects.isNull(user)) {
+      log.error("fetchUser:: Unable to find existing user with barcode {} and id {}.", dcbPatronBarcode, dcbPatronId);
+      throw new NotFoundException(String.format("Unable to find existing user with barcode %s and id %s.", dcbPatronBarcode, dcbPatronId));
+    }
+
+    return user;
+  }
 
   public User fetchOrCreateUser(DcbPatron patronDetails) {
     log.debug("createOrFetchUser:: Trying to create or find user for userId {}, userBarcode {}",
