@@ -2,8 +2,11 @@ package org.folio.dcb.listener;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.folio.dcb.domain.entity.TransactionAuditEntity;
+import org.folio.dcb.domain.mapper.TransactionAuditMapper;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.LibraryService;
+import org.folio.dcb.service.impl.TransactionsServiceImpl;
 import org.folio.spring.integration.XOkapiHeaders;
 import org.folio.spring.service.SystemUserScopedExecutionService;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -13,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
+import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
 import static org.folio.dcb.utils.TransactionHelper.getHeaderValue;
 import static org.folio.dcb.utils.TransactionHelper.parseCheckInEvent;
 
@@ -21,10 +25,13 @@ import static org.folio.dcb.utils.TransactionHelper.parseCheckInEvent;
 @RequiredArgsConstructor
 public class CirculationCheckInEventListener {
   public static final String CHECK_IN_LISTENER_ID = "check-in-listener-id";
+  private static final String CREATED_STATUS = "CREATED";
   @Qualifier("lendingLibraryService")
   private final LibraryService lendingLibraryService;
   private final TransactionRepository transactionRepository;
   private final SystemUserScopedExecutionService systemUserScopedExecutionService;
+  private final TransactionAuditMapper transactionAuditMapper;
+  private final TransactionsServiceImpl transactionsService;
 
   @KafkaListener(
     id = CHECK_IN_LISTENER_ID,
@@ -38,9 +45,12 @@ public class CirculationCheckInEventListener {
       systemUserScopedExecutionService.executeAsyncSystemUserScoped(tenantId, () ->
         transactionRepository.findTransactionByItemId(checkInItemId)
           .ifPresent(transactionEntity -> {
-            switch (transactionEntity.getRole()) {
-              case LENDER ->  lendingLibraryService.updateStatusByTransactionEntity(transactionEntity);
-              default -> throw new IllegalArgumentException("Other roles are not implemented yet");
+            if (transactionEntity.getRole() == LENDER) {
+              TransactionAuditEntity transactionAuditEntity = transactionAuditMapper.mapToEntity(transactionEntity);
+              lendingLibraryService.updateStatusByTransactionEntity(transactionEntity);
+              transactionsService.createTransactionAuditRecord(transactionAuditEntity, transactionEntity.getId(), CREATED_STATUS);
+            } else {
+              throw new IllegalArgumentException("Other roles are not implemented yet");
             }
           })
       );

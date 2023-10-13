@@ -77,7 +77,7 @@ public class LendingLibraryServiceImpl implements LibraryService {
     var currentStatus = dcbTransaction.getStatus();
     var requestedStatus = transactionStatus.getStatus();
     if (OPEN == currentStatus && AWAITING_PICKUP == requestedStatus) {
-      log.info("updateTransactionStatus:: Checking in item by barcode: {} ", dcbTransaction.getPatronBarcode());
+      log.info("updateTransactionStatus:: Checking in item by barcode: {} ", dcbTransaction.getItemBarcode());
       circulationService.checkInByBarcode(dcbTransaction);
       updateTransactionEntity(dcbTransaction, requestedStatus);
     } else if (AWAITING_PICKUP == currentStatus && ITEM_CHECKED_OUT == requestedStatus) {
