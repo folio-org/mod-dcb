@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import static org.folio.dcb.service.ServicePointService.HoldShelfClosedLibraryDateManagement;
+import static org.folio.dcb.service.ServicePointService.HOLD_SHELF_CLOSED_LIBRARY_DATE_MANAGEMENT;
 
 public class EntityUtils {
 
@@ -51,7 +51,7 @@ public class EntityUtils {
       .discoveryDisplayName("TestDiscoveryDisplayName")
       .pickupLocation(true)
       .holdShelfExpiryPeriod(org.folio.dcb.domain.dto.HoldShelfExpiryPeriod.builder().duration(3).intervalId(org.folio.dcb.domain.dto.HoldShelfExpiryPeriod.IntervalIdEnum.DAYS).build())
-      .holdShelfClosedLibraryDateManagement(HoldShelfClosedLibraryDateManagement)
+      .holdShelfClosedLibraryDateManagement(HOLD_SHELF_CLOSED_LIBRARY_DATE_MANAGEMENT)
       .build();
   }
 

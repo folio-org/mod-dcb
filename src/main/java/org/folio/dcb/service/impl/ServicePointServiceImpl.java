@@ -44,7 +44,7 @@ public class ServicePointServiceImpl implements ServicePointService {
       .discoveryDisplayName(discoveryDisplayName)
       .pickupLocation(true)
       .holdShelfExpiryPeriod(HoldShelfExpiryPeriod.builder().duration(3).intervalId(HoldShelfExpiryPeriod.IntervalIdEnum.DAYS).build())
-      .holdShelfClosedLibraryDateManagement(HoldShelfClosedLibraryDateManagement)
+      .holdShelfClosedLibraryDateManagement(HOLD_SHELF_CLOSED_LIBRARY_DATE_MANAGEMENT)
       .build();
   }
 
