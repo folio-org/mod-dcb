@@ -1,11 +1,11 @@
 openapi: 3.0.3
 info:
-  title: mod ReShare FOLIO API
-  description: mod ReShare FOLIO API
+  title: mod DCB FOLIO API
+  description: mod DCB FOLIO API
   version: 1.0.0
 paths:
   /transactions/{dcbTransactionId}:
-    description: ReShare Circulation Transaction endpoint
+    description: DCB Circulation Transaction endpoint
     post:
       description: Create circulation request
       operationId: createCirculationRequest

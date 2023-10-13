@@ -6,10 +6,10 @@ DcbPickup:
       description: The name of the pickup library
       type: string
     libraryCode:
-      description: The code in ReShare DCB which identifies the pickup library
+      description: The code which identifies the pickup library
       type: string
     servicePointId:
-      description: The code in ReShare DCB which identifies the pickup service point
+      description: The code which identifies the pickup service point
       type: string
     servicePointName:
       description: The name of the pickup service point
