@@ -87,4 +87,17 @@
     </createTable>
   </changeSet>
 
+  <changeSet id="addPickupLocationData" author="MagzhanArtykov">
+    <renameColumn tableName="transactions" oldColumnName="pickup_location" newColumnName="service_point_id"/>
+    <addColumn tableName="transactions">
+      <column name="service_point_name" type="text"/>
+    </addColumn>
+    <addColumn tableName="transactions">
+      <column name="pickup_library_name" type="text"/>
+    </addColumn>
+    <addColumn tableName="transactions">
+      <column name="pickup_library_code" type="text"/>
+    </addColumn>
+  </changeSet>
+
 </databaseChangeLog>

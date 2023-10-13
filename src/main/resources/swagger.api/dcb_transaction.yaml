@@ -142,4 +142,5 @@ components:
       $ref: 'schemas/CheckInRequest.yaml#/CheckInRequest'
     CheckOutRequest:
       $ref: 'schemas/checkOutRequest.yaml#/CheckOutRequest'
-
+    ServicePointRequest:
+      $ref: 'schemas/servicePointRequest.yaml#/ServicePointRequest'

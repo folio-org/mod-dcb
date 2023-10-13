@@ -10,10 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.folio.dcb.utils.EntityUtils.createDcbItem;
-import static org.folio.dcb.utils.EntityUtils.createInventoryHolding;
-import static org.folio.dcb.utils.EntityUtils.createInventoryItem;
-import static org.folio.dcb.utils.EntityUtils.createUser;
+import static org.folio.dcb.utils.EntityUtils.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -34,7 +31,7 @@ class RequestServiceTest {
   void createPageItemRequestTest() {
     when(itemService.fetchItemDetailsById(any())).thenReturn(createInventoryItem());
     when(holdingsService.fetchInventoryHoldingDetailsByHoldingId(any())).thenReturn(createInventoryHolding());
-    requestService.createPageItemRequest(createUser(), createDcbItem());
+    requestService.createPageItemRequest(createUser(), createDcbItem(), createDcbPickup().getServicePointId());
     verify(itemService).fetchItemDetailsById(any());
     verify(holdingsService).fetchInventoryHoldingDetailsByHoldingId(any());
     verify(circulationClient).createRequest(any());

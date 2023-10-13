@@ -5,6 +5,7 @@ import org.folio.dcb.DcbApplication;
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.DcbItem;
 import org.folio.dcb.domain.dto.DcbPatron;
+import org.folio.dcb.domain.dto.DcbPickup;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.dto.User;
 import org.folio.dcb.domain.dto.TransactionStatus;
@@ -24,17 +25,33 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import static org.folio.dcb.service.ServicePointService.HoldShelfClosedLibraryDateManagement;
+
 public class EntityUtils {
 
   public static String ITEM_ID = "5b95877d-86c0-4cb7-a0cd-7660b348ae5a";
   public static String PATRON_ID = "571b0a2c-9456-40b5-a449-d41fe6017082";
+  public static String PICKUP_SERVICE_POINT_ID = "0da8c1e4-1c1f-4dd9-b189-70ba978b7d94";
   public static String DCB_TRANSACTION_ID = "571b0a2c-8883-40b5-a449-d41fe6017082";
   public static String DCB_USER_TYPE = "dcb";
   public static DcbTransaction createDcbTransaction() {
     return DcbTransaction.builder()
       .item(createDcbItem())
       .patron(createDcbPatron())
+      .pickup(createDcbPickup())
       .role(DcbTransaction.RoleEnum.LENDER)
+      .build();
+  }
+
+  public static org.folio.dcb.domain.dto.ServicePointRequest createServicePointRequest() {
+    return org.folio.dcb.domain.dto.ServicePointRequest.builder()
+      .id(PICKUP_SERVICE_POINT_ID)
+      .name("TestServicePointName")
+      .code("TestServicePointCode")
+      .discoveryDisplayName("TestDiscoveryDisplayName")
+      .pickupLocation(true)
+      .holdShelfExpiryPeriod(org.folio.dcb.domain.dto.HoldShelfExpiryPeriod.builder().duration(3).intervalId(org.folio.dcb.domain.dto.HoldShelfExpiryPeriod.IntervalIdEnum.DAYS).build())
+      .holdShelfClosedLibraryDateManagement(HoldShelfClosedLibraryDateManagement)
       .build();
   }
 
@@ -48,7 +65,6 @@ public class EntityUtils {
       .barcode("DCB_ITEM")
       .title("ITEM")
       .lendingLibraryCode("KU")
-      .pickupLocation("Datalogisk Institute")
       .materialType("book")
       .build();
   }
@@ -59,6 +75,15 @@ public class EntityUtils {
       .barcode("DCB_PATRON")
       .group("staff")
       .borrowingLibraryCode("E")
+      .build();
+  }
+
+  public static org.folio.dcb.domain.dto.DcbPickup createDcbPickup() {
+    return DcbPickup.builder()
+      .servicePointId(PICKUP_SERVICE_POINT_ID)
+      .servicePointName("TestServicePointCode")
+      .libraryCode("TestLibraryCode")
+      .libraryName("TestLibraryName")
       .build();
   }
 
@@ -94,7 +119,10 @@ public class EntityUtils {
       .patronId(PATRON_ID)
       .patronBarcode("DCB_PATRON")
       .patronGroup("staff")
-      .pickupLocation("PICKUP LOCATION")
+      .servicePointId(PICKUP_SERVICE_POINT_ID)
+      .servicePointName("TestServicePointCode")
+      .pickupLibraryCode("TestLibraryCode")
+      .pickupLibraryName("TestLibraryName")
       .materialType("book")
       .lendingLibraryCode("LEN")
       .borrowingLibraryCode("BOR")
