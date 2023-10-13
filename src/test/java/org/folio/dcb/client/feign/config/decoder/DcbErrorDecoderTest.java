@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
 class DcbErrorDecoderTest{
@@ -15,9 +15,7 @@ class DcbErrorDecoderTest{
     String message = "Service Point Exists";
     int status = 422;
     DcbErrorDecoder dcbErrorDecoder = new DcbErrorDecoder();
-    assertThrows(ResourceAlreadyExistException.class, () -> {
-      throw dcbErrorDecoder.decode("POST", generateResponse(url, message, status));
-    });
+    assertEquals(ResourceAlreadyExistException.class, dcbErrorDecoder.decode("POST", generateResponse(url, message, status)).getClass());
   }
 
   @Test
@@ -26,9 +24,7 @@ class DcbErrorDecoderTest{
     String message = "Something wrong";
     int status = 404;
     DcbErrorDecoder dcbErrorDecoder = new DcbErrorDecoder();
-    assertThrows(RuntimeException.class, () -> {
-      throw dcbErrorDecoder.decode("POST", generateResponse(url, message, status));
-    });
+    assertEquals(RuntimeException.class, dcbErrorDecoder.decode("POST", generateResponse(url, message, status)).getClass());
   }
 
   feign.Response generateResponse(String url,String message, int status){
