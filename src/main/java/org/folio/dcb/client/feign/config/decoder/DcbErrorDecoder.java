@@ -16,11 +16,11 @@ public class DcbErrorDecoder implements ErrorDecoder {
     String requestUrl = response.request().url();
     HttpStatus responseStatus = HttpStatus.valueOf(response.status());
 
-    StringBuilder message;
+    StringBuilder message = new StringBuilder();
     try (InputStream bodyIs = response.body().asInputStream()) {
       message = new StringBuilder(new String(bodyIs.readAllBytes()));
     } catch (IOException e) {
-      return new Exception(e.getMessage());
+      log.debug("Error during reading response body", e);
     }
 
     if (requestUrl.contains("service-points") && responseStatus == HttpStatus.UNPROCESSABLE_ENTITY && message.toString().contains("Service Point Exists")) {

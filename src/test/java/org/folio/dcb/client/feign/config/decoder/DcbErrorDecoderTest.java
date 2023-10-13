@@ -10,12 +10,23 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @ExtendWith(MockitoExtension.class)
 class DcbErrorDecoderTest{
   @Test
-  void shouldReturnExceptionWhenServicePointExistsResponseTest(){
+  void shouldReturnResourceAlreadyExistExceptionWhenServicePointExistsResponseTest(){
     String url = "http://service-points";
     String message = "Service Point Exists";
     int status = 422;
     DcbErrorDecoder dcbErrorDecoder = new DcbErrorDecoder();
     assertThrows(ResourceAlreadyExistException.class, () -> {
+      throw dcbErrorDecoder.decode("POST", generateResponse(url, message, status));
+    });
+  }
+
+  @Test
+  void shouldReturnExceptionTest(){
+    String url = "http://service-points";
+    String message = "Something wrong";
+    int status = 404;
+    DcbErrorDecoder dcbErrorDecoder = new DcbErrorDecoder();
+    assertThrows(RuntimeException.class, () -> {
       throw dcbErrorDecoder.decode("POST", generateResponse(url, message, status));
     });
   }
