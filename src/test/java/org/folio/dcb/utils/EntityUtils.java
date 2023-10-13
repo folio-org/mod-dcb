@@ -27,14 +27,31 @@ import java.util.stream.Stream;
 public class EntityUtils {
 
   public static String ITEM_ID = "5b95877d-86c0-4cb7-a0cd-7660b348ae5a";
-  public static String PATRON_ID = "571b0a2c-9456-40b5-a449-d41fe6017082";
+
+  /**
+   * NOT_EXISTED_PATRON_ID - means
+   * the Mocked userClient returns empty result,
+   * while requesting it by the query, including such a patron id
+   * */
+  public static String NOT_EXISTED_PATRON_ID = "571b0a2c-9456-40b5-a449-d41fe6017082";
+
+  /**
+   * EXISTED_PATRON_ID - means
+   * the Mocked userClient returns result with single value,
+   * while requesting it by the query, including such a patron id
+   * */
+  public static String EXISTED_PATRON_ID = "284056f5-0670-4e1e-9e2f-61b9f1ee2d18";
   public static String DCB_TRANSACTION_ID = "571b0a2c-8883-40b5-a449-d41fe6017082";
   public static String DCB_USER_TYPE = "dcb";
-  public static DcbTransaction createDcbTransaction() {
+  public static DcbTransaction createDcbTransactionByRole(DcbTransaction.RoleEnum role) {
     return DcbTransaction.builder()
       .item(createDcbItem())
-      .patron(createDcbPatron())
-      .role(DcbTransaction.RoleEnum.LENDER)
+      .patron(switch (role){
+          case BORROWER -> createDcbPatronWithExactPatronId(EXISTED_PATRON_ID);
+          default -> createDefaultDcbPatron();
+        }
+      )
+      .role(role)
       .build();
   }
 
@@ -53,18 +70,21 @@ public class EntityUtils {
       .build();
   }
 
-  public static DcbPatron createDcbPatron() {
+  public static DcbPatron createDcbPatronWithExactPatronId(String patronId) {
     return DcbPatron.builder()
-      .id(PATRON_ID)
+      .id(patronId)
       .barcode("DCB_PATRON")
       .group("staff")
       .borrowingLibraryCode("E")
       .build();
   }
+  public static DcbPatron createDefaultDcbPatron() {
+    return createDcbPatronWithExactPatronId(NOT_EXISTED_PATRON_ID);
+  }
 
   public static TransactionStatusResponse createTransactionResponse() {
     return TransactionStatusResponse.builder()
-      .patron(createDcbPatron())
+      .patron(createDefaultDcbPatron())
       .item(createDcbItem())
       .status(TransactionStatusResponse.StatusEnum.CREATED)
       .build();
@@ -74,7 +94,7 @@ public class EntityUtils {
     return User.builder()
       .active(true)
       .patronGroup("staff")
-      .id(PATRON_ID)
+      .id(NOT_EXISTED_PATRON_ID)
       .type(DCB_USER_TYPE)
       .build();
   }
@@ -91,7 +111,7 @@ public class EntityUtils {
       .itemId(ITEM_ID)
       .itemTitle("ITEM TITLE")
       .itemBarcode("DCB_ITEM")
-      .patronId(PATRON_ID)
+      .patronId(NOT_EXISTED_PATRON_ID)
       .patronBarcode("DCB_PATRON")
       .patronGroup("staff")
       .pickupLocation("PICKUP LOCATION")

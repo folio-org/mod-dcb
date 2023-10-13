@@ -37,6 +37,19 @@
           "Content-Type": "application/json"
         }
       }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/holdings-storage/holdings/10cd3a5a-d36f-4c7a-bc4f-e1ae3cf820c9"
+      },
+      "response": {
+        "status": 200,
+        "body": "{\"id\":\"10cd3a5a-d36f-4c7a-bc4f-e1ae3cf820c9\",\"instanceId\": \"7fbd5d84-62d1-44c6-9c45-6cb173998bbd\"}}",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
     }
   ]
 }

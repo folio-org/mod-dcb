@@ -19,8 +19,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
 import static org.folio.dcb.utils.EntityUtils.createDcbItem;
-import static org.folio.dcb.utils.EntityUtils.createDcbPatron;
-import static org.folio.dcb.utils.EntityUtils.createDcbTransaction;
+import static org.folio.dcb.utils.EntityUtils.createDefaultDcbPatron;
+import static org.folio.dcb.utils.EntityUtils.createDcbTransactionByRole;
 import static org.folio.dcb.utils.EntityUtils.createTransactionEntity;
 import static org.folio.dcb.utils.EntityUtils.createTransactionStatus;
 import static org.folio.dcb.utils.EntityUtils.createUser;
@@ -50,7 +50,7 @@ class LendingLibraryServiceTest {
   @Test
   void createTransactionTest() {
     var item = createDcbItem();
-    var patron = createDcbPatron();
+    var patron = createDefaultDcbPatron();
     var user = createUser();
 
 //    when(transactionRepository.existsById(DCB_TRANSACTION_ID)).thenReturn(false);
@@ -59,7 +59,7 @@ class LendingLibraryServiceTest {
     doNothing().when(requestService).createPageItemRequest(any(), any());
 //    when(transactionMapper.mapToEntity(any(), any())).thenReturn(createTransactionEntity());
 
-    var response = lendingLibraryService.createCirculation(DCB_TRANSACTION_ID, createDcbTransaction());
+    var response = lendingLibraryService.createCirculation(DCB_TRANSACTION_ID, createDcbTransactionByRole(LENDER));
 //    verify(transactionRepository).existsById(DCB_TRANSACTION_ID);
 //    verify(transactionRepository).save(any());
 //    verify(transactionMapper).mapToEntity(DCB_TRANSACTION_ID, createDcbTransaction());

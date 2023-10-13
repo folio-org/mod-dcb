@@ -43,7 +43,7 @@ public class TransactionsServiceImpl implements TransactionsService {
       var virtualItem = dcbTransaction.getItem();
       virtualItem.setPickupLocation("3a40852d-49fd-4df2-a1f9-6e2641a6e91f");   // leave it as a temporary solution. checked with Magzhan. Until the field-container will be added into DcbTransaction
       virtualItem.setMaterialType(TEMP_VALUE_MATERIAL_TYPE_NAME_BOOK);
-      virtualItem.setLendingLibraryCode(null);  // we don't need it for the borrowing flow
+//      virtualItem.setLendingLibraryCode(null);  // we don't need it for the borrowing flow
     }
 
     TransactionStatusResponse circulationStatusResponse =

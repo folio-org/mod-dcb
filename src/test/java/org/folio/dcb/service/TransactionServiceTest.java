@@ -21,7 +21,7 @@ import java.util.UUID;
 
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
-import static org.folio.dcb.utils.EntityUtils.createDcbTransaction;
+import static org.folio.dcb.utils.EntityUtils.createDcbTransactionByRole;
 import static org.folio.dcb.utils.EntityUtils.createTransactionEntity;
 import static org.folio.dcb.utils.EntityUtils.createTransactionResponse;
 import static org.junit.Assert.assertThrows;
@@ -43,13 +43,13 @@ class TransactionServiceTest {
   @Mock
   private TransactionMapper transactionMapper;
   @Test
-  void createCirculationRequestTest() {
+  void createLendingCirculationRequestTest() {
     when(transactionMapper.mapToEntity(any(), any())).thenReturn(createTransactionEntity());
 
     when(lendingLibraryService.createCirculation(any(), any()))
       .thenReturn(createTransactionResponse());
-    transactionsService.createCirculationRequest(DCB_TRANSACTION_ID, createDcbTransaction());
-    verify(lendingLibraryService).createCirculation(DCB_TRANSACTION_ID, createDcbTransaction());
+    transactionsService.createCirculationRequest(DCB_TRANSACTION_ID, createDcbTransactionByRole(LENDER));
+    verify(lendingLibraryService).createCirculation(DCB_TRANSACTION_ID, createDcbTransactionByRole(LENDER));
   }
 
   @Test
@@ -79,9 +79,12 @@ class TransactionServiceTest {
     Assertions.assertEquals(String.format("DCB Transaction was not found by id= %s ", transactionIdUnique), exception.getMessage());
   }
 
+  /**
+   * For any kind of role: LENDER/BORROWER/PICKUP/BORROWING_PICKUP
+   * */
   @Test
   void createTransactionWithExistingTransactionIdTest() {
-    var dcbTransaction = createDcbTransaction();
+    var dcbTransaction = createDcbTransactionByRole(LENDER);
     when(transactionRepository.existsById(DCB_TRANSACTION_ID)).thenReturn(true);
     Assertions.assertThrows(ResourceAlreadyExistException.class, () ->
       transactionsService.createCirculationRequest(DCB_TRANSACTION_ID, dcbTransaction));

@@ -1,0 +1,17 @@
+{
+  "mappings": [
+    {
+      "request": {
+        "method": "POST",
+        "url": "/circulation-item/5b95877d-86c0-4cb7-a0cd-7660b348ae5a"
+      },
+      "response": {
+        "status": 201,
+        "body": "{\"id\": \"5b95877d-86c0-4cb7-a0cd-7660b348ae5a\", \"holdingsRecordId\": \"10cd3a5a-d36f-4c7a-bc4f-e1ae3cf820c9\", \"status\": \"In transit\", \"materialTypeId\": \"1a54b431-2e4f-452d-9cae-9cee66c9a892\", \"permanentLoanTypeId\": \"2b94c631-fca9-4892-a730-03ee529ffe27\", \"instanceTitle\": \"ITEM\", \"itemBarcode\": \"DCB_ITEM\", \"pickupLocation\": \"3a40852d-49fd-4df2-a1f9-6e2641a6e91f\"}",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
+    }
+  ]
+}

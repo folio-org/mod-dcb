@@ -12,7 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 import java.util.UUID;
 
-import static org.folio.dcb.utils.EntityUtils.createDcbPatron;
+import static org.folio.dcb.utils.EntityUtils.createDefaultDcbPatron;
 import static org.folio.dcb.utils.EntityUtils.createUserCollection;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
@@ -32,7 +32,7 @@ class UserServiceTest {
   @Test
   void fetchUserTest() {
     when(usersClient.fetchUserByBarcodeAndId(any())).thenReturn(createUserCollection());
-    userService.fetchOrCreateUser(createDcbPatron());
+    userService.fetchOrCreateUser(createDefaultDcbPatron());
     verify(usersClient).fetchUserByBarcodeAndId(any());
     verify(patronGroupService, never()).fetchPatronGroupIdByName("staff");
     verify(usersClient, never()).createUser(any());
@@ -44,7 +44,7 @@ class UserServiceTest {
     userCollection.setUsers(List.of());
     when(usersClient.fetchUserByBarcodeAndId(any())).thenReturn(userCollection);
     when(patronGroupService.fetchPatronGroupIdByName(any())).thenReturn(UUID.randomUUID().toString());
-    userService.fetchOrCreateUser(createDcbPatron());
+    userService.fetchOrCreateUser(createDefaultDcbPatron());
     verify(usersClient).fetchUserByBarcodeAndId(any());
     verify(patronGroupService).fetchPatronGroupIdByName("staff");
     verify(usersClient).createUser(any());
