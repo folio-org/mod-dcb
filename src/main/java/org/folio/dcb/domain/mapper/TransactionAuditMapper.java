@@ -12,7 +12,7 @@ import java.util.UUID;
 @Component
 public class TransactionAuditMapper {
 
-  private final ObjectMapper objectMapper = new ObjectMapper();
+  private ObjectMapper objectMapper = new ObjectMapper();
 
   public TransactionAuditEntity mapToEntity(TransactionEntity transactionEntity) {
     if(Objects.isNull(transactionEntity)) {

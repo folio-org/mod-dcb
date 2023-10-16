@@ -1,11 +1,12 @@
 package org.folio.dcb.service;
 
-import org.folio.dcb.domain.dto.TransactionStatus;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.entity.TransactionAuditEntity;
 import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.domain.mapper.TransactionAuditMapper;
 import org.folio.dcb.domain.mapper.TransactionMapper;
+import org.folio.dcb.repository.TransactionAuditRepository;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.impl.LendingLibraryServiceImpl;
 import org.folio.dcb.service.impl.TransactionsServiceImpl;
@@ -21,6 +22,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CLOSED;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
 import static org.folio.dcb.utils.EntityUtils.*;
 import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -40,15 +43,19 @@ class TransactionServiceTest {
   @Mock
   private TransactionMapper transactionMapper;
   @Mock
+  private TransactionAuditRepository transactionAuditRepository;
+  @Mock
   private TransactionAuditMapper transactionAuditMapper;
   @Mock
   private TransactionsAuditService transactionsAuditService;
+  @Mock
+  private ObjectMapper objectMapper;
 
   @Test
   void createCirculationRequestTest() {
     TransactionAuditEntity transactionAuditEntity = TransactionAuditEntity.builder().transactionId("123").build();
     TransactionEntity transactionEntity = createTransactionEntity();
-    transactionEntity.setStatus(TransactionStatus.StatusEnum.CREATED);
+    transactionEntity.setStatus(CREATED);
 
     when(lendingLibraryService.createTransaction(any(), any())).thenReturn(createTransactionResponse());
     when(transactionAuditMapper.mapToEntity(any())).thenReturn(transactionAuditEntity);
@@ -65,7 +72,7 @@ class TransactionServiceTest {
     var transactionIdUnique = UUID.randomUUID().toString();
     when(transactionRepository.findById(transactionIdUnique))
       .thenReturn(Optional.ofNullable(TransactionEntity.builder()
-        .status(TransactionStatus.StatusEnum.CREATED)
+        .status(CREATED)
         .role(LENDER)
         .build()));
 
@@ -85,5 +92,16 @@ class TransactionServiceTest {
     );
 
     Assertions.assertEquals(String.format("DCB Transaction was not found by id= %s ", transactionIdUnique), exception.getMessage());
+  }
+
+  @Test
+  void createTransactionAuditRecordTest() {
+    TransactionAuditEntity transactionAuditEntity = TransactionAuditEntity.builder().transactionId("123").build();
+    transactionAuditEntity.setBefore("CREATED");
+    TransactionEntity transactionEntity = createTransactionEntity();
+    transactionEntity.setStatus(CLOSED);
+    when(transactionRepository.findById(any())).thenReturn(Optional.of(transactionEntity));
+    transactionsService.createTransactionAuditRecord(transactionAuditEntity, "123", CREATED.getValue());
+    verify(transactionsAuditService, times(1)).createTransactionAuditRecord(any());
   }
 }
