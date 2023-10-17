@@ -17,7 +17,6 @@ import static org.folio.dcb.domain.dto.Status.NameEnum.IN_TRANSIT;
 @RequiredArgsConstructor
 public class CirculationItemServiceImpl implements CirculationItemService {
 
-  private static final String TEMP_VALUE_MATERIAL_TYPE_NAME_BOOK = "book";
   private static final String TEMP_VALUE_HOLDING_ID = "10cd3a5a-d36f-4c7a-bc4f-e1ae3cf820c9";
   private static final String INITIAL_CFG_LOAN_TYPE_VALUE = "Can circulate";
 
@@ -41,7 +40,7 @@ public class CirculationItemServiceImpl implements CirculationItemService {
   }
 
   private void createCirculationItem(DcbItem item){
-    var materialTypeId = itemService.fetchItemMaterialTypeIdByMaterialTypeName(TEMP_VALUE_MATERIAL_TYPE_NAME_BOOK);
+    var materialTypeId = itemService.fetchItemMaterialTypeIdByMaterialTypeName(item.getMaterialType());
     var loanTypeId = itemService.fetchItemLoanTypeIdByLoanTypeName(INITIAL_CFG_LOAN_TYPE_VALUE);
 
     CirculationItemRequest circulationItemRequest =

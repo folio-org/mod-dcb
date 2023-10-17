@@ -25,6 +25,7 @@ import java.util.UUID;
 public class RequestServiceImpl implements RequestService {
 
   private static final String UMBRELLA_HOLDINGS_ID = "10cd3a5a-d36f-4c7a-bc4f-e1ae3cf820c9";
+  private static final String UMBRELLA_INSTANCE_ID = "9d1b77e4-f02e-4b7f-b296-3f2042ddac54";
 
   private final ItemService itemService;
   private final HoldingsService holdingsService;
@@ -44,8 +45,7 @@ public class RequestServiceImpl implements RequestService {
   public void createHoldItemRequest(User user, DcbItem item) {
     log.debug("createHoldItemRequest:: creating a new hold request for userBarcode {} , itemBarcode {}",
       user.getBarcode(), item.getBarcode());
-    var inventoryHolding = holdingsService.fetchInventoryHoldingDetailsByHoldingId(UMBRELLA_HOLDINGS_ID);
-    var circulationRequest = createCirculationRequest(HOLD, user, item, UMBRELLA_HOLDINGS_ID, inventoryHolding.getInstanceId());
+    var circulationRequest = createCirculationRequest(HOLD, user, item, UMBRELLA_HOLDINGS_ID, UMBRELLA_INSTANCE_ID);
     circulationClient.createRequest(circulationRequest);
   }
 
