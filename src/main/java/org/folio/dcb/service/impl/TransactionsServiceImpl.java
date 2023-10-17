@@ -39,6 +39,7 @@ public class TransactionsServiceImpl implements TransactionsService {
     log.debug("createCirculationRequest:: creating new transaction request for role {} ", dcbTransaction.getRole());
     checkTransactionExistsAndThrow(dcbTransactionId);
 
+    //if-clause is temp solution
     if (BORROWER == dcbTransaction.getRole()){
       var virtualItem = dcbTransaction.getItem();
       virtualItem.setPickupLocation("3a40852d-49fd-4df2-a1f9-6e2641a6e91f");   // leave it as a temporary solution. checked with Magzhan. Until the field-container will be added into DcbTransaction

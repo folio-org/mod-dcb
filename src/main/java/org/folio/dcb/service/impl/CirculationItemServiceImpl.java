@@ -34,7 +34,7 @@ public class CirculationItemServiceImpl implements CirculationItemService {
       log.debug("fetchOrCreateItem:: trying to find existed Circulation item");
       circulationItemClient.retrieveCirculationItemById(dcbItemId);
     } catch (FeignException.NotFound ex) {
-      log.debug("Circulation item not found by id={}. Creating it.", dcbItemId);
+      log.warn("Circulation item not found by id={}. Creating it.", dcbItemId);
       createCirculationItem(dcbItem);
     }
 

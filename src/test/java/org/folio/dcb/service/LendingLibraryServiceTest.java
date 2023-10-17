@@ -53,34 +53,16 @@ class LendingLibraryServiceTest {
     var patron = createDefaultDcbPatron();
     var user = createUser();
 
-//    when(transactionRepository.existsById(DCB_TRANSACTION_ID)).thenReturn(false);
     when(userService.fetchOrCreateUser(any()))
       .thenReturn(user);
     doNothing().when(requestService).createPageItemRequest(any(), any());
-//    when(transactionMapper.mapToEntity(any(), any())).thenReturn(createTransactionEntity());
 
     var response = lendingLibraryService.createCirculation(DCB_TRANSACTION_ID, createDcbTransactionByRole(LENDER));
-//    verify(transactionRepository).existsById(DCB_TRANSACTION_ID);
-//    verify(transactionRepository).save(any());
-//    verify(transactionMapper).mapToEntity(DCB_TRANSACTION_ID, createDcbTransaction());
     verify(userService).fetchOrCreateUser(patron);
     verify(requestService).createPageItemRequest(user, item);
 
     Assertions.assertEquals(TransactionStatusResponse.StatusEnum.CREATED, response.getStatus());
   }
-
-  /*@Test
-  void createTransactionWithInvalidEntityTest() {
-    var dcbTransaction = createDcbTransaction();
-    when(transactionRepository.existsById(DCB_TRANSACTION_ID)).thenReturn(false);
-    when(userService.fetchOrCreateUser(any()))
-      .thenReturn(createUser());
-    doNothing().when(requestService).createPageItemRequest(any(), any());
-    when(transactionMapper.mapToEntity(any(), any())).thenReturn(null);
-
-    assertThrows(IllegalArgumentException.class, () ->
-      lendingLibraryService.createCirculation(DCB_TRANSACTION_ID, dcbTransaction));
-  }*/
 
   @Test
   void updateTransactionTestFromCreatedToOpen() {
@@ -115,11 +97,9 @@ class LendingLibraryServiceTest {
     TransactionEntity dcbTransaction = createTransactionEntity();
     dcbTransaction.setStatus(TransactionStatus.StatusEnum.OPEN);
     doNothing().when(circulationService).checkInByBarcode(dcbTransaction);
-//    when(transactionRepository.save(dcbTransaction)).thenReturn(dcbTransaction);
     lendingLibraryService.updateTransactionStatus(dcbTransaction, TransactionStatus.builder().status(TransactionStatus.StatusEnum.AWAITING_PICKUP).build());
 
     verify(circulationService).checkInByBarcode(dcbTransaction);
-//    verify(transactionRepository).save(dcbTransaction);
 
     Assertions.assertEquals(TransactionStatus.StatusEnum.AWAITING_PICKUP, dcbTransaction.getStatus());
   }
@@ -129,11 +109,9 @@ class LendingLibraryServiceTest {
     TransactionEntity dcbTransaction = createTransactionEntity();
     dcbTransaction.setStatus(TransactionStatus.StatusEnum.AWAITING_PICKUP);
     doNothing().when(circulationService).checkOutByBarcode(dcbTransaction);
-//    when(transactionRepository.save(dcbTransaction)).thenReturn(dcbTransaction);
     lendingLibraryService.updateTransactionStatus(dcbTransaction, TransactionStatus.builder().status(TransactionStatus.StatusEnum.ITEM_CHECKED_OUT).build());
 
     verify(circulationService).checkOutByBarcode(dcbTransaction);
-//    verify(transactionRepository).save(dcbTransaction);
 
     Assertions.assertEquals(TransactionStatus.StatusEnum.ITEM_CHECKED_OUT, dcbTransaction.getStatus());
   }
@@ -142,10 +120,7 @@ class LendingLibraryServiceTest {
   void transactionStatusFromCheckoutToCheckInTest() {
     TransactionEntity dcbTransaction = createTransactionEntity();
     dcbTransaction.setStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_OUT);
-//    when(transactionRepository.save(dcbTransaction)).thenReturn(dcbTransaction);
     lendingLibraryService.updateTransactionStatus(dcbTransaction, TransactionStatus.builder().status(TransactionStatus.StatusEnum.ITEM_CHECKED_IN).build());
-
-//    verify(transactionRepository).save(dcbTransaction);
 
     Assertions.assertEquals(TransactionStatus.StatusEnum.ITEM_CHECKED_IN, dcbTransaction.getStatus());
   }
