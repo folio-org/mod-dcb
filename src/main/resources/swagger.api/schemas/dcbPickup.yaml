@@ -9,7 +9,7 @@ DcbPickup:
       description: The code which identifies the pickup library
       type: string
     servicePointId:
-      description: The code which identifies the pickup service point
+      description: UUID of the pickup service point
       type: string
     servicePointName:
       description: The name of the pickup service point

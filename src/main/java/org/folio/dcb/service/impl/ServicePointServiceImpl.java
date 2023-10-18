@@ -1,12 +1,12 @@
 package org.folio.dcb.service.impl;
 
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dcb.client.feign.InventoryServicePointClient;
 import org.folio.dcb.domain.dto.DcbPickup;
 import org.folio.dcb.domain.dto.HoldShelfExpiryPeriod;
 import org.folio.dcb.domain.dto.ServicePointRequest;
-import org.folio.dcb.exception.ResourceAlreadyExistException;
 import org.folio.dcb.service.ServicePointService;
 import org.springframework.stereotype.Service;
 
@@ -30,9 +30,13 @@ public class ServicePointServiceImpl implements ServicePointService {
 
      try{
        return servicePointClient.createServicePoint(servicePointRequest);
-     } catch (ResourceAlreadyExistException e){
-       log.debug("Service point already exists");
-       return servicePointRequest;
+     } catch (FeignException.UnprocessableEntity e){
+       if(e.getMessage().contains("Service Point Exists")){
+         log.warn("Service point already exists");
+         return servicePointRequest;
+       } else{
+         throw new RuntimeException(e);
+       }
      }
   }
 
