@@ -1,12 +1,8 @@
 package org.folio.dcb.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
-import org.folio.dcb.domain.entity.TransactionAuditEntity;
 import org.folio.dcb.domain.entity.TransactionEntity;
-import org.folio.dcb.domain.mapper.TransactionAuditMapper;
-import org.folio.dcb.domain.mapper.TransactionMapper;
-import org.folio.dcb.repository.TransactionAuditRepository;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.impl.LendingLibraryServiceImpl;
 import org.folio.dcb.service.impl.TransactionsServiceImpl;
@@ -22,14 +18,15 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
-import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CLOSED;
-import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
-import static org.folio.dcb.utils.EntityUtils.*;
+import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
+import static org.folio.dcb.utils.EntityUtils.createDcbTransaction;
+import static org.folio.dcb.utils.EntityUtils.createTransactionResponse;
 import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class TransactionServiceTest {
@@ -40,31 +37,13 @@ class TransactionServiceTest {
   private LendingLibraryServiceImpl lendingLibraryService;
   @Mock
   private TransactionRepository transactionRepository;
-  @Mock
-  private TransactionMapper transactionMapper;
-  @Mock
-  private TransactionAuditRepository transactionAuditRepository;
-  @Mock
-  private TransactionAuditMapper transactionAuditMapper;
-  @Mock
-  private TransactionsAuditService transactionsAuditService;
-  @Mock
-  private ObjectMapper objectMapper;
 
   @Test
   void createCirculationRequestTest() {
-    TransactionAuditEntity transactionAuditEntity = TransactionAuditEntity.builder().transactionId("123").build();
-    TransactionEntity transactionEntity = createTransactionEntity();
-    transactionEntity.setStatus(CREATED);
-
-    when(lendingLibraryService.createTransaction(any(), any())).thenReturn(createTransactionResponse());
-    when(transactionAuditMapper.mapToEntity(any())).thenReturn(transactionAuditEntity);
-    when(transactionRepository.findById(any())).thenReturn(Optional.ofNullable(transactionEntity));
-
+    when(lendingLibraryService.createTransaction(any(), any()))
+      .thenReturn(createTransactionResponse());
     transactionsService.createCirculationRequest(DCB_TRANSACTION_ID, createDcbTransaction());
-
     verify(lendingLibraryService).createTransaction(DCB_TRANSACTION_ID, createDcbTransaction());
-    verify(transactionsAuditService).createTransactionAuditRecord(any());
   }
 
   @Test
@@ -72,7 +51,7 @@ class TransactionServiceTest {
     var transactionIdUnique = UUID.randomUUID().toString();
     when(transactionRepository.findById(transactionIdUnique))
       .thenReturn(Optional.ofNullable(TransactionEntity.builder()
-        .status(CREATED)
+        .status(TransactionStatus.StatusEnum.CREATED)
         .role(LENDER)
         .build()));
 
@@ -92,16 +71,5 @@ class TransactionServiceTest {
     );
 
     Assertions.assertEquals(String.format("DCB Transaction was not found by id= %s ", transactionIdUnique), exception.getMessage());
-  }
-
-  @Test
-  void createTransactionAuditRecordTest() {
-    TransactionAuditEntity transactionAuditEntity = TransactionAuditEntity.builder().transactionId("123").build();
-    transactionAuditEntity.setBefore("CREATED");
-    TransactionEntity transactionEntity = createTransactionEntity();
-    transactionEntity.setStatus(CLOSED);
-    when(transactionRepository.findById(any())).thenReturn(Optional.of(transactionEntity));
-    transactionsService.createTransactionAuditRecord(transactionAuditEntity, "123", CREATED.getValue());
-    verify(transactionsAuditService, times(1)).createTransactionAuditRecord(any());
   }
 }

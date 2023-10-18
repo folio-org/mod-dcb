@@ -67,8 +67,7 @@ public class LendingLibraryServiceImpl implements LibraryService {
     if (Objects.isNull(transactionEntity)) {
       throw new IllegalArgumentException("Transaction Entity is null");
     }
-    transactionEntity.setStatus(CREATED);
-    transactionRepository.save(transactionEntity);
+    updateTransactionEntity(transactionEntity, CREATED);
   }
 
   @Override

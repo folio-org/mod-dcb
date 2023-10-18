@@ -1,7 +1,7 @@
 package org.folio.dcb.listener;
 
 import org.folio.dcb.controller.BaseIT;
-import org.folio.dcb.domain.dto.TransactionStatus;
+import org.folio.dcb.listener.kafka.CirculationCheckInEventListener;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.impl.LendingLibraryServiceImpl;
 import org.folio.spring.client.AuthnClient;
@@ -44,10 +44,8 @@ class CirculationCheckInEventListenerTest extends BaseIT {
   void handleCheckingInTest() {
     var transactionEntity = createTransactionEntity();
     transactionEntity.setRole(LENDER);
-    transactionEntity.setStatus(TransactionStatus.StatusEnum.CREATED);
     MessageHeaders messageHeaders = getMessageHeaders();
     when(transactionRepository.findTransactionByItemId(any())).thenReturn(Optional.of(transactionEntity));
-    when(transactionRepository.findById(any())).thenReturn(Optional.of(transactionEntity));
     eventListener.handleCheckInEvent(CHECK_IN_EVENT_SAMPLE, messageHeaders);
     Mockito.verify(libraryService, times(1)).updateStatusByTransactionEntity(any());
   }
