@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 public class ServicePointServiceImpl implements ServicePointService {
 
   private final InventoryServicePointClient servicePointClient;
+  public static String HOLD_SHELF_CLOSED_LIBRARY_DATE_MANAGEMENT = "Keep_the_current_due_date";
 
   @Override
   public ServicePointRequest createServicePoint(DcbPickup pickupServicePoint) {

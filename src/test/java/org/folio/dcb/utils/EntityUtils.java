@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import static org.folio.dcb.service.ServicePointService.HOLD_SHELF_CLOSED_LIBRARY_DATE_MANAGEMENT;
+import static org.folio.dcb.service.impl.ServicePointServiceImpl.HOLD_SHELF_CLOSED_LIBRARY_DATE_MANAGEMENT;
 
 public class EntityUtils {
 
