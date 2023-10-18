@@ -17,15 +17,12 @@ import org.springframework.stereotype.Service;
 
 import java.util.Objects;
 
-import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWER;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
 
 @Service
 @RequiredArgsConstructor
 @Log4j2
 public class TransactionsServiceImpl implements TransactionsService {
-
-  private static final String TEMP_VALUE_MATERIAL_TYPE_NAME_BOOK = "book";
 
   @Qualifier("lendingLibraryService")
   private final LibraryService lendingLibraryService;
@@ -38,14 +35,6 @@ public class TransactionsServiceImpl implements TransactionsService {
   public TransactionStatusResponse createCirculationRequest(String dcbTransactionId, DcbTransaction dcbTransaction) {
     log.debug("createCirculationRequest:: creating new transaction request for role {} ", dcbTransaction.getRole());
     checkTransactionExistsAndThrow(dcbTransactionId);
-
-    //if-clause is temp solution
-    if (BORROWER == dcbTransaction.getRole()){
-      var virtualItem = dcbTransaction.getItem();
-      virtualItem.setPickupLocation("3a40852d-49fd-4df2-a1f9-6e2641a6e91f");   // leave it as a temporary solution. checked with Magzhan. Until the field-container will be added into DcbTransaction
-      virtualItem.setMaterialType(TEMP_VALUE_MATERIAL_TYPE_NAME_BOOK);
-//      virtualItem.setLendingLibraryCode(null);  // we don't need it for the borrowing flow
-    }
 
     TransactionStatusResponse circulationStatusResponse =
       switch (dcbTransaction.getRole()) {

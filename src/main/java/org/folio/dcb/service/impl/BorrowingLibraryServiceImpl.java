@@ -2,6 +2,8 @@ package org.folio.dcb.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
+import org.folio.dcb.domain.dto.DcbItem;
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Log4j2
 public class BorrowingLibraryServiceImpl implements LibraryService {
+  private static final String TEMP_VALUE_MATERIAL_TYPE_NAME_BOOK = "book";
 
   private final UserService userService;
   private final RequestService requestService;
@@ -25,6 +28,8 @@ public class BorrowingLibraryServiceImpl implements LibraryService {
   public TransactionStatusResponse createCirculation(String dcbTransactionId, DcbTransaction dcbTransaction) {
     var itemVirtual = dcbTransaction.getItem();
     var patron = dcbTransaction.getPatron();
+    itemVirtual.setPickupLocation("3a40852d-49fd-4df2-a1f9-6e2641a6e91f");   // leave it as a temporary solution. checked with Magzhan. Until the field-container will be added into DcbTransaction
+    checkForMaterialTypeValueAndSetupDefaultIfNeeded(itemVirtual);
 
     var user = userService.fetchUser(patron); //user is needed, but shouldn't be generated. it should be fetched.
     circulationItemService.checkIfItemExistsAndCreate(itemVirtual);
@@ -36,6 +41,12 @@ public class BorrowingLibraryServiceImpl implements LibraryService {
       .item(itemVirtual)
       .patron(patron)
       .build();
+  }
+
+  private void checkForMaterialTypeValueAndSetupDefaultIfNeeded(DcbItem dcbItem) {
+    if(StringUtils.isBlank(dcbItem.getMaterialType())){
+      dcbItem.setMaterialType(TEMP_VALUE_MATERIAL_TYPE_NAME_BOOK);
+    }
   }
 
   @Override
