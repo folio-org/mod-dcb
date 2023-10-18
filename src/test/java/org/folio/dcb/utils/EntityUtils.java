@@ -46,9 +46,9 @@ public class EntityUtils {
   public static org.folio.dcb.domain.dto.ServicePointRequest createServicePointRequest() {
     return org.folio.dcb.domain.dto.ServicePointRequest.builder()
       .id(PICKUP_SERVICE_POINT_ID)
-      .name("TestServicePointName")
-      .code("TestServicePointCode")
-      .discoveryDisplayName("TestDiscoveryDisplayName")
+      .name("DCB_TestLibraryName_TestServicePointCode")
+      .code("DCB_TESTLIBRARYNAME_TESTSERVICEPOINTCODE")
+      .discoveryDisplayName("DCB_TestLibraryName_TestServicePointCode")
       .pickupLocation(true)
       .holdShelfExpiryPeriod(org.folio.dcb.domain.dto.HoldShelfExpiryPeriod.builder().duration(3).intervalId(org.folio.dcb.domain.dto.HoldShelfExpiryPeriod.IntervalIdEnum.DAYS).build())
       .holdShelfClosedLibraryDateManagement(HOLD_SHELF_CLOSED_LIBRARY_DATE_MANAGEMENT)

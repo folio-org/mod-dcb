@@ -35,7 +35,7 @@ public class ServicePointServiceImpl implements ServicePointService {
          log.warn("Service point already exists");
          return servicePointRequest;
        } else{
-         throw new RuntimeException(e);
+         throw new IllegalArgumentException(e);
        }
      }
   }
