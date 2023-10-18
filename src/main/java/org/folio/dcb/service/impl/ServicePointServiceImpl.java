@@ -25,8 +25,7 @@ public class ServicePointServiceImpl implements ServicePointService {
     ServicePointRequest servicePointRequest = createServicePointRequest(
       pickupServicePoint.getServicePointId(),
       getServicePointName(pickupServicePoint.getLibraryName(), pickupServicePoint.getServicePointName()),
-      getServicePointCode(pickupServicePoint.getLibraryName(), pickupServicePoint.getServicePointName()),
-      getServicePointName(pickupServicePoint.getLibraryName(), pickupServicePoint.getServicePointName())
+      getServicePointCode(pickupServicePoint.getLibraryName(), pickupServicePoint.getServicePointName())
     );
 
      try{
@@ -41,12 +40,12 @@ public class ServicePointServiceImpl implements ServicePointService {
      }
   }
 
-  private ServicePointRequest createServicePointRequest(String id, String name, String code, String discoveryDisplayName){
+  private ServicePointRequest createServicePointRequest(String id, String name, String code){
     return ServicePointRequest.builder()
       .id(id)
       .name(name)
       .code(code)
-      .discoveryDisplayName(discoveryDisplayName)
+      .discoveryDisplayName(name)
       .pickupLocation(true)
       .holdShelfExpiryPeriod(HoldShelfExpiryPeriod.builder().duration(3).intervalId(HoldShelfExpiryPeriod.IntervalIdEnum.DAYS).build())
       .holdShelfClosedLibraryDateManagement(HOLD_SHELF_CLOSED_LIBRARY_DATE_MANAGEMENT)
