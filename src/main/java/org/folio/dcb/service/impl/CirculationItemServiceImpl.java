@@ -25,7 +25,7 @@ public class CirculationItemServiceImpl implements CirculationItemService {
 
 
   @Override
-  public void checkIfItemExistsAndCreate(DcbItem dcbItem) {
+  public void checkIfItemExistsAndCreate(DcbItem dcbItem, String pickupServicePointId) {
     var dcbItemId = dcbItem.getId();
     log.debug("checkIfItemExistsAndCreate:: generate Circulation item by DcbItem with id={} if nit doesn't exist.", dcbItemId);
 
@@ -34,12 +34,12 @@ public class CirculationItemServiceImpl implements CirculationItemService {
       circulationItemClient.retrieveCirculationItemById(dcbItemId);
     } catch (FeignException.NotFound ex) {
       log.warn("Circulation item not found by id={}. Creating it.", dcbItemId);
-      createCirculationItem(dcbItem);
+      createCirculationItem(dcbItem, pickupServicePointId);
     }
 
   }
 
-  private void createCirculationItem(DcbItem item){
+  private void createCirculationItem(DcbItem item, String pickupServicePointId){
     var materialTypeId = itemService.fetchItemMaterialTypeIdByMaterialTypeName(item.getMaterialType());
     var loanTypeId = itemService.fetchItemLoanTypeIdByLoanTypeName(INITIAL_CFG_LOAN_TYPE_VALUE);
 
@@ -52,7 +52,7 @@ public class CirculationItemServiceImpl implements CirculationItemService {
         .instanceTitle(item.getTitle())
         .materialTypeId(materialTypeId)
         .permanentLoanTypeId(loanTypeId)
-        .pickupLocation(item.getPickupLocation())
+        .pickupLocation(pickupServicePointId)
         .build();
 
     circulationItemClient.createCirculationItem(item.getId(), circulationItemRequest);

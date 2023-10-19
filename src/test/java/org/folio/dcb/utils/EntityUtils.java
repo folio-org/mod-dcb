@@ -44,7 +44,6 @@ public class EntityUtils {
    * while requesting it by the query, including such a patron id
    * */
   public static String EXISTED_PATRON_ID = "284056f5-0670-4e1e-9e2f-61b9f1ee2d18";
-  public static String PATRON_ID = "571b0a2c-9456-40b5-a449-d41fe6017082";
   public static String PICKUP_SERVICE_POINT_ID = "0da8c1e4-1c1f-4dd9-b189-70ba978b7d94";
   public static String DCB_TRANSACTION_ID = "571b0a2c-8883-40b5-a449-d41fe6017082";
   public static String DCB_USER_TYPE = "dcb";
@@ -58,7 +57,6 @@ public class EntityUtils {
       )
       .role(role)
       .pickup(createDcbPickup())
-      .role(DcbTransaction.RoleEnum.LENDER)
       .build();
   }
 

@@ -25,16 +25,15 @@ public class BorrowingLibraryServiceImpl implements LibraryService {
   private final CirculationItemService circulationItemService;
 
   @Override
-  public TransactionStatusResponse createCirculation(String dcbTransactionId, DcbTransaction dcbTransaction) {
+  public TransactionStatusResponse createCirculation(String dcbTransactionId, DcbTransaction dcbTransaction, String pickupServicePointId) {
     var itemVirtual = dcbTransaction.getItem();
     var patron = dcbTransaction.getPatron();
-    itemVirtual.setPickupLocation("3a40852d-49fd-4df2-a1f9-6e2641a6e91f");   // leave it as a temporary solution. checked with Magzhan. Until the field-container will be added into DcbTransaction
     checkForMaterialTypeValueAndSetupDefaultIfNeeded(itemVirtual);
 
     var user = userService.fetchUser(patron); //user is needed, but shouldn't be generated. it should be fetched.
-    circulationItemService.checkIfItemExistsAndCreate(itemVirtual);
+    circulationItemService.checkIfItemExistsAndCreate(itemVirtual, pickupServicePointId);
 
-    requestService.createHoldItemRequest(user, itemVirtual);
+    requestService.createHoldItemRequest(user, itemVirtual, pickupServicePointId);
 
     return TransactionStatusResponse.builder()
       .status(TransactionStatusResponse.StatusEnum.CREATED)

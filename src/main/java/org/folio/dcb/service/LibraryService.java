@@ -12,7 +12,7 @@ public interface LibraryService {
    * @param dcbTransaction - dcbTransaction Entity
    * @return TransactionStatusResponse
    */
-  TransactionStatusResponse createCirculation(String dcbTransactionId, DcbTransaction dcbTransaction);
+  TransactionStatusResponse createCirculation(String dcbTransactionId, DcbTransaction dcbTransaction, String pickupServicePointId);
 
   /**
    * Update transaction status based on transactionEntity

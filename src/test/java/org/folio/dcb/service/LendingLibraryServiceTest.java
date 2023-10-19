@@ -18,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
+import static org.folio.dcb.utils.EntityUtils.PICKUP_SERVICE_POINT_ID;
 import static org.folio.dcb.utils.EntityUtils.createDcbItem;
 import static org.folio.dcb.utils.EntityUtils.createDefaultDcbPatron;
 import static org.folio.dcb.utils.EntityUtils.createDcbTransactionByRole;
@@ -55,11 +56,11 @@ class LendingLibraryServiceTest {
 
     when(userService.fetchOrCreateUser(any()))
       .thenReturn(user);
-    doNothing().when(requestService).createPageItemRequest(any(), any());
+    doNothing().when(requestService).createPageItemRequest(any(), any(), any());
 
-    var response = lendingLibraryService.createCirculation(DCB_TRANSACTION_ID, createDcbTransactionByRole(LENDER));
+    var response = lendingLibraryService.createCirculation(DCB_TRANSACTION_ID, createDcbTransactionByRole(LENDER), PICKUP_SERVICE_POINT_ID);
     verify(userService).fetchOrCreateUser(patron);
-    verify(requestService).createPageItemRequest(user, item);
+    verify(requestService).createPageItemRequest(user, item, PICKUP_SERVICE_POINT_ID);
 
     Assertions.assertEquals(TransactionStatusResponse.StatusEnum.CREATED, response.getStatus());
   }

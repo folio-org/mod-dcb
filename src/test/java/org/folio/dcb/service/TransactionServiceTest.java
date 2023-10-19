@@ -46,10 +46,10 @@ class TransactionServiceTest {
   void createLendingCirculationRequestTest() {
     when(transactionMapper.mapToEntity(any(), any())).thenReturn(createTransactionEntity());
 
-    when(lendingLibraryService.createCirculation(any(), any()))
+    when(lendingLibraryService.createCirculation(any(), any(), any()))
       .thenReturn(createTransactionResponse());
     transactionsService.createCirculationRequest(DCB_TRANSACTION_ID, createDcbTransactionByRole(LENDER));
-    verify(lendingLibraryService).createCirculation(DCB_TRANSACTION_ID, createDcbTransactionByRole(LENDER));
+    verify(lendingLibraryService).createCirculation(DCB_TRANSACTION_ID, createDcbTransactionByRole(LENDER), any());
   }
 
   @Test
