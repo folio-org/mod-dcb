@@ -21,7 +21,10 @@ import java.util.UUID;
 
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
+import static org.folio.dcb.utils.EntityUtils.PICKUP_SERVICE_POINT_ID;
+import static org.folio.dcb.utils.EntityUtils.createDcbPickup;
 import static org.folio.dcb.utils.EntityUtils.createDcbTransactionByRole;
+import static org.folio.dcb.utils.EntityUtils.createServicePointRequest;
 import static org.folio.dcb.utils.EntityUtils.createTransactionEntity;
 import static org.folio.dcb.utils.EntityUtils.createTransactionResponse;
 import static org.junit.Assert.assertThrows;
@@ -42,14 +45,18 @@ class TransactionServiceTest {
   private TransactionRepository transactionRepository;
   @Mock
   private TransactionMapper transactionMapper;
+  @Mock
+  private ServicePointService servicePointService;
+
   @Test
   void createLendingCirculationRequestTest() {
+    when(servicePointService.createServicePoint(createDcbPickup())).thenReturn(createServicePointRequest());
     when(transactionMapper.mapToEntity(any(), any())).thenReturn(createTransactionEntity());
 
     when(lendingLibraryService.createCirculation(any(), any(), any()))
       .thenReturn(createTransactionResponse());
     transactionsService.createCirculationRequest(DCB_TRANSACTION_ID, createDcbTransactionByRole(LENDER));
-    verify(lendingLibraryService).createCirculation(DCB_TRANSACTION_ID, createDcbTransactionByRole(LENDER), any());
+    verify(lendingLibraryService).createCirculation(DCB_TRANSACTION_ID, createDcbTransactionByRole(LENDER), PICKUP_SERVICE_POINT_ID);
   }
 
   @Test
