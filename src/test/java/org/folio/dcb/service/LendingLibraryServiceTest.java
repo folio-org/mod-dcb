@@ -26,6 +26,8 @@ import static org.folio.dcb.utils.EntityUtils.createDcbTransaction;
 import static org.folio.dcb.utils.EntityUtils.createTransactionEntity;
 import static org.folio.dcb.utils.EntityUtils.createUser;
 import static org.folio.dcb.utils.EntityUtils.createTransactionStatus;
+import static org.folio.dcb.utils.EntityUtils.createDcbPickup;
+import static org.folio.dcb.utils.EntityUtils.createServicePointRequest;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -49,18 +51,22 @@ class LendingLibraryServiceTest {
   private TransactionMapper transactionMapper;
 
   @Mock
+  private ServicePointService servicePointService;
+
+  @Mock
   private CirculationServiceImpl circulationService;
 
   @Test
   void createTransactionTest() {
     var item = createDcbItem();
     var patron = createDcbPatron();
+    var pickup = createDcbPickup();
     var user = createUser();
 
     when(transactionRepository.existsById(DCB_TRANSACTION_ID)).thenReturn(false);
-    when(userService.fetchOrCreateUser(any()))
-      .thenReturn(user);
-    doNothing().when(requestService).createPageItemRequest(any(), any());
+    when(userService.fetchOrCreateUser(any())).thenReturn(user);
+    when(servicePointService.createServicePoint(any())).thenReturn(createServicePointRequest());
+    doNothing().when(requestService).createPageItemRequest(any(), any(), any());
     when(transactionMapper.mapToEntity(any(), any())).thenReturn(createTransactionEntity());
 
     var response = lendingLibraryService.createTransaction(DCB_TRANSACTION_ID, createDcbTransaction());
@@ -68,7 +74,7 @@ class LendingLibraryServiceTest {
     verify(transactionRepository).save(any());
     verify(transactionMapper).mapToEntity(DCB_TRANSACTION_ID, createDcbTransaction());
     verify(userService).fetchOrCreateUser(patron);
-    verify(requestService).createPageItemRequest(user, item);
+    verify(requestService).createPageItemRequest(user, item, pickup.getServicePointId());
 
     Assertions.assertEquals(TransactionStatusResponse.StatusEnum.CREATED, response.getStatus());
   }
@@ -87,7 +93,8 @@ class LendingLibraryServiceTest {
     when(transactionRepository.existsById(DCB_TRANSACTION_ID)).thenReturn(false);
     when(userService.fetchOrCreateUser(any()))
       .thenReturn(createUser());
-    doNothing().when(requestService).createPageItemRequest(any(), any());
+    when(servicePointService.createServicePoint(any())).thenReturn(createServicePointRequest());
+    doNothing().when(requestService).createPageItemRequest(any(), any(), any());
     when(transactionMapper.mapToEntity(any(), any())).thenReturn(null);
 
     assertThrows(IllegalArgumentException.class, () ->

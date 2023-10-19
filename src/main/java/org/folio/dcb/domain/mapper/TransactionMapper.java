@@ -8,22 +8,25 @@ import org.springframework.stereotype.Component;
 public class TransactionMapper {
 
   public TransactionEntity mapToEntity(String transactionId, DcbTransaction dcbTransaction) {
-    if(dcbTransaction == null || dcbTransaction.getItem() == null || dcbTransaction.getPatron() == null) {
+    if(dcbTransaction == null || dcbTransaction.getItem() == null || dcbTransaction.getPatron() == null || dcbTransaction.getPickup() == null) {
       return null;
     }
 
     var item = dcbTransaction.getItem();
     var patron = dcbTransaction.getPatron();
+    var pickup = dcbTransaction.getPickup();
+
     return TransactionEntity.builder()
       .id(transactionId)
-
       .itemId(item.getId())
       .itemBarcode(item.getBarcode())
       .itemTitle(item.getTitle())
-      .pickupLocation(item.getPickupLocation())
       .materialType(item.getMaterialType())
       .lendingLibraryCode(item.getLendingLibraryCode())
-
+      .servicePointId(pickup.getServicePointId())
+      .servicePointName(pickup.getServicePointName())
+      .pickupLibraryCode(pickup.getLibraryCode())
+      .pickupLibraryName(pickup.getLibraryName())
       .patronBarcode(patron.getBarcode())
       .patronId(patron.getId())
       .patronGroup(patron.getGroup())

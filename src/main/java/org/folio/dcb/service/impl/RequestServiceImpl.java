@@ -26,16 +26,16 @@ public class RequestServiceImpl implements RequestService {
   private final CirculationClient circulationClient;
 
   @Override
-  public void createPageItemRequest(User user, DcbItem item) {
+  public void createPageItemRequest(User user, DcbItem item, String pickupServicePointId) {
     log.debug("createPageItemRequest:: creating a new page request for userBarcode {} , itemBarcode {}",
       user.getBarcode(), item.getBarcode());
     var inventoryItem = itemService.fetchItemDetailsById(item.getId());
     var inventoryHolding = holdingsService.fetchInventoryHoldingDetailsByHoldingId(inventoryItem.getHoldingsRecordId());
-    var circulationRequest = createCirculationRequest(user, item, inventoryItem.getHoldingsRecordId(), inventoryHolding.getInstanceId());
+    var circulationRequest = createCirculationRequest(user, item, inventoryItem.getHoldingsRecordId(), inventoryHolding.getInstanceId(), pickupServicePointId);
     circulationClient.createRequest(circulationRequest);
   }
 
-  private CirculationRequest createCirculationRequest(User user, DcbItem item, String holdingsId, String instanceId) {
+  private CirculationRequest createCirculationRequest(User user, DcbItem item, String holdingsId, String instanceId, String pickupServicePointId) {
     return CirculationRequest.builder()
       .id(UUID.randomUUID().toString())
       .requesterId(UUID.fromString(user.getId()))
@@ -48,8 +48,7 @@ public class RequestServiceImpl implements RequestService {
       .fulfillmentPreference(CirculationRequest.FulfillmentPreferenceEnum.HOLD_SHELF)
       .requester(Requester.builder().barcode(user.getBarcode()).personal(user.getPersonal()).build())
       .item(Item.builder().barcode(item.getBarcode()).build())
-      //As we don't know the servicePoint logic yet, proceeding with hardcoded value
-      .pickupServicePointId("3a40852d-49fd-4df2-a1f9-6e2641a6e91f")
+      .pickupServicePointId(pickupServicePointId)
       .build();
   }
 
