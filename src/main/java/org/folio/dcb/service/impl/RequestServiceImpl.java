@@ -32,24 +32,24 @@ public class RequestServiceImpl implements RequestService {
   private final CirculationClient circulationClient;
 
   @Override
-  public void createPageItemRequest(User user, DcbItem item) {
+  public void createPageItemRequest(User user, DcbItem item, String pickupServicePointId) {
     log.debug("createPageItemRequest:: creating a new page request for userBarcode {} , itemBarcode {}",
       user.getBarcode(), item.getBarcode());
     var inventoryItem = itemService.fetchItemDetailsById(item.getId());
     var inventoryHolding = holdingsService.fetchInventoryHoldingDetailsByHoldingId(inventoryItem.getHoldingsRecordId());
-    var circulationRequest = createCirculationRequest(PAGE, user, item, inventoryItem.getHoldingsRecordId(), inventoryHolding.getInstanceId());
+    var circulationRequest = createCirculationRequest(PAGE, user, item, inventoryItem.getHoldingsRecordId(), inventoryHolding.getInstanceId(), pickupServicePointId);
     circulationClient.createRequest(circulationRequest);
   }
 
   @Override
-  public void createHoldItemRequest(User user, DcbItem item) {
+  public void createHoldItemRequest(User user, DcbItem item, String pickupServicePointId) {
     log.debug("createHoldItemRequest:: creating a new hold request for userBarcode {} , itemBarcode {}",
       user.getBarcode(), item.getBarcode());
-    var circulationRequest = createCirculationRequest(HOLD, user, item, UMBRELLA_HOLDINGS_ID, UMBRELLA_INSTANCE_ID);
+    var circulationRequest = createCirculationRequest(HOLD, user, item, UMBRELLA_HOLDINGS_ID, UMBRELLA_INSTANCE_ID, pickupServicePointId);
     circulationClient.createRequest(circulationRequest);
   }
 
-  private CirculationRequest createCirculationRequest(CirculationRequest.RequestTypeEnum type, User user, DcbItem item, String holdingsId, String instanceId) {
+  private CirculationRequest createCirculationRequest(CirculationRequest.RequestTypeEnum type, User user, DcbItem item, String holdingsId, String instanceId, String pickupServicePointId) {
     return CirculationRequest.builder()
       .id(UUID.randomUUID().toString())
       .requesterId(UUID.fromString(user.getId()))
@@ -62,8 +62,7 @@ public class RequestServiceImpl implements RequestService {
       .fulfillmentPreference(CirculationRequest.FulfillmentPreferenceEnum.HOLD_SHELF)
       .requester(Requester.builder().barcode(user.getBarcode()).personal(user.getPersonal()).build())
       .item(Item.builder().barcode(item.getBarcode()).build())
-      //As we don't know the servicePoint logic yet, proceeding with hardcoded value
-      .pickupServicePointId("3a40852d-49fd-4df2-a1f9-6e2641a6e91f") // keep in mind ---> I need to have it not hard coded. Connect Magzhan for discussion
+      .pickupServicePointId(pickupServicePointId)
       .build();
   }
 
