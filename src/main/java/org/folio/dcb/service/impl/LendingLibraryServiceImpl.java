@@ -2,6 +2,7 @@ package org.folio.dcb.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.folio.dcb.domain.dto.ServicePointRequest;
 import org.folio.dcb.domain.mapper.TransactionMapper;
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.TransactionStatus;
@@ -12,6 +13,7 @@ import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.CirculationService;
 import org.folio.dcb.service.LibraryService;
 import org.folio.dcb.service.RequestService;
+import org.folio.dcb.service.ServicePointService;
 import org.folio.dcb.service.UserService;
 import org.springframework.stereotype.Service;
 
@@ -34,6 +36,7 @@ public class LendingLibraryServiceImpl implements LibraryService {
   private final TransactionRepository transactionRepository;
   private final TransactionMapper transactionMapper;
   private final CirculationService circulationService;
+  private final ServicePointService servicePointService;
 
   @Override
   public TransactionStatusResponse createTransaction(String dcbTransactionId, DcbTransaction dcbTransaction) {
@@ -45,7 +48,8 @@ public class LendingLibraryServiceImpl implements LibraryService {
     var patron = dcbTransaction.getPatron();
 
     var user = userService.fetchOrCreateUser(patron);
-    requestService.createPageItemRequest(user, item);
+    ServicePointRequest pickupServicePoint = servicePointService.createServicePoint(dcbTransaction.getPickup());
+    requestService.createPageItemRequest(user, item, pickupServicePoint.getId());
     saveDcbTransaction(dcbTransactionId, dcbTransaction);
 
     return TransactionStatusResponse.builder()

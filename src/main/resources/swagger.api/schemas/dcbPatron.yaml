@@ -6,11 +6,11 @@ DcbPatron:
       description: The unique identifier for the patron making the request as known in the requesting library
       $ref: "uuid.yaml"
     group:
-      description: The patron group associated with the requesting patron as found in ReShare DCB
+      description: The patron group associated with the requesting patron
       type: string
     barcode:
-      description: The barcode of the patron as found in ReShare DCB
+      description: The barcode of the patron
       type: string
     borrowingLibraryCode:
-      description: The code in ReShare DCB which identifies the borrowing library
+      description: The code which identifies the borrowing library
       type: string

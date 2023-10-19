@@ -37,6 +37,19 @@
           "Content-Type": "application/json"
         }
       }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "url": "/service-points"
+      },
+      "response": {
+        "status": 200,
+        "body": "{\n    \"id\": \"0da8c1e4-1c1f-4dd9-b189-70ba978b7d96\",\n    \"name\": \"DCBSP12345\",\n    \"code\": \"DCBSP12345\",\n    \"discoveryDisplayName\": \"DCBSP12345\",\n    \"pickupLocation\": true,\n    \"holdShelfExpiryPeriod\": {\n        \"duration\": 3,\n        \"intervalId\": \"Days\"\n    },\n    \"holdShelfClosedLibraryDateManagement\": \"Keep_the_current_due_date\",\n    \"staffSlips\": [],\n    \"metadata\": {\n        \"createdDate\": \"2023-10-13T08:10:02.573+00:00\",\n        \"createdByUserId\": \"eba2aed6-1c70-50ac-8757-8ade5b6a11fd\",\n        \"updatedDate\": \"2023-10-13T08:10:02.573+00:00\",\n        \"updatedByUserId\": \"eba2aed6-1c70-50ac-8757-8ade5b6a11fd\"\n    }\n}",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
     }
   ]
 }
