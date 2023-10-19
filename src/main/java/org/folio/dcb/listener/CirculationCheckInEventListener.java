@@ -23,6 +23,9 @@ public class CirculationCheckInEventListener {
   public static final String CHECK_IN_LISTENER_ID = "check-in-listener-id";
   @Qualifier("lendingLibraryService")
   private final LibraryService lendingLibraryService;
+
+  @Qualifier("borrowingPickupLibraryService")
+  private final LibraryService borrowingPickupLibraryService;
   private final TransactionRepository transactionRepository;
   private final SystemUserScopedExecutionService systemUserScopedExecutionService;
 
@@ -40,6 +43,7 @@ public class CirculationCheckInEventListener {
           .ifPresent(transactionEntity -> {
             switch (transactionEntity.getRole()) {
               case LENDER ->  lendingLibraryService.updateStatusByTransactionEntity(transactionEntity);
+              case BORROWING_PICKUP -> borrowingPickupLibraryService.updateStatusByTransactionEntity(transactionEntity);
               default -> throw new IllegalArgumentException("Other roles are not implemented yet");
             }
           })

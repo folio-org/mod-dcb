@@ -9,7 +9,7 @@ CirculationItemRequest:
       description: the system assigned unique ID of the holdings record
       $ref: "uuid.yaml"
     status:
-      type: string
+      $ref: "ItemStatus.yaml#/ItemStatus"
     materialTypeId:
       type: string
     permanentLoanTypeId:
