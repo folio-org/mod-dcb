@@ -35,8 +35,11 @@ public class TransactionEntity extends AuditableEntity {
   private String itemId;
   private String itemTitle;
   private String itemBarcode;
-  private String pickupLocation;
+  private String servicePointId;
+  private String servicePointName;
   private String materialType;
+  private String pickupLibraryName;
+  private String pickupLibraryCode;
   private String lendingLibraryCode;
   @Convert(converter = UUIDConverter.class)
   private String patronId;
@@ -47,5 +50,6 @@ public class TransactionEntity extends AuditableEntity {
   private StatusEnum status;
   @Enumerated(EnumType.STRING)
   private DcbTransaction.RoleEnum role;
+
 
 }
