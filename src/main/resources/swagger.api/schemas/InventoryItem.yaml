@@ -9,14 +9,5 @@ InventoryItem:
       description: ID of the holdings record the item is a member of
       $ref: "uuid.yaml"
     status:
-      $ref: "InventoryItem.yaml#/Status"
-Status:
-  type: object
-  properties:
-    name:
       $ref: "ItemStatus.yaml#/ItemStatus"
-    date:
-      description: Date of the current item state. E.g. date set when item state was changed by the Check out app
-      type: string
-      format: date-time
 

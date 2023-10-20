@@ -16,7 +16,7 @@ import org.folio.dcb.service.RequestService;
 import org.folio.dcb.service.UserService;
 import org.springframework.stereotype.Service;
 
-import static org.folio.dcb.domain.dto.ItemStatus.AWAITING_PICKUP;
+import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.AWAITING_PICKUP;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
 
 @Service("borrowingLibraryServiceImpl")
@@ -64,8 +64,11 @@ public class BorrowingLibraryServiceImpl implements LibraryService {
     log.debug("updateTransactionStatus:: Received checkIn event for itemId: {}", transactionEntity.getItemId());
     if(OPEN == transactionEntity.getStatus()) {
       CirculationItemRequest circulationItemRequest = circulationItemService.fetchItemById(transactionEntity.getItemId());
-      if(AWAITING_PICKUP == circulationItemRequest.getStatus()) {
+      if(AWAITING_PICKUP == circulationItemRequest.getStatus().getName()) {
         updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.AWAITING_PICKUP);
+      } else {
+        log.info("updateStatusByTransactionEntity:: Item status is {} . So status of transaction is not updated",
+          circulationItemRequest.getStatus().getName());
       }
     }
   }
