@@ -1,0 +1,23 @@
+MaterialTypeCollection:
+  type: object
+  properties:
+    mtypes:
+      type: array
+      description: "List of material types"
+      items:
+        $ref: "MaterialType.yaml#/MaterialType"
+    totalRecords:
+      type: integer
+  additionalProperties: false
+MaterialType:
+  type: object
+  properties:
+    id:
+      description: Item id
+      $ref: "uuid.yaml"
+    name:
+      description: label for the material type
+      type: string
+    source:
+      description: origin of the material type record
+      type: string

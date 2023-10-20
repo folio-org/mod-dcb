@@ -10,4 +10,13 @@ public interface UserService {
    * @return user
    */
   User fetchOrCreateUser(DcbPatron dcbPatron);
+
+  /**
+   * Retrieving User.
+   * @param dcbPatron - dcbPatronEntity
+   * It's strongly expected to provide input param content referenced to an existing user.
+   * @return user
+   *
+   * * */
+  User fetchUser(DcbPatron dcbPatron);
 }

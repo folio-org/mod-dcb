@@ -34,44 +34,24 @@ public class LendingLibraryServiceImpl implements LibraryService {
   private final UserService userService;
   private final RequestService requestService;
   private final TransactionRepository transactionRepository;
-  private final TransactionMapper transactionMapper;
   private final CirculationService circulationService;
-  private final ServicePointService servicePointService;
 
   @Override
-  public TransactionStatusResponse createTransaction(String dcbTransactionId, DcbTransaction dcbTransaction) {
+  public TransactionStatusResponse createCirculation(String dcbTransactionId, DcbTransaction dcbTransaction, String pickupServicePointId) {
     log.debug("createTransaction:: creating a new transaction with dcbTransactionId {} , dcbTransaction {}",
       dcbTransactionId, dcbTransaction);
 
-    checkTransactionExistsAndThrow(dcbTransactionId);
     var item = dcbTransaction.getItem();
     var patron = dcbTransaction.getPatron();
 
     var user = userService.fetchOrCreateUser(patron);
-    ServicePointRequest pickupServicePoint = servicePointService.createServicePoint(dcbTransaction.getPickup());
-    requestService.createPageItemRequest(user, item, pickupServicePoint.getId());
-    saveDcbTransaction(dcbTransactionId, dcbTransaction);
+    requestService.createPageItemRequest(user, item, pickupServicePointId);
 
     return TransactionStatusResponse.builder()
       .status(TransactionStatusResponse.StatusEnum.CREATED)
       .item(item)
       .patron(patron)
       .build();
-  }
-
-  private void checkTransactionExistsAndThrow(String dcbTransactionId) {
-    if(transactionRepository.existsById(dcbTransactionId)) {
-      throw new ResourceAlreadyExistException(
-        String.format("unable to create transaction with id %s as it already exists", dcbTransactionId));
-    }
-  }
-
-  private void saveDcbTransaction(String dcbTransactionId, DcbTransaction dcbTransaction) {
-    TransactionEntity transactionEntity = transactionMapper.mapToEntity(dcbTransactionId, dcbTransaction);
-    if (Objects.isNull(transactionEntity)) {
-      throw new IllegalArgumentException("Transaction Entity is null");
-    }
-    updateTransactionEntity(transactionEntity, CREATED);
   }
 
   @Override
