@@ -1,0 +1,39 @@
+ServicePointRequest:
+  description: Request to create Pickup Service Point
+  type: object
+  properties:
+    id:
+      description: ID of the service point
+      type: string
+    name:
+      description: Name of the service point
+      type: string
+    code:
+      description: Code of the service point
+      type: string
+    discoveryDisplayName:
+      description: Display name of the service point
+      type: string
+    pickupLocation:
+      description: Is service point Pickup service point
+      type: boolean
+    holdShelfClosedLibraryDateManagement:
+      description: Hold Shelf Closed Library Date
+      type: string
+    holdShelfExpiryPeriod:
+      $ref: ServicePointRequest.yaml#/HoldShelfExpiryPeriod
+
+
+HoldShelfExpiryPeriod:
+  description: Hold Shelf Expiry Period
+  type: object
+  properties:
+    duration:
+      description: Duration Hold Shelf Expiry Period
+      type: integer
+    intervalId:
+      description: Interval Hold Shelf Expiry Period
+      type: string
+      enum:
+        - Days
+        - Weeks

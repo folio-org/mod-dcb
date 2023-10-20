@@ -2,6 +2,7 @@ package org.folio.dcb.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.folio.dcb.domain.dto.ServicePointRequest;
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
@@ -10,6 +11,7 @@ import org.folio.dcb.domain.mapper.TransactionMapper;
 import org.folio.dcb.exception.ResourceAlreadyExistException;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.LibraryService;
+import org.folio.dcb.service.ServicePointService;
 import org.folio.dcb.service.TransactionsService;
 import org.folio.spring.exception.NotFoundException;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -17,7 +19,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Objects;
 
-import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWER;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
 
 @Service
@@ -25,31 +26,24 @@ import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
 @Log4j2
 public class TransactionsServiceImpl implements TransactionsService {
 
-  private static final String TEMP_VALUE_MATERIAL_TYPE_NAME_BOOK = "book";
-
   @Qualifier("lendingLibraryService")
   private final LibraryService lendingLibraryService;
   @Qualifier("borrowingLibraryServiceImpl")
   private final LibraryService borrowingLibraryServiceImpl;
   private final TransactionRepository transactionRepository;
   private final TransactionMapper transactionMapper;
+  private final ServicePointService servicePointService;
 
   @Override
   public TransactionStatusResponse createCirculationRequest(String dcbTransactionId, DcbTransaction dcbTransaction) {
     log.debug("createCirculationRequest:: creating new transaction request for role {} ", dcbTransaction.getRole());
     checkTransactionExistsAndThrow(dcbTransactionId);
-
-    if (BORROWER == dcbTransaction.getRole()){
-      var virtualItem = dcbTransaction.getItem();
-      virtualItem.setPickupLocation("3a40852d-49fd-4df2-a1f9-6e2641a6e91f");   // leave it as a temporary solution. checked with Magzhan. Until the field-container will be added into DcbTransaction
-      virtualItem.setMaterialType(TEMP_VALUE_MATERIAL_TYPE_NAME_BOOK);
-//      virtualItem.setLendingLibraryCode(null);  // we don't need it for the borrowing flow
-    }
+    ServicePointRequest pickupServicePoint = servicePointService.createServicePoint(dcbTransaction.getPickup());
 
     TransactionStatusResponse circulationStatusResponse =
       switch (dcbTransaction.getRole()) {
-        case LENDER -> lendingLibraryService.createCirculation(dcbTransactionId, dcbTransaction);
-        case BORROWER -> borrowingLibraryServiceImpl.createCirculation(dcbTransactionId, dcbTransaction);
+        case LENDER -> lendingLibraryService.createCirculation(dcbTransactionId, dcbTransaction, pickupServicePoint.getId());
+        case BORROWER -> borrowingLibraryServiceImpl.createCirculation(dcbTransactionId, dcbTransaction, pickupServicePoint.getId());
         default -> throw new IllegalArgumentException("Other roles are not implemented");
       };
 

@@ -5,7 +5,8 @@ import org.folio.dcb.domain.dto.DcbItem;
 
 public interface CirculationItemService {
 
-  void checkIfItemExistsAndCreate(DcbItem dcbTransaction);
+  void checkIfItemExistsAndCreate(DcbItem dcbTransaction, String pickupServicePointId);
+
   CirculationItemRequest fetchItemById(String itemId);
 
 }

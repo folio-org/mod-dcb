@@ -11,13 +11,13 @@ import org.folio.dcb.service.CirculationItemService;
 import org.folio.dcb.service.ItemService;
 import org.springframework.stereotype.Service;
 
+import static org.folio.dcb.domain.dto.Status.NameEnum.IN_TRANSIT;
 
 @Service
 @Log4j2
 @RequiredArgsConstructor
 public class CirculationItemServiceImpl implements CirculationItemService {
 
-  private static final String TEMP_VALUE_MATERIAL_TYPE_NAME_BOOK = "book";
   private static final String TEMP_VALUE_HOLDING_ID = "10cd3a5a-d36f-4c7a-bc4f-e1ae3cf820c9";
   private static final String INITIAL_CFG_LOAN_TYPE_VALUE = "Can circulate";
 
@@ -26,7 +26,7 @@ public class CirculationItemServiceImpl implements CirculationItemService {
 
 
   @Override
-  public void checkIfItemExistsAndCreate(DcbItem dcbItem) {
+  public void checkIfItemExistsAndCreate(DcbItem dcbItem, String pickupServicePointId) {
     var dcbItemId = dcbItem.getId();
     log.debug("checkIfItemExistsAndCreate:: generate Circulation item by DcbItem with id={} if nit doesn't exist.", dcbItemId);
 
@@ -34,8 +34,8 @@ public class CirculationItemServiceImpl implements CirculationItemService {
       log.debug("fetchOrCreateItem:: trying to find existed Circulation item");
       circulationItemClient.retrieveCirculationItemById(dcbItemId);
     } catch (FeignException.NotFound ex) {
-      log.debug("Circulation item not found by id={}. Creating it.", dcbItemId);
-      createCirculationItem(dcbItem);
+      log.warn("Circulation item not found by id={}. Creating it.", dcbItemId);
+      createCirculationItem(dcbItem, pickupServicePointId);
     }
 
   }
@@ -45,20 +45,20 @@ public class CirculationItemServiceImpl implements CirculationItemService {
     return circulationItemClient.retrieveCirculationItemById(itemId);
   }
 
-  private void createCirculationItem(DcbItem item){
-    var materialTypeId = itemService.fetchItemMaterialTypeIdByMaterialTypeName(TEMP_VALUE_MATERIAL_TYPE_NAME_BOOK);
+  private void createCirculationItem(DcbItem item, String pickupServicePointId){
+    var materialTypeId = itemService.fetchItemMaterialTypeIdByMaterialTypeName(item.getMaterialType());
     var loanTypeId = itemService.fetchItemLoanTypeIdByLoanTypeName(INITIAL_CFG_LOAN_TYPE_VALUE);
 
     CirculationItemRequest circulationItemRequest =
       CirculationItemRequest.builder()
         .id(item.getId())
         .itemBarcode(item.getBarcode())
-        .status(ItemStatus.IN_TRANSIT)
+        .status(IN_TRANSIT.getValue())
         .holdingsRecordId(TEMP_VALUE_HOLDING_ID)
         .instanceTitle(item.getTitle())
         .materialTypeId(materialTypeId)
         .permanentLoanTypeId(loanTypeId)
-        .pickupLocation(item.getPickupLocation())
+        .pickupLocation(pickupServicePointId)
         .build();
 
     circulationItemClient.createCirculationItem(item.getId(), circulationItemRequest);

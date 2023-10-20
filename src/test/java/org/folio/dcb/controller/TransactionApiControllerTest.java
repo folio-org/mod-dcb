@@ -67,7 +67,7 @@ class TransactionApiControllerTest extends BaseIT {
     removeExistedTransactionFromDbIfSoExists();
 
     DcbItem expected = createDcbItem();
-    expected.setPickupLocation("3a40852d-49fd-4df2-a1f9-6e2641a6e91f"); // temporary stub
+//    expected.setPickupLocation("3a40852d-49fd-4df2-a1f9-6e2641a6e91f"); // temporary stub
 
     this.mockMvc.perform(
         post("/transactions/" + DCB_TRANSACTION_ID)

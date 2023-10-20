@@ -39,8 +39,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class BaseIT {
   @Autowired
   protected MockMvc mockMvc;
-//  @MockBean
-//  private UsersClient usersClient;
   public static WireMockServer wireMockServer;
   protected static final String TOKEN = "test_token";
   public static final String TENANT = "diku";
