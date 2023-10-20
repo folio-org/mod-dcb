@@ -45,7 +45,7 @@ class CirculationCheckInEventListenerTest extends BaseIT {
     var transactionEntity = createTransactionEntity();
     transactionEntity.setRole(LENDER);
     MessageHeaders messageHeaders = getMessageHeaders();
-    when(transactionRepository.findTransactionByItemId(any())).thenReturn(Optional.of(transactionEntity));
+    when(transactionRepository.findTransactionByItemIdAndStatusNotInClosed(any())).thenReturn(Optional.of(transactionEntity));
     eventListener.handleCheckInEvent(CHECK_IN_EVENT_SAMPLE, messageHeaders);
     Mockito.verify(libraryService, times(1)).updateStatusByTransactionEntity(any());
   }

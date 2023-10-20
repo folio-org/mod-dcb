@@ -12,6 +12,7 @@ import org.springframework.messaging.MessageHeaders;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
+import java.util.UUID;
 
 import static org.folio.dcb.utils.TransactionHelper.getHeaderValue;
 import static org.folio.dcb.utils.TransactionHelper.parseCheckInEvent;
@@ -36,7 +37,7 @@ public class CirculationCheckInEventListener {
     if (Objects.nonNull(checkInItemId)) {
       log.info("updateTransactionStatus:: Received checkIn event for itemId: {}", checkInItemId);
       systemUserScopedExecutionService.executeAsyncSystemUserScoped(tenantId, () ->
-        transactionRepository.findTransactionByItemId(checkInItemId)
+        transactionRepository.findTransactionByItemIdAndStatusNotInClosed(UUID.fromString(checkInItemId))
           .ifPresent(transactionEntity -> {
             switch (transactionEntity.getRole()) {
               case LENDER ->  lendingLibraryService.updateStatusByTransactionEntity(transactionEntity);

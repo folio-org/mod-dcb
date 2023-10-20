@@ -26,15 +26,15 @@ public class TransactionAuditEntityListener {
 
   @Autowired
   private BeanUtil beanUtil;
-  private final ObjectMapper objectMapper = new ObjectMapper();
-  private TransactionAuditEntity transactionAuditEntity;
+  @Autowired
+  private ObjectMapper objectMapper;
   private static final Map<String, TransactionEntity> originalStateCache = new HashMap<>();
 
   @PrePersist
   public void onPrePersist(Object entity) throws JsonProcessingException {
     log.debug("onPrePersist:: creating transaction audit record");
     TransactionEntity transactionEntity = (TransactionEntity) entity;
-    transactionAuditEntity = new TransactionAuditEntity();
+    TransactionAuditEntity transactionAuditEntity = new TransactionAuditEntity();
     transactionAuditEntity.setAction(CREATE_ACTION);
     transactionAuditEntity.setTransactionId(transactionEntity.getId());
     transactionAuditEntity.setBefore(null);
@@ -54,7 +54,7 @@ public class TransactionAuditEntityListener {
   public void onPreUpdate(Object entity) throws JsonProcessingException {
     log.debug("onPreUpdate:: creating transaction audit record");
     TransactionEntity transactionEntity = (TransactionEntity) entity;
-    transactionAuditEntity = new TransactionAuditEntity();
+    TransactionAuditEntity transactionAuditEntity = new TransactionAuditEntity();
     transactionAuditEntity.setBefore(objectMapper.writeValueAsString(getTransactionEntity(transactionEntity.getId())));
     transactionAuditEntity.setAfter(objectMapper.writeValueAsString(transactionEntity));
     transactionAuditEntity.setTransactionId(transactionEntity.getId());
