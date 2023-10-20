@@ -1,5 +1,6 @@
 package org.folio.dcb.service;
 
+import org.folio.dcb.client.feign.CirculationClient;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.impl.BorrowingLibraryServiceImpl;
@@ -7,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWER;
@@ -23,6 +24,8 @@ class BorrowingLibraryServiceTest {
   private TransactionRepository transactionRepository;
   @Mock
   private CirculationService circulationService;
+  @Mock
+  private CirculationClient circulationClient;
 
   @Test
   void updateTransactionTestFromCreatedToOpen() {
@@ -32,6 +35,16 @@ class BorrowingLibraryServiceTest {
     doNothing().when(circulationService).checkInByBarcode(any(), any());
 
     borrowingLibraryService.updateTransactionStatus(transactionEntity, TransactionStatus.builder().status(TransactionStatus.StatusEnum.OPEN).build());
-    Mockito.verify(transactionRepository, times(1)).save(transactionEntity);
+    verify(transactionRepository, times(1)).save(transactionEntity);
+    verify(circulationService, timeout(1)).checkInByBarcode(any(), any());
+  }
+
+  @Test
+  void updateTransactionErrorTest() {
+    var transactionEntity = createTransactionEntity();
+    transactionEntity.setStatus(TransactionStatus.StatusEnum.CREATED);
+    transactionEntity.setRole(BORROWER);
+    TransactionStatus transactionStatus = TransactionStatus.builder().status(TransactionStatus.StatusEnum.AWAITING_PICKUP).build();
+    assertThrows(IllegalArgumentException.class, () -> borrowingLibraryService.updateTransactionStatus(transactionEntity, transactionStatus));
   }
 }
