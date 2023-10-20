@@ -89,7 +89,7 @@ public class TransactionsServiceImpl implements TransactionsService {
       .build();
   }
 
-  private TransactionEntity getTransactionEntityOrThrow(String dcbTransactionId) {
+  public TransactionEntity getTransactionEntityOrThrow(String dcbTransactionId) {
     return transactionRepository.findById(dcbTransactionId)
       .orElseThrow(() -> new NotFoundException(String.format("DCB Transaction was not found by id= %s ", dcbTransactionId)));
   }

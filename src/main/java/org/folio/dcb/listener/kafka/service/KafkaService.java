@@ -1,11 +1,11 @@
-package org.folio.dcb.listener.kafka;
+package org.folio.dcb.listener.kafka.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
 import org.springframework.stereotype.Component;
 
-import static org.folio.dcb.listener.CirculationCheckInEventListener.CHECK_IN_LISTENER_ID;
+import static org.folio.dcb.listener.kafka.CirculationCheckInEventListener.CHECK_IN_LISTENER_ID;
 
 @Component
 @Log4j2
