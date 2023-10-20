@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.AWAITING_PICKUP;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
 
-@Service("borrowingLibraryServiceImpl")
+@Service("borrowingLibraryService")
 @RequiredArgsConstructor
 @Log4j2
 public class BorrowingLibraryServiceImpl implements LibraryService {

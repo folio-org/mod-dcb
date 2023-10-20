@@ -24,7 +24,7 @@ public class CirculationCheckInEventListener {
   public static final String CHECK_IN_LISTENER_ID = "check-in-listener-id";
   @Qualifier("lendingLibraryService")
   private final LibraryService lendingLibraryService;
-  @Qualifier("borrowingLibraryServiceImpl")
+  @Qualifier("borrowingLibraryService")
   private final LibraryService borrowingLibraryService;
   private final TransactionRepository transactionRepository;
   private final SystemUserScopedExecutionService systemUserScopedExecutionService;
