@@ -1,6 +1,6 @@
 package org.folio.dcb.service;
 
-import org.folio.dcb.listener.kafka.KafkaService;
+import org.folio.dcb.listener.kafka.service.KafkaService;
 import org.folio.dcb.service.impl.CustomTenantService;
 import org.folio.spring.service.PrepareSystemUserService;
 import org.folio.tenant.domain.dto.TenantAttributes;
