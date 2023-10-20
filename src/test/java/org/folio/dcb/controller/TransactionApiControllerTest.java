@@ -1,5 +1,6 @@
 package org.folio.dcb.controller;
 
+import org.folio.dcb.domain.dto.DcbItem;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.spring.service.SystemUserScopedExecutionService;
