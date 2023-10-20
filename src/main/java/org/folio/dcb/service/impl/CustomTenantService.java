@@ -1,7 +1,7 @@
 package org.folio.dcb.service.impl;
 
 import lombok.extern.log4j.Log4j2;
-import org.folio.dcb.listener.kafka.KafkaService;
+import org.folio.dcb.listener.kafka.service.KafkaService;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.liquibase.FolioSpringLiquibase;
 import org.folio.spring.service.PrepareSystemUserService;
