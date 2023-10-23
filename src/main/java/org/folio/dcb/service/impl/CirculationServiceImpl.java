@@ -15,21 +15,18 @@ import java.time.OffsetDateTime;
 @Log4j2
 @RequiredArgsConstructor
 public class CirculationServiceImpl implements CirculationService {
-  //SERVICE_POINT_ID field will be updated.
-  private static final String SERVICE_POINT_ID = "3a40852d-49fd-4df2-a1f9-6e2641a6e91f";
-
   private final CirculationClient circulationClient;
 
   @Override
   public void checkInByBarcode(TransactionEntity dcbTransaction) {
     log.debug("checkInByBarcode:: automate item checkIn using  dcbTransaction {} ", dcbTransaction);
-    circulationClient.checkInByBarcode(createCheckInRequest(dcbTransaction.getItemBarcode(), SERVICE_POINT_ID));
+    circulationClient.checkInByBarcode(createCheckInRequest(dcbTransaction.getItemBarcode(), dcbTransaction.getServicePointId()));
   }
 
   @Override
   public void checkOutByBarcode(TransactionEntity dcbTransaction) {
     log.debug("checkOutByBarcode:: automate item checkOut using  dcbTransaction {} ", dcbTransaction);
-    circulationClient.checkOutByBarcode(createCheckOutRequest(dcbTransaction.getItemBarcode(), dcbTransaction.getPatronBarcode(), SERVICE_POINT_ID));
+    circulationClient.checkOutByBarcode(createCheckOutRequest(dcbTransaction.getItemBarcode(), dcbTransaction.getPatronBarcode(), dcbTransaction.getServicePointId()));
   }
 
   private CheckInRequest createCheckInRequest(String itemBarcode, String servicePointId){
