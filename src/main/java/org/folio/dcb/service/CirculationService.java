@@ -10,6 +10,8 @@ public interface CirculationService {
    */
   void checkInByBarcode(TransactionEntity dcbTransaction);
 
+  void checkInByBarcode(TransactionEntity dcbTransaction, String servicePointId);
+
   /**
    * Check out item by barcode
    * @param dcbTransaction dcbTransactionEntity

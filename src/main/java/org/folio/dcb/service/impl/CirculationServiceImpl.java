@@ -24,6 +24,12 @@ public class CirculationServiceImpl implements CirculationService {
   }
 
   @Override
+  public void checkInByBarcode(TransactionEntity dcbTransaction, String servicePointId) {
+    log.debug("checkInByBarcode:: automate item checkIn using  dcbTransaction {} ", dcbTransaction);
+    circulationClient.checkInByBarcode(createCheckInRequest(dcbTransaction.getItemBarcode(), servicePointId));
+  }
+
+  @Override
   public void checkOutByBarcode(TransactionEntity dcbTransaction) {
     log.debug("checkOutByBarcode:: automate item checkOut using  dcbTransaction {} ", dcbTransaction);
     circulationClient.checkOutByBarcode(createCheckOutRequest(dcbTransaction.getItemBarcode(), dcbTransaction.getPatronBarcode(), dcbTransaction.getServicePointId()));

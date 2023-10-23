@@ -3,20 +3,24 @@ package org.folio.dcb.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
-import org.folio.dcb.domain.dto.DcbItem;
 import org.folio.dcb.domain.dto.CirculationItemRequest;
+import org.folio.dcb.domain.dto.DcbItem;
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.CirculationItemService;
+import org.folio.dcb.service.CirculationService;
 import org.folio.dcb.service.LibraryService;
 import org.folio.dcb.service.RequestService;
 import org.folio.dcb.service.UserService;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.AWAITING_PICKUP;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
 
 @Service("borrowingLibraryService")
@@ -29,6 +33,8 @@ public class BorrowingLibraryServiceImpl implements LibraryService {
   private final RequestService requestService;
   private final CirculationItemService circulationItemService;
   private final TransactionRepository transactionRepository;
+  private final CirculationService circulationService;
+
 
   @Override
   public TransactionStatusResponse createCirculation(String dcbTransactionId, DcbTransaction dcbTransaction, String pickupServicePointId) {
@@ -57,6 +63,19 @@ public class BorrowingLibraryServiceImpl implements LibraryService {
   @Override
   public void updateTransactionStatus(TransactionEntity dcbTransaction, TransactionStatus transactionStatus) {
     log.debug("updateTransactionStatus:: Updating dcbTransaction {} to status {} ", dcbTransaction, transactionStatus);
+    var currentStatus = dcbTransaction.getStatus();
+    var requestedStatus = transactionStatus.getStatus();
+    if (CREATED == currentStatus && OPEN == requestedStatus) {
+      log.info("updateTransactionStatus:: Checking in item by barcode: {} ", dcbTransaction.getItemBarcode());
+      //Random UUID for servicePointId.
+      circulationService.checkInByBarcode(dcbTransaction, UUID.randomUUID().toString());
+      updateTransactionEntity(dcbTransaction, requestedStatus);
+    } else {
+      String errorMessage = String.format("updateTransactionStatus:: status update from %s to %s is not implemented",
+        currentStatus, requestedStatus);
+      log.warn(errorMessage);
+      throw new IllegalArgumentException(errorMessage);
+    }
   }
 
   @Override
