@@ -3,11 +3,9 @@ package org.folio.dcb.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
-import org.folio.dcb.domain.dto.DcbItem;
-import org.folio.dcb.domain.dto.DcbTransaction;
-import org.folio.dcb.domain.dto.TransactionStatus;
-import org.folio.dcb.domain.dto.TransactionStatusResponse;
+import org.folio.dcb.domain.dto.*;
 import org.folio.dcb.domain.entity.TransactionEntity;
+import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.CirculationItemService;
 import org.folio.dcb.service.CirculationService;
 import org.folio.dcb.service.LibraryService;
@@ -15,7 +13,10 @@ import org.folio.dcb.service.RequestService;
 import org.folio.dcb.service.UserService;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.AWAITING_PICKUP;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
 
 @Service("borrowingLibraryService")
@@ -85,12 +86,6 @@ public class BorrowingLibraryServiceImpl implements LibraryService {
           circulationItemRequest.getStatus().getName());
       }
     }
-  }
-
-  private void updateTransactionEntity(TransactionEntity transactionEntity, TransactionStatus.StatusEnum transactionStatusEnum) {
-    log.info("updateTransactionEntity:: updating transaction entity from {} to {}", transactionEntity.getStatus(), transactionStatusEnum);
-    transactionEntity.setStatus(transactionStatusEnum);
-    transactionRepository.save(transactionEntity);
   }
 
   private void updateTransactionEntity(TransactionEntity transactionEntity, TransactionStatus.StatusEnum transactionStatusEnum) {
