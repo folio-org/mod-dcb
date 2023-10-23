@@ -6,11 +6,12 @@ import lombok.extern.log4j.Log4j2;
 import org.folio.dcb.client.feign.CirculationItemClient;
 import org.folio.dcb.domain.dto.CirculationItemRequest;
 import org.folio.dcb.domain.dto.DcbItem;
+import org.folio.dcb.domain.dto.ItemStatus;
 import org.folio.dcb.service.CirculationItemService;
 import org.folio.dcb.service.ItemService;
 import org.springframework.stereotype.Service;
 
-import static org.folio.dcb.domain.dto.Status.NameEnum.IN_TRANSIT;
+import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.IN_TRANSIT;
 
 @Service
 @Log4j2
@@ -39,6 +40,11 @@ public class CirculationItemServiceImpl implements CirculationItemService {
 
   }
 
+  public CirculationItemRequest fetchItemById(String itemId) {
+    log.info("fetchItemById:: fetching item details for id {} ", itemId);
+    return circulationItemClient.retrieveCirculationItemById(itemId);
+  }
+
   private void createCirculationItem(DcbItem item, String pickupServicePointId){
     var materialTypeId = itemService.fetchItemMaterialTypeIdByMaterialTypeName(item.getMaterialType());
     var loanTypeId = itemService.fetchItemLoanTypeIdByLoanTypeName(INITIAL_CFG_LOAN_TYPE_VALUE);
@@ -47,7 +53,9 @@ public class CirculationItemServiceImpl implements CirculationItemService {
       CirculationItemRequest.builder()
         .id(item.getId())
         .itemBarcode(item.getBarcode())
-        .status(IN_TRANSIT.getValue())
+        .status(ItemStatus.builder()
+          .name(IN_TRANSIT)
+          .build())
         .holdingsRecordId(TEMP_VALUE_HOLDING_ID)
         .instanceTitle(item.getTitle())
         .materialTypeId(materialTypeId)

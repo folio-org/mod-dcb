@@ -8,7 +8,6 @@ import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.entity.TransactionEntity;
-import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.CirculationItemService;
 import org.folio.dcb.service.CirculationService;
 import org.folio.dcb.service.LibraryService;
@@ -16,12 +15,10 @@ import org.folio.dcb.service.RequestService;
 import org.folio.dcb.service.UserService;
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
-
-import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
+import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.AWAITING_PICKUP;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
 
-@Service("borrowingLibraryServiceImpl")
+@Service("borrowingLibraryService")
 @RequiredArgsConstructor
 @Log4j2
 public class BorrowingLibraryServiceImpl implements LibraryService {
@@ -79,6 +76,21 @@ public class BorrowingLibraryServiceImpl implements LibraryService {
   @Override
   public void updateStatusByTransactionEntity(TransactionEntity transactionEntity) {
     log.debug("updateTransactionStatus:: Received checkIn event for itemId: {}", transactionEntity.getItemId());
+    if(OPEN == transactionEntity.getStatus()) {
+      CirculationItemRequest circulationItemRequest = circulationItemService.fetchItemById(transactionEntity.getItemId());
+      if(AWAITING_PICKUP == circulationItemRequest.getStatus().getName()) {
+        updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.AWAITING_PICKUP);
+      } else {
+        log.info("updateStatusByTransactionEntity:: Item status is {} . So status of transaction is not updated",
+          circulationItemRequest.getStatus().getName());
+      }
+    }
+  }
+
+  private void updateTransactionEntity(TransactionEntity transactionEntity, TransactionStatus.StatusEnum transactionStatusEnum) {
+    log.info("updateTransactionEntity:: updating transaction entity from {} to {}", transactionEntity.getStatus(), transactionStatusEnum);
+    transactionEntity.setStatus(transactionStatusEnum);
+    transactionRepository.save(transactionEntity);
   }
 
   private void updateTransactionEntity(TransactionEntity transactionEntity, TransactionStatus.StatusEnum transactionStatusEnum) {
