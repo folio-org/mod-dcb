@@ -15,6 +15,11 @@ folio:
   tenant:
     validation:
       enabled: false
+system-user:
+  username: dcb-system-user
+  password: dcb-system-user
+  lastname: System
+  permissionsFilePath: permissions/mod-dcb.csv
 management:
   endpoints:
     enabled-by-default: false
