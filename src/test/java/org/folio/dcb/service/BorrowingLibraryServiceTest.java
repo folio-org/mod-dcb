@@ -8,7 +8,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+
 import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWER;
@@ -46,5 +49,15 @@ class BorrowingLibraryServiceTest {
     transactionEntity.setRole(BORROWER);
     TransactionStatus transactionStatus = TransactionStatus.builder().status(TransactionStatus.StatusEnum.AWAITING_PICKUP).build();
     assertThrows(IllegalArgumentException.class, () -> borrowingLibraryService.updateTransactionStatus(transactionEntity, transactionStatus));
+  }
+
+  @Test
+  void updateTransactionFromCheckInToCloseTest() {
+    var transactionEntity = createTransactionEntity();
+    transactionEntity.setStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_IN);
+    transactionEntity.setRole(BORROWER);
+
+    borrowingLibraryService.updateStatusByTransactionEntity(transactionEntity);
+    Mockito.verify(transactionRepository, times(1)).save(transactionEntity);
   }
 }

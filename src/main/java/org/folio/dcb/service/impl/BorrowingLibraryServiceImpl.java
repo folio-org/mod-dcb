@@ -20,7 +20,9 @@ import org.springframework.stereotype.Service;
 import java.util.UUID;
 
 import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.AWAITING_PICKUP;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CLOSED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_IN;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
 
 @Service("borrowingLibraryService")
@@ -89,6 +91,9 @@ public class BorrowingLibraryServiceImpl implements LibraryService {
         log.info("updateStatusByTransactionEntity:: Item status is {} . So status of transaction is not updated",
           circulationItemRequest.getStatus().getName());
       }
+    } else if (ITEM_CHECKED_IN == transactionEntity.getStatus()) {
+      log.info("updateTransactionStatus:: Transaction status updated from CHECKED_IN to CLOSED for itemId: {}", transactionEntity.getItemId());
+      updateTransactionEntity(transactionEntity, CLOSED);
     }
   }
 
