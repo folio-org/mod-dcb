@@ -11,14 +11,9 @@ public class DcbApplication {
   public static final String SYSTEM_USER_PASSWORD = "SYSTEM_USER_PASSWORD";
 
   public static void main(String[] args) {
-    checkIfSystemUserPasswordProvided();
-    SpringApplication.run(DcbApplication.class, args);
-  }
-
-  private static void checkIfSystemUserPasswordProvided() {
     if (StringUtils.isEmpty(System.getenv(SYSTEM_USER_PASSWORD))) {
       throw new IllegalArgumentException("Required environment variable is missing: " + SYSTEM_USER_PASSWORD);
     }
+    SpringApplication.run(DcbApplication.class, args);
   }
-
 }
