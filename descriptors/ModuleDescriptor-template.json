@@ -66,7 +66,9 @@
             "login.item.post",
             "perms.users.item.post",
             "perms.users.get",
-            "perms.users.assign.immutable"
+            "perms.users.assign.immutable",
+            "inventory.instances.item.get",
+            "inventory.instances.item.post"
           ]
         },
         {
