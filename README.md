@@ -83,6 +83,11 @@ For production deployments you MUST specify the password for this system user vi
 See project [MODDCB](https://issues.folio.org/projects/MODDCB)
 at the [FOLIO issue tracker](https://dev.folio.org/guidelines/issue-tracker).
 
+### ModuleDescriptor
+
+See the built `target/ModuleDescriptor.json` for the interfaces that this module
+requires and provides, the permissions, and the additional module metadata.
+
 ### API documentation
 
 This module's [API documentation](https://dev.folio.org/reference/api/#mod-dcb).
