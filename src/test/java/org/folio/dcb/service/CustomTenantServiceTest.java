@@ -1,5 +1,6 @@
 package org.folio.dcb.service;
 
+import feign.FeignException;
 import org.folio.dcb.client.feign.HoldingSourcesClient;
 import org.folio.dcb.client.feign.HoldingsStorageClient;
 import org.folio.dcb.client.feign.InstanceTypeClient;
@@ -51,6 +52,7 @@ class CustomTenantServiceTest {
   void shouldPrepareSystemUser() {
     when(instanceTypeClient.queryInstanceTypeByName(any())).thenReturn(new ResultList<>());
     when(locationUnitClient.getCampusByName(any())).thenReturn(new ResultList<>());
+    when(inventoryClient.getInstanceById(any())).thenThrow(FeignException.NotFound.class);
     when(locationUnitClient.getLibraryByName(any())).thenReturn(new ResultList<>());
     when(servicePointClient.getServicePointByName(any())).thenReturn(new ResultList<>());
     when(locationsClient.queryLocationsByName(any())).thenReturn(new ResultList<>());
