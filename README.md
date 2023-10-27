@@ -73,10 +73,20 @@ requires and provides, the permissions, and the additional module metadata.
 | SYSTEM\_USER\_PASSWORD |        -        | Password of the system user                                                                                                                                         |
 ## Additional information
 
+### System user configuration
+The module uses system user to communicate with other modules.
+For production deployments you MUST specify the password for this system user via env variable:
+`SYSTEM_USER_PASSWORD=<password>`.
+
 ### Issue tracker
 
 See project [MODDCB](https://issues.folio.org/projects/MODDCB)
 at the [FOLIO issue tracker](https://dev.folio.org/guidelines/issue-tracker).
+
+### ModuleDescriptor
+
+See the built `target/ModuleDescriptor.json` for the interfaces that this module
+requires and provides, the permissions, and the additional module metadata.
 
 ### API documentation
 
