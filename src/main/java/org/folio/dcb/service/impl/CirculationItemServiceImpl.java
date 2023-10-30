@@ -52,7 +52,7 @@ public class CirculationItemServiceImpl implements CirculationItemService {
     CirculationItemRequest circulationItemRequest =
       CirculationItemRequest.builder()
         .id(item.getId())
-        .itemBarcode(item.getBarcode())
+        .barcode(item.getBarcode())
         .status(ItemStatus.builder()
           .name(IN_TRANSIT)
           .build())
