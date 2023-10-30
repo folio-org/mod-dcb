@@ -22,6 +22,7 @@ import java.util.UUID;
 import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.AWAITING_PICKUP;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_OUT;
 
 @Service("borrowingLibraryService")
 @RequiredArgsConstructor
@@ -89,6 +90,10 @@ public class BorrowingLibraryServiceImpl implements LibraryService {
         log.info("updateStatusByTransactionEntity:: Item status is {} . So status of transaction is not updated",
           circulationItemRequest.getStatus().getName());
       }
+    } else if(ITEM_CHECKED_OUT == transactionEntity.getStatus()){
+      log.info("updateStatusByTransactionEntity:: Updated item status from {} to {}",
+        transactionEntity.getStatus().getValue(), TransactionStatus.StatusEnum.ITEM_CHECKED_IN.getValue());
+      updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.ITEM_CHECKED_IN);
     }
   }
 
