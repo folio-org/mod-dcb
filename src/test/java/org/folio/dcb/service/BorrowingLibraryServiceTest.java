@@ -4,10 +4,13 @@ import org.folio.dcb.client.feign.CirculationClient;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.impl.BorrowingLibraryServiceImpl;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CLOSED;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -46,5 +49,16 @@ class BorrowingLibraryServiceTest {
     transactionEntity.setRole(BORROWER);
     TransactionStatus transactionStatus = TransactionStatus.builder().status(TransactionStatus.StatusEnum.AWAITING_PICKUP).build();
     assertThrows(IllegalArgumentException.class, () -> borrowingLibraryService.updateTransactionStatus(transactionEntity, transactionStatus));
+  }
+
+  @Test
+  void updateTransactionStatusFromItemCheckedInToClosedTest() {
+    var transactionEntity = createTransactionEntity();
+    transactionEntity.setStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_IN);
+    transactionEntity.setRole(BORROWER);
+
+    borrowingLibraryService.updateTransactionStatus(transactionEntity, TransactionStatus.builder().status(CLOSED).build());
+
+    Assertions.assertEquals(CLOSED, transactionEntity.getStatus());
   }
 }

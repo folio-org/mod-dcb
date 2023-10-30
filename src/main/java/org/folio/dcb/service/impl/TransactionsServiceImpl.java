@@ -62,6 +62,7 @@ public class TransactionsServiceImpl implements TransactionsService {
       }
       switch (dcbTransaction.getRole()) {
         case LENDER -> lendingLibraryService.updateTransactionStatus(dcbTransaction, transactionStatus);
+        case BORROWER -> borrowingLibraryService.updateTransactionStatus(dcbTransaction, transactionStatus);
         default -> throw new IllegalArgumentException("Other roles are not implemented");
       }
 
