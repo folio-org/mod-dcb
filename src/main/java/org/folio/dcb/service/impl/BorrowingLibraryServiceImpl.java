@@ -21,6 +21,7 @@ import java.util.UUID;
 
 import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.AWAITING_PICKUP;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_OUT;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
 
 @Service("borrowingLibraryService")
@@ -70,9 +71,12 @@ public class BorrowingLibraryServiceImpl implements LibraryService {
       //Random UUID for servicePointId.
       circulationService.checkInByBarcode(dcbTransaction, UUID.randomUUID().toString());
       updateTransactionEntity(dcbTransaction, requestedStatus);
+    } else if (TransactionStatus.StatusEnum.AWAITING_PICKUP == currentStatus && ITEM_CHECKED_OUT == requestedStatus) {
+      log.info("updateTransactionStatus:: Checking out item by barcode: {} ", dcbTransaction.getPatronBarcode());
+      circulationService.checkOutByBarcode(dcbTransaction);
+      updateTransactionEntity(dcbTransaction, requestedStatus);
     } else {
-      String errorMessage = String.format("updateTransactionStatus:: status update from %s to %s is not implemented",
-        currentStatus, requestedStatus);
+      String errorMessage = String.format("updateTransactionStatus:: status update from %s to %s is not implemented", currentStatus, requestedStatus);
       log.warn(errorMessage);
       throw new IllegalArgumentException(errorMessage);
     }
