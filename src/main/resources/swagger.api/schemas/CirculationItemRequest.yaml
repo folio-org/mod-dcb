@@ -16,7 +16,7 @@ CirculationItemRequest:
       type: string
     instanceTitle:
       type: string
-    itemBarcode:
+    barcode:
       type: string
     pickupLocation:
       type: string
