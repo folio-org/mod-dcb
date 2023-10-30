@@ -66,7 +66,25 @@
             "login.item.post",
             "perms.users.item.post",
             "perms.users.get",
-            "perms.users.assign.immutable"
+            "perms.users.assign.immutable",
+            "inventory.instances.item.get",
+            "inventory.instances.item.post",
+            "inventory-storage.instance-types.collection.get",
+            "inventory-storage.instance-types.item.post",
+            "inventory-storage.location-units.institutions.item.get",
+            "inventory-storage.location-units.institutions.item.post",
+            "inventory-storage.location-units.campuses.item.post",
+            "inventory-storage.location-units.libraries.item.get",
+            "inventory-storage.location-units.libraries.item.post",
+            "inventory-storage.location-units.campuses.collection.get",
+            "inventory-storage.service-points.collection.get",
+            "inventory-storage.locations.collection.get",
+            "inventory-storage.holdings.item.get",
+            "inventory-storage.holdings-sources.collection.get",
+            "inventory-storage.holdings.item.post",
+            "inventory-storage.locations.item.post",
+            "inventory-storage.service-points.item.post",
+            "inventory-storage.location-units.libraries.collection.get"
           ]
         },
         {
