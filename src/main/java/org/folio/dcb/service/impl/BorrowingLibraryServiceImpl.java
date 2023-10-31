@@ -37,7 +37,6 @@ public class BorrowingLibraryServiceImpl implements LibraryService {
   private final TransactionRepository transactionRepository;
   private final CirculationService circulationService;
 
-
   @Override
   public TransactionStatusResponse createCirculation(String dcbTransactionId, DcbTransaction dcbTransaction, String pickupServicePointId) {
     var itemVirtual = dcbTransaction.getItem();
@@ -82,16 +81,14 @@ public class BorrowingLibraryServiceImpl implements LibraryService {
   @Override
   public void updateStatusByTransactionEntity(TransactionEntity transactionEntity) {
     log.debug("updateTransactionStatus:: Received checkIn event for itemId: {}", transactionEntity.getItemId());
-    if(OPEN == transactionEntity.getStatus()) {
-      CirculationItemRequest circulationItemRequest = circulationItemService.fetchItemById(transactionEntity.getItemId());
-      if(AWAITING_PICKUP == circulationItemRequest.getStatus().getName()) {
-        updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.AWAITING_PICKUP);
-      } else if (CHECKED_OUT == circulationItemRequest.getStatus().getName()) {
-        updateTransactionEntity(transactionEntity, ITEM_CHECKED_OUT);
-      } else {
-        log.info("updateStatusByTransactionEntity:: Item status is {} . So status of transaction is not updated",
-          circulationItemRequest.getStatus().getName());
-      }
+    CirculationItemRequest circulationItemRequest = circulationItemService.fetchItemById(transactionEntity.getItemId());
+    if (OPEN == transactionEntity.getStatus() && AWAITING_PICKUP == circulationItemRequest.getStatus().getName()) {
+      updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.AWAITING_PICKUP);
+    } else if (TransactionStatus.StatusEnum.AWAITING_PICKUP == transactionEntity.getStatus() && CHECKED_OUT == circulationItemRequest.getStatus().getName()) {
+      updateTransactionEntity(transactionEntity, ITEM_CHECKED_OUT);
+    } else {
+      log.info("updateStatusByTransactionEntity:: Item status is {}. So status of transaction is not updated",
+        circulationItemRequest.getStatus().getName());
     }
   }
 
