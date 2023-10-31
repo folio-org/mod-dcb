@@ -2,6 +2,7 @@ package org.folio.dcb.utils;
 
 import lombok.SneakyThrows;
 import org.folio.dcb.DcbApplication;
+import org.folio.dcb.client.feign.HoldingsStorageClient;
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.DcbItem;
 import org.folio.dcb.domain.dto.DcbPatron;
@@ -10,7 +11,6 @@ import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.dto.User;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.entity.TransactionEntity;
-import org.folio.dcb.domain.dto.InventoryHolding;
 import org.folio.dcb.domain.dto.InventoryItem;
 import org.folio.dcb.domain.dto.UserGroupCollection;
 import org.folio.dcb.domain.dto.UserGroup;
@@ -149,8 +149,8 @@ public class EntityUtils {
       .build();
   }
 
-  public static InventoryHolding createInventoryHolding() {
-    return InventoryHolding.builder()
+  public static HoldingsStorageClient.Holding createInventoryHolding() {
+    return HoldingsStorageClient.Holding.builder()
       .id(UUID.randomUUID().toString())
       .instanceId(UUID.randomUUID().toString())
       .build();
