@@ -25,10 +25,10 @@ import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_IN;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
 
-@Service("borrowingLibraryService")
+@Service("borrowingPickupLibraryService")
 @RequiredArgsConstructor
 @Log4j2
-public class BorrowingLibraryServiceImpl implements LibraryService {
+public class BorrowingPickupLibraryServiceImpl implements LibraryService {
   private static final String TEMP_VALUE_MATERIAL_TYPE_NAME_BOOK = "book";
 
   private final UserService userService;

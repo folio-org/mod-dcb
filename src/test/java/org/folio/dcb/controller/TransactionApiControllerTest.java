@@ -10,8 +10,9 @@ import org.springframework.http.MediaType;
 
 import java.util.UUID;
 
+import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWING_PICKUP;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
-import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWER;
+
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
 import static org.folio.dcb.utils.EntityUtils.EXISTED_PATRON_ID;
 import static org.folio.dcb.utils.EntityUtils.NOT_EXISTED_PATRON_ID;
@@ -63,7 +64,7 @@ class TransactionApiControllerTest extends BaseIT {
   }
 
   @Test
-  void createBorrowingCirculationRequestTest() throws Exception {
+  void createBorrowingPickupCirculationRequestTest() throws Exception {
     removeExistedTransactionFromDbIfSoExists();
 
     DcbItem expected = createDcbItem();
@@ -71,7 +72,7 @@ class TransactionApiControllerTest extends BaseIT {
 
     this.mockMvc.perform(
         post("/transactions/" + DCB_TRANSACTION_ID)
-          .content(asJsonString(createDcbTransactionByRole(BORROWER)))
+          .content(asJsonString(createDcbTransactionByRole(BORROWING_PICKUP)))
           .headers(defaultHeaders())
           .contentType(MediaType.APPLICATION_JSON)
           .accept(MediaType.APPLICATION_JSON))
@@ -83,7 +84,7 @@ class TransactionApiControllerTest extends BaseIT {
     //Trying to create another transaction with same transaction id
     this.mockMvc.perform(
         post("/transactions/" + DCB_TRANSACTION_ID)
-          .content(asJsonString(createDcbTransactionByRole(BORROWER)))
+          .content(asJsonString(createDcbTransactionByRole(BORROWING_PICKUP)))
           .headers(defaultHeaders())
           .contentType(MediaType.APPLICATION_JSON)
           .accept(MediaType.APPLICATION_JSON))
@@ -107,8 +108,8 @@ class TransactionApiControllerTest extends BaseIT {
   }
 
   @Test
-  void createBorrowingCirculationRequestWithInvalidDefaultNotExistedPatronId() throws Exception {
-    var dcbTransaction = createDcbTransactionByRole(BORROWER);
+  void createBorrowingPickupCirculationRequestWithInvalidDefaultNotExistedPatronId() throws Exception {
+    var dcbTransaction = createDcbTransactionByRole(BORROWING_PICKUP);
     dcbTransaction.getPatron().setId(NOT_EXISTED_PATRON_ID);
 
     this.mockMvc.perform(
@@ -198,7 +199,7 @@ class TransactionApiControllerTest extends BaseIT {
     var transactionID = UUID.randomUUID().toString();
     var dcbTransaction = createTransactionEntity();
     dcbTransaction.setStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_IN);
-    dcbTransaction.setRole(BORROWER);
+    dcbTransaction.setRole(BORROWING_PICKUP);
     dcbTransaction.setId(transactionID);
 
     systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> transactionRepository.save(dcbTransaction));
