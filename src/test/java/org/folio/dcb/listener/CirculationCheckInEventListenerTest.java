@@ -2,7 +2,7 @@ package org.folio.dcb.listener;
 
 import org.folio.dcb.controller.BaseIT;
 import org.folio.dcb.domain.dto.TransactionStatus;
-import org.folio.dcb.listener.kafka.CirculationCheckInEventListener;
+import org.folio.dcb.listener.kafka.CirculationEventListener;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.impl.LendingLibraryServiceImpl;
 import org.folio.spring.client.AuthnClient;
@@ -38,7 +38,7 @@ class CirculationCheckInEventListenerTest extends BaseIT {
   private LendingLibraryServiceImpl libraryService;
 
   @Autowired
-  private CirculationCheckInEventListener eventListener ;
+  private CirculationEventListener eventListener ;
   @Mock
   private AuthnClient authnClient;
   @MockBean

@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.util.UUID;
 
 import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.AWAITING_PICKUP;
+import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.CHECKED_OUT;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_OUT;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
@@ -71,10 +72,6 @@ public class BorrowingLibraryServiceImpl implements LibraryService {
       //Random UUID for servicePointId.
       circulationService.checkInByBarcode(dcbTransaction, UUID.randomUUID().toString());
       updateTransactionEntity(dcbTransaction, requestedStatus);
-    } else if (TransactionStatus.StatusEnum.AWAITING_PICKUP == currentStatus && ITEM_CHECKED_OUT == requestedStatus) {
-      log.info("updateTransactionStatus:: Checking out item by barcode: {} ", dcbTransaction.getPatronBarcode());
-      circulationService.checkOutByBarcode(dcbTransaction);
-      updateTransactionEntity(dcbTransaction, requestedStatus);
     } else {
       String errorMessage = String.format("updateTransactionStatus:: status update from %s to %s is not implemented", currentStatus, requestedStatus);
       log.warn(errorMessage);
@@ -89,6 +86,8 @@ public class BorrowingLibraryServiceImpl implements LibraryService {
       CirculationItemRequest circulationItemRequest = circulationItemService.fetchItemById(transactionEntity.getItemId());
       if(AWAITING_PICKUP == circulationItemRequest.getStatus().getName()) {
         updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.AWAITING_PICKUP);
+      } else if (CHECKED_OUT == circulationItemRequest.getStatus().getName()) {
+        updateTransactionEntity(transactionEntity, ITEM_CHECKED_OUT);
       } else {
         log.info("updateStatusByTransactionEntity:: Item status is {} . So status of transaction is not updated",
           circulationItemRequest.getStatus().getName());

@@ -40,18 +40,6 @@ class BorrowingLibraryServiceTest {
   }
 
   @Test
-  void updateTransactionTestFromAwaitingToCheckout() {
-    var transactionEntity = createTransactionEntity();
-    transactionEntity.setStatus(TransactionStatus.StatusEnum.AWAITING_PICKUP);
-    transactionEntity.setRole(BORROWER);
-    doNothing().when(circulationService).checkOutByBarcode(any());
-
-    borrowingLibraryService.updateTransactionStatus(transactionEntity, TransactionStatus.builder().status(TransactionStatus.StatusEnum.ITEM_CHECKED_OUT).build());
-    verify(transactionRepository, times(1)).save(transactionEntity);
-    verify(circulationService, timeout(1)).checkOutByBarcode(any());
-  }
-
-  @Test
   void updateTransactionErrorTest() {
     var transactionEntity = createTransactionEntity();
     transactionEntity.setStatus(TransactionStatus.StatusEnum.CREATED);
