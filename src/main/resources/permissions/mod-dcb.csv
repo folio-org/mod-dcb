@@ -19,3 +19,4 @@ circulation.check-in-by-barcode.post
 circulation.check-out-by-barcode.post
 inventory.items.item.put
 inventory-storage.holdings.item.put
+circulation-item-storage.items.item.get
