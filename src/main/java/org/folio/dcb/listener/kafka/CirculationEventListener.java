@@ -22,7 +22,7 @@ import static org.folio.dcb.utils.TransactionHelper.parseEvent;
 @RequiredArgsConstructor
 public class CirculationEventListener {
   public static final String CHECK_IN_LISTENER_ID = "check-in-listener-id";
-  public static final String CHECK_OUT_LISTENER_ID = "loan-listener-id";
+  public static final String CHECK_OUT_LOAN_LISTENER_ID = "loan-listener-id";
   @Qualifier("lendingLibraryService")
   private final LibraryService lendingLibraryService;
   @Qualifier("borrowingPickupLibraryService")
@@ -56,7 +56,7 @@ public class CirculationEventListener {
   }
 
   @KafkaListener(
-    id = CHECK_OUT_LISTENER_ID,
+    id = CHECK_OUT_LOAN_LISTENER_ID,
     topicPattern = "#{folioKafkaProperties.listener['loan'].topicPattern}",
     concurrency = "#{folioKafkaProperties.listener['loan'].concurrency}")
   public void handleCheckOutEvent(String data, MessageHeaders messageHeaders) {
