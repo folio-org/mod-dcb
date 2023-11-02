@@ -25,7 +25,7 @@ public class CirculationEventListener {
   public static final String CHECK_OUT_LISTENER_ID = "loan-listener-id";
   @Qualifier("lendingLibraryService")
   private final LibraryService lendingLibraryService;
-  @Qualifier("borrowingLibraryService")
+  @Qualifier("borrowingPickupLibraryService")
   private final LibraryService borrowingLibraryService;
   private final TransactionRepository transactionRepository;
   private final SystemUserScopedExecutionService systemUserScopedExecutionService;
@@ -46,7 +46,7 @@ public class CirculationEventListener {
             .ifPresent(transactionEntity -> {
               switch (transactionEntity.getRole()) {
                 case LENDER -> lendingLibraryService.updateStatusByTransactionEntity(transactionEntity);
-                case BORROWER -> borrowingLibraryService.updateStatusByTransactionEntity(transactionEntity);
+                case BORROWING_PICKUP -> borrowingLibraryService.updateStatusByTransactionEntity(transactionEntity);
                 default -> throw new IllegalArgumentException("Other roles are not implemented yet");
               }
             })
@@ -70,7 +70,7 @@ public class CirculationEventListener {
           transactionRepository.findTransactionByItemIdAndStatusNotInClosed(UUID.fromString(checkOutItemId))
             .ifPresent(transactionEntity -> {
               switch (transactionEntity.getRole()) {
-                case BORROWER -> borrowingLibraryService.updateStatusByTransactionEntity(transactionEntity);
+                case BORROWING_PICKUP -> borrowingLibraryService.updateStatusByTransactionEntity(transactionEntity);
                 default -> throw new IllegalArgumentException("Other roles are not implemented yet");
               }
             })
