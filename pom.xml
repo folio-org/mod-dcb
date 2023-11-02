@@ -27,6 +27,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <rest-assured.version>5.1.1</rest-assured.version>
+    <mvn-failsafe.version>3.2.1</mvn-failsafe.version>
     <vertx.version>4.4.6</vertx.version>
     <sonar.exclusions>
       <!-- define sonar exclusions here -->
@@ -347,7 +348,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
-        <version>3.0.0-M6</version>
+        <version>${mvn-failsafe.version}</version>
         <executions>
           <execution>
             <goals>
