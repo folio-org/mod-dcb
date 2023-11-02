@@ -5,7 +5,8 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
 import org.springframework.stereotype.Component;
 
-import static org.folio.dcb.listener.kafka.CirculationCheckInEventListener.CHECK_IN_LISTENER_ID;
+import static org.folio.dcb.listener.kafka.CirculationEventListener.CHECK_IN_LISTENER_ID;
+import static org.folio.dcb.listener.kafka.CirculationEventListener.CHECK_OUT_LOAN_LISTENER_ID;
 
 @Component
 @Log4j2
@@ -16,17 +17,18 @@ public class KafkaService {
    * Restarts kafka event listeners in mod-dcb application.
    */
   public void restartEventListeners() {
-    restartEventListener();
+    restartEventListener(CHECK_OUT_LOAN_LISTENER_ID);
+    restartEventListener(CHECK_IN_LISTENER_ID);
   }
 
-  private void restartEventListener() {
-    log.info("restartEventListener:: Restarting kafka consumer to start listening topics [id: {}]", CHECK_IN_LISTENER_ID);
-    var listenerContainer = kafkaListenerEndpointRegistry.getListenerContainer(CHECK_IN_LISTENER_ID);
+  private void restartEventListener(String listenerId) {
+    log.debug("restartEventListener:: Restarting kafka consumer to start listening topics [id: {}]", listenerId);
+    var listenerContainer = kafkaListenerEndpointRegistry.getListenerContainer(listenerId);
     if (listenerContainer != null) {
       listenerContainer.stop();
       listenerContainer.start();
     } else {
-      log.error("restartEventListener:: Listener container not found [id: {}]", CHECK_IN_LISTENER_ID);
+      log.error("Listener container not found [id: {}]", listenerId);
     }
   }
 }
