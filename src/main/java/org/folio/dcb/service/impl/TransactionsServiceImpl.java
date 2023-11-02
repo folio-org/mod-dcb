@@ -28,8 +28,8 @@ public class TransactionsServiceImpl implements TransactionsService {
 
   @Qualifier("lendingLibraryService")
   private final LibraryService lendingLibraryService;
-  @Qualifier("borrowingLibraryService")
-  private final LibraryService borrowingLibraryService;
+  @Qualifier("borrowingPickupLibraryService")
+  private final LibraryService borrowingPickupLibraryService;
   private final TransactionRepository transactionRepository;
   private final TransactionMapper transactionMapper;
   private final ServicePointService servicePointService;
@@ -43,7 +43,7 @@ public class TransactionsServiceImpl implements TransactionsService {
     TransactionStatusResponse circulationStatusResponse =
       switch (dcbTransaction.getRole()) {
         case LENDER -> lendingLibraryService.createCirculation(dcbTransactionId, dcbTransaction, pickupServicePoint.getId());
-        case BORROWER -> borrowingLibraryService.createCirculation(dcbTransactionId, dcbTransaction, pickupServicePoint.getId());
+        case BORROWING_PICKUP -> borrowingPickupLibraryService.createCirculation(dcbTransactionId, dcbTransaction, pickupServicePoint.getId());
         default -> throw new IllegalArgumentException("Other roles are not implemented");
       };
 
@@ -62,7 +62,7 @@ public class TransactionsServiceImpl implements TransactionsService {
       }
       switch (dcbTransaction.getRole()) {
         case LENDER -> lendingLibraryService.updateTransactionStatus(dcbTransaction, transactionStatus);
-        case BORROWER -> borrowingLibraryService.updateTransactionStatus(dcbTransaction, transactionStatus);
+        case BORROWING_PICKUP -> borrowingPickupLibraryService.updateTransactionStatus(dcbTransaction, transactionStatus);
         default -> throw new IllegalArgumentException("Other roles are not implemented");
       }
 

@@ -51,7 +51,7 @@ public class EntityUtils {
     return DcbTransaction.builder()
       .item(createDcbItem())
       .patron(switch (role){
-          case BORROWER -> createDcbPatronWithExactPatronId(EXISTED_PATRON_ID);
+        case BORROWING_PICKUP -> createDcbPatronWithExactPatronId(EXISTED_PATRON_ID);
           default -> createDefaultDcbPatron();
         }
       )

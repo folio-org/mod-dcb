@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWER;
+import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWING_PICKUP;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
 import static org.folio.dcb.utils.EntityUtils.createTransactionEntity;
 import static org.folio.dcb.utils.EntityUtils.getMockDataAsString;
@@ -59,7 +59,7 @@ class CirculationCheckInEventListenerTest extends BaseIT {
     var transactionEntity = createTransactionEntity();
     transactionEntity.setItemId("5b95877d-86c0-4cb7-a0cd-7660b348ae5b");
     transactionEntity.setStatus(TransactionStatus.StatusEnum.OPEN);
-    transactionEntity.setRole(BORROWER);
+    transactionEntity.setRole(BORROWING_PICKUP);
     MessageHeaders messageHeaders = getMessageHeaders();
     when(transactionRepository.findTransactionByItemIdAndStatusNotInClosed(any())).thenReturn(Optional.of(transactionEntity));
     eventListener.handleCheckInEvent(CHECK_IN_EVENT_SAMPLE, messageHeaders);
@@ -71,7 +71,7 @@ class CirculationCheckInEventListenerTest extends BaseIT {
     var transactionEntity = createTransactionEntity();
     transactionEntity.setItemId("5b95877d-86c0-4cb7-a0cd-7660b348ae5c");
     transactionEntity.setStatus(TransactionStatus.StatusEnum.OPEN);
-    transactionEntity.setRole(BORROWER);
+    transactionEntity.setRole(BORROWING_PICKUP);
     MessageHeaders messageHeaders = getMessageHeaders();
     when(transactionRepository.findTransactionByItemIdAndStatusNotInClosed(any())).thenReturn(Optional.of(transactionEntity));
     eventListener.handleCheckInEvent(CHECK_IN_EVENT_SAMPLE, messageHeaders);
