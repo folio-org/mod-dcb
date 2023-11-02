@@ -2,16 +2,24 @@ package org.folio.dcb.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.folio.dcb.domain.dto.ServicePointRequest;
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.entity.TransactionEntity;
+import org.folio.dcb.domain.mapper.TransactionMapper;
+import org.folio.dcb.exception.ResourceAlreadyExistException;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.LibraryService;
+import org.folio.dcb.service.ServicePointService;
 import org.folio.dcb.service.TransactionsService;
 import org.folio.spring.exception.NotFoundException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+
+import java.util.Objects;
+
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
 
 @Service
 @RequiredArgsConstructor
@@ -20,15 +28,28 @@ public class TransactionsServiceImpl implements TransactionsService {
 
   @Qualifier("lendingLibraryService")
   private final LibraryService lendingLibraryService;
+  @Qualifier("borrowingPickupLibraryService")
+  private final LibraryService borrowingPickupLibraryService;
   private final TransactionRepository transactionRepository;
+  private final TransactionMapper transactionMapper;
+  private final ServicePointService servicePointService;
 
   @Override
   public TransactionStatusResponse createCirculationRequest(String dcbTransactionId, DcbTransaction dcbTransaction) {
     log.debug("createCirculationRequest:: creating new transaction request for role {} ", dcbTransaction.getRole());
-    return switch (dcbTransaction.getRole()) {
-      case LENDER -> lendingLibraryService.createTransaction(dcbTransactionId, dcbTransaction);
-      default -> throw new IllegalArgumentException("Other roles are not implemented");
-    };
+    checkTransactionExistsAndThrow(dcbTransactionId);
+    ServicePointRequest pickupServicePoint = servicePointService.createServicePoint(dcbTransaction.getPickup());
+
+    TransactionStatusResponse circulationStatusResponse =
+      switch (dcbTransaction.getRole()) {
+        case LENDER -> lendingLibraryService.createCirculation(dcbTransactionId, dcbTransaction, pickupServicePoint.getId());
+        case BORROWING_PICKUP -> borrowingPickupLibraryService.createCirculation(dcbTransactionId, dcbTransaction, pickupServicePoint.getId());
+        default -> throw new IllegalArgumentException("Other roles are not implemented");
+      };
+
+    saveDcbTransaction(dcbTransactionId, dcbTransaction);
+
+    return circulationStatusResponse;
   }
 
   @Override
@@ -41,6 +62,7 @@ public class TransactionsServiceImpl implements TransactionsService {
       }
       switch (dcbTransaction.getRole()) {
         case LENDER -> lendingLibraryService.updateTransactionStatus(dcbTransaction, transactionStatus);
+        case BORROWING_PICKUP -> borrowingPickupLibraryService.updateTransactionStatus(dcbTransaction, transactionStatus);
         default -> throw new IllegalArgumentException("Other roles are not implemented");
       }
 
@@ -68,9 +90,24 @@ public class TransactionsServiceImpl implements TransactionsService {
       .build();
   }
 
-  private TransactionEntity getTransactionEntityOrThrow(String dcbTransactionId) {
+  public TransactionEntity getTransactionEntityOrThrow(String dcbTransactionId) {
     return transactionRepository.findById(dcbTransactionId)
       .orElseThrow(() -> new NotFoundException(String.format("DCB Transaction was not found by id= %s ", dcbTransactionId)));
   }
 
+  private void checkTransactionExistsAndThrow(String dcbTransactionId) {
+    if(transactionRepository.existsById(dcbTransactionId)) {
+      throw new ResourceAlreadyExistException(
+        String.format("unable to create transaction with id %s as it already exists", dcbTransactionId));
+    }
   }
+
+  private void saveDcbTransaction(String dcbTransactionId, DcbTransaction dcbTransaction) {
+    TransactionEntity transactionEntity = transactionMapper.mapToEntity(dcbTransactionId, dcbTransaction);
+    if (Objects.isNull(transactionEntity)) {
+      throw new IllegalArgumentException("Transaction Entity is null");
+    }
+    transactionEntity.setStatus(CREATED);
+    transactionRepository.save(transactionEntity);
+  }
+}

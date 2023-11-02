@@ -1,0 +1,23 @@
+CirculationItemRequest:
+  type: "object"
+  description: "CirculationItemRequest"
+  properties:
+    id:
+      description: the system assigned unique ID of the circulation item record
+      $ref: "uuid.yaml"
+    holdingsRecordId:
+      description: the system assigned unique ID of the holdings record
+      $ref: "uuid.yaml"
+    status:
+      $ref: "ItemStatus.yaml#/ItemStatus"
+    materialTypeId:
+      type: string
+    permanentLoanTypeId:
+      type: string
+    instanceTitle:
+      type: string
+    barcode:
+      type: string
+    pickupLocation:
+      type: string
+  additionalProperties: false

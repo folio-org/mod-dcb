@@ -16,6 +16,10 @@ import org.folio.spring.liquibase.FolioLiquibaseConfiguration;
 import org.folio.tenant.domain.dto.TenantAttributes;
 import org.folio.tenant.rest.resource.TenantApi;
 
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertThrows;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class FolioDcbApplicationTest {
 
@@ -41,4 +45,9 @@ class FolioDcbApplicationTest {
     assertTrue(true);
   }
 
+  @Test
+  void exceptionOnMissingSystemUserPassword() {
+    var e = assertThrows(IllegalArgumentException.class, () -> DcbApplication.main(null));
+    assertThat(e.getMessage(), containsString(DcbApplication.SYSTEM_USER_PASSWORD));
+  }
 }

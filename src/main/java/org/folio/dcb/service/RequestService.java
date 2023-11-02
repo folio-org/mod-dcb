@@ -10,4 +10,5 @@ public interface RequestService {
    * @param dcbItem - dcbItemEntity
    */
   void createPageItemRequest(User user, DcbItem dcbItem, String pickupServicePointId);
+  void createHoldItemRequest(User user, DcbItem dcbItem, String pickupServicePointId);
 }

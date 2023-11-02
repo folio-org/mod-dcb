@@ -1,7 +1,7 @@
 package org.folio.dcb.service;
 
 import feign.FeignException;
-import org.folio.dcb.client.feign.InventoryHoldingsStorageClient;
+import org.folio.dcb.client.feign.HoldingsStorageClient;
 import org.folio.dcb.service.impl.HoldingsServiceImpl;
 import org.folio.spring.exception.NotFoundException;
 import org.junit.jupiter.api.Test;
@@ -26,7 +26,7 @@ class InventoryHoldingsServiceTest {
   @InjectMocks
   private HoldingsServiceImpl holdingsService;
   @Mock
-  private InventoryHoldingsStorageClient holdingsStorageClient;
+  private HoldingsStorageClient holdingsStorageClient;
 
   @Test
   void fetchInventoryHoldingDetailsByIdTest() {

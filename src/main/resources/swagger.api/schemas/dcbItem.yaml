@@ -17,3 +17,6 @@ DcbItem:
     lendingLibraryCode:
       description: The code which identifies the lending library
       type: string
+    loanType:
+      description: The code in ReShare DCB which identifies the loan type
+      type: string

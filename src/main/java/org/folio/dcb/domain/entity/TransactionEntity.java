@@ -2,6 +2,7 @@ package org.folio.dcb.domain.entity;
 
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
@@ -16,9 +17,11 @@ import org.folio.dcb.domain.converter.UUIDConverter;
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.entity.base.AuditableEntity;
 import org.folio.dcb.domain.dto.TransactionStatus.StatusEnum;
+import org.folio.dcb.listener.entity.TransactionAuditEntityListener;
 
 @Entity
 @Table(name = "transactions")
+@EntityListeners(TransactionAuditEntityListener.class)
 @Getter
 @Setter
 @ToString

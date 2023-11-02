@@ -8,6 +8,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.UUID;
+
 import static org.folio.dcb.utils.EntityUtils.createTransactionEntity;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -24,6 +26,12 @@ class CirculationServiceTest {
   @Test
   void checkInByBarcodeTest(){
     circulationService.checkInByBarcode(createTransactionEntity());
+    verify(circulationClient).checkInByBarcode(any());
+  }
+
+  @Test
+  void checkInByBarcodeWithServicePointTest(){
+    circulationService.checkInByBarcode(createTransactionEntity(), String.valueOf(UUID.randomUUID()));
     verify(circulationClient).checkInByBarcode(any());
   }
 

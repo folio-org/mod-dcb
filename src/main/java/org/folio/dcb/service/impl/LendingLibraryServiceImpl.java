@@ -34,23 +34,18 @@ public class LendingLibraryServiceImpl implements LibraryService {
   private final UserService userService;
   private final RequestService requestService;
   private final TransactionRepository transactionRepository;
-  private final TransactionMapper transactionMapper;
   private final CirculationService circulationService;
-  private final ServicePointService servicePointService;
 
   @Override
-  public TransactionStatusResponse createTransaction(String dcbTransactionId, DcbTransaction dcbTransaction) {
+  public TransactionStatusResponse createCirculation(String dcbTransactionId, DcbTransaction dcbTransaction, String pickupServicePointId) {
     log.debug("createTransaction:: creating a new transaction with dcbTransactionId {} , dcbTransaction {}",
       dcbTransactionId, dcbTransaction);
 
-    checkTransactionExistsAndThrow(dcbTransactionId);
     var item = dcbTransaction.getItem();
     var patron = dcbTransaction.getPatron();
 
     var user = userService.fetchOrCreateUser(patron);
-    ServicePointRequest pickupServicePoint = servicePointService.createServicePoint(dcbTransaction.getPickup());
-    requestService.createPageItemRequest(user, item, pickupServicePoint.getId());
-    saveDcbTransaction(dcbTransactionId, dcbTransaction);
+    requestService.createPageItemRequest(user, item, pickupServicePointId);
 
     return TransactionStatusResponse.builder()
       .status(TransactionStatusResponse.StatusEnum.CREATED)
@@ -59,29 +54,13 @@ public class LendingLibraryServiceImpl implements LibraryService {
       .build();
   }
 
-  private void checkTransactionExistsAndThrow(String dcbTransactionId) {
-    if(transactionRepository.existsById(dcbTransactionId)) {
-      throw new ResourceAlreadyExistException(
-        String.format("unable to create transaction with id %s as it already exists", dcbTransactionId));
-    }
-  }
-
-  private void saveDcbTransaction(String dcbTransactionId, DcbTransaction dcbTransaction) {
-    TransactionEntity transactionEntity = transactionMapper.mapToEntity(dcbTransactionId, dcbTransaction);
-    if (Objects.isNull(transactionEntity)) {
-      throw new IllegalArgumentException("Transaction Entity is null");
-    }
-    transactionEntity.setStatus(CREATED);
-    transactionRepository.save(transactionEntity);
-  }
-
   @Override
   public void updateTransactionStatus(TransactionEntity dcbTransaction, TransactionStatus transactionStatus) {
     log.debug("updateTransactionStatus:: Updating dcbTransaction {} to status {} ", dcbTransaction, transactionStatus);
     var currentStatus = dcbTransaction.getStatus();
     var requestedStatus = transactionStatus.getStatus();
     if (OPEN == currentStatus && AWAITING_PICKUP == requestedStatus) {
-      log.info("updateTransactionStatus:: Checking in item by barcode: {} ", dcbTransaction.getPatronBarcode());
+      log.info("updateTransactionStatus:: Checking in item by barcode: {} ", dcbTransaction.getItemBarcode());
       circulationService.checkInByBarcode(dcbTransaction);
       updateTransactionEntity(dcbTransaction, requestedStatus);
     } else if (AWAITING_PICKUP == currentStatus && ITEM_CHECKED_OUT == requestedStatus) {

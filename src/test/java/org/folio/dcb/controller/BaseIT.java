@@ -8,6 +8,7 @@ import lombok.SneakyThrows;
 import org.folio.spring.config.properties.FolioEnvironment;
 import org.folio.spring.integration.XOkapiHeaders;
 import org.folio.tenant.domain.dto.TenantAttributes;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.http.HttpHeaders;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.support.TestPropertySourceUtils;
 import org.springframework.test.util.TestSocketUtils;
@@ -35,6 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ContextConfiguration(initializers = BaseIT.DockerPostgresDataSourceInitializer.class)
 @AutoConfigureMockMvc
 @Testcontainers
+@ActiveProfiles("test")
 public class BaseIT {
   @Autowired
   protected MockMvc mockMvc;
@@ -95,7 +98,7 @@ public class BaseIT {
 
   public static class DockerPostgresDataSourceInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
     @Override
-    public void initialize(ConfigurableApplicationContext applicationContext) {
+    public void initialize(@NotNull ConfigurableApplicationContext applicationContext) {
       TestPropertySourceUtils.addInlinedPropertiesToEnvironment(applicationContext,
         "spring.datasource.url=" + postgreDBContainer.getJdbcUrl(),
         "spring.datasource.username=" + postgreDBContainer.getUsername(),
