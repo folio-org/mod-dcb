@@ -24,6 +24,8 @@ import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.CHECKED_OUT;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_OUT;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_IN;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CLOSED;
 
 @Service("borrowingPickupLibraryService")
 @RequiredArgsConstructor
