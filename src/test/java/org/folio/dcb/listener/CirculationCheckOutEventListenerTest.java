@@ -4,7 +4,7 @@ import org.folio.dcb.controller.BaseIT;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.listener.kafka.CirculationEventListener;
 import org.folio.dcb.repository.TransactionRepository;
-import org.folio.dcb.service.impl.BorrowingLibraryServiceImpl;
+import org.folio.dcb.service.impl.BorrowingPickupLibraryServiceImpl;
 import org.folio.spring.client.AuthnClient;
 import org.folio.spring.integration.XOkapiHeaders;
 import org.junit.jupiter.api.Test;
@@ -32,7 +32,7 @@ class CirculationCheckOutEventListenerTest extends BaseIT {
   private static final String CHECK_OUT_EVENT_SAMPLE = getMockDataAsString("mockdata/kafka/check_out.json");
 
   @Mock
-  private BorrowingLibraryServiceImpl libraryService;
+  private BorrowingPickupLibraryServiceImpl libraryService;
   @Autowired
   private CirculationEventListener eventListener ;
   @Mock

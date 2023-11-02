@@ -20,8 +20,8 @@ import org.springframework.stereotype.Service;
 import java.util.UUID;
 
 import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.AWAITING_PICKUP;
-import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
-import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
+import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.CHECKED_OUT;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.*;
 
 @Service("borrowingPickupLibraryService")
 @RequiredArgsConstructor
