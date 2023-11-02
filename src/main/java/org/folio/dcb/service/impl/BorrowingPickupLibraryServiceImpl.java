@@ -21,7 +21,11 @@ import java.util.UUID;
 
 import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.AWAITING_PICKUP;
 import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.CHECKED_OUT;
-import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.*;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_OUT;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_IN;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CLOSED;
 
 @Service("borrowingPickupLibraryService")
 @RequiredArgsConstructor
@@ -87,6 +91,10 @@ public class BorrowingPickupLibraryServiceImpl implements LibraryService {
       updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.AWAITING_PICKUP);
     } else if (TransactionStatus.StatusEnum.AWAITING_PICKUP == transactionEntity.getStatus() && CHECKED_OUT == circulationItemRequest.getStatus().getName()) {
       updateTransactionEntity(transactionEntity, ITEM_CHECKED_OUT);
+    } else if(ITEM_CHECKED_OUT == transactionEntity.getStatus()){
+      log.info("updateStatusByTransactionEntity:: Updated item status from {} to {}",
+        transactionEntity.getStatus().getValue(), TransactionStatus.StatusEnum.ITEM_CHECKED_IN.getValue());
+      updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.ITEM_CHECKED_IN);
     } else {
       log.info("updateStatusByTransactionEntity:: Item status is {}. So status of transaction is not updated",
         circulationItemRequest.getStatus().getName());
