@@ -20,13 +20,15 @@ import org.springframework.stereotype.Service;
 import java.util.UUID;
 
 import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.AWAITING_PICKUP;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CLOSED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_IN;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
 
-@Service("borrowingLibraryService")
+@Service("borrowingPickupLibraryService")
 @RequiredArgsConstructor
 @Log4j2
-public class BorrowingLibraryServiceImpl implements LibraryService {
+public class BorrowingPickupLibraryServiceImpl implements LibraryService {
   private static final String TEMP_VALUE_MATERIAL_TYPE_NAME_BOOK = "book";
 
   private final UserService userService;
@@ -69,6 +71,8 @@ public class BorrowingLibraryServiceImpl implements LibraryService {
       log.info("updateTransactionStatus:: Checking in item by barcode: {} ", dcbTransaction.getItemBarcode());
       //Random UUID for servicePointId.
       circulationService.checkInByBarcode(dcbTransaction, UUID.randomUUID().toString());
+      updateTransactionEntity(dcbTransaction, requestedStatus);
+    } else if (ITEM_CHECKED_IN == currentStatus && CLOSED == requestedStatus) {
       updateTransactionEntity(dcbTransaction, requestedStatus);
     } else {
       String errorMessage = String.format("updateTransactionStatus:: status update from %s to %s is not implemented",

@@ -13,6 +13,42 @@
     {
       "id": "inventory",
       "version": "13.0"
+    },
+    {
+      "id": "login",
+      "version": "7.3"
+    },
+    {
+      "id": "permissions",
+      "version": "5.6"
+    },
+    {
+      "id": "item-storage",
+      "version": "10.0"
+    },
+    {
+      "id": "holdings-storage",
+      "version": "6.0"
+    },
+    {
+      "id": "service-points",
+      "version": "3.3"
+    },
+    {
+      "id": "circulation-item",
+      "version": "1.1"
+    },
+    {
+      "id": "inventory",
+      "version": "13.0"
+    },
+    {
+      "id": "material-types",
+      "version": "2.2"
+    },
+    {
+      "id": "loan-types",
+      "version": "2.3"
     }
   ],
   "provides": [
@@ -28,7 +64,19 @@
           "permissionsRequired": [
             "dcb.transactions.post"
           ],
-          "modulePermissions": []
+          "modulePermissions": [
+            "inventory-storage.service-points.item.post",
+            "users.collection.get",
+            "users.item.post",
+            "usergroups.collection.get",
+            "inventory-storage.items.item.get",
+            "inventory-storage.holdings.item.get",
+            "circulation.requests.item.post",
+            "circulation-item-storage.items.item.post",
+            "circulation-item-storage.items.item.get",
+            "inventory-storage.material-types.collection.get",
+            "inventory-storage.loan-types.collection.get"
+          ]
         },
         {
           "methods": [
@@ -48,7 +96,10 @@
           "permissionsRequired": [
             "dcb.transactions.put"
           ],
-          "modulePermissions": []
+          "modulePermissions": [
+            "circulation.check-out-by-barcode.post",
+            "circulation.check-in-by-barcode.post"
+          ]
         }
       ]
     },
