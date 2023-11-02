@@ -20,10 +20,8 @@ import org.springframework.stereotype.Service;
 import java.util.UUID;
 
 import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.AWAITING_PICKUP;
-import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CLOSED;
-import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
-import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_IN;
-import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
+import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.CHECKED_OUT;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.*;
 
 @Service("borrowingPickupLibraryService")
 @RequiredArgsConstructor
@@ -75,8 +73,7 @@ public class BorrowingPickupLibraryServiceImpl implements LibraryService {
     } else if (ITEM_CHECKED_IN == currentStatus && CLOSED == requestedStatus) {
       updateTransactionEntity(dcbTransaction, requestedStatus);
     } else {
-      String errorMessage = String.format("updateTransactionStatus:: status update from %s to %s is not implemented",
-        currentStatus, requestedStatus);
+      String errorMessage = String.format("updateTransactionStatus:: status update from %s to %s is not implemented", currentStatus, requestedStatus);
       log.warn(errorMessage);
       throw new IllegalArgumentException(errorMessage);
     }
@@ -85,14 +82,14 @@ public class BorrowingPickupLibraryServiceImpl implements LibraryService {
   @Override
   public void updateStatusByTransactionEntity(TransactionEntity transactionEntity) {
     log.debug("updateTransactionStatus:: Received checkIn event for itemId: {}", transactionEntity.getItemId());
-    if(OPEN == transactionEntity.getStatus()) {
-      CirculationItemRequest circulationItemRequest = circulationItemService.fetchItemById(transactionEntity.getItemId());
-      if(AWAITING_PICKUP == circulationItemRequest.getStatus().getName()) {
-        updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.AWAITING_PICKUP);
-      } else {
-        log.info("updateStatusByTransactionEntity:: Item status is {} . So status of transaction is not updated",
-          circulationItemRequest.getStatus().getName());
-      }
+    CirculationItemRequest circulationItemRequest = circulationItemService.fetchItemById(transactionEntity.getItemId());
+    if (OPEN == transactionEntity.getStatus() && AWAITING_PICKUP == circulationItemRequest.getStatus().getName()) {
+      updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.AWAITING_PICKUP);
+    } else if (TransactionStatus.StatusEnum.AWAITING_PICKUP == transactionEntity.getStatus() && CHECKED_OUT == circulationItemRequest.getStatus().getName()) {
+      updateTransactionEntity(transactionEntity, ITEM_CHECKED_OUT);
+    } else {
+      log.info("updateStatusByTransactionEntity:: Item status is {}. So status of transaction is not updated",
+        circulationItemRequest.getStatus().getName());
     }
   }
 
