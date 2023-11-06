@@ -49,6 +49,22 @@
     {
       "id": "loan-types",
       "version": "2.3"
+    },
+    {
+      "id": "locations",
+      "version": "3.0"
+    },
+    {
+      "id": "location-units",
+      "version": "2.0"
+    },
+    {
+      "id": "holdings-sources",
+      "version": "1.0"
+    },
+    {
+      "id": "instance-types",
+      "version": "2.0"
     }
   ],
   "provides": [
