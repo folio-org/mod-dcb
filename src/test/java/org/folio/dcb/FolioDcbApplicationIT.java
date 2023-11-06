@@ -29,7 +29,7 @@ import org.testcontainers.utility.DockerImageName;
 
 @org.testcontainers.junit.jupiter.Testcontainers
 @WireMockTest(httpPort = 9999)
-public class FolioDcbApplicationIT {
+class FolioDcbApplicationIT {
 
   private static final Logger LOG = LoggerFactory.getLogger(FolioDcbApplicationIT.class);
   /** Container logging, requires log4j-slf4j2-impl in test scope */
@@ -103,7 +103,7 @@ public class FolioDcbApplicationIT {
   }
 
   @Test
-  public void installAndUpgrade() {
+  void installAndUpgrade() {
     RestAssured.requestSpecification = new RequestSpecBuilder()
       .addHeader(XOkapiHeaders.URL, "http://host.testcontainers.internal:9999")
       .addHeader(XOkapiHeaders.TENANT, TENANT)
