@@ -36,7 +36,7 @@
     },
     {
       "id": "circulation-item",
-      "version": "1.1"
+      "version": "1.0"
     },
     {
       "id": "inventory",
@@ -147,7 +147,7 @@
   ],
   "permissionSets" : [
     {
-      "permissionName": "dcb.all",
+      "permissionName": "dcb.transactions.all",
       "displayName": "DCB API module - all permissions",
       "description": "All permissions for dcb module",
       "subPermissions": [
@@ -157,17 +157,17 @@
       ]
     },
     {
-      "permissionName": "dcb.post",
+      "permissionName": "dcb.transactions.post",
       "displayName": "creates new transaction",
       "description": "creates new transaction"
     },
     {
-      "permissionName": "dcb.get",
+      "permissionName": "dcb.transactions.get",
       "displayName": "get transaction details",
       "description": "get transaction details"
     },
     {
-      "permissionName": "dcb.put",
+      "permissionName": "dcb.transactions.put",
       "displayName": "update transaction details",
       "description": "update transaction details"
     }

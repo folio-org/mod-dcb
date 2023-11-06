@@ -21,8 +21,8 @@ import static org.folio.dcb.utils.TransactionHelper.parseEvent;
 @Component
 @RequiredArgsConstructor
 public class CirculationEventListener {
-  public static final String CHECK_IN_LISTENER_ID = "check-in-listener-id";
-  public static final String CHECK_OUT_LOAN_LISTENER_ID = "loan-listener-id";
+  public static final String CHECK_IN_LISTENER_ID = "mod-dcb-check-in-listener-id";
+  public static final String CHECK_OUT_LOAN_LISTENER_ID = "mod-dcb-loan-listener-id";
   @Qualifier("lendingLibraryService")
   private final LibraryService lendingLibraryService;
   @Qualifier("borrowingPickupLibraryService")
