@@ -1,6 +1,7 @@
 package org.folio.dcb.service;
 
 import org.folio.dcb.domain.dto.TransactionStatus;
+import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.impl.CirculationServiceImpl;
 import org.folio.dcb.service.impl.PickupLibraryServiceImpl;
@@ -14,6 +15,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.PICKUP;
 import static org.folio.dcb.utils.EntityUtils.createTransactionEntity;
 
+import static org.folio.dcb.utils.EntityUtils.createTransactionStatus;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.times;
 @ExtendWith(MockitoExtension.class)
 class PickupLibraryServiceTest {
@@ -32,6 +35,13 @@ class PickupLibraryServiceTest {
 
     pickupLibraryService.updateTransactionStatus(transactionEntity, TransactionStatus.builder().status(TransactionStatus.StatusEnum.OPEN).build());
     Mockito.verify(transactionRepository, times(1)).save(transactionEntity);
+  }
+
+  @Test
+  void updateTransactionWithWrongStatusTest() {
+    TransactionEntity transactionEntity = createTransactionEntity();
+    TransactionStatus transactionStatus = createTransactionStatus(TransactionStatus.StatusEnum.AWAITING_PICKUP);
+    assertThrows(IllegalArgumentException.class, () -> pickupLibraryService.updateTransactionStatus(transactionEntity, transactionStatus));
   }
 
 }
