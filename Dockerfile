@@ -1,6 +1,10 @@
 FROM folioci/alpine-jre-openjdk17:latest
 
-ENV SYSTEM_USER_PASSWORD dcb-system-user
+# Install latest patch versions of packages: https://pythonspeed.com/articles/security-updates-in-docker/
+USER root
+RUN apk upgrade --no-cache
+USER folio
+
 # Copy your fat jar to the container
 ENV APP_FILE mod-dcb.jar
 # - should be a single jar file
