@@ -30,7 +30,9 @@ public class PickupLibraryServiceImpl implements LibraryService {
 
   @Override
   public void updateStatusByTransactionEntity(TransactionEntity transactionEntity) {
+    log.debug("updateTransactionStatus:: Received checkIn event for itemId: {}", transactionEntity.getItemId());
 
+    log.info("Not implemented yet");
   }
 
   @Override
