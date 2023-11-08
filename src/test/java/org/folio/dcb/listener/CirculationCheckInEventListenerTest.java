@@ -91,7 +91,7 @@ class CirculationCheckInEventListenerTest extends BaseIT {
     return new MessageHeaders(header);
   }
   @Test
-  void handleCheckInEventInPickupFromOpenToAwaitingPickup_1() {
+  void handleCheckInEventInPickupFromOpenToAwaitingPickupTest() {
     var transactionEntity = createTransactionEntity();
     transactionEntity.setItemId("5b95877d-86c0-4cb7-a0cd-7660b348ae5d");
     transactionEntity.setStatus(TransactionStatus.StatusEnum.OPEN);
@@ -100,5 +100,17 @@ class CirculationCheckInEventListenerTest extends BaseIT {
     when(transactionRepository.findTransactionByItemIdAndStatusNotInClosed(any())).thenReturn(Optional.of(transactionEntity));
     eventListener.handleCheckInEvent(CHECK_IN_EVENT_SAMPLE, messageHeaders);
     Mockito.verify(transactionRepository).save(any());
+  }
+
+  @Test
+  void handleCheckInEventInPickupWithIncorrectDataTest() {
+    var transactionEntity = createTransactionEntity();
+    transactionEntity.setItemId("5b95877d-86c0-4cb7-a0cd-7660b348ae5d");
+    transactionEntity.setStatus(TransactionStatus.StatusEnum.CREATED);
+    transactionEntity.setRole(PICKUP);
+    MessageHeaders messageHeaders = getMessageHeaders();
+    when(transactionRepository.findTransactionByItemIdAndStatusNotInClosed(any())).thenReturn(Optional.of(transactionEntity));
+    eventListener.handleCheckInEvent(CHECK_IN_EVENT_SAMPLE, messageHeaders);
+    Mockito.verify(transactionRepository, never()).save(any());
   }
 }

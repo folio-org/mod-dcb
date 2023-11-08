@@ -42,7 +42,8 @@ public class PickupLibraryServiceImpl implements LibraryService {
     } else {
       log.info("updateStatusByTransactionEntity:: Item status is {}. So status of transaction is not updated",
         circulationItemRequest.getStatus().getName());
-    }  }
+    }
+  }
 
   @Override
   public void updateTransactionStatus(TransactionEntity dcbTransaction, TransactionStatus transactionStatus) {
