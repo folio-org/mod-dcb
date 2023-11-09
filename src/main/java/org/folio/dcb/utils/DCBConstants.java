@@ -17,4 +17,6 @@ public class DCBConstants {
   public static final String INSTANCE_TYPE_SOURCE = "local";
   public static final String NAME = "DCB";
   public static final String CODE = "000";
+  public static final String DCB_LOAN_TYPE_ID = "9d87cd21-49d0-4164-8d22-883103ee57af";
+  public static final String DCB_LOAN_TYPE_NAME = "DCB Can circulate";
 }

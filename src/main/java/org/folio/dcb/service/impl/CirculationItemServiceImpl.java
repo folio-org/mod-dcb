@@ -12,6 +12,7 @@ import org.folio.dcb.service.ItemService;
 import org.springframework.stereotype.Service;
 
 import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.IN_TRANSIT;
+import static org.folio.dcb.utils.DCBConstants.DCB_LOAN_TYPE_NAME;
 
 @Service
 @Log4j2
@@ -19,7 +20,6 @@ import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.IN_TRANSIT;
 public class CirculationItemServiceImpl implements CirculationItemService {
 
   private static final String TEMP_VALUE_HOLDING_ID = "10cd3a5a-d36f-4c7a-bc4f-e1ae3cf820c9";
-  private static final String INITIAL_CFG_LOAN_TYPE_VALUE = "Can circulate";
 
   private final ItemService itemService;
   private final CirculationItemClient circulationItemClient;
@@ -47,7 +47,7 @@ public class CirculationItemServiceImpl implements CirculationItemService {
 
   private void createCirculationItem(DcbItem item, String pickupServicePointId){
     var materialTypeId = itemService.fetchItemMaterialTypeIdByMaterialTypeName(item.getMaterialType());
-    var loanTypeId = itemService.fetchItemLoanTypeIdByLoanTypeName(INITIAL_CFG_LOAN_TYPE_VALUE);
+    var loanTypeId = itemService.fetchItemLoanTypeIdByLoanTypeName(DCB_LOAN_TYPE_NAME);
 
     CirculationItemRequest circulationItemRequest =
       CirculationItemRequest.builder()

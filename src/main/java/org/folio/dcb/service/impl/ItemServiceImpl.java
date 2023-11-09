@@ -11,6 +11,8 @@ import org.folio.dcb.service.ItemService;
 import org.folio.spring.exception.NotFoundException;
 import org.springframework.stereotype.Service;
 
+import static org.folio.dcb.utils.DCBConstants.DCB_LOAN_TYPE_NAME;
+
 @Service
 @AllArgsConstructor
 @Log4j2
@@ -55,10 +57,10 @@ public class ItemServiceImpl implements ItemService {
   @Override
   public String fetchItemLoanTypeIdByLoanTypeName(String loanTypeName) {
     log.debug("fetchItemLoanTypeIdByLoanTypeName:: Fetching ItemMaterialTypeId by MaterialTypeName={}", loanTypeName);
-    return loanTypeClient.fetchLoanTypeByQuery(String.format("name==\"%s\"", loanTypeName))
-      .getLoantypes()
+    return loanTypeClient.queryLoanTypeByName(DCB_LOAN_TYPE_NAME)
+      .getResult()
       .stream()
       .findFirst()
-      .map(org.folio.dcb.domain.dto.LoanType::getId)
+      .map(LoanTypeClient.LoanType::getId)
       .orElseThrow(() -> new NotFoundException(String.format("LoanType not found with name %s ", loanTypeName)));  }
 }
