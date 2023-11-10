@@ -53,6 +53,7 @@ public class CirculationEventListener {
               switch (transactionEntity.getRole()) {
                 case LENDER -> lendingLibraryService.updateStatusByTransactionEntity(transactionEntity);
                 case BORROWING_PICKUP -> borrowingLibraryService.updateStatusByTransactionEntity(transactionEntity);
+                case PICKUP -> pickupLibraryService.updateStatusByTransactionEntity(transactionEntity);
                 default -> throw new IllegalArgumentException("Other roles are not implemented yet");
               }
             })

@@ -2,17 +2,20 @@ package org.folio.dcb.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.folio.dcb.domain.dto.CirculationItemRequest;
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.repository.TransactionRepository;
+import org.folio.dcb.service.CirculationItemService;
 import org.folio.dcb.service.CirculationService;
 import org.folio.dcb.service.LibraryService;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
+import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.AWAITING_PICKUP;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.*;
 
 @Service("pickupLibraryService")
@@ -22,6 +25,8 @@ public class PickupLibraryServiceImpl implements LibraryService {
 
   private final TransactionRepository transactionRepository;
   private final CirculationService circulationService;
+  private final CirculationItemService circulationItemService;
+
 
   @Override
   public TransactionStatusResponse createCirculation(String dcbTransactionId, DcbTransaction dcbTransaction, String pickupServicePointId) {
@@ -30,9 +35,16 @@ public class PickupLibraryServiceImpl implements LibraryService {
 
   @Override
   public void updateStatusByTransactionEntity(TransactionEntity transactionEntity) {
-    if(CANCELLED == transactionEntity.getStatus()){
+    log.debug("updateTransactionStatus:: Received checkIn event for itemId: {}", transactionEntity.getItemId());
+    CirculationItemRequest circulationItemRequest = circulationItemService.fetchItemById(transactionEntity.getItemId());
+    if (OPEN == transactionEntity.getStatus() && AWAITING_PICKUP == circulationItemRequest.getStatus().getName()) {
+      updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.AWAITING_PICKUP);
+    } else if(CANCELLED == transactionEntity.getStatus()){
       log.info("updateTransactionStatus:: Transaction cancelled for itemId: {}", transactionEntity.getItemId());
       updateTransactionEntity(transactionEntity, CANCELLED);
+    } else {
+      log.info("updateStatusByTransactionEntity:: Item status is {}. So status of transaction is not updated",
+        circulationItemRequest.getStatus().getName());
     }
   }
 
