@@ -2,6 +2,7 @@ package org.folio.dcb.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.folio.dcb.domain.dto.CirculationItemRequest;
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
+import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.AWAITING_PICKUP;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.*;
 
 @Service("pickupLibraryService")
@@ -48,7 +50,14 @@ public class PickupLibraryServiceImpl implements LibraryService {
 
   @Override
   public void updateStatusByTransactionEntity(TransactionEntity transactionEntity) {
-    log.info("Not implemented yet");
+    log.debug("updateTransactionStatus:: Received checkIn event for itemId: {}", transactionEntity.getItemId());
+    CirculationItemRequest circulationItemRequest = circulationItemService.fetchItemById(transactionEntity.getItemId());
+    if (OPEN == transactionEntity.getStatus() && AWAITING_PICKUP == circulationItemRequest.getStatus().getName()) {
+      updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.AWAITING_PICKUP);
+    } else {
+      log.info("updateStatusByTransactionEntity:: Item status is {}. So status of transaction is not updated",
+        circulationItemRequest.getStatus().getName());
+    }
   }
 
   @Override
