@@ -153,7 +153,8 @@
             "inventory-storage.service-points.item.post",
             "inventory-storage.location-units.libraries.collection.get",
             "inventory-storage.loan-types.collection.get",
-            "inventory-storage.loan-types.collection.post"
+            "inventory-storage.loan-types.collection.post",
+            "inventory-storage.loan-types.item.post"
           ]
         },
         {
