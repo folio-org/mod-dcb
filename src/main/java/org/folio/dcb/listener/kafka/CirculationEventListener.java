@@ -3,7 +3,6 @@ package org.folio.dcb.listener.kafka;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dcb.repository.TransactionRepository;
-import org.folio.dcb.service.CirculationItemService;
 import org.folio.dcb.service.LibraryService;
 import org.folio.spring.integration.XOkapiHeaders;
 import org.folio.spring.service.SystemUserScopedExecutionService;
