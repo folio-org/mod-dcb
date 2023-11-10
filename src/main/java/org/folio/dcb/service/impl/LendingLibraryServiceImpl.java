@@ -2,22 +2,16 @@ package org.folio.dcb.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.folio.dcb.domain.dto.ServicePointRequest;
-import org.folio.dcb.domain.mapper.TransactionMapper;
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.entity.TransactionEntity;
-import org.folio.dcb.exception.ResourceAlreadyExistException;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.CirculationService;
 import org.folio.dcb.service.LibraryService;
 import org.folio.dcb.service.RequestService;
-import org.folio.dcb.service.ServicePointService;
 import org.folio.dcb.service.UserService;
 import org.springframework.stereotype.Service;
-
-import java.util.Objects;
 
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.AWAITING_PICKUP;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CLOSED;
@@ -25,6 +19,7 @@ import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_IN;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_OUT;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CANCELLED;
 
 @Service("lendingLibraryService")
 @RequiredArgsConstructor
@@ -69,6 +64,9 @@ public class LendingLibraryServiceImpl implements LibraryService {
       updateTransactionEntity(dcbTransaction, requestedStatus);
     } else if (ITEM_CHECKED_OUT == currentStatus && ITEM_CHECKED_IN == requestedStatus) {
       updateTransactionEntity(dcbTransaction, requestedStatus);
+    } else if(CANCELLED == requestedStatus) {
+      log.info("updateTransactionStatus:: Cancelling transaction: {} ", dcbTransaction.getId());
+      updateTransactionEntity(dcbTransaction, requestedStatus);
     } else {
       String errorMessage = String.format("updateTransactionStatus:: status update from %s to %s is not implemented",
         currentStatus, requestedStatus);
@@ -86,6 +84,9 @@ public class LendingLibraryServiceImpl implements LibraryService {
     } else if (ITEM_CHECKED_IN == transactionEntity.getStatus()) {
       log.info("updateTransactionStatus:: Transaction status updated from CHECKED_IN to CLOSED for itemId: {}", transactionEntity.getItemId());
       updateTransactionEntity(transactionEntity, CLOSED);
+    } else if(CANCELLED == transactionEntity.getStatus()){
+      log.info("updateTransactionStatus:: Transaction cancelled for itemId: {}", transactionEntity.getItemId());
+      updateTransactionEntity(transactionEntity, CANCELLED);
     }
   }
 

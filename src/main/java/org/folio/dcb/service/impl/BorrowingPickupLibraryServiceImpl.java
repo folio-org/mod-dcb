@@ -26,6 +26,7 @@ import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_OUT;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_IN;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CLOSED;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CANCELLED;
 
 @Service("borrowingPickupLibraryService")
 @RequiredArgsConstructor
@@ -95,6 +96,9 @@ public class BorrowingPickupLibraryServiceImpl implements LibraryService {
       log.info("updateStatusByTransactionEntity:: Updated item status from {} to {}",
         transactionEntity.getStatus().getValue(), TransactionStatus.StatusEnum.ITEM_CHECKED_IN.getValue());
       updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.ITEM_CHECKED_IN);
+    } else if(CANCELLED == transactionEntity.getStatus()){
+      log.info("updateTransactionStatus:: Transaction cancelled for itemId: {}", transactionEntity.getItemId());
+      updateTransactionEntity(transactionEntity, CANCELLED);
     } else {
       log.info("updateStatusByTransactionEntity:: Item status is {}. So status of transaction is not updated",
         circulationItemRequest.getStatus().getName());

@@ -30,7 +30,10 @@ public class PickupLibraryServiceImpl implements LibraryService {
 
   @Override
   public void updateStatusByTransactionEntity(TransactionEntity transactionEntity) {
-    log.info("Not implemented yet");
+    if(CANCELLED == transactionEntity.getStatus()){
+      log.info("updateTransactionStatus:: Transaction cancelled for itemId: {}", transactionEntity.getItemId());
+      updateTransactionEntity(transactionEntity, CANCELLED);
+    }
   }
 
   @Override

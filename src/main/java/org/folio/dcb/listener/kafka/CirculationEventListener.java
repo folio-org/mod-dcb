@@ -3,6 +3,7 @@ package org.folio.dcb.listener.kafka;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dcb.repository.TransactionRepository;
+import org.folio.dcb.service.CirculationItemService;
 import org.folio.dcb.service.LibraryService;
 import org.folio.spring.integration.XOkapiHeaders;
 import org.folio.spring.service.SystemUserScopedExecutionService;
@@ -23,11 +24,18 @@ import static org.folio.dcb.utils.TransactionHelper.parseEvent;
 public class CirculationEventListener {
   public static final String CHECK_IN_LISTENER_ID = "mod-dcb-check-in-listener-id";
   public static final String CHECK_OUT_LOAN_LISTENER_ID = "mod-dcb-loan-listener-id";
+  public static final String REQUEST_LISTENER_ID = "mod-dcb-request-listener-id";
+
   @Qualifier("lendingLibraryService")
   private final LibraryService lendingLibraryService;
   @Qualifier("borrowingPickupLibraryService")
   private final LibraryService borrowingLibraryService;
+  @Qualifier("borrowingPickupLibraryService")
+  private final LibraryService borrowingPickupLibraryService;
+  @Qualifier("pickupLibraryService")
+  private final LibraryService pickupLibraryService;
   private final TransactionRepository transactionRepository;
+  private final CirculationItemService circulationItemService;
   private final SystemUserScopedExecutionService systemUserScopedExecutionService;
 
   @KafkaListener(
@@ -78,4 +86,32 @@ public class CirculationEventListener {
       }
     }
   }
+
+  @KafkaListener(
+    id = REQUEST_LISTENER_ID,
+    topicPattern = "#{folioKafkaProperties.listener['request'].topicPattern}",
+    concurrency = "#{folioKafkaProperties.listener['request'].concurrency}")
+  public void handleRequestCancelEvent(String data, MessageHeaders messageHeaders) {
+    String tenantId = getHeaderValue(messageHeaders, XOkapiHeaders.TENANT, null).get(0);
+    var eventData = parseEvent(data);
+    if (Objects.nonNull(eventData) && eventData.getType() == EventData.EventType.CANCEL) {
+      String itemID = eventData.getItemId();
+      if (Objects.nonNull(itemID)) {
+        log.info("updateTransactionStatus:: Received cancel event for itemId: {}", itemID);
+        systemUserScopedExecutionService.executeAsyncSystemUserScoped(tenantId, () ->
+          transactionRepository.findTransactionByItemIdAndStatusNotInClosed(UUID.fromString(itemID))
+            .ifPresent(transactionEntity -> {
+              switch (transactionEntity.getRole()) {
+                case LENDER -> lendingLibraryService.updateStatusByTransactionEntity(transactionEntity);
+                case BORROWING_PICKUP -> borrowingPickupLibraryService.updateStatusByTransactionEntity(transactionEntity);
+                case BORROWER -> borrowingLibraryService.updateStatusByTransactionEntity(transactionEntity);
+                case PICKUP -> pickupLibraryService.updateStatusByTransactionEntity(transactionEntity);
+                default -> throw new IllegalArgumentException("Other roles are not implemented yet");
+              }
+            })
+        );
+      }
+    }
+  }
+
 }

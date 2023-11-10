@@ -8,6 +8,6 @@ public class EventData {
   private String itemId;
 
   public enum EventType {
-    CHECK_IN, CHECK_OUT
+    CHECK_IN, CHECK_OUT, CANCEL
   }
 }
