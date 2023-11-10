@@ -4,7 +4,6 @@ import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.repository.TransactionRepository;
-import org.folio.dcb.service.impl.CirculationServiceImpl;
 import org.folio.dcb.service.impl.PickupLibraryServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,7 +43,7 @@ class PickupLibraryServiceTest {
   @Mock
   private CirculationItemService circulationItemService;
   @Mock
-  private CirculationServiceImpl circulationService;
+  private CirculationService circulationService;
 
   @Test
   void updateTransactionTestFromCreatedToOpen() {
