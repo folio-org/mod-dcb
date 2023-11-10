@@ -46,6 +46,7 @@ public class TransactionsServiceImpl implements TransactionsService {
       switch (dcbTransaction.getRole()) {
         case LENDER -> lendingLibraryService.createCirculation(dcbTransactionId, dcbTransaction, pickupServicePoint.getId());
         case BORROWING_PICKUP -> borrowingPickupLibraryService.createCirculation(dcbTransactionId, dcbTransaction, pickupServicePoint.getId());
+        case PICKUP -> pickupLibraryService.createCirculation(dcbTransactionId, dcbTransaction, pickupServicePoint.getId());
         default -> throw new IllegalArgumentException("Other roles are not implemented");
       };
 
