@@ -10,9 +10,7 @@ import org.springframework.http.MediaType;
 
 import java.util.UUID;
 
-import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWING_PICKUP;
-import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
-
+import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.*;
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
 import static org.folio.dcb.utils.EntityUtils.EXISTED_PATRON_ID;
 import static org.folio.dcb.utils.EntityUtils.NOT_EXISTED_PATRON_ID;
@@ -145,6 +143,26 @@ class TransactionApiControllerTest extends BaseIT {
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.status").value("AWAITING_PICKUP"));
   }
+  @Test
+  void transactionStatusUpdateFromCreatedToOpenForPickupLibTest() throws Exception {
+
+    var transactionID = UUID.randomUUID().toString();
+    var dcbTransaction = createTransactionEntity();
+    dcbTransaction.setStatus(TransactionStatus.StatusEnum.CREATED);
+    dcbTransaction.setRole(PICKUP);
+    dcbTransaction.setId(transactionID);
+
+    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> transactionRepository.save(dcbTransaction));
+
+    this.mockMvc.perform(
+        put("/transactions/" + transactionID + "/status")
+          .content(asJsonString(createTransactionStatus(TransactionStatus.StatusEnum.OPEN)))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.status").value("OPEN"));
+  }
 
   /**
    * The test at the put endpoint invocation stage initiates stage verification from AWAITING_PICKUP to CHECKED_OUT
@@ -249,6 +267,33 @@ class TransactionApiControllerTest extends BaseIT {
           .headers(defaultHeaders())
           .contentType(MediaType.APPLICATION_JSON))
       .andExpect(status().isNotFound());
+  }
+
+  @Test
+  void createTransactionForPickupLibrary() throws Exception {
+    removeExistedTransactionFromDbIfSoExists();
+
+    this.mockMvc.perform(
+        post("/transactions/" + DCB_TRANSACTION_ID)
+          .content(asJsonString(createDcbTransactionByRole(PICKUP)))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isCreated())
+      .andExpect(jsonPath("$.status").value("CREATED"))
+      .andExpect(jsonPath("$.item").value(createDcbItem()))
+      .andExpect(jsonPath("$.patron").value(createDefaultDcbPatron()));
+
+    //Trying to create another transaction with same transaction id
+    this.mockMvc.perform(
+        post("/transactions/" + DCB_TRANSACTION_ID)
+          .content(asJsonString(createDcbTransactionByRole(LENDER)))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpectAll(status().is4xxClientError(),
+        jsonPath("$.errors[0].code", is("DUPLICATE_ERROR")));
+
   }
 
   private void removeExistedTransactionFromDbIfSoExists() {

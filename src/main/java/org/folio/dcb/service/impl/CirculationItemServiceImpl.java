@@ -3,6 +3,7 @@ package org.folio.dcb.service.impl;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.folio.dcb.client.feign.CirculationItemClient;
 import org.folio.dcb.domain.dto.CirculationItemRequest;
 import org.folio.dcb.domain.dto.DcbItem;
@@ -12,14 +13,14 @@ import org.folio.dcb.service.ItemService;
 import org.springframework.stereotype.Service;
 
 import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.IN_TRANSIT;
+import static org.folio.dcb.utils.DCBConstants.HOLDING_ID;
+import static org.folio.dcb.utils.DCBConstants.LOAN_TYPE_ID;
+import static org.folio.dcb.utils.DCBConstants.MATERIAL_TYPE_NAME_BOOK;
 
 @Service
 @Log4j2
 @RequiredArgsConstructor
 public class CirculationItemServiceImpl implements CirculationItemService {
-
-  private static final String TEMP_VALUE_HOLDING_ID = "10cd3a5a-d36f-4c7a-bc4f-e1ae3cf820c9";
-  private static final String INITIAL_CFG_LOAN_TYPE_VALUE = "Can circulate";
 
   private final ItemService itemService;
   private final CirculationItemClient circulationItemClient;
@@ -46,8 +47,9 @@ public class CirculationItemServiceImpl implements CirculationItemService {
   }
 
   private void createCirculationItem(DcbItem item, String pickupServicePointId){
-    var materialTypeId = itemService.fetchItemMaterialTypeIdByMaterialTypeName(item.getMaterialType());
-    var loanTypeId = itemService.fetchItemLoanTypeIdByLoanTypeName(INITIAL_CFG_LOAN_TYPE_VALUE);
+    //SetupDefaultMaterialTypeIfNotGiven
+    String materialType = StringUtils.isBlank(item.getMaterialType()) ? MATERIAL_TYPE_NAME_BOOK : item.getMaterialType();
+    var materialTypeId = itemService.fetchItemMaterialTypeIdByMaterialTypeName(materialType);
 
     CirculationItemRequest circulationItemRequest =
       CirculationItemRequest.builder()
@@ -56,10 +58,10 @@ public class CirculationItemServiceImpl implements CirculationItemService {
         .status(ItemStatus.builder()
           .name(IN_TRANSIT)
           .build())
-        .holdingsRecordId(TEMP_VALUE_HOLDING_ID)
+        .holdingsRecordId(HOLDING_ID)
         .instanceTitle(item.getTitle())
         .materialTypeId(materialTypeId)
-        .permanentLoanTypeId(loanTypeId)
+        .permanentLoanTypeId(LOAN_TYPE_ID)
         .pickupLocation(pickupServicePointId)
         .build();
 
