@@ -35,7 +35,6 @@ public class CirculationEventListener {
   @Qualifier("pickupLibraryService")
   private final LibraryService pickupLibraryService;
   private final TransactionRepository transactionRepository;
-  private final CirculationItemService circulationItemService;
   private final SystemUserScopedExecutionService systemUserScopedExecutionService;
 
   @KafkaListener(
