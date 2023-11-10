@@ -43,6 +43,8 @@ class PickupLibraryServiceTest {
   private RequestService requestService;
   @Mock
   private CirculationItemService circulationItemService;
+  @Mock
+  private CirculationServiceImpl circulationService;
 
   @Test
   void updateTransactionTestFromCreatedToOpen() {
