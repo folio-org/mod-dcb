@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.util.UUID;
 
 import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.AWAITING_PICKUP;
+import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.CHECKED_OUT;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.*;
 
 @Service("pickupLibraryService")
@@ -54,6 +55,12 @@ public class PickupLibraryServiceImpl implements LibraryService {
     CirculationItemRequest circulationItemRequest = circulationItemService.fetchItemById(transactionEntity.getItemId());
     if (OPEN == transactionEntity.getStatus() && AWAITING_PICKUP == circulationItemRequest.getStatus().getName()) {
       updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.AWAITING_PICKUP);
+    } else if (TransactionStatus.StatusEnum.AWAITING_PICKUP == transactionEntity.getStatus() && CHECKED_OUT == circulationItemRequest.getStatus().getName()) {
+      updateTransactionEntity(transactionEntity, ITEM_CHECKED_OUT);
+    } else if(ITEM_CHECKED_OUT == transactionEntity.getStatus()){
+      log.info("updateStatusByTransactionEntity:: Updated item status from {} to {}",
+        transactionEntity.getStatus().getValue(), TransactionStatus.StatusEnum.ITEM_CHECKED_IN.getValue());
+      updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.ITEM_CHECKED_IN);
     } else {
       log.info("updateStatusByTransactionEntity:: Item status is {}. So status of transaction is not updated",
         circulationItemRequest.getStatus().getName());
