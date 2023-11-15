@@ -17,5 +17,4 @@ public interface ItemService {
    * */
   String fetchItemMaterialTypeIdByMaterialTypeName(String materialTypeName);
   String fetchItemMaterialTypeNameByMaterialTypeId(String materialTypeId);
-  String fetchItemLoanTypeIdByLoanTypeName(String loanTypeName);
 }

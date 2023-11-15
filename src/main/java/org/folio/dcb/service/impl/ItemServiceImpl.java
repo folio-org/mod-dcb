@@ -4,14 +4,11 @@ import feign.FeignException;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dcb.client.feign.InventoryItemStorageClient;
-import org.folio.dcb.client.feign.LoanTypeClient;
 import org.folio.dcb.client.feign.MaterialTypeClient;
 import org.folio.dcb.domain.dto.InventoryItem;
 import org.folio.dcb.service.ItemService;
 import org.folio.spring.exception.NotFoundException;
 import org.springframework.stereotype.Service;
-
-import static org.folio.dcb.utils.DCBConstants.DCB_LOAN_TYPE_NAME;
 
 @Service
 @AllArgsConstructor
@@ -20,7 +17,6 @@ public class ItemServiceImpl implements ItemService {
 
   private final InventoryItemStorageClient inventoryItemStorageClient;
   private final MaterialTypeClient materialTypeClient;
-  private final LoanTypeClient loanTypeClient;
 
   @Override
   public InventoryItem fetchItemDetailsById(String itemId) {
@@ -54,13 +50,4 @@ public class ItemServiceImpl implements ItemService {
       .orElseThrow(() -> new NotFoundException(String.format("MaterialType not found with id %s ", materialTypeId)));
   }
 
-  @Override
-  public String fetchItemLoanTypeIdByLoanTypeName(String loanTypeName) {
-    log.debug("fetchItemLoanTypeIdByLoanTypeName:: Fetching ItemMaterialTypeId by MaterialTypeName={}", loanTypeName);
-    return loanTypeClient.queryLoanTypeByName(DCB_LOAN_TYPE_NAME)
-      .getResult()
-      .stream()
-      .findFirst()
-      .map(LoanTypeClient.LoanType::getId)
-      .orElseThrow(() -> new NotFoundException(String.format("LoanType not found with name %s ", loanTypeName)));  }
 }
