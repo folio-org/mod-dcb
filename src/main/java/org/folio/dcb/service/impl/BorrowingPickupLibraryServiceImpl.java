@@ -35,23 +35,13 @@ public class BorrowingPickupLibraryServiceImpl implements LibraryService {
   private final CirculationItemService circulationItemService;
   private final TransactionRepository transactionRepository;
   private final CirculationService circulationService;
+  private final LibraryUtil libraryUtil;
 
 
   @Override
   public TransactionStatusResponse createCirculation(String dcbTransactionId, DcbTransaction dcbTransaction, String pickupServicePointId) {
-    var itemVirtual = dcbTransaction.getItem();
-    var patron = dcbTransaction.getPatron();
-
-    var user = userService.fetchUser(patron); //user is needed, but shouldn't be generated. it should be fetched.
-    circulationItemService.checkIfItemExistsAndCreate(itemVirtual, pickupServicePointId);
-
-    requestService.createHoldItemRequest(user, itemVirtual, pickupServicePointId);
-
-    return TransactionStatusResponse.builder()
-      .status(TransactionStatusResponse.StatusEnum.CREATED)
-      .item(itemVirtual)
-      .patron(patron)
-      .build();
+    return libraryUtil.
+      createBorrowingLibraryTransaction(dcbTransactionId, dcbTransaction, pickupServicePointId);
   }
 
   @Override

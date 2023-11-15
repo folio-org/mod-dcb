@@ -30,6 +30,7 @@ public class PickupLibraryServiceImpl implements LibraryService {
   private final UserService userService;
   private final RequestService requestService;
   private final CirculationItemService circulationItemService;
+  private final LibraryUtil libraryUtil;
 
   @Override
   public TransactionStatusResponse createCirculation(String dcbTransactionId, DcbTransaction dcbTransaction, String pickupServicePointId) {
@@ -40,6 +41,7 @@ public class PickupLibraryServiceImpl implements LibraryService {
     circulationItemService.checkIfItemExistsAndCreate(itemVirtual, pickupServicePointId);
 
     requestService.createHoldItemRequest(user, itemVirtual, pickupServicePointId);
+    libraryUtil.saveDcbTransaction(dcbTransactionId, dcbTransaction, null);
 
     return TransactionStatusResponse.builder()
       .status(TransactionStatusResponse.StatusEnum.CREATED)

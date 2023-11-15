@@ -35,6 +35,7 @@ public class LendingLibraryServiceImpl implements LibraryService {
   private final RequestService requestService;
   private final TransactionRepository transactionRepository;
   private final CirculationService circulationService;
+  private final LibraryUtil libraryUtil;
 
   @Override
   public TransactionStatusResponse createCirculation(String dcbTransactionId, DcbTransaction dcbTransaction, String pickupServicePointId) {
@@ -46,6 +47,7 @@ public class LendingLibraryServiceImpl implements LibraryService {
 
     var user = userService.fetchOrCreateUser(patron);
     requestService.createPageItemRequest(user, item, pickupServicePointId);
+    libraryUtil.saveDcbTransaction(dcbTransactionId, dcbTransaction, null);
 
     return TransactionStatusResponse.builder()
       .status(TransactionStatusResponse.StatusEnum.CREATED)
