@@ -2,10 +2,7 @@ package org.folio.dcb.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.folio.dcb.domain.dto.CirculationItemRequest;
-import org.folio.dcb.domain.dto.DcbTransaction;
-import org.folio.dcb.domain.dto.TransactionStatus;
-import org.folio.dcb.domain.dto.TransactionStatusResponse;
+import org.folio.dcb.domain.dto.*;
 import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.CirculationItemService;
@@ -42,9 +39,14 @@ public class BasicPickupLibraryServiceImpl implements LibraryService {
   public void updateStatusByTransactionEntity(TransactionEntity transactionEntity) {
     log.debug("updateTransactionStatus:: Received checkIn event for itemId: {}", transactionEntity.getItemId());
     CirculationItemRequest circulationItemRequest = circulationItemService.fetchItemById(transactionEntity.getItemId());
-    if (OPEN == transactionEntity.getStatus() && AWAITING_PICKUP == circulationItemRequest.getStatus().getName()) {
+    var circulationItemRequestStatus = circulationItemRequest.getStatus().getName();
+    if (OPEN == transactionEntity.getStatus() && AWAITING_PICKUP == circulationItemRequestStatus) {
+      log.info("updateStatusByTransactionEntity:: Updated item status from {} to {}",
+        transactionEntity.getStatus().getValue(), TransactionStatus.StatusEnum.AWAITING_PICKUP.getValue());
       updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.AWAITING_PICKUP);
-    } else if (TransactionStatus.StatusEnum.AWAITING_PICKUP == transactionEntity.getStatus() && CHECKED_OUT == circulationItemRequest.getStatus().getName()) {
+    } else if (TransactionStatus.StatusEnum.AWAITING_PICKUP == transactionEntity.getStatus() && CHECKED_OUT == circulationItemRequestStatus) {
+      log.info("updateStatusByTransactionEntity:: Updated item status from {} to {}",
+        transactionEntity.getStatus().getValue(), ITEM_CHECKED_OUT.getValue());
       updateTransactionEntity(transactionEntity, ITEM_CHECKED_OUT);
     } else if(ITEM_CHECKED_OUT == transactionEntity.getStatus()){
       log.info("updateStatusByTransactionEntity:: Updated item status from {} to {}",
@@ -52,7 +54,7 @@ public class BasicPickupLibraryServiceImpl implements LibraryService {
       updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.ITEM_CHECKED_IN);
     } else {
       log.info("updateStatusByTransactionEntity:: Item status is {}. So status of transaction is not updated",
-        circulationItemRequest.getStatus().getName());
+        circulationItemRequestStatus);
     }
 
   }
@@ -68,6 +70,8 @@ public class BasicPickupLibraryServiceImpl implements LibraryService {
       circulationService.checkInByBarcode(dcbTransaction, UUID.randomUUID().toString());
       updateTransactionEntity(dcbTransaction, requestedStatus);
     } else if (ITEM_CHECKED_IN == currentStatus && CLOSED == requestedStatus) {
+      log.info("updateTransactionStatus:: transaction status transition from {} to {} for the item with barcode {} ",
+        ITEM_CHECKED_IN.getValue(), CLOSED.getValue(), dcbTransaction.getItemBarcode());
       updateTransactionEntity(dcbTransaction, requestedStatus);
     } else {
       String errorMessage = String.format("updateTransactionStatus:: status update from %s to %s is not implemented", currentStatus, requestedStatus);
