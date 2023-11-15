@@ -7,7 +7,6 @@ import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.CirculationItemService;
 import org.folio.dcb.service.CirculationService;
-import org.folio.dcb.service.LibraryService;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -23,7 +22,7 @@ import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
 @Service("basicPickupLibraryService")
 @RequiredArgsConstructor
 @Log4j2
-public class BasicPickupLibraryServiceImpl implements LibraryService {
+public class BasicPickupLibraryServiceImpl {
 
   private static final String UPDATE_STATUS_BY_TRANSACTION_ENTITY_LOG_MESSAGE_PATTERN = "updateStatusByTransactionEntity:: Updated item status from {} to {}";
 
@@ -32,12 +31,6 @@ public class BasicPickupLibraryServiceImpl implements LibraryService {
   private final CirculationItemService circulationItemService;
 
 
-  @Override
-  public TransactionStatusResponse createCirculation(String dcbTransactionId, DcbTransaction dcbTransaction, String pickupServicePointId) {
-    return null;
-  }
-
-  @Override
   public void updateStatusByTransactionEntity(TransactionEntity transactionEntity) {
     log.debug("updateTransactionStatus:: Received checkIn event for itemId: {}", transactionEntity.getItemId());
     CirculationItemRequest circulationItemRequest = circulationItemService.fetchItemById(transactionEntity.getItemId());
@@ -61,7 +54,6 @@ public class BasicPickupLibraryServiceImpl implements LibraryService {
 
   }
 
-  @Override
   public void updateTransactionStatus(TransactionEntity dcbTransaction, TransactionStatus transactionStatus) {
     log.debug("updateTransactionStatus:: Updating dcbTransaction {} to status {} ", dcbTransaction, transactionStatus);
     var currentStatus = dcbTransaction.getStatus();

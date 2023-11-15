@@ -23,7 +23,7 @@ public class BorrowingPickupLibraryServiceImpl implements LibraryService {
   private final RequestService requestService;
   private final CirculationItemService circulationItemService;
   @Qualifier("basicPickupLibraryService")
-  private final LibraryService basicPickupLibraryService;
+  private final BasicPickupLibraryServiceImpl basicPickupLibraryService;
 
   @Override
   public TransactionStatusResponse createCirculation(String dcbTransactionId, DcbTransaction dcbTransaction, String pickupServicePointId) {
