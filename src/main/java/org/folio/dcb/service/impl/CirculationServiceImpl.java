@@ -9,14 +9,8 @@ import org.folio.dcb.domain.dto.CirculationRequest;
 import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.service.CirculationService;
 import org.folio.dcb.service.CirculationRequestService;
-import org.folio.dcb.utils.DCBConstants;
-import org.folio.dcb.utils.RequestStatus;
-import org.folio.spring.FolioExecutionContext;
 import org.springframework.stereotype.Service;
-
 import java.time.OffsetDateTime;
-import java.util.Date;
-import java.util.UUID;
 
 @Service
 @Log4j2

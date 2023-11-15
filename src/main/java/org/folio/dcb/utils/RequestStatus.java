@@ -1,7 +1,5 @@
 package org.folio.dcb.utils;
 
-import org.bouncycastle.cert.ocsp.Req;
-
 import java.util.Arrays;
 import java.util.EnumSet;
 
