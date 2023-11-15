@@ -21,7 +21,7 @@ import static org.mockito.Mockito.verify;
 
 
 @ExtendWith(MockitoExtension.class)
-public class BorrowingLibraryServiceTest {
+class BorrowingLibraryServiceTest {
   @InjectMocks
   private BorrowingLibraryServiceImpl borrowingLibraryService;
   @Mock
