@@ -25,6 +25,8 @@ import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
 @Log4j2
 public class BasicPickupLibraryServiceImpl implements LibraryService {
 
+  private static final String UPDATE_STATUS_BY_TRANSACTION_ENTITY_LOG_MESSAGE_PATTERN = "updateStatusByTransactionEntity:: Updated item status from {} to {}";
+
   private final TransactionRepository transactionRepository;
   private final CirculationService circulationService;
   private final CirculationItemService circulationItemService;
@@ -41,15 +43,15 @@ public class BasicPickupLibraryServiceImpl implements LibraryService {
     CirculationItemRequest circulationItemRequest = circulationItemService.fetchItemById(transactionEntity.getItemId());
     var circulationItemRequestStatus = circulationItemRequest.getStatus().getName();
     if (OPEN == transactionEntity.getStatus() && AWAITING_PICKUP == circulationItemRequestStatus) {
-      log.info("updateStatusByTransactionEntity:: Updated item status from {} to {}",
+      log.info(UPDATE_STATUS_BY_TRANSACTION_ENTITY_LOG_MESSAGE_PATTERN,
         transactionEntity.getStatus().getValue(), TransactionStatus.StatusEnum.AWAITING_PICKUP.getValue());
       updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.AWAITING_PICKUP);
     } else if (TransactionStatus.StatusEnum.AWAITING_PICKUP == transactionEntity.getStatus() && CHECKED_OUT == circulationItemRequestStatus) {
-      log.info("updateStatusByTransactionEntity:: Updated item status from {} to {}",
+      log.info(UPDATE_STATUS_BY_TRANSACTION_ENTITY_LOG_MESSAGE_PATTERN,
         transactionEntity.getStatus().getValue(), ITEM_CHECKED_OUT.getValue());
       updateTransactionEntity(transactionEntity, ITEM_CHECKED_OUT);
     } else if(ITEM_CHECKED_OUT == transactionEntity.getStatus()){
-      log.info("updateStatusByTransactionEntity:: Updated item status from {} to {}",
+      log.info(UPDATE_STATUS_BY_TRANSACTION_ENTITY_LOG_MESSAGE_PATTERN,
         transactionEntity.getStatus().getValue(), TransactionStatus.StatusEnum.ITEM_CHECKED_IN.getValue());
       updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.ITEM_CHECKED_IN);
     } else {
