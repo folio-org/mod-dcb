@@ -6,6 +6,7 @@ import org.folio.dcb.client.feign.HoldingsStorageClient;
 import org.folio.dcb.client.feign.InstanceTypeClient;
 import org.folio.dcb.client.feign.InstanceClient;
 import org.folio.dcb.client.feign.InventoryServicePointClient;
+import org.folio.dcb.client.feign.LoanTypeClient;
 import org.folio.dcb.client.feign.LocationUnitClient;
 import org.folio.dcb.client.feign.LocationsClient;
 import org.folio.dcb.listener.kafka.service.KafkaService;
@@ -44,6 +45,9 @@ class CustomTenantServiceTest {
   private InventoryServicePointClient servicePointClient;
   @Mock
   private LocationUnitClient locationUnitClient;
+  @Mock
+  private LoanTypeClient loanTypeClient;
+
 
   @InjectMocks
   private CustomTenantService service;
@@ -56,6 +60,7 @@ class CustomTenantServiceTest {
     when(locationUnitClient.getLibraryByName(any())).thenReturn(new ResultList<>());
     when(servicePointClient.getServicePointByName(any())).thenReturn(new ResultList<>());
     when(locationsClient.queryLocationsByName(any())).thenReturn(new ResultList<>());
+    when(loanTypeClient.queryLoanTypeByName(any())).thenReturn(new ResultList<>());
 
     service.createOrUpdateTenant(new TenantAttributes());
     verify(systemUserService).setupSystemUser();

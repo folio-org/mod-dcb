@@ -7,6 +7,7 @@ import org.folio.dcb.client.feign.HoldingsStorageClient;
 import org.folio.dcb.client.feign.InstanceClient;
 import org.folio.dcb.client.feign.InstanceTypeClient;
 import org.folio.dcb.client.feign.InventoryServicePointClient;
+import org.folio.dcb.client.feign.LoanTypeClient;
 import org.folio.dcb.client.feign.LocationUnitClient;
 import org.folio.dcb.client.feign.LocationsClient;
 import org.folio.dcb.domain.dto.HoldShelfExpiryPeriod;
@@ -38,7 +39,8 @@ import static org.folio.dcb.utils.DCBConstants.LOCATION_ID;
 import static org.folio.dcb.utils.DCBConstants.NAME;
 import static org.folio.dcb.utils.DCBConstants.SERVICE_POINT_ID;
 import static org.folio.dcb.utils.DCBConstants.SOURCE;
-
+import static org.folio.dcb.utils.DCBConstants.LOAN_TYPE_ID;
+import static org.folio.dcb.utils.DCBConstants.DCB_LOAN_TYPE_NAME;
 @Log4j2
 @Service
 @Primary
@@ -54,9 +56,11 @@ public class CustomTenantService extends TenantService {
   private final HoldingSourcesClient holdingSourcesClient;
   private final InventoryServicePointClient servicePointClient;
   private final LocationUnitClient locationUnitClient;
+  private final LoanTypeClient loanTypeClient;
+
 
   public CustomTenantService(JdbcTemplate jdbcTemplate, FolioExecutionContext context,
-                             FolioSpringLiquibase folioSpringLiquibase, PrepareSystemUserService systemUserService, KafkaService kafkaService, InstanceClient inventoryClient, InstanceTypeClient instanceTypeClient, HoldingsStorageClient holdingsStorageClient, LocationsClient locationsClient, HoldingSourcesClient holdingSourcesClient, InventoryServicePointClient servicePointClient, LocationUnitClient locationUnitClient) {
+                             FolioSpringLiquibase folioSpringLiquibase, PrepareSystemUserService systemUserService, KafkaService kafkaService, InstanceClient inventoryClient, InstanceTypeClient instanceTypeClient, HoldingsStorageClient holdingsStorageClient, LocationsClient locationsClient, HoldingSourcesClient holdingSourcesClient, InventoryServicePointClient servicePointClient, LocationUnitClient locationUnitClient, LoanTypeClient loanTypeClient) {
     super(jdbcTemplate, context, folioSpringLiquibase);
 
     this.systemUserService = systemUserService;
@@ -68,6 +72,7 @@ public class CustomTenantService extends TenantService {
     this.holdingSourcesClient = holdingSourcesClient;
     this.servicePointClient = servicePointClient;
     this.locationUnitClient = locationUnitClient;
+    this.loanTypeClient = loanTypeClient;
   }
 
   @Override
@@ -83,6 +88,20 @@ public class CustomTenantService extends TenantService {
     createServicePoint();
     createLocation();
     createHolding();
+    createLoanType();
+  }
+
+  private void createLoanType() {
+    if(loanTypeClient.queryLoanTypeByName(DCB_LOAN_TYPE_NAME).getTotalRecords() == 0){
+      log.debug("createLoanType:: loanType creating {}", DCB_LOAN_TYPE_NAME);
+      LoanTypeClient.LoanType loanType = LoanTypeClient.LoanType.builder()
+        .id(LOAN_TYPE_ID)
+        .name(DCB_LOAN_TYPE_NAME)
+        .build();
+
+      loanTypeClient.createLoanType(loanType);
+      log.info("createLoanType:: loanType created");
+    }
   }
 
   private void createInstanceType() {
