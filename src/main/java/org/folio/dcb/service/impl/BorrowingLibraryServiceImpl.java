@@ -21,12 +21,10 @@ public class BorrowingLibraryServiceImpl implements LibraryService {
 
   private final CirculationService circulationService;
   private final TransactionRepository transactionRepository;
-  private final LibraryUtil libraryUtil;
 
   @Override
   public TransactionStatusResponse createCirculation(String dcbTransactionId, DcbTransaction dcbTransaction, String pickupServicePointId) {
-    return libraryUtil.
-      createBorrowingLibraryTransaction(dcbTransactionId, dcbTransaction, pickupServicePointId);
+    return null;
   }
 
   @Override
