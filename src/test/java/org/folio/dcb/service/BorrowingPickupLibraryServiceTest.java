@@ -15,12 +15,14 @@ import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWING_PICKUP;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CLOSED;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.folio.dcb.utils.EntityUtils.createTransactionEntity;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class BorrowingPickupLibraryServiceTest {
@@ -42,7 +44,7 @@ class BorrowingPickupLibraryServiceTest {
 
     borrowingPickupLibraryService.updateTransactionStatus(transactionEntity, TransactionStatus.builder().status(TransactionStatus.StatusEnum.OPEN).build());
     verify(transactionRepository, times(1)).save(transactionEntity);
-    verify(circulationService, timeout(1)).checkInByBarcode(any(), any());
+    verify(circulationService, times(1)).checkInByBarcode(any(), any());
   }
 
   @Test
@@ -62,7 +64,7 @@ class BorrowingPickupLibraryServiceTest {
     when(circulationItemService.fetchItemById(any())).thenReturn(CirculationItemRequest.builder().status(
       ItemStatus.builder().name(ItemStatus.NameEnum.AVAILABLE).build()).build());
     borrowingPickupLibraryService.updateStatusByTransactionEntity(transactionEntity);
-    Mockito.verify(transactionRepository, times(1)).save(transactionEntity);
+    verify(transactionRepository, times(1)).save(transactionEntity);
   }
 
   @Test
