@@ -2,9 +2,7 @@ package org.folio.dcb.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.StringUtils;
 import org.folio.dcb.domain.dto.CirculationItemRequest;
-import org.folio.dcb.domain.dto.DcbItem;
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
@@ -21,10 +19,11 @@ import java.util.UUID;
 
 import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.AWAITING_PICKUP;
 import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.CHECKED_OUT;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CLOSED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
-import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
-import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_OUT;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_IN;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_OUT;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CLOSED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CANCELLED;
 
@@ -32,7 +31,6 @@ import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CANCELLED;
 @RequiredArgsConstructor
 @Log4j2
 public class BorrowingPickupLibraryServiceImpl implements LibraryService {
-  private static final String TEMP_VALUE_MATERIAL_TYPE_NAME_BOOK = "book";
 
   private final UserService userService;
   private final RequestService requestService;
@@ -45,7 +43,6 @@ public class BorrowingPickupLibraryServiceImpl implements LibraryService {
   public TransactionStatusResponse createCirculation(String dcbTransactionId, DcbTransaction dcbTransaction, String pickupServicePointId) {
     var itemVirtual = dcbTransaction.getItem();
     var patron = dcbTransaction.getPatron();
-    checkForMaterialTypeValueAndSetupDefaultIfNeeded(itemVirtual);
 
     var user = userService.fetchUser(patron); //user is needed, but shouldn't be generated. it should be fetched.
     circulationItemService.checkIfItemExistsAndCreate(itemVirtual, pickupServicePointId);
@@ -57,12 +54,6 @@ public class BorrowingPickupLibraryServiceImpl implements LibraryService {
       .item(itemVirtual)
       .patron(patron)
       .build();
-  }
-
-  private void checkForMaterialTypeValueAndSetupDefaultIfNeeded(DcbItem dcbItem) {
-    if(StringUtils.isBlank(dcbItem.getMaterialType())){
-      dcbItem.setMaterialType(TEMP_VALUE_MATERIAL_TYPE_NAME_BOOK);
-    }
   }
 
   @Override

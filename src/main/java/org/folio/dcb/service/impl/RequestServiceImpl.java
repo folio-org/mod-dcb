@@ -2,6 +2,8 @@ package org.folio.dcb.service.impl;
 
 import static org.folio.dcb.domain.dto.CirculationRequest.RequestTypeEnum.PAGE;
 import static org.folio.dcb.domain.dto.CirculationRequest.RequestTypeEnum.HOLD;
+import static org.folio.dcb.utils.DCBConstants.HOLDING_ID;
+import static org.folio.dcb.utils.DCBConstants.INSTANCE_ID;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -24,9 +26,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class RequestServiceImpl implements RequestService {
 
-  private static final String UMBRELLA_HOLDINGS_ID = "10cd3a5a-d36f-4c7a-bc4f-e1ae3cf820c9";
-  private static final String UMBRELLA_INSTANCE_ID = "9d1b77e4-f02e-4b7f-b296-3f2042ddac54";
-
   private final ItemService itemService;
   private final HoldingsService holdingsService;
   private final CirculationClient circulationClient;
@@ -45,7 +44,7 @@ public class RequestServiceImpl implements RequestService {
   public void createHoldItemRequest(User user, DcbItem item, String pickupServicePointId) {
     log.debug("createHoldItemRequest:: creating a new hold request for userBarcode {} , itemBarcode {}",
       user.getBarcode(), item.getBarcode());
-    var circulationRequest = createCirculationRequest(HOLD, user, item, UMBRELLA_HOLDINGS_ID, UMBRELLA_INSTANCE_ID, pickupServicePointId);
+    var circulationRequest = createCirculationRequest(HOLD, user, item, HOLDING_ID, INSTANCE_ID, pickupServicePointId);
     circulationClient.createRequest(circulationRequest);
   }
 

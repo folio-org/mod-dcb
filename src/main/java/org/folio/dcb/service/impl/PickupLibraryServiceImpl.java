@@ -11,6 +11,8 @@ import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.CirculationItemService;
 import org.folio.dcb.service.CirculationService;
 import org.folio.dcb.service.LibraryService;
+import org.folio.dcb.service.RequestService;
+import org.folio.dcb.service.UserService;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -25,12 +27,25 @@ public class PickupLibraryServiceImpl implements LibraryService {
 
   private final TransactionRepository transactionRepository;
   private final CirculationService circulationService;
+  private final UserService userService;
+  private final RequestService requestService;
   private final CirculationItemService circulationItemService;
-
 
   @Override
   public TransactionStatusResponse createCirculation(String dcbTransactionId, DcbTransaction dcbTransaction, String pickupServicePointId) {
-    return null;
+    var itemVirtual = dcbTransaction.getItem();
+    var patron = dcbTransaction.getPatron();
+
+    var user = userService.fetchOrCreateUser(patron);
+    circulationItemService.checkIfItemExistsAndCreate(itemVirtual, pickupServicePointId);
+
+    requestService.createHoldItemRequest(user, itemVirtual, pickupServicePointId);
+
+    return TransactionStatusResponse.builder()
+      .status(TransactionStatusResponse.StatusEnum.CREATED)
+      .item(itemVirtual)
+      .patron(patron)
+      .build();
   }
 
   @Override
