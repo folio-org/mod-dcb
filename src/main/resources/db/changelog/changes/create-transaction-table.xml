@@ -85,6 +85,9 @@
       <column name="borrowing_library_code" type="text">
         <constraints nullable="false"/>
       </column>
+      <column name="request_id" type="UUID">
+        <constraints nullable="false"/>
+      </column>
       <column name="status" type="StatusEnum"/>
       <column name="role" type="RoleEnum"/>
       <column name="created_by" type="uuid"/>

@@ -19,4 +19,5 @@ public interface CirculationService {
    */
   void checkOutByBarcode(TransactionEntity dcbTransaction);
 
+  void cancelRequest(TransactionEntity dcbTransaction);
 }

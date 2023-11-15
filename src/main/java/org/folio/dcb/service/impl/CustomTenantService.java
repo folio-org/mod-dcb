@@ -2,13 +2,7 @@ package org.folio.dcb.service.impl;
 
 import feign.FeignException;
 import lombok.extern.log4j.Log4j2;
-import org.folio.dcb.client.feign.HoldingSourcesClient;
-import org.folio.dcb.client.feign.HoldingsStorageClient;
-import org.folio.dcb.client.feign.InstanceClient;
-import org.folio.dcb.client.feign.InstanceTypeClient;
-import org.folio.dcb.client.feign.InventoryServicePointClient;
-import org.folio.dcb.client.feign.LocationUnitClient;
-import org.folio.dcb.client.feign.LocationsClient;
+import org.folio.dcb.client.feign.*;
 import org.folio.dcb.domain.dto.HoldShelfExpiryPeriod;
 import org.folio.dcb.domain.dto.ServicePointRequest;
 import org.folio.dcb.listener.kafka.service.KafkaService;
@@ -25,19 +19,7 @@ import org.springframework.stereotype.Service;
 import java.util.Collections;
 
 import static org.folio.dcb.service.impl.ServicePointServiceImpl.HOLD_SHELF_CLOSED_LIBRARY_DATE_MANAGEMENT;
-import static org.folio.dcb.utils.DCBConstants.CAMPUS_ID;
-import static org.folio.dcb.utils.DCBConstants.CODE;
-import static org.folio.dcb.utils.DCBConstants.HOLDING_ID;
-import static org.folio.dcb.utils.DCBConstants.INSTANCE_ID;
-import static org.folio.dcb.utils.DCBConstants.INSTANCE_TITLE;
-import static org.folio.dcb.utils.DCBConstants.INSTANCE_TYPE_ID;
-import static org.folio.dcb.utils.DCBConstants.INSTANCE_TYPE_SOURCE;
-import static org.folio.dcb.utils.DCBConstants.INSTITUTION_ID;
-import static org.folio.dcb.utils.DCBConstants.LIBRARY_ID;
-import static org.folio.dcb.utils.DCBConstants.LOCATION_ID;
-import static org.folio.dcb.utils.DCBConstants.NAME;
-import static org.folio.dcb.utils.DCBConstants.SERVICE_POINT_ID;
-import static org.folio.dcb.utils.DCBConstants.SOURCE;
+import static org.folio.dcb.utils.DCBConstants.*;
 
 @Log4j2
 @Service
@@ -54,9 +36,10 @@ public class CustomTenantService extends TenantService {
   private final HoldingSourcesClient holdingSourcesClient;
   private final InventoryServicePointClient servicePointClient;
   private final LocationUnitClient locationUnitClient;
+  private final CancellationReasonClient cancellationReasonClient;
 
   public CustomTenantService(JdbcTemplate jdbcTemplate, FolioExecutionContext context,
-                             FolioSpringLiquibase folioSpringLiquibase, PrepareSystemUserService systemUserService, KafkaService kafkaService, InstanceClient inventoryClient, InstanceTypeClient instanceTypeClient, HoldingsStorageClient holdingsStorageClient, LocationsClient locationsClient, HoldingSourcesClient holdingSourcesClient, InventoryServicePointClient servicePointClient, LocationUnitClient locationUnitClient) {
+                             FolioSpringLiquibase folioSpringLiquibase, PrepareSystemUserService systemUserService, KafkaService kafkaService, InstanceClient inventoryClient, InstanceTypeClient instanceTypeClient, HoldingsStorageClient holdingsStorageClient, LocationsClient locationsClient, HoldingSourcesClient holdingSourcesClient, InventoryServicePointClient servicePointClient, LocationUnitClient locationUnitClient, CancellationReasonClient cancellationReasonClient) {
     super(jdbcTemplate, context, folioSpringLiquibase);
 
     this.systemUserService = systemUserService;
@@ -68,6 +51,7 @@ public class CustomTenantService extends TenantService {
     this.holdingSourcesClient = holdingSourcesClient;
     this.servicePointClient = servicePointClient;
     this.locationUnitClient = locationUnitClient;
+    this.cancellationReasonClient = cancellationReasonClient;
   }
 
   @Override
@@ -83,6 +67,7 @@ public class CustomTenantService extends TenantService {
     createServicePoint();
     createLocation();
     createHolding();
+    createCancellationReason();
   }
 
   private void createInstanceType() {
@@ -214,6 +199,19 @@ public class CustomTenantService extends TenantService {
 
       holdingsStorageClient.createHolding(holding);
       log.info("createHolding:: holding created");
+    }
+  }
+
+  private void createCancellationReason(){
+    try {
+      cancellationReasonClient.findCancellationReason(CANCELLATION_REASON_ID);
+    } catch (FeignException.NotFound ex) {
+      log.debug("createCancellationReason:: creating cancellation reason");
+      cancellationReasonClient.createCancellationReason(CancellationReasonClient.CancellationReason.builder()
+        .id(CANCELLATION_REASON_ID)
+        .description("DCB Cancelled")
+        .name("DCB Cancelled").build());
+      log.info("createCancellationReason:: cancellation reason created");
     }
   }
 }

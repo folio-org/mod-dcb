@@ -1,6 +1,9 @@
 package org.folio.dcb.utils;
 
+import org.bouncycastle.cert.ocsp.Req;
+
 import java.util.Arrays;
+import java.util.EnumSet;
 
 import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
 
@@ -14,6 +17,9 @@ public enum RequestStatus {
   CLOSED_CANCELLED("Closed - Cancelled"),
   CLOSED_UNFILLED("Closed - Unfilled"),
   CLOSED_PICKUP_EXPIRED("Closed - Pickup expired");
+
+  private static final EnumSet<RequestStatus> OPEN_STATUSES = EnumSet.of(
+    OPEN_NOT_YET_FILLED, OPEN_AWAITING_PICKUP, OPEN_IN_TRANSIT, OPEN_AWAITING_DELIVERY);
 
   private final String value;
 
@@ -34,5 +40,8 @@ public enum RequestStatus {
 
   public String getValue() {
     return value;
+  }
+  public static boolean isRequestOpen(RequestStatus currentStatus){
+    return OPEN_STATUSES.contains(currentStatus);
   }
 }

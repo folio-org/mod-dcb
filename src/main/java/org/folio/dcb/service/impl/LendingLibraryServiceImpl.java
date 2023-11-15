@@ -7,10 +7,7 @@ import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.repository.TransactionRepository;
-import org.folio.dcb.service.CirculationService;
-import org.folio.dcb.service.LibraryService;
-import org.folio.dcb.service.RequestService;
-import org.folio.dcb.service.UserService;
+import org.folio.dcb.service.*;
 import org.springframework.stereotype.Service;
 
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.AWAITING_PICKUP;
@@ -30,6 +27,7 @@ public class LendingLibraryServiceImpl implements LibraryService {
   private final RequestService requestService;
   private final TransactionRepository transactionRepository;
   private final CirculationService circulationService;
+  private final CirculationRequestService circulationStorageService;
 
   @Override
   public TransactionStatusResponse createCirculation(String dcbTransactionId, DcbTransaction dcbTransaction, String pickupServicePointId) {
@@ -66,6 +64,7 @@ public class LendingLibraryServiceImpl implements LibraryService {
       updateTransactionEntity(dcbTransaction, requestedStatus);
     } else if(CANCELLED == requestedStatus) {
       log.info("updateTransactionStatus:: Cancelling transaction: {} ", dcbTransaction.getId());
+      circulationService.cancelRequest(dcbTransaction);
       updateTransactionEntity(dcbTransaction, requestedStatus);
     } else {
       String errorMessage = String.format("updateTransactionStatus:: status update from %s to %s is not implemented",
