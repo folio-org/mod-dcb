@@ -316,6 +316,32 @@ class TransactionApiControllerTest extends BaseIT {
       .andExpect(jsonPath("$.status").value("AWAITING_PICKUP"));
   }
 
+  @Test
+  void createBorrowerCirculationRequestTest() throws Exception {
+    removeExistedTransactionFromDbIfSoExists();
+
+    this.mockMvc.perform(
+        post("/transactions/" + DCB_TRANSACTION_ID)
+          .content(asJsonString(createDcbTransactionByRole(BORROWER)))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isCreated())
+      .andExpect(jsonPath("$.status").value("CREATED"))
+      .andExpect(jsonPath("$.item").value(createDcbItem()))
+      .andExpect(jsonPath("$.patron").value(createDcbPatronWithExactPatronId(EXISTED_PATRON_ID)));
+
+    //Trying to create another transaction with same transaction id
+    this.mockMvc.perform(
+        post("/transactions/" + DCB_TRANSACTION_ID)
+          .content(asJsonString(createDcbTransactionByRole(BORROWER)))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpectAll(status().is4xxClientError(),
+        jsonPath("$.errors[0].code", is("DUPLICATE_ERROR")));
+  }
+
   private void removeExistedTransactionFromDbIfSoExists() {
     systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> {
       if (transactionRepository.existsById(DCB_TRANSACTION_ID)){

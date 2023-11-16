@@ -4,11 +4,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dcb.domain.dto.*;
 import org.folio.dcb.domain.entity.TransactionEntity;
+import org.folio.dcb.domain.mapper.TransactionMapper;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.CirculationItemService;
 import org.folio.dcb.service.CirculationService;
+import org.folio.dcb.service.RequestService;
+import org.folio.dcb.service.UserService;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
 import java.util.UUID;
 
 import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.AWAITING_PICKUP;
@@ -19,17 +23,44 @@ import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_OUT;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
 
-@Service("basicPickupLibraryService")
+@Service
 @RequiredArgsConstructor
 @Log4j2
-public class BasicPickupLibraryServiceImpl {
+public class BaseLibraryService {
 
   private static final String UPDATE_STATUS_BY_TRANSACTION_ENTITY_LOG_MESSAGE_PATTERN = "updateStatusByTransactionEntity:: Updated item status from {} to {}";
 
   private final TransactionRepository transactionRepository;
   private final CirculationService circulationService;
   private final CirculationItemService circulationItemService;
+  private final UserService userService;
+  private final RequestService requestService;
+  private final TransactionMapper transactionMapper;
 
+  public TransactionStatusResponse createBorrowingLibraryTransaction(String dcbTransactionId, DcbTransaction dcbTransaction, String pickupServicePointId) {
+    var itemVirtual = dcbTransaction.getItem();
+    var patron = dcbTransaction.getPatron();
+
+    var user = userService.fetchUser(patron); //user is needed, but shouldn't be generated. it should be fetched.
+    circulationItemService.checkIfItemExistsAndCreate(itemVirtual, pickupServicePointId);
+
+    requestService.createHoldItemRequest(user, itemVirtual, pickupServicePointId);
+    saveDcbTransaction(dcbTransactionId, dcbTransaction);
+
+    return TransactionStatusResponse.builder()
+      .status(TransactionStatusResponse.StatusEnum.CREATED)
+      .item(itemVirtual)
+      .patron(patron)
+      .build();
+  }
+  public void saveDcbTransaction(String dcbTransactionId, DcbTransaction dcbTransaction) {
+    TransactionEntity transactionEntity = transactionMapper.mapToEntity(dcbTransactionId, dcbTransaction);
+    if (Objects.isNull(transactionEntity)) {
+      throw new IllegalArgumentException("Transaction Entity is null");
+    }
+    transactionEntity.setStatus(CREATED);
+    transactionRepository.save(transactionEntity);
+  }
 
   public void updateStatusByTransactionEntity(TransactionEntity transactionEntity) {
     log.debug("updateTransactionStatus:: Received checkIn event for itemId: {}", transactionEntity.getItemId());

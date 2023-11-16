@@ -10,7 +10,6 @@ import org.folio.dcb.service.CirculationItemService;
 import org.folio.dcb.service.LibraryService;
 import org.folio.dcb.service.RequestService;
 import org.folio.dcb.service.UserService;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service("pickupLibraryService")
@@ -21,8 +20,7 @@ public class PickupLibraryServiceImpl implements LibraryService {
   private final UserService userService;
   private final RequestService requestService;
   private final CirculationItemService circulationItemService;
-  @Qualifier("basicPickupLibraryService")
-  private final BasicPickupLibraryServiceImpl basicPickupLibraryService;
+  private final BaseLibraryService baseLibraryService;
 
   @Override
   public TransactionStatusResponse createCirculation(String dcbTransactionId, DcbTransaction dcbTransaction, String pickupServicePointId) {
@@ -33,6 +31,7 @@ public class PickupLibraryServiceImpl implements LibraryService {
     circulationItemService.checkIfItemExistsAndCreate(itemVirtual, pickupServicePointId);
 
     requestService.createHoldItemRequest(user, itemVirtual, pickupServicePointId);
+    baseLibraryService.saveDcbTransaction(dcbTransactionId, dcbTransaction);
 
     return TransactionStatusResponse.builder()
       .status(TransactionStatusResponse.StatusEnum.CREATED)
@@ -43,11 +42,11 @@ public class PickupLibraryServiceImpl implements LibraryService {
 
   @Override
   public void updateStatusByTransactionEntity(TransactionEntity transactionEntity) {
-    basicPickupLibraryService.updateStatusByTransactionEntity(transactionEntity);
+    baseLibraryService.updateStatusByTransactionEntity(transactionEntity);
   }
 
   @Override
   public void updateTransactionStatus(TransactionEntity dcbTransaction, TransactionStatus transactionStatus) {
-    basicPickupLibraryService.updateTransactionStatus(dcbTransaction, transactionStatus);
+    baseLibraryService.updateTransactionStatus(dcbTransaction, transactionStatus);
   }
 }

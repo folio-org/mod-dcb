@@ -3,7 +3,6 @@ package org.folio.dcb.service;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.entity.TransactionEntity;
-import org.folio.dcb.domain.mapper.TransactionMapper;
 import org.folio.dcb.exception.ResourceAlreadyExistException;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.impl.LendingLibraryServiceImpl;
@@ -25,7 +24,6 @@ import static org.folio.dcb.utils.EntityUtils.PICKUP_SERVICE_POINT_ID;
 import static org.folio.dcb.utils.EntityUtils.createDcbPickup;
 import static org.folio.dcb.utils.EntityUtils.createDcbTransactionByRole;
 import static org.folio.dcb.utils.EntityUtils.createServicePointRequest;
-import static org.folio.dcb.utils.EntityUtils.createTransactionEntity;
 import static org.folio.dcb.utils.EntityUtils.createTransactionResponse;
 import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -44,14 +42,11 @@ class TransactionServiceTest {
   @Mock
   private TransactionRepository transactionRepository;
   @Mock
-  private TransactionMapper transactionMapper;
-  @Mock
   private ServicePointService servicePointService;
 
   @Test
   void createLendingCirculationRequestTest() {
     when(servicePointService.createServicePoint(createDcbPickup())).thenReturn(createServicePointRequest());
-    when(transactionMapper.mapToEntity(any(), any())).thenReturn(createTransactionEntity());
 
     when(lendingLibraryService.createCirculation(any(), any(), any()))
       .thenReturn(createTransactionResponse());
