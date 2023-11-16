@@ -2,6 +2,7 @@ package org.folio.dcb.service.impl;
 
 import feign.FeignException;
 import lombok.extern.log4j.Log4j2;
+import org.folio.dcb.client.feign.CancellationReasonClient;
 import org.folio.dcb.client.feign.HoldingSourcesClient;
 import org.folio.dcb.client.feign.HoldingsStorageClient;
 import org.folio.dcb.client.feign.InstanceClient;
@@ -27,6 +28,7 @@ import java.util.Collections;
 
 import static org.folio.dcb.service.impl.ServicePointServiceImpl.HOLD_SHELF_CLOSED_LIBRARY_DATE_MANAGEMENT;
 import static org.folio.dcb.utils.DCBConstants.CAMPUS_ID;
+import static org.folio.dcb.utils.DCBConstants.CANCELLATION_REASON_ID;
 import static org.folio.dcb.utils.DCBConstants.CODE;
 import static org.folio.dcb.utils.DCBConstants.HOLDING_ID;
 import static org.folio.dcb.utils.DCBConstants.INSTANCE_ID;
@@ -61,8 +63,7 @@ public class CustomTenantService extends TenantService {
 
 
   public CustomTenantService(JdbcTemplate jdbcTemplate, FolioExecutionContext context,
-                             FolioSpringLiquibase folioSpringLiquibase, PrepareSystemUserService systemUserService, KafkaService kafkaService, InstanceClient inventoryClient, InstanceTypeClient instanceTypeClient, HoldingsStorageClient holdingsStorageClient, LocationsClient locationsClient, HoldingSourcesClient holdingSourcesClient, InventoryServicePointClient servicePointClient, LocationUnitClient locationUnitClient, CancellationReasonClient cancellationReasonClient) {
-                             FolioSpringLiquibase folioSpringLiquibase, PrepareSystemUserService systemUserService, KafkaService kafkaService, InstanceClient inventoryClient, InstanceTypeClient instanceTypeClient, HoldingsStorageClient holdingsStorageClient, LocationsClient locationsClient, HoldingSourcesClient holdingSourcesClient, InventoryServicePointClient servicePointClient, LocationUnitClient locationUnitClient, LoanTypeClient loanTypeClient) {
+                             FolioSpringLiquibase folioSpringLiquibase, PrepareSystemUserService systemUserService, KafkaService kafkaService, InstanceClient inventoryClient, InstanceTypeClient instanceTypeClient, HoldingsStorageClient holdingsStorageClient, LocationsClient locationsClient, HoldingSourcesClient holdingSourcesClient, InventoryServicePointClient servicePointClient, LocationUnitClient locationUnitClient, LoanTypeClient loanTypeClient, CancellationReasonClient cancellationReasonClient) {
     super(jdbcTemplate, context, folioSpringLiquibase);
 
     this.systemUserService = systemUserService;
@@ -74,8 +75,8 @@ public class CustomTenantService extends TenantService {
     this.holdingSourcesClient = holdingSourcesClient;
     this.servicePointClient = servicePointClient;
     this.locationUnitClient = locationUnitClient;
-    this.cancellationReasonClient = cancellationReasonClient;
     this.loanTypeClient = loanTypeClient;
+    this.cancellationReasonClient = cancellationReasonClient;
   }
 
   @Override
