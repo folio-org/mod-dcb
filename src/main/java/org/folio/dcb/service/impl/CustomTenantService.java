@@ -2,7 +2,14 @@ package org.folio.dcb.service.impl;
 
 import feign.FeignException;
 import lombok.extern.log4j.Log4j2;
-import org.folio.dcb.client.feign.*;
+import org.folio.dcb.client.feign.HoldingSourcesClient;
+import org.folio.dcb.client.feign.HoldingsStorageClient;
+import org.folio.dcb.client.feign.InstanceClient;
+import org.folio.dcb.client.feign.InstanceTypeClient;
+import org.folio.dcb.client.feign.InventoryServicePointClient;
+import org.folio.dcb.client.feign.LoanTypeClient;
+import org.folio.dcb.client.feign.LocationUnitClient;
+import org.folio.dcb.client.feign.LocationsClient;
 import org.folio.dcb.domain.dto.HoldShelfExpiryPeriod;
 import org.folio.dcb.domain.dto.ServicePointRequest;
 import org.folio.dcb.listener.kafka.service.KafkaService;
@@ -19,8 +26,21 @@ import org.springframework.stereotype.Service;
 import java.util.Collections;
 
 import static org.folio.dcb.service.impl.ServicePointServiceImpl.HOLD_SHELF_CLOSED_LIBRARY_DATE_MANAGEMENT;
-import static org.folio.dcb.utils.DCBConstants.*;
-
+import static org.folio.dcb.utils.DCBConstants.CAMPUS_ID;
+import static org.folio.dcb.utils.DCBConstants.CODE;
+import static org.folio.dcb.utils.DCBConstants.HOLDING_ID;
+import static org.folio.dcb.utils.DCBConstants.INSTANCE_ID;
+import static org.folio.dcb.utils.DCBConstants.INSTANCE_TITLE;
+import static org.folio.dcb.utils.DCBConstants.INSTANCE_TYPE_ID;
+import static org.folio.dcb.utils.DCBConstants.INSTANCE_TYPE_SOURCE;
+import static org.folio.dcb.utils.DCBConstants.INSTITUTION_ID;
+import static org.folio.dcb.utils.DCBConstants.LIBRARY_ID;
+import static org.folio.dcb.utils.DCBConstants.LOCATION_ID;
+import static org.folio.dcb.utils.DCBConstants.NAME;
+import static org.folio.dcb.utils.DCBConstants.SERVICE_POINT_ID;
+import static org.folio.dcb.utils.DCBConstants.SOURCE;
+import static org.folio.dcb.utils.DCBConstants.LOAN_TYPE_ID;
+import static org.folio.dcb.utils.DCBConstants.DCB_LOAN_TYPE_NAME;
 @Log4j2
 @Service
 @Primary
@@ -37,9 +57,12 @@ public class CustomTenantService extends TenantService {
   private final InventoryServicePointClient servicePointClient;
   private final LocationUnitClient locationUnitClient;
   private final CancellationReasonClient cancellationReasonClient;
+  private final LoanTypeClient loanTypeClient;
+
 
   public CustomTenantService(JdbcTemplate jdbcTemplate, FolioExecutionContext context,
                              FolioSpringLiquibase folioSpringLiquibase, PrepareSystemUserService systemUserService, KafkaService kafkaService, InstanceClient inventoryClient, InstanceTypeClient instanceTypeClient, HoldingsStorageClient holdingsStorageClient, LocationsClient locationsClient, HoldingSourcesClient holdingSourcesClient, InventoryServicePointClient servicePointClient, LocationUnitClient locationUnitClient, CancellationReasonClient cancellationReasonClient) {
+                             FolioSpringLiquibase folioSpringLiquibase, PrepareSystemUserService systemUserService, KafkaService kafkaService, InstanceClient inventoryClient, InstanceTypeClient instanceTypeClient, HoldingsStorageClient holdingsStorageClient, LocationsClient locationsClient, HoldingSourcesClient holdingSourcesClient, InventoryServicePointClient servicePointClient, LocationUnitClient locationUnitClient, LoanTypeClient loanTypeClient) {
     super(jdbcTemplate, context, folioSpringLiquibase);
 
     this.systemUserService = systemUserService;
@@ -52,6 +75,7 @@ public class CustomTenantService extends TenantService {
     this.servicePointClient = servicePointClient;
     this.locationUnitClient = locationUnitClient;
     this.cancellationReasonClient = cancellationReasonClient;
+    this.loanTypeClient = loanTypeClient;
   }
 
   @Override
@@ -68,6 +92,20 @@ public class CustomTenantService extends TenantService {
     createLocation();
     createHolding();
     createCancellationReason();
+    createLoanType();
+  }
+
+  private void createLoanType() {
+    if(loanTypeClient.queryLoanTypeByName(DCB_LOAN_TYPE_NAME).getTotalRecords() == 0){
+      log.debug("createLoanType:: loanType creating {}", DCB_LOAN_TYPE_NAME);
+      LoanTypeClient.LoanType loanType = LoanTypeClient.LoanType.builder()
+        .id(LOAN_TYPE_ID)
+        .name(DCB_LOAN_TYPE_NAME)
+        .build();
+
+      loanTypeClient.createLoanType(loanType);
+      log.info("createLoanType:: loanType created");
+    }
   }
 
   private void createInstanceType() {
