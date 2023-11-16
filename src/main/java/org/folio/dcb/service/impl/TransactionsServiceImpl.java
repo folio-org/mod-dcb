@@ -7,7 +7,6 @@ import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.entity.TransactionEntity;
-import org.folio.dcb.domain.mapper.TransactionMapper;
 import org.folio.dcb.exception.ResourceAlreadyExistException;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.LibraryService;
@@ -16,10 +15,6 @@ import org.folio.dcb.service.TransactionsService;
 import org.folio.spring.exception.NotFoundException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-
-import java.util.Objects;
-
-import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
 
 @Service
 @RequiredArgsConstructor
@@ -35,7 +30,6 @@ public class TransactionsServiceImpl implements TransactionsService {
   @Qualifier("borrowingLibraryService")
   private final LibraryService borrowingLibraryService;
   private final TransactionRepository transactionRepository;
-  private final TransactionMapper transactionMapper;
   private final ServicePointService servicePointService;
 
   @Override
@@ -44,17 +38,12 @@ public class TransactionsServiceImpl implements TransactionsService {
     checkTransactionExistsAndThrow(dcbTransactionId);
     ServicePointRequest pickupServicePoint = servicePointService.createServicePoint(dcbTransaction.getPickup());
 
-    TransactionStatusResponse circulationStatusResponse =
-      switch (dcbTransaction.getRole()) {
-        case LENDER -> lendingLibraryService.createCirculation(dcbTransactionId, dcbTransaction, pickupServicePoint.getId());
-        case BORROWING_PICKUP -> borrowingPickupLibraryService.createCirculation(dcbTransactionId, dcbTransaction, pickupServicePoint.getId());
-        case PICKUP -> pickupLibraryService.createCirculation(dcbTransactionId, dcbTransaction, pickupServicePoint.getId());
-        default -> throw new IllegalArgumentException("Other roles are not implemented");
-      };
-
-    saveDcbTransaction(dcbTransactionId, dcbTransaction);
-
-    return circulationStatusResponse;
+    return switch (dcbTransaction.getRole()) {
+      case LENDER -> lendingLibraryService.createCirculation(dcbTransactionId, dcbTransaction, pickupServicePoint.getId());
+      case BORROWING_PICKUP -> borrowingPickupLibraryService.createCirculation(dcbTransactionId, dcbTransaction, pickupServicePoint.getId());
+      case PICKUP -> pickupLibraryService.createCirculation(dcbTransactionId, dcbTransaction, pickupServicePoint.getId());
+      case BORROWER -> borrowingLibraryService.createCirculation(dcbTransactionId, dcbTransaction, pickupServicePoint.getId());
+    };
   }
 
   @Override
@@ -106,14 +95,5 @@ public class TransactionsServiceImpl implements TransactionsService {
       throw new ResourceAlreadyExistException(
         String.format("unable to create transaction with id %s as it already exists", dcbTransactionId));
     }
-  }
-
-  private void saveDcbTransaction(String dcbTransactionId, DcbTransaction dcbTransaction) {
-    TransactionEntity transactionEntity = transactionMapper.mapToEntity(dcbTransactionId, dcbTransaction);
-    if (Objects.isNull(transactionEntity)) {
-      throw new IllegalArgumentException("Transaction Entity is null");
-    }
-    transactionEntity.setStatus(CREATED);
-    transactionRepository.save(transactionEntity);
   }
 }

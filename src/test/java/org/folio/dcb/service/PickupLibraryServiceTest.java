@@ -1,6 +1,7 @@
 package org.folio.dcb.service;
 
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
+import org.folio.dcb.service.impl.BaseLibraryService;
 import org.folio.dcb.service.impl.PickupLibraryServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,6 +35,8 @@ class PickupLibraryServiceTest {
   private CirculationItemService circulationItemService;
   @Mock
   private CirculationService circulationService;
+  @Mock
+  private BaseLibraryService baseLibraryService;
 
   @Test
   void createTransactionTest() {
@@ -45,6 +48,7 @@ class PickupLibraryServiceTest {
       .thenReturn(user);
     doNothing().when(requestService).createHoldItemRequest(any(), any(), any());
     doNothing().when(circulationItemService).checkIfItemExistsAndCreate(any(), any());
+    doNothing().when(baseLibraryService).saveDcbTransaction(any(), any());
 
     var response = pickupLibraryService.createCirculation(DCB_TRANSACTION_ID, createDcbTransactionByRole(PICKUP), PICKUP_SERVICE_POINT_ID);
     verify(userService).fetchOrCreateUser(patron);
