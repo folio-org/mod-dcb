@@ -7,8 +7,13 @@ import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.repository.TransactionRepository;
-import org.folio.dcb.service.*;
+import org.folio.dcb.service.CirculationService;
+import org.folio.dcb.service.LibraryService;
+import org.folio.dcb.service.RequestService;
+import org.folio.dcb.service.UserService;
 import org.springframework.stereotype.Service;
+
+import java.util.Objects;
 
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.AWAITING_PICKUP;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CLOSED;
@@ -27,6 +32,7 @@ public class LendingLibraryServiceImpl implements LibraryService {
   private final RequestService requestService;
   private final TransactionRepository transactionRepository;
   private final CirculationService circulationService;
+  private final BaseLibraryService baseLibraryService;
   private final CirculationRequestService circulationStorageService;
 
   @Override
@@ -39,6 +45,7 @@ public class LendingLibraryServiceImpl implements LibraryService {
 
     var user = userService.fetchOrCreateUser(patron);
     requestService.createPageItemRequest(user, item, pickupServicePointId);
+    baseLibraryService.saveDcbTransaction(dcbTransactionId, dcbTransaction);
 
     return TransactionStatusResponse.builder()
       .status(TransactionStatusResponse.StatusEnum.CREATED)
