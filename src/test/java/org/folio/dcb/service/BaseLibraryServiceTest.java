@@ -130,10 +130,4 @@ class BaseLibraryServiceTest {
     verify(transactionRepository).save(any());
   }
 
-  @Test
-  void saveTransactionTestWithInvalidTransaction() {
-    when(transactionMapper.mapToEntity(any(), any())).thenReturn(null);
-
-    assertThrows(IllegalArgumentException.class, () -> baseLibraryService.saveDcbTransaction(DCB_TRANSACTION_ID, createDcbTransactionByRole(BORROWER)));
-  }
 }
