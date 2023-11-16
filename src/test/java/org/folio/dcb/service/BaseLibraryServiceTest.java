@@ -20,10 +20,11 @@ import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWER;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWING_PICKUP;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CLOSED;
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
+import static org.folio.dcb.utils.EntityUtils.EXISTED_PATRON_ID;
 import static org.folio.dcb.utils.EntityUtils.PICKUP_SERVICE_POINT_ID;
 import static org.folio.dcb.utils.EntityUtils.createDcbItem;
+import static org.folio.dcb.utils.EntityUtils.createDcbPatronWithExactPatronId;
 import static org.folio.dcb.utils.EntityUtils.createDcbTransactionByRole;
-import static org.folio.dcb.utils.EntityUtils.createDefaultDcbPatron;
 import static org.folio.dcb.utils.EntityUtils.createTransactionEntity;
 import static org.folio.dcb.utils.EntityUtils.createTransactionStatus;
 import static org.folio.dcb.utils.EntityUtils.createUser;
@@ -106,7 +107,7 @@ class BaseLibraryServiceTest {
   @Test
   void createBorrowingTransactionTest() {
     var item = createDcbItem();
-    var patron = createDefaultDcbPatron();
+    var patron = createDcbPatronWithExactPatronId(EXISTED_PATRON_ID);
     var user = createUser();
 
     when(userService.fetchUser(any()))
