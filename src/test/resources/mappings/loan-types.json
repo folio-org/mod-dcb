@@ -3,11 +3,11 @@
     {
       "request": {
         "method": "GET",
-        "url": "/loan-types?query=name%3D%3D%22Can%20circulate%22"
+        "url": "/loan-types?query=(name==DCB%20Can%20circulate)"
       },
       "response": {
         "status": 200,
-        "body": "{\"loantypes\": [{\"name\": \"Can circulate\",\n            \"id\": \"2b94c631-fca9-4892-a730-03ee529ffe27\",\n            \"source\": \"folio\"}]}",
+        "body": "{\"loantypes\": [{\"name\": \"DCB Can circulate\",\n            \"id\": \"2b94c631-fca9-4892-a730-03ee529ffe27\",\n            \"source\": \"folio\"}],\n\"totalRecords\" : 1\n}\n",
         "headers": {
           "Content-Type": "application/json"
         }
