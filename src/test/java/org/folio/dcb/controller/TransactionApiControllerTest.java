@@ -10,7 +10,10 @@ import org.springframework.http.MediaType;
 
 import java.util.UUID;
 
-import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.*;
+import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWER;
+import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWING_PICKUP;
+import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
+import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.PICKUP;
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
 import static org.folio.dcb.utils.EntityUtils.EXISTED_PATRON_ID;
 import static org.folio.dcb.utils.EntityUtils.NOT_EXISTED_PATRON_ID;

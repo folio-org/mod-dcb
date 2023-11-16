@@ -10,7 +10,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.folio.dcb.utils.EntityUtils.*;
+import static org.folio.dcb.utils.EntityUtils.createDcbItem;
+import static org.folio.dcb.utils.EntityUtils.createDcbPickup;
+import static org.folio.dcb.utils.EntityUtils.createInventoryHolding;
+import static org.folio.dcb.utils.EntityUtils.createInventoryItem;
+import static org.folio.dcb.utils.EntityUtils.createUser;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
