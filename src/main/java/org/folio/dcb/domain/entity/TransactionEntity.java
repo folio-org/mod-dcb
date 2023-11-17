@@ -19,6 +19,8 @@ import org.folio.dcb.domain.entity.base.AuditableEntity;
 import org.folio.dcb.domain.dto.TransactionStatus.StatusEnum;
 import org.folio.dcb.listener.entity.TransactionAuditEntityListener;
 
+import java.util.UUID;
+
 @Entity
 @Table(name = "transactions")
 @EntityListeners(TransactionAuditEntityListener.class)
@@ -46,7 +48,7 @@ public class TransactionEntity extends AuditableEntity {
   private String patronGroup;
   private String patronBarcode;
   private String borrowingLibraryCode;
-  private String requestId;
+  private UUID requestId;
   @Enumerated(EnumType.STRING)
   private StatusEnum status;
   @Enumerated(EnumType.STRING)

@@ -12,6 +12,7 @@ import org.folio.dcb.service.LibraryService;
 import org.springframework.stereotype.Service;
 
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.AWAITING_PICKUP;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CANCELLED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
 
 @Log4j2
@@ -30,7 +31,10 @@ public class BorrowingLibraryServiceImpl implements LibraryService {
 
   @Override
   public void updateStatusByTransactionEntity(TransactionEntity transactionEntity) {
-
+    if(CANCELLED == transactionEntity.getStatus()){
+      log.info("updateStatusByTransactionEntity:: Transaction cancelled for itemId: {}", transactionEntity.getItemId());
+      updateTransactionEntity(transactionEntity, CANCELLED);
+    }
   }
 
   @Override
@@ -40,6 +44,10 @@ public class BorrowingLibraryServiceImpl implements LibraryService {
     var requestedStatus = transactionStatus.getStatus();
     if(OPEN == currentStatus && AWAITING_PICKUP == requestedStatus) {
       circulationService.checkInByBarcode(dcbTransaction);
+      updateTransactionEntity(dcbTransaction, requestedStatus);
+    } else if(CANCELLED == requestedStatus) {
+      log.info("updateTransactionStatus:: Cancelling transaction: {} ", dcbTransaction.getId());
+      circulationService.cancelRequest(dcbTransaction);
       updateTransactionEntity(dcbTransaction, requestedStatus);
     } else {
       String error = String.format("updateTransactionStatus:: status update from %s to %s is not implemented", currentStatus, requestedStatus);

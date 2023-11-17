@@ -4,7 +4,6 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 
-  <!-- Create StatusEnum ENUM -->
   <changeSet id="createStatusEnum" author="singhAdesh">
     <sql>
       <![CDATA[
@@ -12,6 +11,14 @@
             ]]>
     </sql>
   </changeSet>
+
+  <!-- Create StatusEnum ENUM -->
+  <changeSet id="addNewStatusToEnum" author="magzhanArtykov">
+    <sql>
+      <![CDATA[
+      ALTER TYPE StatusEnum ADD VALUE 'CANCELLED';
+      ]]>
+    </sql></changeSet>
 
   <!-- Create CAST for character varying to StatusEnum -->
   <changeSet id="createCast" author="singhAdesh">

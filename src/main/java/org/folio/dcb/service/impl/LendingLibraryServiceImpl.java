@@ -2,18 +2,18 @@ package org.folio.dcb.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.folio.dcb.domain.dto.CirculationRequest;
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.repository.TransactionRepository;
+import org.folio.dcb.service.CirculationRequestService;
 import org.folio.dcb.service.CirculationService;
 import org.folio.dcb.service.LibraryService;
 import org.folio.dcb.service.RequestService;
 import org.folio.dcb.service.UserService;
 import org.springframework.stereotype.Service;
-
-import java.util.Objects;
 
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.AWAITING_PICKUP;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CLOSED;
@@ -44,8 +44,8 @@ public class LendingLibraryServiceImpl implements LibraryService {
     var patron = dcbTransaction.getPatron();
 
     var user = userService.fetchOrCreateUser(patron);
-    requestService.createPageItemRequest(user, item, pickupServicePointId);
-    baseLibraryService.saveDcbTransaction(dcbTransactionId, dcbTransaction);
+    CirculationRequest pageRequest = requestService.createPageItemRequest(user, item, pickupServicePointId);
+    baseLibraryService.saveDcbTransaction(dcbTransactionId, dcbTransaction, pageRequest.getId());
 
     return TransactionStatusResponse.builder()
       .status(TransactionStatusResponse.StatusEnum.CREATED)

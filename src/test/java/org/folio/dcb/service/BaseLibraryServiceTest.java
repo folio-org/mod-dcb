@@ -1,3 +1,4 @@
+
 package org.folio.dcb.service;
 
 import org.folio.dcb.domain.dto.CirculationItemRequest;
@@ -126,7 +127,7 @@ class BaseLibraryServiceTest {
   void saveTransactionTest() {
     when(transactionMapper.mapToEntity(any(), any())).thenReturn(createTransactionEntity());
 
-    baseLibraryService.saveDcbTransaction(DCB_TRANSACTION_ID, createDcbTransactionByRole(BORROWER));
+    baseLibraryService.saveDcbTransaction(DCB_TRANSACTION_ID, createDcbTransactionByRole(BORROWER), any());
     verify(transactionRepository).save(any());
   }
 

@@ -60,12 +60,12 @@ class LendingLibraryServiceTest {
     when(userService.fetchOrCreateUser(any()))
       .thenReturn(user);
     doNothing().when(requestService).createPageItemRequest(any(), any(), any());
-    doNothing().when(baseLibraryService).saveDcbTransaction(any(), any());
+    doNothing().when(baseLibraryService).saveDcbTransaction(any(), any(), any());
 
     var response = lendingLibraryService.createCirculation(DCB_TRANSACTION_ID, createDcbTransactionByRole(LENDER), PICKUP_SERVICE_POINT_ID);
     verify(userService).fetchOrCreateUser(patron);
     verify(requestService).createPageItemRequest(user, item, PICKUP_SERVICE_POINT_ID);
-    verify(baseLibraryService).saveDcbTransaction(DCB_TRANSACTION_ID, createDcbTransactionByRole(LENDER));
+    verify(baseLibraryService).saveDcbTransaction(DCB_TRANSACTION_ID, createDcbTransactionByRole(LENDER), any());
     Assertions.assertEquals(TransactionStatusResponse.StatusEnum.CREATED, response.getStatus());
   }
 

@@ -48,7 +48,7 @@ class PickupLibraryServiceTest {
       .thenReturn(user);
     doNothing().when(requestService).createHoldItemRequest(any(), any(), any());
     doNothing().when(circulationItemService).checkIfItemExistsAndCreate(any(), any());
-    doNothing().when(baseLibraryService).saveDcbTransaction(any(), any());
+    doNothing().when(baseLibraryService).saveDcbTransaction(any(), any(), any());
 
     var response = pickupLibraryService.createCirculation(DCB_TRANSACTION_ID, createDcbTransactionByRole(PICKUP), PICKUP_SERVICE_POINT_ID);
     verify(userService).fetchOrCreateUser(patron);

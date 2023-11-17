@@ -2,6 +2,7 @@ package org.folio.dcb.listener.kafka;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.LibraryService;
 import org.folio.spring.integration.XOkapiHeaders;
@@ -101,6 +102,7 @@ public class CirculationEventListener {
         systemUserScopedExecutionService.executeAsyncSystemUserScoped(tenantId, () ->
           transactionRepository.findTransactionByItemIdAndStatusNotInClosed(UUID.fromString(itemID))
             .ifPresent(transactionEntity -> {
+              transactionEntity.setStatus(TransactionStatus.StatusEnum.CANCELLED);
               switch (transactionEntity.getRole()) {
                 case LENDER -> lendingLibraryService.updateStatusByTransactionEntity(transactionEntity);
                 case BORROWING_PICKUP -> borrowingPickupLibraryService.updateStatusByTransactionEntity(transactionEntity);

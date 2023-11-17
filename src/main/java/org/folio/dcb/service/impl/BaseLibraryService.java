@@ -3,6 +3,7 @@ package org.folio.dcb.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dcb.domain.dto.CirculationItemRequest;
+import org.folio.dcb.domain.dto.CirculationRequest;
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
@@ -20,6 +21,7 @@ import java.util.UUID;
 
 import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.AWAITING_PICKUP;
 import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.CHECKED_OUT;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CANCELLED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CLOSED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_IN;
@@ -47,8 +49,8 @@ public class BaseLibraryService {
     var user = userService.fetchUser(patron); //user is needed, but shouldn't be generated. it should be fetched.
     circulationItemService.checkIfItemExistsAndCreate(itemVirtual, pickupServicePointId);
 
-    requestService.createHoldItemRequest(user, itemVirtual, pickupServicePointId);
-    saveDcbTransaction(dcbTransactionId, dcbTransaction);
+    CirculationRequest holdRequest = requestService.createHoldItemRequest(user, itemVirtual, pickupServicePointId);
+    saveDcbTransaction(dcbTransactionId, dcbTransaction, holdRequest.getId());
 
     return TransactionStatusResponse.builder()
       .status(TransactionStatusResponse.StatusEnum.CREATED)
@@ -57,11 +59,12 @@ public class BaseLibraryService {
       .build();
   }
 
-  public void saveDcbTransaction(String dcbTransactionId, DcbTransaction dcbTransaction) {
+  public void saveDcbTransaction(String dcbTransactionId, DcbTransaction dcbTransaction, String requestId) {
     TransactionEntity transactionEntity = transactionMapper.mapToEntity(dcbTransactionId, dcbTransaction);
     if (Objects.isNull(transactionEntity)) {
       throw new IllegalArgumentException("Transaction Entity is null");
     }
+    transactionEntity.setRequestId(UUID.fromString(requestId));
     transactionEntity.setStatus(CREATED);
     transactionRepository.save(transactionEntity);
   }
@@ -82,6 +85,9 @@ public class BaseLibraryService {
       log.info(UPDATE_STATUS_BY_TRANSACTION_ENTITY_LOG_MESSAGE_PATTERN,
         transactionEntity.getStatus().getValue(), TransactionStatus.StatusEnum.ITEM_CHECKED_IN.getValue());
       updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.ITEM_CHECKED_IN);
+    } else if(CANCELLED == transactionEntity.getStatus()){
+      log.info("updateStatusByTransactionEntity:: Transaction cancelled for itemId: {}", transactionEntity.getItemId());
+      updateTransactionEntity(transactionEntity, CANCELLED);
     } else {
       log.info("updateStatusByTransactionEntity:: Item status is {}. So status of transaction is not updated",
         circulationItemRequestStatus);
@@ -101,6 +107,10 @@ public class BaseLibraryService {
     } else if (ITEM_CHECKED_IN == currentStatus && CLOSED == requestedStatus) {
       log.info("updateTransactionStatus:: transaction status transition from {} to {} for the item with barcode {} ",
         ITEM_CHECKED_IN.getValue(), CLOSED.getValue(), dcbTransaction.getItemBarcode());
+      updateTransactionEntity(dcbTransaction, requestedStatus);
+    } else if(CANCELLED == requestedStatus) {
+      log.info("updateTransactionStatus:: Cancelling transaction: {} ", dcbTransaction.getId());
+      circulationService.cancelRequest(dcbTransaction);
       updateTransactionEntity(dcbTransaction, requestedStatus);
     } else {
       String errorMessage = String.format("updateTransactionStatus:: status update from %s to %s is not implemented", currentStatus, requestedStatus);
