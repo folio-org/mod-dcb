@@ -8,7 +8,6 @@ import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.repository.TransactionRepository;
-import org.folio.dcb.service.CirculationRequestService;
 import org.folio.dcb.service.CirculationService;
 import org.folio.dcb.service.LibraryService;
 import org.folio.dcb.service.RequestService;
@@ -88,9 +87,6 @@ public class LendingLibraryServiceImpl implements LibraryService {
     } else if (ITEM_CHECKED_IN == transactionEntity.getStatus()) {
       log.info("updateTransactionStatus:: Transaction status updated from CHECKED_IN to CLOSED for itemId: {}", transactionEntity.getItemId());
       updateTransactionEntity(transactionEntity, CLOSED);
-    } else if(CANCELLED == transactionEntity.getStatus()){
-      log.info("updateTransactionStatus:: Transaction cancelled for itemId: {}", transactionEntity.getItemId());
-      updateTransactionEntity(transactionEntity, CANCELLED);
     }
   }
 

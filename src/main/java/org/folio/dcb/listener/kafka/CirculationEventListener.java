@@ -2,9 +2,9 @@ package org.folio.dcb.listener.kafka;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.LibraryService;
+import org.folio.dcb.service.impl.BaseLibraryService;
 import org.folio.spring.integration.XOkapiHeaders;
 import org.folio.spring.service.SystemUserScopedExecutionService;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -30,12 +30,11 @@ public class CirculationEventListener {
   private final LibraryService lendingLibraryService;
   @Qualifier("borrowingPickupLibraryService")
   private final LibraryService borrowingLibraryService;
-  @Qualifier("borrowingPickupLibraryService")
-  private final LibraryService borrowingPickupLibraryService;
   @Qualifier("pickupLibraryService")
   private final LibraryService pickupLibraryService;
   private final TransactionRepository transactionRepository;
   private final SystemUserScopedExecutionService systemUserScopedExecutionService;
+  private final BaseLibraryService baseLibraryService;
 
   @KafkaListener(
     id = CHECK_IN_LISTENER_ID,
@@ -102,13 +101,9 @@ public class CirculationEventListener {
         systemUserScopedExecutionService.executeAsyncSystemUserScoped(tenantId, () ->
           transactionRepository.findTransactionByItemIdAndStatusNotInClosed(UUID.fromString(itemID))
             .ifPresent(transactionEntity -> {
-              transactionEntity.setStatus(TransactionStatus.StatusEnum.CANCELLED);
               switch (transactionEntity.getRole()) {
-                case LENDER -> lendingLibraryService.updateStatusByTransactionEntity(transactionEntity);
-                case BORROWING_PICKUP -> borrowingPickupLibraryService.updateStatusByTransactionEntity(transactionEntity);
-                case BORROWER -> borrowingLibraryService.updateStatusByTransactionEntity(transactionEntity);
-                case PICKUP -> pickupLibraryService.updateStatusByTransactionEntity(transactionEntity);
-                default -> throw new IllegalArgumentException("Other roles are not implemented yet");
+                case LENDER, BORROWING_PICKUP, BORROWER, PICKUP -> baseLibraryService.cancelTransactionEntity(transactionEntity);
+                  default -> throw new IllegalArgumentException("Other roles are not implemented yet");
               }
             })
         );

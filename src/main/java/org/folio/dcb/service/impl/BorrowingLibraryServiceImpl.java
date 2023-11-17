@@ -31,10 +31,6 @@ public class BorrowingLibraryServiceImpl implements LibraryService {
 
   @Override
   public void updateStatusByTransactionEntity(TransactionEntity transactionEntity) {
-    if(CANCELLED == transactionEntity.getStatus()){
-      log.info("updateStatusByTransactionEntity:: Transaction cancelled for itemId: {}", transactionEntity.getItemId());
-      updateTransactionEntity(transactionEntity, CANCELLED);
-    }
   }
 
   @Override

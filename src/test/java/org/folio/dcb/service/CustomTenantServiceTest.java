@@ -1,6 +1,7 @@
 package org.folio.dcb.service;
 
 import feign.FeignException;
+import org.folio.dcb.client.feign.CancellationReasonClient;
 import org.folio.dcb.client.feign.HoldingSourcesClient;
 import org.folio.dcb.client.feign.HoldingsStorageClient;
 import org.folio.dcb.client.feign.InstanceTypeClient;
@@ -47,6 +48,8 @@ class CustomTenantServiceTest {
   private LocationUnitClient locationUnitClient;
   @Mock
   private LoanTypeClient loanTypeClient;
+  @Mock
+  private CancellationReasonClient cancellationReasonClient;
 
 
   @InjectMocks

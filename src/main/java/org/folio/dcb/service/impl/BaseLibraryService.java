@@ -85,9 +85,6 @@ public class BaseLibraryService {
       log.info(UPDATE_STATUS_BY_TRANSACTION_ENTITY_LOG_MESSAGE_PATTERN,
         transactionEntity.getStatus().getValue(), TransactionStatus.StatusEnum.ITEM_CHECKED_IN.getValue());
       updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.ITEM_CHECKED_IN);
-    } else if(CANCELLED == transactionEntity.getStatus()){
-      log.info("updateStatusByTransactionEntity:: Transaction cancelled for itemId: {}", transactionEntity.getItemId());
-      updateTransactionEntity(transactionEntity, CANCELLED);
     } else {
       log.info("updateStatusByTransactionEntity:: Item status is {}. So status of transaction is not updated",
         circulationItemRequestStatus);
@@ -117,6 +114,11 @@ public class BaseLibraryService {
       log.warn(errorMessage);
       throw new IllegalArgumentException(errorMessage);
     }
+  }
+
+  public void cancelTransactionEntity(TransactionEntity transactionEntity) {
+    log.info("cancelTransactionEntity:: Transaction cancelled for itemId: {}", transactionEntity.getItemId());
+    updateTransactionEntity(transactionEntity, CANCELLED);
   }
 
   private void updateTransactionEntity(TransactionEntity transactionEntity, TransactionStatus.StatusEnum transactionStatusEnum) {

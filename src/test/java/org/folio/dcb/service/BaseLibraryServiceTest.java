@@ -20,9 +20,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWER;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWING_PICKUP;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CLOSED;
+import static org.folio.dcb.utils.EntityUtils.CIRCULATION_REQUEST_ID;
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
 import static org.folio.dcb.utils.EntityUtils.EXISTED_PATRON_ID;
 import static org.folio.dcb.utils.EntityUtils.PICKUP_SERVICE_POINT_ID;
+import static org.folio.dcb.utils.EntityUtils.createCirculationRequest;
 import static org.folio.dcb.utils.EntityUtils.createDcbItem;
 import static org.folio.dcb.utils.EntityUtils.createDcbPatronWithExactPatronId;
 import static org.folio.dcb.utils.EntityUtils.createDcbTransactionByRole;
@@ -31,6 +33,7 @@ import static org.folio.dcb.utils.EntityUtils.createTransactionStatus;
 import static org.folio.dcb.utils.EntityUtils.createUser;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.times;
@@ -113,7 +116,7 @@ class BaseLibraryServiceTest {
 
     when(userService.fetchUser(any()))
       .thenReturn(user);
-    doNothing().when(requestService).createHoldItemRequest(any(), any(), any());
+    when(requestService.createHoldItemRequest(any(), any(), anyString())).thenReturn(createCirculationRequest());
     when(transactionMapper.mapToEntity(any(), any())).thenReturn(createTransactionEntity());
 
     var response = baseLibraryService.createBorrowingLibraryTransaction(DCB_TRANSACTION_ID, createDcbTransactionByRole(BORROWER), PICKUP_SERVICE_POINT_ID);
@@ -127,7 +130,7 @@ class BaseLibraryServiceTest {
   void saveTransactionTest() {
     when(transactionMapper.mapToEntity(any(), any())).thenReturn(createTransactionEntity());
 
-    baseLibraryService.saveDcbTransaction(DCB_TRANSACTION_ID, createDcbTransactionByRole(BORROWER), any());
+    baseLibraryService.saveDcbTransaction(DCB_TRANSACTION_ID, createDcbTransactionByRole(BORROWER), CIRCULATION_REQUEST_ID);
     verify(transactionRepository).save(any());
   }
 

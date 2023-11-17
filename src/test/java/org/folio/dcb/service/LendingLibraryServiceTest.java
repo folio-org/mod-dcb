@@ -18,8 +18,10 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
+import static org.folio.dcb.utils.EntityUtils.CIRCULATION_REQUEST_ID;
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
 import static org.folio.dcb.utils.EntityUtils.PICKUP_SERVICE_POINT_ID;
+import static org.folio.dcb.utils.EntityUtils.createCirculationRequest;
 import static org.folio.dcb.utils.EntityUtils.createDcbItem;
 import static org.folio.dcb.utils.EntityUtils.createDefaultDcbPatron;
 import static org.folio.dcb.utils.EntityUtils.createDcbTransactionByRole;
@@ -29,6 +31,7 @@ import static org.folio.dcb.utils.EntityUtils.createUser;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -59,13 +62,13 @@ class LendingLibraryServiceTest {
 
     when(userService.fetchOrCreateUser(any()))
       .thenReturn(user);
-    doNothing().when(requestService).createPageItemRequest(any(), any(), any());
+    when(requestService.createPageItemRequest(any(), any(), anyString())).thenReturn(createCirculationRequest());
     doNothing().when(baseLibraryService).saveDcbTransaction(any(), any(), any());
 
     var response = lendingLibraryService.createCirculation(DCB_TRANSACTION_ID, createDcbTransactionByRole(LENDER), PICKUP_SERVICE_POINT_ID);
     verify(userService).fetchOrCreateUser(patron);
     verify(requestService).createPageItemRequest(user, item, PICKUP_SERVICE_POINT_ID);
-    verify(baseLibraryService).saveDcbTransaction(DCB_TRANSACTION_ID, createDcbTransactionByRole(LENDER), any());
+    verify(baseLibraryService).saveDcbTransaction(DCB_TRANSACTION_ID, createDcbTransactionByRole(LENDER), CIRCULATION_REQUEST_ID);
     Assertions.assertEquals(TransactionStatusResponse.StatusEnum.CREATED, response.getStatus());
   }
 
