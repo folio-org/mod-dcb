@@ -33,8 +33,6 @@ public class LendingLibraryServiceImpl implements LibraryService {
   private final TransactionRepository transactionRepository;
   private final CirculationService circulationService;
   private final BaseLibraryService baseLibraryService;
-  private final CirculationRequestService circulationStorageService;
-
   @Override
   public TransactionStatusResponse createCirculation(String dcbTransactionId, DcbTransaction dcbTransaction, String pickupServicePointId) {
     log.debug("createTransaction:: creating a new transaction with dcbTransactionId {} , dcbTransaction {}",
