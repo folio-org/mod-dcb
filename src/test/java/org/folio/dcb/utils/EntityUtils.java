@@ -154,6 +154,7 @@ public class EntityUtils {
       .materialType("book")
       .lendingLibraryCode("LEN")
       .borrowingLibraryCode("BOR")
+      .requestId(UUID.fromString(CIRCULATION_REQUEST_ID))
       .build();
   }
 

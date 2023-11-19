@@ -64,7 +64,6 @@ class CustomTenantServiceTest {
     when(servicePointClient.getServicePointByName(any())).thenReturn(new ResultList<>());
     when(locationsClient.queryLocationsByName(any())).thenReturn(new ResultList<>());
     when(loanTypeClient.queryLoanTypeByName(any())).thenReturn(new ResultList<>());
-    when(cancellationReasonClient.findCancellationReason(any())).thenReturn(CancellationReasonClient.CancellationReason.builder().build());
 
     service.createOrUpdateTenant(new TenantAttributes());
     verify(systemUserService).setupSystemUser();

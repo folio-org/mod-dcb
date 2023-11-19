@@ -1,0 +1,17 @@
+{
+  "mappings": [
+    {
+      "request": {
+        "method": "POST",
+        "url": "/cancellation-reason-storage/cancellation-reasons"
+      },
+      "response": {
+        "status": 201,
+        "body": "{\"id\": \"5b95877d-86c0-4cb7-a0cd-7660b348ae5a\", \"name\": \"DCB Cancellation\",  \"description\": \"DCB Cancellation\"}",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
+    }
+  ]
+}
