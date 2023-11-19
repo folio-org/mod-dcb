@@ -1,6 +1,7 @@
 package org.folio.dcb.service;
 
 import org.folio.dcb.domain.dto.TransactionStatus;
+import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.impl.BaseLibraryService;
 import org.folio.dcb.service.impl.BorrowingLibraryServiceImpl;
 import org.junit.jupiter.api.Assertions;
@@ -31,6 +32,8 @@ class BorrowingLibraryServiceTest {
   private BorrowingLibraryServiceImpl borrowingLibraryService;
   @Mock
   private CirculationService circulationService;
+  @Mock
+  private TransactionRepository transactionRepository;
   @Mock
   private BaseLibraryService baseLibraryService;
 
