@@ -10,10 +10,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.UUID;
 
+import static org.folio.dcb.utils.EntityUtils.createCirculationRequest;
 import static org.folio.dcb.utils.EntityUtils.createTransactionEntity;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class CirculationServiceTest {
@@ -23,6 +25,9 @@ class CirculationServiceTest {
 
   @Mock
   private CirculationClient circulationClient;
+
+  @Mock
+  private CirculationRequestService circulationRequestService;
 
   @Test
   void checkInByBarcodeTest(){
@@ -38,7 +43,8 @@ class CirculationServiceTest {
 
   @Test
   void cancelRequestTest() {
-    circulationClient.cancelRequest(anyString(), any());
+    when(circulationRequestService.getCancellationRequestIfOpenOrNull(anyString())).thenReturn(createCirculationRequest());
+    circulationService.cancelRequest(createTransactionEntity());
     verify(circulationClient).cancelRequest(anyString(), any());
   }
 
