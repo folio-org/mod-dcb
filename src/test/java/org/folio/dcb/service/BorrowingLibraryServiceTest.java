@@ -1,7 +1,6 @@
 package org.folio.dcb.service;
 
 import org.folio.dcb.domain.dto.TransactionStatus;
-import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.impl.BaseLibraryService;
 import org.folio.dcb.service.impl.BorrowingLibraryServiceImpl;
 import org.junit.jupiter.api.Assertions;
@@ -13,6 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWER;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.AWAITING_PICKUP;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CANCELLED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
@@ -31,8 +31,6 @@ class BorrowingLibraryServiceTest {
   private BorrowingLibraryServiceImpl borrowingLibraryService;
   @Mock
   private CirculationService circulationService;
-  @Mock
-  private TransactionRepository transactionRepository;
   @Mock
   private BaseLibraryService baseLibraryService;
 
@@ -54,6 +52,16 @@ class BorrowingLibraryServiceTest {
     transactionEntity.setStatus(CREATED);
     TransactionStatus transactionStatus = TransactionStatus.builder().status(AWAITING_PICKUP).build();
     assertThrows(IllegalArgumentException.class, () -> borrowingLibraryService.updateTransactionStatus(transactionEntity, transactionStatus));
+  }
+
+  @Test
+  void testTransactionCancelTest(){
+    var transactionEntity = createTransactionEntity();
+    transactionEntity.setStatus(OPEN);
+    TransactionStatus transactionStatus = TransactionStatus.builder().status(CANCELLED).build();
+    borrowingLibraryService.updateTransactionStatus(transactionEntity, transactionStatus);
+    verify(circulationService).cancelRequest(any());
+    Assertions.assertEquals(CANCELLED, transactionEntity.getStatus());
   }
 
   @Test
