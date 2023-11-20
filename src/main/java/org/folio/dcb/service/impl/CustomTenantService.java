@@ -30,6 +30,7 @@ import static org.folio.dcb.service.impl.ServicePointServiceImpl.HOLD_SHELF_CLOS
 import static org.folio.dcb.utils.DCBConstants.CAMPUS_ID;
 import static org.folio.dcb.utils.DCBConstants.CANCELLATION_REASON_ID;
 import static org.folio.dcb.utils.DCBConstants.CODE;
+import static org.folio.dcb.utils.DCBConstants.DCB_CANCELLATION_REASON_NAME;
 import static org.folio.dcb.utils.DCBConstants.HOLDING_ID;
 import static org.folio.dcb.utils.DCBConstants.INSTANCE_ID;
 import static org.folio.dcb.utils.DCBConstants.INSTANCE_TITLE;
@@ -248,8 +249,8 @@ public class CustomTenantService extends TenantService {
       log.debug("createCancellationReason:: creating cancellation reason");
       cancellationReasonClient.createCancellationReason(CancellationReasonClient.CancellationReason.builder()
         .id(CANCELLATION_REASON_ID)
-        .description("DCB Cancelled")
-        .name("DCB Cancelled").build());
+        .description(DCB_CANCELLATION_REASON_NAME)
+        .name(DCB_CANCELLATION_REASON_NAME).build());
       log.info("createCancellationReason:: cancellation reason created");
     }
   }

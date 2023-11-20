@@ -11,7 +11,7 @@ import org.folio.dcb.utils.RequestStatus;
 import org.folio.spring.FolioExecutionContext;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Service
@@ -37,7 +37,7 @@ public class CirculationRequestServiceImpl implements CirculationRequestService 
     CirculationRequest request = fetchRequestById(requestId);
     if(request != null && RequestStatus.isRequestOpen(RequestStatus.from(request.getStatus()))){
       request.setStatus(RequestStatus.CLOSED_CANCELLED.getValue());
-      request.setCancelledDate(String.valueOf(new Date()));
+      request.setCancelledDate(OffsetDateTime.now().toString());
       request.setCancellationAdditionalInformation("Request cancelled by DCB");
       request.setCancelledByUserId(folioExecutionContext.getUserId());
       request.setCancellationReasonId(UUID.fromString(DCBConstants.CANCELLATION_REASON_ID));

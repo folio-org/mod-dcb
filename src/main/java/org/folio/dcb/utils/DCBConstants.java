@@ -21,4 +21,5 @@ public class DCBConstants {
   public static final String LOAN_TYPE_ID = "4dec5417-0765-4767-bed6-b363a2d7d4e2";
   public static final String DCB_LOAN_TYPE_NAME = "DCB Can circulate";
   public static final String MATERIAL_TYPE_NAME_BOOK = "book";
+  public static final String DCB_CANCELLATION_REASON_NAME = "DCB Cancelled";
 }
