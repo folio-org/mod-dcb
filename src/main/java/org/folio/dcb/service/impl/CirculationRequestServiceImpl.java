@@ -1,5 +1,6 @@
 package org.folio.dcb.service.impl;
 
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dcb.client.feign.CirculationRequestClient;
@@ -18,13 +19,17 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class CirculationRequestServiceImpl implements CirculationRequestService {
 
-  private final CirculationRequestClient circulationStorageClient;
+  private final CirculationRequestClient circulationRequestClient;
   private final FolioExecutionContext folioExecutionContext;
 
-  @Override
-  public CirculationRequest fetchRequestById(String requestId) {
+  private CirculationRequest fetchRequestById(String requestId) {
     log.info("fetchRequestById:: fetching request for id {} ", requestId);
-    return circulationStorageClient.fetchRequestById(requestId);
+    try {
+      return circulationRequestClient.fetchRequestById(requestId);
+    } catch (FeignException.NotFound e) {
+      log.warn("Circulation request not found by id={}", requestId);
+      return null;
+    }
   }
 
   @Override

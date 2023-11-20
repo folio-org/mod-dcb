@@ -9,6 +9,7 @@ import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.domain.mapper.TransactionMapper;
+import org.folio.dcb.exception.CirculationRequestException;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.CirculationItemService;
 import org.folio.dcb.service.CirculationService;
@@ -106,9 +107,13 @@ public class BaseLibraryService {
         ITEM_CHECKED_IN.getValue(), CLOSED.getValue(), dcbTransaction.getItemBarcode());
       updateTransactionEntity(dcbTransaction, requestedStatus);
     } else if(CANCELLED == requestedStatus) {
-      log.info("updateTransactionStatus:: Cancelling transaction: {} ", dcbTransaction.getId());
-      circulationService.cancelRequest(dcbTransaction);
-      updateTransactionEntity(dcbTransaction, requestedStatus);
+      log.info("updateTransactionStatus:: Cancelling transaction with id: {} for Borrower/Pickup role", dcbTransaction.getId());
+      try {
+        circulationService.cancelRequest(dcbTransaction);
+        updateTransactionEntity(dcbTransaction, requestedStatus);
+      } catch (CirculationRequestException e) {
+        updateTransactionEntity(dcbTransaction, TransactionStatus.StatusEnum.ERROR);
+      }
     } else {
       String errorMessage = String.format("updateTransactionStatus:: status update from %s to %s is not implemented", currentStatus, requestedStatus);
       log.warn(errorMessage);

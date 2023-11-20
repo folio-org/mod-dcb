@@ -100,12 +100,7 @@ public class CirculationEventListener {
         log.info("updateTransactionStatus:: Received cancel event for itemId: {}", itemID);
         systemUserScopedExecutionService.executeAsyncSystemUserScoped(tenantId, () ->
           transactionRepository.findTransactionByItemIdAndStatusNotInClosed(UUID.fromString(itemID))
-            .ifPresent(transactionEntity -> {
-              switch (transactionEntity.getRole()) {
-                case LENDER, BORROWING_PICKUP, BORROWER, PICKUP -> baseLibraryService.cancelTransactionEntity(transactionEntity);
-                  default -> throw new IllegalArgumentException("Other roles are not implemented yet");
-              }
-            })
+            .ifPresent(baseLibraryService::cancelTransactionEntity)
         );
       }
     }

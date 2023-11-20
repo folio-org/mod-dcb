@@ -11,5 +11,6 @@ TransactionStatus:
         - ITEM_CHECKED_IN #Item returned to borrowing/Pickup library
         - CLOSED #Item returned to lending library
         - CANCELLED #Request was cancelled
+        - ERROR #Error occurred
     message:
       type: string

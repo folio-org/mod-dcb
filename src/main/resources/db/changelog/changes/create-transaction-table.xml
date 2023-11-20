@@ -12,14 +12,6 @@
     </sql>
   </changeSet>
 
-  <!-- Create StatusEnum ENUM -->
-  <changeSet id="addNewStatusToEnum" author="magzhanArtykov">
-    <sql>
-      <![CDATA[
-      ALTER TYPE StatusEnum ADD VALUE 'CANCELLED';
-      ]]>
-    </sql></changeSet>
-
   <!-- Create CAST for character varying to StatusEnum -->
   <changeSet id="createCast" author="singhAdesh">
     <sql>
@@ -90,9 +82,6 @@
         <constraints nullable="false"/>
       </column>
       <column name="borrowing_library_code" type="text">
-        <constraints nullable="false"/>
-      </column>
-      <column name="request_id" type="UUID">
         <constraints nullable="false"/>
       </column>
       <column name="status" type="StatusEnum"/>

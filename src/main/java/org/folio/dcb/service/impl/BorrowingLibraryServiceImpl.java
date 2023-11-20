@@ -6,6 +6,7 @@ import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.entity.TransactionEntity;
+import org.folio.dcb.exception.CirculationRequestException;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.CirculationService;
 import org.folio.dcb.service.LibraryService;
@@ -42,9 +43,13 @@ public class BorrowingLibraryServiceImpl implements LibraryService {
       circulationService.checkInByBarcode(dcbTransaction);
       updateTransactionEntity(dcbTransaction, requestedStatus);
     } else if(CANCELLED == requestedStatus) {
-      log.info("updateTransactionStatus:: Cancelling transaction: {} ", dcbTransaction.getId());
-      circulationService.cancelRequest(dcbTransaction);
-      updateTransactionEntity(dcbTransaction, requestedStatus);
+      log.info("updateTransactionStatus:: Cancelling transaction with id: {} for Borrower role", dcbTransaction.getId());
+      try {
+        circulationService.cancelRequest(dcbTransaction);
+        updateTransactionEntity(dcbTransaction, requestedStatus);
+      } catch (CirculationRequestException e) {
+        updateTransactionEntity(dcbTransaction, TransactionStatus.StatusEnum.ERROR);
+      }
     } else {
       String error = String.format("updateTransactionStatus:: status update from %s to %s is not implemented", currentStatus, requestedStatus);
       log.warn(error);
