@@ -11,8 +11,8 @@ import org.folio.dcb.service.CirculationService;
 import org.folio.dcb.service.LibraryService;
 import org.springframework.stereotype.Service;
 
-import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.AWAITING_PICKUP;
-import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.*;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CLOSED;
 
 @Log4j2
 @Service("borrowingLibraryService")
@@ -40,6 +40,10 @@ public class BorrowingLibraryServiceImpl implements LibraryService {
     var requestedStatus = transactionStatus.getStatus();
     if(OPEN == currentStatus && AWAITING_PICKUP == requestedStatus) {
       circulationService.checkInByBarcode(dcbTransaction);
+      updateTransactionEntity(dcbTransaction, requestedStatus);
+    }else if (ITEM_CHECKED_IN == currentStatus && CLOSED == requestedStatus) {
+      log.info("updateTransactionStatus:: transaction status transition from {} to {} for the item with barcode {} ",
+        ITEM_CHECKED_IN.getValue(), CLOSED.getValue(), dcbTransaction.getItemBarcode());
       updateTransactionEntity(dcbTransaction, requestedStatus);
     } else {
       String error = String.format("updateTransactionStatus:: status update from %s to %s is not implemented", currentStatus, requestedStatus);

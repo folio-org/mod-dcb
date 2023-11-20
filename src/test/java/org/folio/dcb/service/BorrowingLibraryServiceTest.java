@@ -12,9 +12,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWER;
-import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.AWAITING_PICKUP;
-import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
-import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.*;
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
 import static org.folio.dcb.utils.EntityUtils.PICKUP_SERVICE_POINT_ID;
 import static org.folio.dcb.utils.EntityUtils.createDcbTransactionByRole;
@@ -61,6 +59,16 @@ class BorrowingLibraryServiceTest {
     borrowingLibraryService.createCirculation(DCB_TRANSACTION_ID, createDcbTransactionByRole(BORROWER), PICKUP_SERVICE_POINT_ID);
 
     verify(baseLibraryService).createBorrowingLibraryTransaction(DCB_TRANSACTION_ID, createDcbTransactionByRole(BORROWER), PICKUP_SERVICE_POINT_ID);
+  }
+
+  @Test
+  void testTransactionStatusUpdateFromItemCheckedInToClosed() {
+    var transactionEntity = createTransactionEntity();
+    transactionEntity.setStatus(ITEM_CHECKED_IN);
+    TransactionStatus transactionStatus = TransactionStatus.builder().status(CLOSED).build();
+    borrowingLibraryService.updateTransactionStatus(transactionEntity, transactionStatus);
+
+    Assertions.assertEquals(CLOSED, transactionEntity.getStatus());
   }
 
 }
