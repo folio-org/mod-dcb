@@ -1,6 +1,8 @@
 package org.folio.dcb.service;
 
+import feign.FeignException;
 import org.folio.dcb.client.feign.CirculationClient;
+import org.folio.dcb.exception.CirculationRequestException;
 import org.folio.dcb.service.impl.CirculationServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,6 +14,7 @@ import java.util.UUID;
 
 import static org.folio.dcb.utils.EntityUtils.createCirculationRequest;
 import static org.folio.dcb.utils.EntityUtils.createTransactionEntity;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
@@ -46,6 +49,13 @@ class CirculationServiceTest {
     when(circulationRequestService.getCancellationRequestIfOpenOrNull(anyString())).thenReturn(createCirculationRequest());
     circulationService.cancelRequest(createTransactionEntity());
     verify(circulationClient).cancelRequest(anyString(), any());
+  }
+
+  @Test
+  void shouldThrowExceptionWhenRequestIsNotUpdated() {
+    when(circulationRequestService.getCancellationRequestIfOpenOrNull(anyString())).thenReturn(createCirculationRequest());
+    when(circulationClient.cancelRequest(anyString(), any())).thenThrow(FeignException.BadRequest.class);
+    assertThrows(CirculationRequestException.class, () -> circulationService.cancelRequest(createTransactionEntity()));
   }
 
 }
