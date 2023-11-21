@@ -134,7 +134,7 @@ class BaseLibraryServiceTest {
     transactionEntity.setStatus(OPEN);
     TransactionStatus transactionStatus = TransactionStatus.builder().status(CANCELLED).build();
     baseLibraryService.updateTransactionStatus(transactionEntity, transactionStatus);
-    Assertions.assertEquals(CANCELLED, transactionEntity.getStatus());
+    verify(circulationService).cancelRequest(any());
   }
 
   @Test
