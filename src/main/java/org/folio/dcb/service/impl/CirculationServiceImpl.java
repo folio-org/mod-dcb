@@ -41,17 +41,18 @@ public class CirculationServiceImpl implements CirculationService {
   }
 
   @Override
-  public void cancelRequest(TransactionEntity dcbTransaction) {
+  public CirculationRequest cancelRequestIfExistOrNull(TransactionEntity dcbTransaction) {
     log.debug("cancelRequest:: cancelling request using request id {} ", dcbTransaction.getRequestId());
     CirculationRequest request = circulationStorageService.getCancellationRequestIfOpenOrNull(dcbTransaction.getRequestId().toString());
     if (request != null){
       try {
-        circulationClient.cancelRequest(request.getId(), request);
+        return circulationClient.cancelRequest(request.getId(), request);
       } catch (FeignException e) {
         log.warn("cancelRequest:: error cancelling request using request id {} ", dcbTransaction.getRequestId(), e);
         throw new CirculationRequestException(String.format("Error cancelling request using request id %s", dcbTransaction.getRequestId()));
       }
     }
+    return null;
   }
 
   private CheckInRequest createCheckInRequest(String itemBarcode, String servicePointId){

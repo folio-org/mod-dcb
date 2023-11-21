@@ -63,7 +63,7 @@ class BorrowingLibraryServiceTest {
     transactionEntity.setStatus(OPEN);
     TransactionStatus transactionStatus = TransactionStatus.builder().status(CANCELLED).build();
     borrowingLibraryService.updateTransactionStatus(transactionEntity, transactionStatus);
-    verify(circulationService).cancelRequest(any());
+    verify(circulationService).cancelRequestIfExistOrNull(any());
     Assertions.assertEquals(CANCELLED, transactionEntity.getStatus());
   }
 

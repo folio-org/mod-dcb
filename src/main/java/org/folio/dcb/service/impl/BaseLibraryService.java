@@ -108,16 +108,21 @@ public class BaseLibraryService {
       updateTransactionEntity(dcbTransaction, requestedStatus);
     } else if(CANCELLED == requestedStatus) {
       log.info("updateTransactionStatus:: Cancelling transaction with id: {} for Borrower/Pickup role", dcbTransaction.getId());
-      try {
-        circulationService.cancelRequest(dcbTransaction);
-        updateTransactionEntity(dcbTransaction, requestedStatus);
-      } catch (CirculationRequestException e) {
-        updateTransactionEntity(dcbTransaction, TransactionStatus.StatusEnum.ERROR);
-      }
+      cancelTransactionRequest(dcbTransaction);
     } else {
       String errorMessage = String.format("updateTransactionStatus:: status update from %s to %s is not implemented", currentStatus, requestedStatus);
       log.warn(errorMessage);
       throw new IllegalArgumentException(errorMessage);
+    }
+  }
+
+  public void cancelTransactionRequest(TransactionEntity transactionEntity){
+    try {
+      if(circulationService.cancelRequestIfExistOrNull(transactionEntity) == null){
+        cancelTransactionEntity(transactionEntity);
+      }
+    } catch (CirculationRequestException e) {
+      updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.ERROR);
     }
   }
 

@@ -18,7 +18,7 @@
   <changeSet id="addRequestIdColumn" author="magzhanArtykov">
     <addColumn tableName="transactions">
       <column name="request_id" type="uuid">
-        <constraints nullable="false"/>
+        <constraints nullable="true"/>
       </column>
     </addColumn>
   </changeSet>
