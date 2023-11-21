@@ -48,6 +48,17 @@ class BorrowingLibraryServiceTest {
     verify(circulationService).checkInByBarcode(any());
     Assertions.assertEquals(AWAITING_PICKUP, transactionEntity.getStatus());
   }
+  @Test
+  void testTransactionStatusUpdateFromCreatedToOpen() {
+    var transactionEntity = createTransactionEntity();
+    transactionEntity.setStatus(CREATED);
+    doNothing().when(circulationService).checkInByBarcode(any(), any());
+    TransactionStatus transactionStatus = TransactionStatus.builder().status(OPEN).build();
+    borrowingLibraryService.updateTransactionStatus(transactionEntity, transactionStatus);
+
+    verify(circulationService).checkInByBarcode(any(), any());
+    Assertions.assertEquals(OPEN, transactionEntity.getStatus());
+  }
 
   @Test
   void testTransactionStatusUpdateWithIncorrectStatus() {
