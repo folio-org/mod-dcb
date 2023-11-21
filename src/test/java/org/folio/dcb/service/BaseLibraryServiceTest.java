@@ -19,7 +19,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWER;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWING_PICKUP;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CANCELLED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CLOSED;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
 import static org.folio.dcb.utils.EntityUtils.CIRCULATION_REQUEST_ID;
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
 import static org.folio.dcb.utils.EntityUtils.EXISTED_PATRON_ID;
@@ -124,6 +126,15 @@ class BaseLibraryServiceTest {
     verify(requestService).createHoldItemRequest(user, item, PICKUP_SERVICE_POINT_ID);
     verify(transactionRepository).save(any());
     Assertions.assertEquals(TransactionStatusResponse.StatusEnum.CREATED, response.getStatus());
+  }
+
+  @Test
+  void testTransactionCancelTest(){
+    var transactionEntity = createTransactionEntity();
+    transactionEntity.setStatus(OPEN);
+    TransactionStatus transactionStatus = TransactionStatus.builder().status(CANCELLED).build();
+    baseLibraryService.updateTransactionStatus(transactionEntity, transactionStatus);
+    Assertions.assertEquals(CANCELLED, transactionEntity.getStatus());
   }
 
   @Test
