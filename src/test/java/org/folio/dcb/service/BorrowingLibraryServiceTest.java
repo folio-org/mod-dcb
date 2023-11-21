@@ -16,6 +16,7 @@ import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.AWAITING_PIC
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_IN;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_OUT;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CLOSED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
 import static org.folio.dcb.utils.EntityUtils.PICKUP_SERVICE_POINT_ID;
@@ -74,6 +75,16 @@ class BorrowingLibraryServiceTest {
     borrowingLibraryService.createCirculation(DCB_TRANSACTION_ID, createDcbTransactionByRole(BORROWER), PICKUP_SERVICE_POINT_ID);
 
     verify(baseLibraryService).createBorrowingLibraryTransaction(DCB_TRANSACTION_ID, createDcbTransactionByRole(BORROWER), PICKUP_SERVICE_POINT_ID);
+  }
+
+  @Test
+  void testTransactionStatusUpdateFromItemCheckedInToClosed() {
+    var transactionEntity = createTransactionEntity();
+    transactionEntity.setStatus(ITEM_CHECKED_IN);
+    TransactionStatus transactionStatus = TransactionStatus.builder().status(CLOSED).build();
+    borrowingLibraryService.updateTransactionStatus(transactionEntity, transactionStatus);
+
+    Assertions.assertEquals(CLOSED, transactionEntity.getStatus());
   }
 
   @Test
