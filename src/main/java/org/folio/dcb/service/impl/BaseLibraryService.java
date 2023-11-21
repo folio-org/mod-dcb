@@ -118,9 +118,7 @@ public class BaseLibraryService {
 
   public void cancelTransactionRequest(TransactionEntity transactionEntity){
     try {
-      if(circulationService.cancelRequestIfExistOrNull(transactionEntity) == null){
-        cancelTransactionEntity(transactionEntity);
-      }
+      circulationService.cancelRequest(transactionEntity);
     } catch (CirculationRequestException e) {
       updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.ERROR);
     }

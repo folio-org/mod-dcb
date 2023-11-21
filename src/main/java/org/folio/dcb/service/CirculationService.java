@@ -1,6 +1,5 @@
 package org.folio.dcb.service;
 
-import org.folio.dcb.domain.dto.CirculationRequest;
 import org.folio.dcb.domain.entity.TransactionEntity;
 
 public interface CirculationService {
@@ -18,5 +17,5 @@ public interface CirculationService {
    */
   void checkOutByBarcode(TransactionEntity dcbTransaction);
 
-  CirculationRequest cancelRequestIfExistOrNull(TransactionEntity dcbTransaction);
+  void cancelRequest(TransactionEntity dcbTransaction);
 }
