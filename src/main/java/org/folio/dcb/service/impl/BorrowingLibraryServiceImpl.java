@@ -10,9 +10,13 @@ import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.CirculationService;
 import org.folio.dcb.service.LibraryService;
 import org.springframework.stereotype.Service;
+import java.util.UUID;
 
-import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.*;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.AWAITING_PICKUP;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CLOSED;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_IN;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
 
 @Log4j2
 @Service("borrowingLibraryService")
@@ -38,7 +42,13 @@ public class BorrowingLibraryServiceImpl implements LibraryService {
     log.debug("updateTransactionStatus:: Updating dcbTransaction {} to status {} ", dcbTransaction, transactionStatus);
     var currentStatus = dcbTransaction.getStatus();
     var requestedStatus = transactionStatus.getStatus();
-    if(OPEN == currentStatus && AWAITING_PICKUP == requestedStatus) {
+
+    if (CREATED == currentStatus && OPEN == requestedStatus) {
+      log.info("updateTransactionStatus:: Checking in item by barcode: {} ", dcbTransaction.getItemBarcode());
+      //Random UUID for servicePointId.
+      circulationService.checkInByBarcode(dcbTransaction, UUID.randomUUID().toString());
+      updateTransactionEntity(dcbTransaction, requestedStatus);
+    } else if(OPEN == currentStatus && AWAITING_PICKUP == requestedStatus) {
       circulationService.checkInByBarcode(dcbTransaction);
       updateTransactionEntity(dcbTransaction, requestedStatus);
     }else if (ITEM_CHECKED_IN == currentStatus && CLOSED == requestedStatus) {
