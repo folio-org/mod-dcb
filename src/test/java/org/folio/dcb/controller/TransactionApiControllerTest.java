@@ -345,6 +345,46 @@ class TransactionApiControllerTest extends BaseIT {
         jsonPath("$.errors[0].code", is("DUPLICATE_ERROR")));
   }
 
+  @Test
+  void transactionStatusUpdateFromAwaitingPickupToItemCheckedOut() throws Exception {
+    var transactionID = UUID.randomUUID().toString();
+    var dcbTransaction = createTransactionEntity();
+    dcbTransaction.setStatus(TransactionStatus.StatusEnum.AWAITING_PICKUP);
+    dcbTransaction.setRole(BORROWER);
+    dcbTransaction.setId(transactionID);
+
+    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> transactionRepository.save(dcbTransaction));
+
+    this.mockMvc.perform(
+        put("/transactions/" + transactionID + "/status")
+          .content(asJsonString(createTransactionStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_OUT)))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.status").value("ITEM_CHECKED_OUT"));
+  }
+
+  @Test
+  void transactionStatusUpdateFromItemCheckedOutToItemCheckedIn() throws Exception {
+    var transactionID = UUID.randomUUID().toString();
+    var dcbTransaction = createTransactionEntity();
+    dcbTransaction.setStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_OUT);
+    dcbTransaction.setRole(BORROWER);
+    dcbTransaction.setId(transactionID);
+
+    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> transactionRepository.save(dcbTransaction));
+
+    this.mockMvc.perform(
+        put("/transactions/" + transactionID + "/status")
+          .content(asJsonString(createTransactionStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_IN)))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.status").value("ITEM_CHECKED_IN"));
+  }
+
   private void removeExistedTransactionFromDbIfSoExists() {
     systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> {
       if (transactionRepository.existsById(DCB_TRANSACTION_ID)){
