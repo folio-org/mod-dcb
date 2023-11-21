@@ -44,7 +44,7 @@ public class BorrowingLibraryServiceImpl implements LibraryService {
     var currentStatus = dcbTransaction.getStatus();
     var requestedStatus = transactionStatus.getStatus();
 
-    if (CREATED == currentStatus && OPEN == requestedStatus) {
+    if ((CREATED == currentStatus && OPEN == requestedStatus) || (ITEM_CHECKED_OUT == currentStatus && ITEM_CHECKED_IN == requestedStatus)) {
       log.info("updateTransactionStatus:: Checking in item by barcode: {} ", dcbTransaction.getItemBarcode());
       //Random UUID for servicePointId.
       circulationService.checkInByBarcode(dcbTransaction, UUID.randomUUID().toString());
@@ -56,12 +56,7 @@ public class BorrowingLibraryServiceImpl implements LibraryService {
       log.info("updateTransactionStatus:: Checking out item by barcode: {} ", dcbTransaction.getPatronBarcode());
       circulationService.checkOutByBarcode(dcbTransaction);
       updateTransactionEntity(dcbTransaction, requestedStatus);
-    } else if (ITEM_CHECKED_OUT == currentStatus && ITEM_CHECKED_IN == requestedStatus) {
-      log.info("updateTransactionStatus:: Checking in item by barcode: {} ", dcbTransaction.getItemBarcode());
-      //Random UUID for servicePointId.
-      circulationService.checkInByBarcode(dcbTransaction, UUID.randomUUID().toString());
-      updateTransactionEntity(dcbTransaction, requestedStatus);
-    }else if (ITEM_CHECKED_IN == currentStatus && CLOSED == requestedStatus) {
+    } else if (ITEM_CHECKED_IN == currentStatus && CLOSED == requestedStatus) {
       log.info("updateTransactionStatus:: transaction status transition from {} to {} for the item with barcode {} ",
         ITEM_CHECKED_IN.getValue(), CLOSED.getValue(), dcbTransaction.getItemBarcode());
       updateTransactionEntity(dcbTransaction, requestedStatus);
