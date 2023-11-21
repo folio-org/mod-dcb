@@ -10,8 +10,13 @@ import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.CirculationService;
 import org.folio.dcb.service.LibraryService;
 import org.springframework.stereotype.Service;
+import java.util.UUID;
 
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.AWAITING_PICKUP;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CLOSED;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_IN;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_OUT;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
 
 @Log4j2
@@ -38,8 +43,22 @@ public class BorrowingLibraryServiceImpl implements LibraryService {
     log.debug("updateTransactionStatus:: Updating dcbTransaction {} to status {} ", dcbTransaction, transactionStatus);
     var currentStatus = dcbTransaction.getStatus();
     var requestedStatus = transactionStatus.getStatus();
-    if(OPEN == currentStatus && AWAITING_PICKUP == requestedStatus) {
+
+    if ((CREATED == currentStatus && OPEN == requestedStatus) || (ITEM_CHECKED_OUT == currentStatus && ITEM_CHECKED_IN == requestedStatus)) {
+      log.info("updateTransactionStatus:: Checking in item by barcode: {} ", dcbTransaction.getItemBarcode());
+      //Random UUID for servicePointId.
+      circulationService.checkInByBarcode(dcbTransaction, UUID.randomUUID().toString());
+      updateTransactionEntity(dcbTransaction, requestedStatus);
+    } else if(OPEN == currentStatus && AWAITING_PICKUP == requestedStatus) {
       circulationService.checkInByBarcode(dcbTransaction);
+      updateTransactionEntity(dcbTransaction, requestedStatus);
+    } else if (AWAITING_PICKUP == currentStatus && ITEM_CHECKED_OUT == requestedStatus) {
+      log.info("updateTransactionStatus:: Checking out item by barcode: {} ", dcbTransaction.getPatronBarcode());
+      circulationService.checkOutByBarcode(dcbTransaction);
+      updateTransactionEntity(dcbTransaction, requestedStatus);
+    } else if (ITEM_CHECKED_IN == currentStatus && CLOSED == requestedStatus) {
+      log.info("updateTransactionStatus:: transaction status transition from {} to {} for the item with barcode {} ",
+        ITEM_CHECKED_IN.getValue(), CLOSED.getValue(), dcbTransaction.getItemBarcode());
       updateTransactionEntity(dcbTransaction, requestedStatus);
     } else {
       String error = String.format("updateTransactionStatus:: status update from %s to %s is not implemented", currentStatus, requestedStatus);
