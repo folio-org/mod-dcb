@@ -2,6 +2,7 @@ package org.folio.dcb.service.impl;
 
 import feign.FeignException;
 import lombok.extern.log4j.Log4j2;
+import org.folio.dcb.client.feign.CancellationReasonClient;
 import org.folio.dcb.client.feign.HoldingSourcesClient;
 import org.folio.dcb.client.feign.HoldingsStorageClient;
 import org.folio.dcb.client.feign.InstanceClient;
@@ -27,7 +28,9 @@ import java.util.Collections;
 
 import static org.folio.dcb.service.impl.ServicePointServiceImpl.HOLD_SHELF_CLOSED_LIBRARY_DATE_MANAGEMENT;
 import static org.folio.dcb.utils.DCBConstants.CAMPUS_ID;
+import static org.folio.dcb.utils.DCBConstants.CANCELLATION_REASON_ID;
 import static org.folio.dcb.utils.DCBConstants.CODE;
+import static org.folio.dcb.utils.DCBConstants.DCB_CANCELLATION_REASON_NAME;
 import static org.folio.dcb.utils.DCBConstants.HOLDING_ID;
 import static org.folio.dcb.utils.DCBConstants.INSTANCE_ID;
 import static org.folio.dcb.utils.DCBConstants.INSTANCE_TITLE;
@@ -56,11 +59,12 @@ public class CustomTenantService extends TenantService {
   private final HoldingSourcesClient holdingSourcesClient;
   private final InventoryServicePointClient servicePointClient;
   private final LocationUnitClient locationUnitClient;
+  private final CancellationReasonClient cancellationReasonClient;
   private final LoanTypeClient loanTypeClient;
 
 
   public CustomTenantService(JdbcTemplate jdbcTemplate, FolioExecutionContext context,
-                             FolioSpringLiquibase folioSpringLiquibase, PrepareSystemUserService systemUserService, KafkaService kafkaService, InstanceClient inventoryClient, InstanceTypeClient instanceTypeClient, HoldingsStorageClient holdingsStorageClient, LocationsClient locationsClient, HoldingSourcesClient holdingSourcesClient, InventoryServicePointClient servicePointClient, LocationUnitClient locationUnitClient, LoanTypeClient loanTypeClient) {
+                             FolioSpringLiquibase folioSpringLiquibase, PrepareSystemUserService systemUserService, KafkaService kafkaService, InstanceClient inventoryClient, InstanceTypeClient instanceTypeClient, HoldingsStorageClient holdingsStorageClient, LocationsClient locationsClient, HoldingSourcesClient holdingSourcesClient, InventoryServicePointClient servicePointClient, LocationUnitClient locationUnitClient, LoanTypeClient loanTypeClient, CancellationReasonClient cancellationReasonClient) {
     super(jdbcTemplate, context, folioSpringLiquibase);
 
     this.systemUserService = systemUserService;
@@ -73,6 +77,7 @@ public class CustomTenantService extends TenantService {
     this.servicePointClient = servicePointClient;
     this.locationUnitClient = locationUnitClient;
     this.loanTypeClient = loanTypeClient;
+    this.cancellationReasonClient = cancellationReasonClient;
   }
 
   @Override
@@ -88,6 +93,7 @@ public class CustomTenantService extends TenantService {
     createServicePoint();
     createLocation();
     createHolding();
+    createCancellationReason();
     createLoanType();
   }
 
@@ -233,6 +239,19 @@ public class CustomTenantService extends TenantService {
 
       holdingsStorageClient.createHolding(holding);
       log.info("createHolding:: holding created");
+    }
+  }
+
+  private void createCancellationReason(){
+    try {
+      cancellationReasonClient.findCancellationReason(CANCELLATION_REASON_ID);
+    } catch (FeignException.NotFound ex) {
+      log.debug("createCancellationReason:: creating cancellation reason");
+      cancellationReasonClient.createCancellationReason(CancellationReasonClient.CancellationReason.builder()
+        .id(CANCELLATION_REASON_ID)
+        .description(DCB_CANCELLATION_REASON_NAME)
+        .name(DCB_CANCELLATION_REASON_NAME).build());
+      log.info("createCancellationReason:: cancellation reason created");
     }
   }
 }

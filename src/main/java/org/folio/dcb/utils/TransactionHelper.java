@@ -42,6 +42,12 @@ public class TransactionHelper {
         }
 
         return eventData;
+      } else if(typeNode.equals("UPDATED") && newDataNode != null && newDataNode.has("status")
+        && RequestStatus.CLOSED_CANCELLED == RequestStatus.from(newDataNode.get("status").asText())){
+        EventData eventData = new EventData();
+        eventData.setItemId(newDataNode.get("itemId").asText());
+        eventData.setType(EventData.EventType.CANCEL);
+        return eventData;
       }
     } catch (Exception e) {
       log.error("Could not parse input payload for processing event", e);

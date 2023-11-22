@@ -18,6 +18,7 @@ import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CLOSED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_IN;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_OUT;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CANCELLED;
 
 @Log4j2
 @Service("borrowingLibraryService")
@@ -35,7 +36,6 @@ public class BorrowingLibraryServiceImpl implements LibraryService {
 
   @Override
   public void updateStatusByTransactionEntity(TransactionEntity transactionEntity) {
-
   }
 
   @Override
@@ -60,6 +60,9 @@ public class BorrowingLibraryServiceImpl implements LibraryService {
       log.info("updateTransactionStatus:: transaction status transition from {} to {} for the item with barcode {} ",
         ITEM_CHECKED_IN.getValue(), CLOSED.getValue(), dcbTransaction.getItemBarcode());
       updateTransactionEntity(dcbTransaction, requestedStatus);
+    } else if(CANCELLED == requestedStatus) {
+      log.info("updateTransactionStatus:: Cancelling transaction with id: {} for Borrower role", dcbTransaction.getId());
+      libraryService.cancelTransactionRequest(dcbTransaction);
     } else {
       String error = String.format("updateTransactionStatus:: status update from %s to %s is not implemented", currentStatus, requestedStatus);
       log.warn(error);

@@ -31,21 +31,21 @@ public class RequestServiceImpl implements RequestService {
   private final CirculationClient circulationClient;
 
   @Override
-  public void createPageItemRequest(User user, DcbItem item, String pickupServicePointId) {
+  public CirculationRequest createPageItemRequest(User user, DcbItem item, String pickupServicePointId) {
     log.debug("createPageItemRequest:: creating a new page request for userBarcode {} , itemBarcode {}",
       user.getBarcode(), item.getBarcode());
     var inventoryItem = itemService.fetchItemDetailsById(item.getId());
     var inventoryHolding = holdingsService.fetchInventoryHoldingDetailsByHoldingId(inventoryItem.getHoldingsRecordId());
     var circulationRequest = createCirculationRequest(PAGE, user, item, inventoryItem.getHoldingsRecordId(), inventoryHolding.getInstanceId(), pickupServicePointId);
-    circulationClient.createRequest(circulationRequest);
+    return circulationClient.createRequest(circulationRequest);
   }
 
   @Override
-  public void createHoldItemRequest(User user, DcbItem item, String pickupServicePointId) {
+  public CirculationRequest createHoldItemRequest(User user, DcbItem item, String pickupServicePointId) {
     log.debug("createHoldItemRequest:: creating a new hold request for userBarcode {} , itemBarcode {}",
       user.getBarcode(), item.getBarcode());
     var circulationRequest = createCirculationRequest(HOLD, user, item, HOLDING_ID, INSTANCE_ID, pickupServicePointId);
-    circulationClient.createRequest(circulationRequest);
+    return circulationClient.createRequest(circulationRequest);
   }
 
   private CirculationRequest createCirculationRequest(CirculationRequest.RequestTypeEnum type, User user, DcbItem item, String holdingsId, String instanceId, String pickupServicePointId) {

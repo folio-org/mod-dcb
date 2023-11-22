@@ -12,12 +12,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.PICKUP;
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
 import static org.folio.dcb.utils.EntityUtils.PICKUP_SERVICE_POINT_ID;
+import static org.folio.dcb.utils.EntityUtils.createCirculationRequest;
 import static org.folio.dcb.utils.EntityUtils.createDcbItem;
 import static org.folio.dcb.utils.EntityUtils.createDcbTransactionByRole;
 import static org.folio.dcb.utils.EntityUtils.createDefaultDcbPatron;
 import static org.folio.dcb.utils.EntityUtils.createUser;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -46,9 +48,9 @@ class PickupLibraryServiceTest {
 
     when(userService.fetchOrCreateUser(any()))
       .thenReturn(user);
-    doNothing().when(requestService).createHoldItemRequest(any(), any(), any());
+    when(requestService.createHoldItemRequest(any(), any(), anyString())).thenReturn(createCirculationRequest());
     doNothing().when(circulationItemService).checkIfItemExistsAndCreate(any(), any());
-    doNothing().when(baseLibraryService).saveDcbTransaction(any(), any());
+    doNothing().when(baseLibraryService).saveDcbTransaction(any(), any(), any());
 
     var response = pickupLibraryService.createCirculation(DCB_TRANSACTION_ID, createDcbTransactionByRole(PICKUP), PICKUP_SERVICE_POINT_ID);
     verify(userService).fetchOrCreateUser(patron);
