@@ -5,7 +5,9 @@ import org.folio.dcb.domain.dto.CheckOutRequest;
 import org.folio.dcb.domain.dto.CirculationRequest;
 import org.folio.spring.config.FeignClientConfiguration;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 @FeignClient(name = "circulation", configuration = FeignClientConfiguration.class)
@@ -18,4 +20,7 @@ public interface CirculationClient {
 
   @PostMapping("/check-out-by-barcode")
   void checkOutByBarcode(@RequestBody CheckOutRequest checkOutRequest);
+
+  @PutMapping("/requests/{requestId}")
+  CirculationRequest cancelRequest(@PathVariable("requestId") String requestId, @RequestBody CirculationRequest circulationRequest);
 }

@@ -3,11 +3,13 @@ package org.folio.dcb.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dcb.domain.dto.CirculationItemRequest;
+import org.folio.dcb.domain.dto.CirculationRequest;
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.domain.mapper.TransactionMapper;
+import org.folio.dcb.exception.CirculationRequestException;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.CirculationItemService;
 import org.folio.dcb.service.CirculationService;
@@ -20,6 +22,7 @@ import java.util.UUID;
 
 import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.AWAITING_PICKUP;
 import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.CHECKED_OUT;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CANCELLED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CLOSED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_IN;
@@ -47,8 +50,8 @@ public class BaseLibraryService {
     var user = userService.fetchUser(patron); //user is needed, but shouldn't be generated. it should be fetched.
     circulationItemService.checkIfItemExistsAndCreate(itemVirtual, pickupServicePointId);
 
-    requestService.createHoldItemRequest(user, itemVirtual, pickupServicePointId);
-    saveDcbTransaction(dcbTransactionId, dcbTransaction);
+    CirculationRequest holdRequest = requestService.createHoldItemRequest(user, itemVirtual, pickupServicePointId);
+    saveDcbTransaction(dcbTransactionId, dcbTransaction, holdRequest.getId());
 
     return TransactionStatusResponse.builder()
       .status(TransactionStatusResponse.StatusEnum.CREATED)
@@ -57,11 +60,12 @@ public class BaseLibraryService {
       .build();
   }
 
-  public void saveDcbTransaction(String dcbTransactionId, DcbTransaction dcbTransaction) {
+  public void saveDcbTransaction(String dcbTransactionId, DcbTransaction dcbTransaction, String requestId) {
     TransactionEntity transactionEntity = transactionMapper.mapToEntity(dcbTransactionId, dcbTransaction);
     if (Objects.isNull(transactionEntity)) {
       throw new IllegalArgumentException("Transaction Entity is null");
     }
+    transactionEntity.setRequestId(UUID.fromString(requestId));
     transactionEntity.setStatus(CREATED);
     transactionRepository.save(transactionEntity);
   }
@@ -102,11 +106,27 @@ public class BaseLibraryService {
       log.info("updateTransactionStatus:: transaction status transition from {} to {} for the item with barcode {} ",
         ITEM_CHECKED_IN.getValue(), CLOSED.getValue(), dcbTransaction.getItemBarcode());
       updateTransactionEntity(dcbTransaction, requestedStatus);
+    } else if(CANCELLED == requestedStatus) {
+      log.info("updateTransactionStatus:: Cancelling transaction with id: {} for Borrower/Pickup role", dcbTransaction.getId());
+      cancelTransactionRequest(dcbTransaction);
     } else {
       String errorMessage = String.format("updateTransactionStatus:: status update from %s to %s is not implemented", currentStatus, requestedStatus);
       log.warn(errorMessage);
       throw new IllegalArgumentException(errorMessage);
     }
+  }
+
+  public void cancelTransactionRequest(TransactionEntity transactionEntity){
+    try {
+      circulationService.cancelRequest(transactionEntity);
+    } catch (CirculationRequestException e) {
+      updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.ERROR);
+    }
+  }
+
+  public void cancelTransactionEntity(TransactionEntity transactionEntity) {
+    log.info("cancelTransactionEntity:: Transaction cancelled for itemId: {}", transactionEntity.getItemId());
+    updateTransactionEntity(transactionEntity, CANCELLED);
   }
 
   private void updateTransactionEntity(TransactionEntity transactionEntity, TransactionStatus.StatusEnum transactionStatusEnum) {

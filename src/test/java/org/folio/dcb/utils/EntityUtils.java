@@ -3,6 +3,7 @@ package org.folio.dcb.utils;
 import lombok.SneakyThrows;
 import org.folio.dcb.DcbApplication;
 import org.folio.dcb.client.feign.HoldingsStorageClient;
+import org.folio.dcb.domain.dto.CirculationRequest;
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.DcbItem;
 import org.folio.dcb.domain.dto.DcbPatron;
@@ -46,6 +47,7 @@ public class EntityUtils {
   public static String EXISTED_PATRON_ID = "284056f5-0670-4e1e-9e2f-61b9f1ee2d18";
   public static String PICKUP_SERVICE_POINT_ID = "0da8c1e4-1c1f-4dd9-b189-70ba978b7d94";
   public static String DCB_TRANSACTION_ID = "571b0a2c-8883-40b5-a449-d41fe6017082";
+  public static String CIRCULATION_REQUEST_ID = "571b0a2c-8883-40b5-a449-d41fe6017083";
   public static String DCB_USER_TYPE = "dcb";
   public static DcbTransaction createDcbTransactionByRole(DcbTransaction.RoleEnum role) {
     return DcbTransaction.builder()
@@ -83,6 +85,12 @@ public class EntityUtils {
       .title("ITEM")
       .lendingLibraryCode("KU")
       .materialType("book")
+      .build();
+  }
+
+  public static CirculationRequest createCirculationRequest() {
+    return CirculationRequest.builder()
+      .id(CIRCULATION_REQUEST_ID)
       .build();
   }
 
@@ -146,6 +154,7 @@ public class EntityUtils {
       .materialType("book")
       .lendingLibraryCode("LEN")
       .borrowingLibraryCode("BOR")
+      .requestId(UUID.fromString(CIRCULATION_REQUEST_ID))
       .build();
   }
 

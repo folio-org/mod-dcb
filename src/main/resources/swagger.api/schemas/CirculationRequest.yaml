@@ -40,6 +40,9 @@ CirculationRequest:
       description: ID of the item being requested
       type: string
       format: uuid
+    status:
+      description: Status of the request
+      type: string
     cancellationReasonId:
       description: The id of the request reason
       type: string

@@ -2,6 +2,7 @@ package org.folio.dcb.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.folio.dcb.domain.dto.CirculationRequest;
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
@@ -19,6 +20,7 @@ import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_IN;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_OUT;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CANCELLED;
 
 @Service("lendingLibraryService")
 @RequiredArgsConstructor
@@ -30,7 +32,6 @@ public class LendingLibraryServiceImpl implements LibraryService {
   private final TransactionRepository transactionRepository;
   private final CirculationService circulationService;
   private final BaseLibraryService baseLibraryService;
-
   @Override
   public TransactionStatusResponse createCirculation(String dcbTransactionId, DcbTransaction dcbTransaction, String pickupServicePointId) {
     log.debug("createTransaction:: creating a new transaction with dcbTransactionId {} , dcbTransaction {}",
@@ -40,8 +41,8 @@ public class LendingLibraryServiceImpl implements LibraryService {
     var patron = dcbTransaction.getPatron();
 
     var user = userService.fetchOrCreateUser(patron);
-    requestService.createPageItemRequest(user, item, pickupServicePointId);
-    baseLibraryService.saveDcbTransaction(dcbTransactionId, dcbTransaction);
+    CirculationRequest pageRequest = requestService.createPageItemRequest(user, item, pickupServicePointId);
+    baseLibraryService.saveDcbTransaction(dcbTransactionId, dcbTransaction, pageRequest.getId());
 
     return TransactionStatusResponse.builder()
       .status(TransactionStatusResponse.StatusEnum.CREATED)
@@ -65,6 +66,9 @@ public class LendingLibraryServiceImpl implements LibraryService {
       updateTransactionEntity(dcbTransaction, requestedStatus);
     } else if (ITEM_CHECKED_OUT == currentStatus && ITEM_CHECKED_IN == requestedStatus) {
       updateTransactionEntity(dcbTransaction, requestedStatus);
+    } else if(CANCELLED == requestedStatus) {
+      log.info("updateTransactionStatus:: Cancelling transaction with id: {} for Lender role", dcbTransaction.getId());
+      baseLibraryService.cancelTransactionRequest(dcbTransaction);
     } else {
       String errorMessage = String.format("updateTransactionStatus:: status update from %s to %s is not implemented",
         currentStatus, requestedStatus);
