@@ -45,7 +45,7 @@ public class TransactionHelper {
       } else if(typeNode.equals("UPDATED") && newDataNode != null && newDataNode.has("status")
         && RequestStatus.CLOSED_CANCELLED == RequestStatus.from(newDataNode.get("status").asText())){
         EventData eventData = new EventData();
-        eventData.setItemId(newDataNode.get("itemId").asText());
+        eventData.setRequestId(newDataNode.get("id").asText());
         eventData.setType(EventData.EventType.CANCEL);
         return eventData;
       }
