@@ -7,8 +7,10 @@ import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.domain.mapper.TransactionMapper;
+import org.folio.dcb.exception.ResourceAlreadyExistException;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.impl.BaseLibraryService;
+import org.folio.spring.model.ResultList;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,6 +18,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.List;
 
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWER;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWING_PICKUP;
@@ -30,6 +34,7 @@ import static org.folio.dcb.utils.EntityUtils.createCirculationRequest;
 import static org.folio.dcb.utils.EntityUtils.createDcbItem;
 import static org.folio.dcb.utils.EntityUtils.createDcbPatronWithExactPatronId;
 import static org.folio.dcb.utils.EntityUtils.createDcbTransactionByRole;
+import static org.folio.dcb.utils.EntityUtils.createInventoryItem;
 import static org.folio.dcb.utils.EntityUtils.createTransactionEntity;
 import static org.folio.dcb.utils.EntityUtils.createTransactionStatus;
 import static org.folio.dcb.utils.EntityUtils.createUser;
@@ -59,6 +64,8 @@ class BaseLibraryServiceTest {
   private CirculationService circulationService;
   @Mock
   private TransactionMapper transactionMapper;
+  @Mock
+  private ItemService itemService;
 
   @Test
   void updateTransactionWithWrongStatusTest() {
@@ -115,17 +122,61 @@ class BaseLibraryServiceTest {
     var item = createDcbItem();
     var patron = createDcbPatronWithExactPatronId(EXISTED_PATRON_ID);
     var user = createUser();
+    user.setType("shadow");
 
     when(userService.fetchUser(any()))
       .thenReturn(user);
     when(requestService.createHoldItemRequest(any(), any(), anyString())).thenReturn(createCirculationRequest());
     when(transactionMapper.mapToEntity(any(), any())).thenReturn(createTransactionEntity());
+    when(itemService.fetchItemByBarcode(item.getBarcode())).thenReturn(new ResultList<>());
 
     var response = baseLibraryService.createBorrowingLibraryTransaction(DCB_TRANSACTION_ID, createDcbTransactionByRole(BORROWER), PICKUP_SERVICE_POINT_ID);
     verify(userService).fetchUser(patron);
     verify(requestService).createHoldItemRequest(user, item, PICKUP_SERVICE_POINT_ID);
     verify(transactionRepository).save(any());
     Assertions.assertEquals(TransactionStatusResponse.StatusEnum.CREATED, response.getStatus());
+  }
+
+  @Test
+  void checkItemIfExistsInInventory() {
+    var item = createDcbItem();
+    var inventoryItem = createInventoryItem();
+
+    when(itemService.fetchItemByBarcode(item.getBarcode())).thenReturn(ResultList.of(1, List.of(inventoryItem)));
+
+    assertThrows(ResourceAlreadyExistException.class, () -> baseLibraryService.checkItemExistsInInventoryAndThrow(item.getBarcode()));
+  }
+
+  @Test
+  void checkItemIfNotExistsInInventory() {
+    var item = createDcbItem();
+
+    when(itemService.fetchItemByBarcode(item.getBarcode())).thenReturn(ResultList.of(0, List.of()));
+
+    baseLibraryService.checkItemExistsInInventoryAndThrow(item.getBarcode());
+    verify(itemService).fetchItemByBarcode(item.getBarcode());
+  }
+
+  @Test
+  void createBorrowingTransactionTestThrowException() {
+    var user = createUser();
+
+    when(userService.fetchUser(any()))
+      .thenReturn(user);
+
+    assertThrows(IllegalArgumentException.class, () -> baseLibraryService.createBorrowingLibraryTransaction(DCB_TRANSACTION_ID, createDcbTransactionByRole(BORROWER), PICKUP_SERVICE_POINT_ID));
+  }
+
+  @Test
+  void checkUserTypeAndThrowIfMismatchTest() {
+    var user = createUser();
+    baseLibraryService.checkUserTypeAndThrowIfMismatch(user.getType());
+
+    user.setType("shadow");
+    baseLibraryService.checkUserTypeAndThrowIfMismatch(user.getType());
+
+    user.setType("patron");
+    assertThrows(IllegalArgumentException.class, () -> baseLibraryService.checkUserTypeAndThrowIfMismatch(user.getType()));
   }
 
   @Test

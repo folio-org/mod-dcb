@@ -28,6 +28,32 @@
     {
       "request": {
         "method": "GET",
+        "url": "/item-storage?query=barcode%3D%3DDCB_ITEM"
+      },
+      "response": {
+        "status": 200,
+        "body": "{\"users\": [], \"totalRecords\": 0, \"resultInfo\": {\"totalRecords\": 0, \"facets\": [],\"diagnostics\": []}}",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/item-storage?query=barcode%3D%3DINVENTORY_ITEM"
+      },
+      "response": {
+        "status": 200,
+        "body": "{\"items\": [], \"totalRecords\": 1, \"resultInfo\": {\"totalRecords\": 0, \"facets\": [],\"diagnostics\": []}}",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
         "url": "/holdings-storage/holdings/fb7b70f1-b898-4924-a991-0e4b6312bb5f"
       },
       "response": {
