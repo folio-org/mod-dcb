@@ -11,7 +11,10 @@ import java.util.UUID;
 
 @Repository
 public interface TransactionRepository extends JpaRepository<TransactionEntity, String> {
-  @Query(value = "SELECT * FROM transactions where item_id = :itemId AND status != 'CLOSED'", nativeQuery = true)
+  @Query(value = "SELECT * FROM transactions where item_id = :itemId AND status not in ('CLOSED', 'CANCELLED', 'ERROR')", nativeQuery = true)
   Optional<TransactionEntity> findTransactionByItemIdAndStatusNotInClosed(@Param("itemId") UUID itemId);
+
+  @Query(value = "SELECT * FROM transactions where request_id = :requestId AND status != 'CLOSED'", nativeQuery = true)
+  Optional<TransactionEntity> findTransactionByRequestIdAndStatusNotInClosed(@Param("requestId") UUID itemId);
 
 }

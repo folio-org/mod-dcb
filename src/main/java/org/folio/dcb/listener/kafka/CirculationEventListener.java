@@ -95,11 +95,11 @@ public class CirculationEventListener {
     String tenantId = getHeaderValue(messageHeaders, XOkapiHeaders.TENANT, null).get(0);
     var eventData = parseEvent(data);
     if (Objects.nonNull(eventData) && eventData.getType() == EventData.EventType.CANCEL) {
-      String itemID = eventData.getItemId();
-      if (Objects.nonNull(itemID)) {
-        log.info("updateTransactionStatus:: Received cancel event for itemId: {}", itemID);
+      String requestId = eventData.getRequestId();
+      if (Objects.nonNull(requestId)) {
+        log.info("updateTransactionStatus:: Received cancel event for requestId: {}", requestId);
         systemUserScopedExecutionService.executeAsyncSystemUserScoped(tenantId, () ->
-          transactionRepository.findTransactionByItemIdAndStatusNotInClosed(UUID.fromString(itemID))
+          transactionRepository.findTransactionByRequestIdAndStatusNotInClosed(UUID.fromString(requestId))
             .ifPresent(baseLibraryService::cancelTransactionEntity)
         );
       }
