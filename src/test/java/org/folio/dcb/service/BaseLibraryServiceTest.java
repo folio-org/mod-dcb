@@ -144,7 +144,7 @@ class BaseLibraryServiceTest {
 
     when(itemService.fetchItemByBarcode(item.getBarcode())).thenReturn(ResultList.of(1, List.of(inventoryItem)));
 
-    assertThrows(ResourceAlreadyExistException.class, () -> baseLibraryService.checkItemExistsInInventoryAndThrow(item.getBarcode()));
+    assertThrows(ResourceAlreadyExistException.class, () -> baseLibraryService.checkItemExistsInInventoryAndThrow("DCB_ITEM"));
   }
 
   @Test
@@ -160,11 +160,11 @@ class BaseLibraryServiceTest {
   @Test
   void createBorrowingTransactionTestThrowException() {
     var user = createUser();
-
+    var transaction = createDcbTransactionByRole(BORROWER);
     when(userService.fetchUser(any()))
       .thenReturn(user);
 
-    assertThrows(IllegalArgumentException.class, () -> baseLibraryService.createBorrowingLibraryTransaction(DCB_TRANSACTION_ID, createDcbTransactionByRole(BORROWER), PICKUP_SERVICE_POINT_ID));
+    assertThrows(IllegalArgumentException.class, () -> baseLibraryService.createBorrowingLibraryTransaction(DCB_TRANSACTION_ID, transaction, PICKUP_SERVICE_POINT_ID));
   }
 
   @Test
@@ -175,8 +175,7 @@ class BaseLibraryServiceTest {
     user.setType("shadow");
     baseLibraryService.checkUserTypeAndThrowIfMismatch(user.getType());
 
-    user.setType("patron");
-    assertThrows(IllegalArgumentException.class, () -> baseLibraryService.checkUserTypeAndThrowIfMismatch(user.getType()));
+    assertThrows(IllegalArgumentException.class, () -> baseLibraryService.checkUserTypeAndThrowIfMismatch("patron"));
   }
 
   @Test
