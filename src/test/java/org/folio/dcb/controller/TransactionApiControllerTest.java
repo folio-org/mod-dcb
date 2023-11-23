@@ -427,7 +427,7 @@ class TransactionApiControllerTest extends BaseIT {
           .accept(MediaType.APPLICATION_JSON))
       .andExpect(status().isBadRequest());
 
-    transaction = createDcbTransactionByRole(LENDER);
+    transaction = createDcbTransactionByRole(BORROWER);
     transaction.getPatron().setId(PATRON_TYPE_USER_ID);
 
     this.mockMvc.perform(
