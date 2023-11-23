@@ -54,7 +54,7 @@ public class BaseLibraryService {
     var patron = dcbTransaction.getPatron();
 
     var user = userService.fetchUser(patron); //user is needed, but shouldn't be generated. it should be fetched.
-    if(Objects.equals(user.getType(), "dcb")) {
+    if(Objects.equals(user.getType(), DCB_TYPE)) {
       throw new IllegalArgumentException(String.format("User with type %s is retrieved. so unable to create transaction", user.getType()));
     }
     checkItemExistsInInventoryAndThrow(itemVirtual.getBarcode());
