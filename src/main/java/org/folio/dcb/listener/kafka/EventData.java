@@ -6,6 +6,7 @@ import lombok.Data;
 public class EventData {
   private EventType type;
   private String itemId;
+  private String requestId;
 
   public enum EventType {
     CHECK_IN, CHECK_OUT, CANCEL
