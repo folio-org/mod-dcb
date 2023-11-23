@@ -2,6 +2,7 @@ package org.folio.dcb.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.ObjectUtils;
 import org.folio.dcb.domain.dto.CirculationItemRequest;
 import org.folio.dcb.domain.dto.CirculationRequest;
 import org.folio.dcb.domain.dto.DcbTransaction;
@@ -10,9 +11,11 @@ import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.domain.mapper.TransactionMapper;
 import org.folio.dcb.exception.CirculationRequestException;
+import org.folio.dcb.exception.ResourceAlreadyExistException;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.CirculationItemService;
 import org.folio.dcb.service.CirculationService;
+import org.folio.dcb.service.ItemService;
 import org.folio.dcb.service.RequestService;
 import org.folio.dcb.service.UserService;
 import org.springframework.stereotype.Service;
@@ -28,6 +31,8 @@ import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_IN;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_OUT;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
+import static org.folio.dcb.utils.DCBConstants.DCB_TYPE;
+import static org.folio.dcb.utils.DCBConstants.SHADOW_TYPE;
 
 @Service
 @RequiredArgsConstructor
@@ -42,12 +47,17 @@ public class BaseLibraryService {
   private final UserService userService;
   private final RequestService requestService;
   private final TransactionMapper transactionMapper;
+  private final ItemService itemService;
 
   public TransactionStatusResponse createBorrowingLibraryTransaction(String dcbTransactionId, DcbTransaction dcbTransaction, String pickupServicePointId) {
     var itemVirtual = dcbTransaction.getItem();
     var patron = dcbTransaction.getPatron();
 
     var user = userService.fetchUser(patron); //user is needed, but shouldn't be generated. it should be fetched.
+    if(Objects.equals(user.getType(), "dcb")) {
+      throw new IllegalArgumentException(String.format("User with type %s is retrieved. so unable to create transaction", user.getType()));
+    }
+    checkItemExistsInInventoryAndThrow(itemVirtual.getBarcode());
     circulationItemService.checkIfItemExistsAndCreate(itemVirtual, pickupServicePointId);
 
     CirculationRequest holdRequest = requestService.createHoldItemRequest(user, itemVirtual, pickupServicePointId);
@@ -68,6 +78,12 @@ public class BaseLibraryService {
     transactionEntity.setRequestId(UUID.fromString(requestId));
     transactionEntity.setStatus(CREATED);
     transactionRepository.save(transactionEntity);
+  }
+
+  public void checkUserTypeAndThrowIfMismatch(String userType) {
+    if(ObjectUtils.notEqual(userType, DCB_TYPE) && ObjectUtils.notEqual(userType, SHADOW_TYPE)) {
+      throw new IllegalArgumentException(String.format("User with type %s is retrieved. so unable to create transaction", userType));
+    }
   }
 
   public void updateStatusByTransactionEntity(TransactionEntity transactionEntity) {
@@ -127,6 +143,11 @@ public class BaseLibraryService {
   public void cancelTransactionEntity(TransactionEntity transactionEntity) {
     log.info("cancelTransactionEntity:: Transaction cancelled for itemId: {}", transactionEntity.getItemId());
     updateTransactionEntity(transactionEntity, CANCELLED);
+  }
+
+  public void checkItemExistsInInventoryAndThrow(String itemBarcode) {
+    if(itemService.fetchItemByBarcode(itemBarcode).getTotalRecords() != 0)
+      throw new ResourceAlreadyExistException(String.format("Unable to create item with barcode %s as it exists in inventory ", itemBarcode));
   }
 
   private void updateTransactionEntity(TransactionEntity transactionEntity, TransactionStatus.StatusEnum transactionStatusEnum) {
