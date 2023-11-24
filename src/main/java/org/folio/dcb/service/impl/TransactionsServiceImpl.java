@@ -53,6 +53,12 @@ public class TransactionsServiceImpl implements TransactionsService {
         throw new IllegalArgumentException(String.format(
           "Current transaction status equal to new transaction status: dcbTransactionId: %s, status: %s", dcbTransactionId, transactionStatus.getStatus()
         ));
+      } else if (transactionStatus.getStatus() == TransactionStatus.StatusEnum.CANCELLED
+                  && (dcbTransaction.getStatus() == TransactionStatus.StatusEnum.ITEM_CHECKED_IN ||
+                        dcbTransaction.getStatus() == TransactionStatus.StatusEnum.ITEM_CHECKED_OUT)) {
+        throw new IllegalArgumentException(String.format(
+          "Cannot cancel transaction dcbTransactionId: %s. Transaction already in status: %s: ", dcbTransactionId, dcbTransaction.getStatus()
+        ));
       }
       switch (dcbTransaction.getRole()) {
         case LENDER -> lendingLibraryService.updateTransactionStatus(dcbTransaction, transactionStatus);
