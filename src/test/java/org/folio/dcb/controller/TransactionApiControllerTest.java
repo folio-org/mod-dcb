@@ -385,6 +385,45 @@ class TransactionApiControllerTest extends BaseIT {
       .andExpect(jsonPath("$.status").value("ITEM_CHECKED_IN"));
   }
 
+  @Test
+  void transactionStatusUpdateFromCreatedToCancelledAsLenderTest() throws Exception {
+    var transactionID = UUID.randomUUID().toString();
+    var dcbTransaction = createTransactionEntity();
+    dcbTransaction.setStatus(TransactionStatus.StatusEnum.CREATED);
+    dcbTransaction.setRole(LENDER);
+    dcbTransaction.setId(transactionID);
+
+    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> transactionRepository.save(dcbTransaction));
+
+    mockMvc.perform(
+        put("/transactions/" + transactionID + "/status")
+          .content(asJsonString(createTransactionStatus(TransactionStatus.StatusEnum.CANCELLED)))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.status").value("CANCELLED"));
+  }
+
+  @Test
+  void transactionStatusUpdateFromCheckedInToCancelledAsLenderTest() throws Exception {
+    var transactionID = UUID.randomUUID().toString();
+    var dcbTransaction = createTransactionEntity();
+    dcbTransaction.setStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_IN);
+    dcbTransaction.setRole(LENDER);
+    dcbTransaction.setId(transactionID);
+
+    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> transactionRepository.save(dcbTransaction));
+
+    mockMvc.perform(
+        put("/transactions/" + transactionID + "/status")
+          .content(asJsonString(createTransactionStatus(TransactionStatus.StatusEnum.CANCELLED)))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isBadRequest());
+  }
+
   private void removeExistedTransactionFromDbIfSoExists() {
     systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> {
       if (transactionRepository.existsById(DCB_TRANSACTION_ID)){
