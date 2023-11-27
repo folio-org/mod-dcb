@@ -134,6 +134,14 @@ class LendingLibraryServiceTest {
   }
 
   @Test
+  void transactionStatusFromCreatedToCancelledTest() {
+    TransactionEntity dcbTransaction = createTransactionEntity();
+    dcbTransaction.setStatus(TransactionStatus.StatusEnum.CREATED);
+    lendingLibraryService.updateTransactionStatus(dcbTransaction, TransactionStatus.builder().status(TransactionStatus.StatusEnum.CANCELLED).build());
+    verify(baseLibraryService).cancelTransactionRequest(dcbTransaction);
+  }
+
+  @Test
   void updateTransactionWithWrongStatusTest() {
     TransactionEntity transactionEntity = createTransactionEntity();
     TransactionStatus transactionStatus = createTransactionStatus(TransactionStatus.StatusEnum.AWAITING_PICKUP);
