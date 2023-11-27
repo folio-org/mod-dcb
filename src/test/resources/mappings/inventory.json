@@ -28,7 +28,7 @@
     {
       "request": {
         "method": "GET",
-        "url": "/item-storage?query=barcode%3D%3DDCB_ITEM"
+        "url": "/item-storage/items?query=barcode%3D%3DDCB_ITEM"
       },
       "response": {
         "status": 200,
@@ -41,7 +41,7 @@
     {
       "request": {
         "method": "GET",
-        "url": "/item-storage?query=barcode%3D%3DINVENTORY_ITEM"
+        "url": "/item-storage/items?query=barcode%3D%3DINVENTORY_ITEM"
       },
       "response": {
         "status": 200,

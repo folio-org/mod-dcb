@@ -13,6 +13,6 @@ public interface InventoryItemStorageClient {
   @GetMapping("/items/{itemId}")
   InventoryItem findItem(@PathVariable("itemId") String itemId);
 
-  @GetMapping
+  @GetMapping("/items")
   ResultList<InventoryItem> fetchItemByBarcode(@RequestParam("query") String query);
 }
