@@ -8,6 +8,7 @@ import org.folio.dcb.client.feign.MaterialTypeClient;
 import org.folio.dcb.domain.dto.InventoryItem;
 import org.folio.dcb.service.ItemService;
 import org.folio.spring.exception.NotFoundException;
+import org.folio.spring.model.ResultList;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -40,14 +41,9 @@ public class ItemServiceImpl implements ItemService {
   }
 
   @Override
-  public String fetchItemMaterialTypeNameByMaterialTypeId(String materialTypeId) {
-    log.debug("fetchItemMaterialTypeNameByMaterialTypeId:: Fetching ItemMaterialTypeName by MaterialTypeId={}", materialTypeId);
-    return materialTypeClient.fetchMaterialTypeByQuery(String.format("id==\"%s\"", materialTypeId))
-      .getMtypes()
-      .stream()
-      .findFirst()
-      .map(org.folio.dcb.domain.dto.MaterialType::getName)
-      .orElseThrow(() -> new NotFoundException(String.format("MaterialType not found with id %s ", materialTypeId)));
+  public ResultList<InventoryItem> fetchItemByBarcode(String itemBarcode) {
+    log.debug("fetchItemByBarcode:: fetching item details for barcode {} ", itemBarcode);
+    return inventoryItemStorageClient.fetchItemByBarcode("barcode==" + itemBarcode);
   }
 
 }

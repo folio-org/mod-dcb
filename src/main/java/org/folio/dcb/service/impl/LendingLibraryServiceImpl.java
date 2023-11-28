@@ -41,6 +41,7 @@ public class LendingLibraryServiceImpl implements LibraryService {
     var patron = dcbTransaction.getPatron();
 
     var user = userService.fetchOrCreateUser(patron);
+    baseLibraryService.checkUserTypeAndThrowIfMismatch(user.getType());
     CirculationRequest pageRequest = requestService.createPageItemRequest(user, item, pickupServicePointId);
     baseLibraryService.saveDcbTransaction(dcbTransactionId, dcbTransaction, pageRequest.getId());
 
