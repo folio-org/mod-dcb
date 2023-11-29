@@ -3,6 +3,7 @@ package org.folio.dcb.controller;
 import feign.FeignException;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dcb.exception.ResourceAlreadyExistException;
+import org.folio.dcb.exception.StatusException;
 import org.folio.spring.exception.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -59,7 +60,8 @@ public class ExceptionHandlingController {
     MissingServletRequestParameterException.class,
     MethodArgumentTypeMismatchException.class,
     HttpMessageNotReadableException.class,
-    IllegalArgumentException.class
+    IllegalArgumentException.class,
+    StatusException.class
   })
   public Errors handleValidationErrors(Exception ex) {
     logExceptionMessage(ex);

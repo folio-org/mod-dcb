@@ -146,6 +146,27 @@ class TransactionApiControllerTest extends BaseIT {
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.status").value("AWAITING_PICKUP"));
   }
+
+  @Test
+  void transactionStatusUpdateFromOpenToCheckedInTest() throws Exception {
+
+    var transactionID = UUID.randomUUID().toString();
+    var dcbTransaction = createTransactionEntity();
+    dcbTransaction.setStatus(TransactionStatus.StatusEnum.OPEN);
+    dcbTransaction.setRole(LENDER);
+    dcbTransaction.setId(transactionID);
+
+    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> transactionRepository.save(dcbTransaction));
+
+    this.mockMvc.perform(
+        put("/transactions/" + transactionID + "/status")
+          .content(asJsonString(createTransactionStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_IN)))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.status").value("ITEM_CHECKED_IN"));
+  }
   @Test
   void transactionStatusUpdateFromCreatedToOpenForPickupLibTest() throws Exception {
 
@@ -363,6 +384,26 @@ class TransactionApiControllerTest extends BaseIT {
           .accept(MediaType.APPLICATION_JSON))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.status").value("ITEM_CHECKED_OUT"));
+  }
+
+  @Test
+  void transactionStatusUpdateFromCreatedToItemClosed() throws Exception {
+    var transactionID = UUID.randomUUID().toString();
+    var dcbTransaction = createTransactionEntity();
+    dcbTransaction.setStatus(TransactionStatus.StatusEnum.CREATED);
+    dcbTransaction.setRole(BORROWER);
+    dcbTransaction.setId(transactionID);
+
+    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> transactionRepository.save(dcbTransaction));
+
+    this.mockMvc.perform(
+        put("/transactions/" + transactionID + "/status")
+          .content(asJsonString(createTransactionStatus(TransactionStatus.StatusEnum.CLOSED)))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.status").value("CLOSED"));
   }
 
   @Test

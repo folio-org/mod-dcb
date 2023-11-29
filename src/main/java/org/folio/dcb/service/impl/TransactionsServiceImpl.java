@@ -11,6 +11,7 @@ import org.folio.dcb.exception.ResourceAlreadyExistException;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.LibraryService;
 import org.folio.dcb.service.ServicePointService;
+import org.folio.dcb.service.StatusProcessorService;
 import org.folio.dcb.service.TransactionsService;
 import org.folio.spring.exception.NotFoundException;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -31,6 +32,7 @@ public class TransactionsServiceImpl implements TransactionsService {
   private final LibraryService borrowingLibraryService;
   private final TransactionRepository transactionRepository;
   private final ServicePointService servicePointService;
+  private final StatusProcessorService statusProcessorService;
 
   @Override
   public TransactionStatusResponse createCirculationRequest(String dcbTransactionId, DcbTransaction dcbTransaction) {
@@ -55,10 +57,12 @@ public class TransactionsServiceImpl implements TransactionsService {
         ));
       }
       switch (dcbTransaction.getRole()) {
-        case LENDER -> lendingLibraryService.updateTransactionStatus(dcbTransaction, transactionStatus);
+        case LENDER -> statusProcessorService.lendingChainProcessor(dcbTransaction.getStatus(), transactionStatus.getStatus())
+          .forEach(statusEnum -> lendingLibraryService.updateTransactionStatus(dcbTransaction, TransactionStatus.builder().status(statusEnum).build()));
         case BORROWING_PICKUP -> borrowingPickupLibraryService.updateTransactionStatus(dcbTransaction, transactionStatus);
         case PICKUP -> pickupLibraryService.updateTransactionStatus(dcbTransaction, transactionStatus);
-        case BORROWER -> borrowingLibraryService.updateTransactionStatus(dcbTransaction, transactionStatus);
+        case BORROWER -> statusProcessorService.borrowingChainProcessor(dcbTransaction.getStatus(), transactionStatus.getStatus())
+          .forEach(statusEnum -> borrowingLibraryService.updateTransactionStatus(dcbTransaction, TransactionStatus.builder().status(statusEnum).build()));
       }
 
       return TransactionStatusResponse.builder()
