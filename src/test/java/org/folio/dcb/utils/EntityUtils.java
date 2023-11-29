@@ -49,6 +49,10 @@ public class EntityUtils {
   public static String DCB_TRANSACTION_ID = "571b0a2c-8883-40b5-a449-d41fe6017082";
   public static String CIRCULATION_REQUEST_ID = "571b0a2c-8883-40b5-a449-d41fe6017083";
   public static String DCB_USER_TYPE = "dcb";
+  public static String DCB_TYPE_USER_ID = "910c512c-ebc5-40c6-96a5-a20bfd81e154";
+  public static String EXISTED_INVENTORY_ITEM_BARCODE = "INVENTORY_ITEM";
+  public static String PATRON_TYPE_USER_ID = "18c1741d-e678-4c8e-9fe7-cfaeefab5eea";
+
   public static DcbTransaction createDcbTransactionByRole(DcbTransaction.RoleEnum role) {
     return DcbTransaction.builder()
       .item(createDcbItem())
