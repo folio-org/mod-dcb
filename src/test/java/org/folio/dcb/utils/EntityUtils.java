@@ -11,6 +11,7 @@ import org.folio.dcb.domain.dto.DcbPickup;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.dto.User;
 import org.folio.dcb.domain.dto.TransactionStatus;
+import org.folio.dcb.domain.entity.TransactionAuditEntity;
 import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.domain.dto.InventoryItem;
 import org.folio.dcb.domain.dto.UserGroupCollection;
@@ -207,4 +208,13 @@ public class EntityUtils {
       .build();
   }
 
+  public static TransactionAuditEntity createTransactionAuditEntity(){
+    return TransactionAuditEntity.builder()
+      .id(UUID.randomUUID())
+      .transactionId(UUID.randomUUID().toString())
+      .action("UPDATE")
+      .before("")
+      .after("")
+      .build();
+  }
 }
