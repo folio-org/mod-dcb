@@ -89,6 +89,7 @@ public class EntityUtils {
       .title("ITEM")
       .lendingLibraryCode("KU")
       .materialType("book")
+      .agencyCode("11191")
       .build();
   }
 
@@ -158,6 +159,7 @@ public class EntityUtils {
       .materialType("book")
       .lendingLibraryCode("LEN")
       .borrowingLibraryCode("BOR")
+      .agencyCode("11191")
       .requestId(UUID.fromString(CIRCULATION_REQUEST_ID))
       .build();
   }
