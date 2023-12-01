@@ -49,6 +49,7 @@ public class TransactionEntity extends AuditableEntity {
   private String patronBarcode;
   private String borrowingLibraryCode;
   private UUID requestId;
+  private String agencyCode;
   @Enumerated(EnumType.STRING)
   private StatusEnum status;
   @Enumerated(EnumType.STRING)

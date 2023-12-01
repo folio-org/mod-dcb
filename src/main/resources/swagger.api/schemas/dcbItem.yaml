@@ -17,3 +17,6 @@ DcbItem:
     lendingLibraryCode:
       description: The code which identifies the lending library
       type: string
+    agencyCode:
+      description: Effective 5 character agency code
+      type: string

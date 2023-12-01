@@ -4,8 +4,13 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 
-  <include file="changes/create-transaction-table.xml" relativeToChangelogFile="true"/>
-  <include file="changes/create-audit-table.xml" relativeToChangelogFile="true"/>
-  <include file="changes/add-request-to-transaction.xml" relativeToChangelogFile="true"/>
-  <include file="changes/add-agency-code.xml" relativeToChangelogFile="true"/>
+  <!-- Add agencyCode column -->
+  <changeSet id="addAgencyCodeColumn" author="magzhanArtykov">
+    <addColumn tableName="transactions">
+      <column name="agency_code" type="text">
+        <constraints nullable="false"/>
+      </column>
+    </addColumn>
+  </changeSet>
+
 </databaseChangeLog>

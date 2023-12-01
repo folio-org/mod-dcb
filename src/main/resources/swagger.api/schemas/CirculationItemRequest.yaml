@@ -20,4 +20,6 @@ CirculationItemRequest:
       type: string
     pickupLocation:
       type: string
+    agencyCode:
+      type: string
   additionalProperties: false
