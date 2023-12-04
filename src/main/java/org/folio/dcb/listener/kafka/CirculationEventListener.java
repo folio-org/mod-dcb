@@ -16,7 +16,8 @@ import java.util.Objects;
 import java.util.UUID;
 
 import static org.folio.dcb.utils.TransactionHelper.getHeaderValue;
-import static org.folio.dcb.utils.TransactionHelper.parseEvent;
+import static org.folio.dcb.utils.TransactionHelper.parseLoanEvent;
+import static org.folio.dcb.utils.TransactionHelper.parseRequestEvent;
 
 @Log4j2
 @Component
@@ -37,38 +38,12 @@ public class CirculationEventListener {
   private final BaseLibraryService baseLibraryService;
 
   @KafkaListener(
-    id = CHECK_IN_LISTENER_ID,
-    topicPattern = "#{folioKafkaProperties.listener['check-in'].topicPattern}",
-    concurrency = "#{folioKafkaProperties.listener['check-in'].concurrency}")
-  public void handleCheckInEvent(String data, MessageHeaders messageHeaders) {
-    String tenantId = getHeaderValue(messageHeaders, XOkapiHeaders.TENANT, null).get(0);
-    var eventData = parseEvent(data);
-    if (Objects.nonNull(eventData) && eventData.getType() == EventData.EventType.CHECK_IN) {
-      String checkInItemId = eventData.getItemId();
-      if (Objects.nonNull(checkInItemId)) {
-        log.info("updateTransactionStatus:: Received checkIn event for itemId: {}", checkInItemId);
-        systemUserScopedExecutionService.executeAsyncSystemUserScoped(tenantId, () ->
-          transactionRepository.findTransactionByItemIdAndStatusNotInClosed(UUID.fromString(checkInItemId))
-            .ifPresent(transactionEntity -> {
-              switch (transactionEntity.getRole()) {
-                case LENDER -> lendingLibraryService.updateStatusByTransactionEntity(transactionEntity);
-                case BORROWING_PICKUP -> borrowingLibraryService.updateStatusByTransactionEntity(transactionEntity);
-                case PICKUP -> pickupLibraryService.updateStatusByTransactionEntity(transactionEntity);
-                default -> throw new IllegalArgumentException("Other roles are not implemented yet");
-              }
-            })
-        );
-      }
-    }
-  }
-
-  @KafkaListener(
     id = CHECK_OUT_LOAN_LISTENER_ID,
     topicPattern = "#{folioKafkaProperties.listener['loan'].topicPattern}",
     concurrency = "#{folioKafkaProperties.listener['loan'].concurrency}")
   public void handleCheckOutEvent(String data, MessageHeaders messageHeaders) {
     String tenantId = getHeaderValue(messageHeaders, XOkapiHeaders.TENANT, null).get(0);
-    var eventData = parseEvent(data);
+    var eventData = parseLoanEvent(data);
     if (Objects.nonNull(eventData) && eventData.getType() == EventData.EventType.CHECK_OUT) {
       String checkOutItemId = eventData.getItemId();
       if (Objects.nonNull(checkOutItemId)) {
@@ -91,19 +66,30 @@ public class CirculationEventListener {
     id = REQUEST_LISTENER_ID,
     topicPattern = "#{folioKafkaProperties.listener['request'].topicPattern}",
     concurrency = "#{folioKafkaProperties.listener['request'].concurrency}")
-  public void handleRequestCancelEvent(String data, MessageHeaders messageHeaders) {
+  public void handleRequestEvent(String data, MessageHeaders messageHeaders) {
     String tenantId = getHeaderValue(messageHeaders, XOkapiHeaders.TENANT, null).get(0);
-    var eventData = parseEvent(data);
+    var eventData = parseRequestEvent(data);
     if (Objects.nonNull(eventData) && eventData.getType() == EventData.EventType.CANCEL) {
       String requestId = eventData.getRequestId();
       if (Objects.nonNull(requestId)) {
         log.info("updateTransactionStatus:: Received cancel event for requestId: {}", requestId);
         systemUserScopedExecutionService.executeAsyncSystemUserScoped(tenantId, () ->
           transactionRepository.findTransactionByRequestIdAndStatusNotInClosed(UUID.fromString(requestId))
-            .ifPresent(baseLibraryService::cancelTransactionEntity)
+            .ifPresent(transactionEntity -> {
+              if(eventData.getType() == EventData.EventType.CANCEL) {
+                baseLibraryService.cancelTransactionEntity(transactionEntity);
+              } else if(eventData.getType() == EventData.EventType.IN_TRANSIT){
+                lendingLibraryService.updateStatusByTransactionEntity(transactionEntity);
+              } else if(eventData.getType() == EventData.EventType.AWAITING_PICKUP) {
+                switch (transactionEntity.getRole()) {
+                  case BORROWING_PICKUP -> borrowingLibraryService.updateStatusByTransactionEntity(transactionEntity);
+                  case PICKUP -> pickupLibraryService.updateStatusByTransactionEntity(transactionEntity);
+                  default -> throw new IllegalArgumentException("Other roles are not implemented yet");
+                }
+              }
+            })
         );
       }
     }
   }
-
 }

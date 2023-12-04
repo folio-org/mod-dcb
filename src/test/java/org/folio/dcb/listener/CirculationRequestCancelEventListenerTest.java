@@ -43,7 +43,7 @@ class CirculationRequestCancelEventListenerTest extends BaseIT {
     transactionEntity.setRole(LENDER);
     MessageHeaders messageHeaders = getMessageHeaders();
     when(transactionRepository.findTransactionByRequestIdAndStatusNotInClosed(any())).thenReturn(Optional.of(transactionEntity));
-    eventListener.handleRequestCancelEvent(REQUEST_CANCEL_EVENT_SAMPLE, messageHeaders);
+    eventListener.handleRequestEvent(REQUEST_CANCEL_EVENT_SAMPLE, messageHeaders);
     Mockito.verify(baseLibraryService, times(1)).cancelTransactionEntity(any());
   }
 
@@ -52,7 +52,7 @@ class CirculationRequestCancelEventListenerTest extends BaseIT {
     var transactionEntity = createTransactionEntity();
     transactionEntity.setRole(LENDER);
     MessageHeaders messageHeaders = getMessageHeaders();
-    assertDoesNotThrow(() -> eventListener.handleRequestCancelEvent(null, messageHeaders));
+    assertDoesNotThrow(() -> eventListener.handleRequestEvent(null, messageHeaders));
   }
 
   private MessageHeaders getMessageHeaders() {
