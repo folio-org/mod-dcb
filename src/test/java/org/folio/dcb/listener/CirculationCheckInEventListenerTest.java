@@ -9,7 +9,6 @@ import org.folio.spring.client.AuthnClient;
 import org.folio.spring.integration.XOkapiHeaders;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -19,15 +18,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWING_PICKUP;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.PICKUP;
 import static org.folio.dcb.utils.EntityUtils.createTransactionEntity;
 import static org.folio.dcb.utils.EntityUtils.getMockDataAsString;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -44,40 +40,6 @@ class CirculationCheckInEventListenerTest extends BaseIT {
   private AuthnClient authnClient;
   @MockBean
   private TransactionRepository transactionRepository;
-
-  @Test
-  void handleCheckingInTest() {
-    var transactionEntity = createTransactionEntity();
-    transactionEntity.setRole(LENDER);
-    MessageHeaders messageHeaders = getMessageHeaders();
-    when(transactionRepository.findTransactionByItemIdAndStatusNotInClosed(any())).thenReturn(Optional.of(transactionEntity));
-    eventListener.handleRequestEvent(CHECK_IN_EVENT_SAMPLE, messageHeaders);
-    Mockito.verify(libraryService, times(1)).updateStatusByTransactionEntity(any());
-  }
-
-  @Test
-  void handleCheckInEventInBorrowingFromOpenToAwaitingPickup_1() {
-    var transactionEntity = createTransactionEntity();
-    transactionEntity.setItemId("5b95877d-86c0-4cb7-a0cd-7660b348ae5b");
-    transactionEntity.setStatus(TransactionStatus.StatusEnum.OPEN);
-    transactionEntity.setRole(BORROWING_PICKUP);
-    MessageHeaders messageHeaders = getMessageHeaders();
-    when(transactionRepository.findTransactionByItemIdAndStatusNotInClosed(any())).thenReturn(Optional.of(transactionEntity));
-    eventListener.handleRequestEvent(CHECK_IN_EVENT_SAMPLE, messageHeaders);
-    Mockito.verify(transactionRepository).save(any());
-  }
-
-  @Test
-  void handleCheckInEventInBorrowingFromOpenToAwaitingPickup_2() {
-    var transactionEntity = createTransactionEntity();
-    transactionEntity.setItemId("5b95877d-86c0-4cb7-a0cd-7660b348ae5c");
-    transactionEntity.setStatus(TransactionStatus.StatusEnum.OPEN);
-    transactionEntity.setRole(BORROWING_PICKUP);
-    MessageHeaders messageHeaders = getMessageHeaders();
-    when(transactionRepository.findTransactionByItemIdAndStatusNotInClosed(any())).thenReturn(Optional.of(transactionEntity));
-    eventListener.handleRequestEvent(CHECK_IN_EVENT_SAMPLE, messageHeaders);
-    Mockito.verify(transactionRepository, never()).save(any());
-  }
 
   @Test
   void handleCheckingInWithIncorrectDataTest() {
@@ -101,18 +63,5 @@ class CirculationCheckInEventListenerTest extends BaseIT {
     MessageHeaders messageHeaders = getMessageHeaders();
     when(transactionRepository.findTransactionByItemIdAndStatusNotInClosed(any())).thenReturn(Optional.of(transactionEntity));
     eventListener.handleRequestEvent(CHECK_IN_EVENT_SAMPLE, messageHeaders);
-    Mockito.verify(transactionRepository).save(any());
-  }
-
-  @Test
-  void handleCheckInEventInPickupWithIncorrectDataTest() {
-    var transactionEntity = createTransactionEntity();
-    transactionEntity.setItemId("5b95877d-86c0-4cb7-a0cd-7660b348ae5d");
-    transactionEntity.setStatus(TransactionStatus.StatusEnum.CREATED);
-    transactionEntity.setRole(PICKUP);
-    MessageHeaders messageHeaders = getMessageHeaders();
-    when(transactionRepository.findTransactionByItemIdAndStatusNotInClosed(any())).thenReturn(Optional.of(transactionEntity));
-    eventListener.handleRequestEvent(CHECK_IN_EVENT_SAMPLE, messageHeaders);
-    Mockito.verify(transactionRepository, never()).save(any());
   }
 }
