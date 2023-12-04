@@ -63,6 +63,10 @@ public class CirculationEventListener {
                 } else if(eventData.getType() == EventData.EventType.CHECK_IN) {
                   if(transactionEntity.getRole() == LENDER) {
                     lendingLibraryService.updateStatusByTransactionEntity(transactionEntity);
+                  } else if(transactionEntity.getRole() == BORROWING_PICKUP) {
+                    borrowingLibraryService.updateStatusByTransactionEntity(transactionEntity);
+                  } else if(transactionEntity.getRole() == PICKUP) {
+                    pickupLibraryService.updateStatusByTransactionEntity(transactionEntity);
                   }
                 }
               })
