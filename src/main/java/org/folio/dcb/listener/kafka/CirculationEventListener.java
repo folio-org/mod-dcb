@@ -15,6 +15,9 @@ import org.springframework.stereotype.Component;
 import java.util.Objects;
 import java.util.UUID;
 
+import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWING_PICKUP;
+import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
+import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.PICKUP;
 import static org.folio.dcb.utils.TransactionHelper.getHeaderValue;
 import static org.folio.dcb.utils.TransactionHelper.parseLoanEvent;
 import static org.folio.dcb.utils.TransactionHelper.parseRequestEvent;
@@ -44,20 +47,26 @@ public class CirculationEventListener {
   public void handleCheckOutEvent(String data, MessageHeaders messageHeaders) {
     String tenantId = getHeaderValue(messageHeaders, XOkapiHeaders.TENANT, null).get(0);
     var eventData = parseLoanEvent(data);
-    if (Objects.nonNull(eventData) && eventData.getType() == EventData.EventType.CHECK_OUT) {
-      String checkOutItemId = eventData.getItemId();
-      if (Objects.nonNull(checkOutItemId)) {
-        log.info("updateTransactionStatus:: Received checkOut event for itemId: {}", checkOutItemId);
-        systemUserScopedExecutionService.executeAsyncSystemUserScoped(tenantId, () ->
-          transactionRepository.findTransactionByItemIdAndStatusNotInClosed(UUID.fromString(checkOutItemId))
-            .ifPresent(transactionEntity -> {
-              switch (transactionEntity.getRole()) {
-                case BORROWING_PICKUP -> borrowingLibraryService.updateStatusByTransactionEntity(transactionEntity);
-                case PICKUP -> pickupLibraryService.updateStatusByTransactionEntity(transactionEntity);
-                default -> throw new IllegalArgumentException("Other roles are not implemented yet");
-              }
-            })
-        );
+    if (Objects.nonNull(eventData)) {
+      String itemId = eventData.getItemId();
+      if (Objects.nonNull(itemId)) {
+          log.info("updateTransactionStatus:: Received checkOut event for itemId: {}", itemId);
+          systemUserScopedExecutionService.executeAsyncSystemUserScoped(tenantId, () ->
+            transactionRepository.findTransactionByItemIdAndStatusNotInClosed(UUID.fromString(itemId))
+              .ifPresent(transactionEntity -> {
+                if(eventData.getType() == EventData.EventType.CHECK_OUT) {
+                  if(transactionEntity.getRole() == BORROWING_PICKUP) {
+                    borrowingLibraryService.updateStatusByTransactionEntity(transactionEntity);
+                  } else if(transactionEntity.getRole() == PICKUP) {
+                    pickupLibraryService.updateStatusByTransactionEntity(transactionEntity);
+                  }
+                } else if(eventData.getType() == EventData.EventType.CHECK_IN) {
+                  if(transactionEntity.getRole() == LENDER) {
+                    lendingLibraryService.updateStatusByTransactionEntity(transactionEntity);
+                  }
+                }
+              })
+          );
       }
     }
   }
@@ -69,7 +78,7 @@ public class CirculationEventListener {
   public void handleRequestEvent(String data, MessageHeaders messageHeaders) {
     String tenantId = getHeaderValue(messageHeaders, XOkapiHeaders.TENANT, null).get(0);
     var eventData = parseRequestEvent(data);
-    if (Objects.nonNull(eventData) && eventData.getType() == EventData.EventType.CANCEL) {
+    if (Objects.nonNull(eventData)) {
       String requestId = eventData.getRequestId();
       if (Objects.nonNull(requestId)) {
         log.info("updateTransactionStatus:: Received cancel event for requestId: {}", requestId);
@@ -81,10 +90,10 @@ public class CirculationEventListener {
               } else if(eventData.getType() == EventData.EventType.IN_TRANSIT){
                 lendingLibraryService.updateStatusByTransactionEntity(transactionEntity);
               } else if(eventData.getType() == EventData.EventType.AWAITING_PICKUP) {
-                switch (transactionEntity.getRole()) {
-                  case BORROWING_PICKUP -> borrowingLibraryService.updateStatusByTransactionEntity(transactionEntity);
-                  case PICKUP -> pickupLibraryService.updateStatusByTransactionEntity(transactionEntity);
-                  default -> throw new IllegalArgumentException("Other roles are not implemented yet");
+                if(transactionEntity.getRole() == BORROWING_PICKUP) {
+                  borrowingLibraryService.updateStatusByTransactionEntity(transactionEntity);
+                } else if (transactionEntity.getRole() == PICKUP) {
+                  pickupLibraryService.updateStatusByTransactionEntity(transactionEntity);
                 }
               }
             })

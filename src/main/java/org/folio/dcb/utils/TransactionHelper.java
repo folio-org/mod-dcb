@@ -11,7 +11,7 @@ import java.util.List;
 @Log4j2
 public class TransactionHelper {
   private static final String LOAN_ACTION_CHECKED_OUT = "checkedout";
-  private static final String LOAN_ACTION_CHECKED_IN = "checkedout";
+  private static final String LOAN_ACTION_CHECKED_IN = "checkedin";
   private TransactionHelper(){}
 
   public static List<String> getHeaderValue(MessageHeaders headers, String headerName, String defaultValue) {
@@ -24,8 +24,7 @@ public class TransactionHelper {
 
   public static EventData parseLoanEvent(String eventPayload) {
       KafkaEvent kafkaEvent = new KafkaEvent(eventPayload);
-      if (kafkaEvent.hasNewNode() && kafkaEvent.getNewNode().has("itemId")
-        && kafkaEvent.getEventType() == KafkaEvent.EventType.CREATED) {
+      if (kafkaEvent.hasNewNode() && kafkaEvent.getNewNode().has("itemId")) {
         EventData eventData = new EventData();
         eventData.setItemId(kafkaEvent.getNewNode().get("itemId").asText());
         if (kafkaEvent.getNewNode().has("action")) {
@@ -48,9 +47,9 @@ public class TransactionHelper {
         eventData.setRequestId(kafkaEvent.getNewNode().get("id").asText());
         RequestStatus requestStatus = RequestStatus.from(kafkaEvent.getNewNode().get("status").asText());
         switch (requestStatus) {
-          case OPEN_IN_TRANSIT: eventData.setType(EventData.EventType.IN_TRANSIT);
-          case OPEN_AWAITING_PICKUP: eventData.setType(EventData.EventType.AWAITING_PICKUP);
-          case CLOSED_CANCELLED: eventData.setType(EventData.EventType.CANCEL);
+          case OPEN_IN_TRANSIT -> eventData.setType(EventData.EventType.IN_TRANSIT);
+          case OPEN_AWAITING_PICKUP -> eventData.setType(EventData.EventType.AWAITING_PICKUP);
+          case CLOSED_CANCELLED -> eventData.setType(EventData.EventType.CANCEL);
         }
         return eventData;
       }
