@@ -13,6 +13,8 @@ public class KafkaEvent {
   private JsonNode newNode;
   private JsonNode oldNode;
   private static final ObjectMapper objectMapper = new ObjectMapper();
+  public static final String ACTION = "action";
+  public static final String STATUS = "status";
 
   public KafkaEvent(String eventPayload) {
     try {

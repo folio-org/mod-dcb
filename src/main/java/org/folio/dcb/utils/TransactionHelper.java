@@ -8,6 +8,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 
+import static org.folio.dcb.utils.KafkaEvent.ACTION;
+import static org.folio.dcb.utils.KafkaEvent.STATUS;
+
 @Log4j2
 public class TransactionHelper {
   private static final String LOAN_ACTION_CHECKED_OUT = "checkedout";
@@ -27,10 +30,10 @@ public class TransactionHelper {
       if (kafkaEvent.hasNewNode() && kafkaEvent.getNewNode().has("itemId")) {
         EventData eventData = new EventData();
         eventData.setItemId(kafkaEvent.getNewNode().get("itemId").asText());
-        if (kafkaEvent.getNewNode().has("action")) {
-          if(LOAN_ACTION_CHECKED_OUT.equals(kafkaEvent.getNewNode().get("action").asText())){
+        if (kafkaEvent.getNewNode().has(ACTION)) {
+          if(LOAN_ACTION_CHECKED_OUT.equals(kafkaEvent.getNewNode().get(ACTION).asText())){
             eventData.setType(EventData.EventType.CHECK_OUT);
-          } else if(LOAN_ACTION_CHECKED_IN.equals(kafkaEvent.getNewNode().get("action").asText())) {
+          } else if(LOAN_ACTION_CHECKED_IN.equals(kafkaEvent.getNewNode().get(ACTION).asText())) {
             eventData.setType(EventData.EventType.CHECK_IN);
           }
         }
@@ -42,10 +45,10 @@ public class TransactionHelper {
   public static EventData parseRequestEvent(String eventPayload){
       KafkaEvent kafkaEvent = new KafkaEvent(eventPayload);
       if(kafkaEvent.getEventType() == KafkaEvent.EventType.UPDATED && kafkaEvent.hasNewNode()
-        && kafkaEvent.getNewNode().has("status")){
+        && kafkaEvent.getNewNode().has(STATUS)){
         EventData eventData = new EventData();
         eventData.setRequestId(kafkaEvent.getNewNode().get("id").asText());
-        RequestStatus requestStatus = RequestStatus.from(kafkaEvent.getNewNode().get("status").asText());
+        RequestStatus requestStatus = RequestStatus.from(kafkaEvent.getNewNode().get(STATUS).asText());
         switch (requestStatus) {
           case OPEN_IN_TRANSIT -> eventData.setType(EventData.EventType.IN_TRANSIT);
           case OPEN_AWAITING_PICKUP -> eventData.setType(EventData.EventType.AWAITING_PICKUP);
