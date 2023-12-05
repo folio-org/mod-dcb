@@ -3,6 +3,7 @@ package org.folio.dcb.utils;
 import lombok.SneakyThrows;
 import org.folio.dcb.DcbApplication;
 import org.folio.dcb.client.feign.HoldingsStorageClient;
+import org.folio.dcb.domain.dto.CirculationItemRequest;
 import org.folio.dcb.domain.dto.CirculationRequest;
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.DcbItem;
@@ -49,6 +50,8 @@ public class EntityUtils {
   public static String PICKUP_SERVICE_POINT_ID = "0da8c1e4-1c1f-4dd9-b189-70ba978b7d94";
   public static String DCB_TRANSACTION_ID = "571b0a2c-8883-40b5-a449-d41fe6017082";
   public static String CIRCULATION_REQUEST_ID = "571b0a2c-8883-40b5-a449-d41fe6017083";
+
+  public static String CIRCULATION_ITEM_REQUEST_ID = "571b0a2c-8883-40b5-a449-d41fe6017183";
   public static String DCB_USER_TYPE = "dcb";
   public static String DCB_TYPE_USER_ID = "910c512c-ebc5-40c6-96a5-a20bfd81e154";
   public static String EXISTED_INVENTORY_ITEM_BARCODE = "INVENTORY_ITEM";
@@ -96,6 +99,12 @@ public class EntityUtils {
   public static CirculationRequest createCirculationRequest() {
     return CirculationRequest.builder()
       .id(CIRCULATION_REQUEST_ID)
+      .build();
+  }
+
+  public static CirculationItemRequest createCirculationItemRequest() {
+    return CirculationItemRequest.builder()
+      .id(CIRCULATION_ITEM_REQUEST_ID)
       .build();
   }
 
