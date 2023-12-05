@@ -44,7 +44,7 @@ public class CirculationEventListener {
     id = CHECK_OUT_LOAN_LISTENER_ID,
     topicPattern = "#{folioKafkaProperties.listener['loan'].topicPattern}",
     concurrency = "#{folioKafkaProperties.listener['loan'].concurrency}")
-  public void handleCheckOutEvent(String data, MessageHeaders messageHeaders) {
+  public void handleLoanEvent(String data, MessageHeaders messageHeaders) {
     String tenantId = getHeaderValue(messageHeaders, XOkapiHeaders.TENANT, null).get(0);
     var eventData = parseLoanEvent(data);
     if (Objects.nonNull(eventData)) {

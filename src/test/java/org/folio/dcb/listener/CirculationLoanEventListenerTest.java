@@ -20,6 +20,8 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWING_PICKUP;
+import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
+import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.PICKUP;
 import static org.folio.dcb.utils.EntityUtils.createTransactionEntity;
 import static org.folio.dcb.utils.EntityUtils.getMockDataAsString;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -27,9 +29,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
-class CirculationCheckOutEventListenerTest extends BaseIT {
+class CirculationLoanEventListenerTest extends BaseIT {
 
   private static final String CHECK_OUT_EVENT_SAMPLE = getMockDataAsString("mockdata/kafka/check_out.json");
+  private static final String CHECK_IN_EVENT_SAMPLE = getMockDataAsString("mockdata/kafka/loan_check_in.json");
 
   @Mock
   private BorrowingPickupLibraryServiceImpl libraryService;
@@ -48,7 +51,7 @@ class CirculationCheckOutEventListenerTest extends BaseIT {
     transactionEntity.setItemId("8db107f5-12aa-479f-9c07-39e7c9cf2e4d");
     MessageHeaders messageHeaders = getMessageHeaders();
     when(transactionRepository.findTransactionByItemIdAndStatusNotInClosed(any())).thenReturn(Optional.of(transactionEntity));
-    eventListener.handleCheckOutEvent(CHECK_OUT_EVENT_SAMPLE, messageHeaders);
+    eventListener.handleLoanEvent(CHECK_OUT_EVENT_SAMPLE, messageHeaders);
     Mockito.verify(transactionRepository).save(any());
   }
 
@@ -60,7 +63,31 @@ class CirculationCheckOutEventListenerTest extends BaseIT {
     transactionEntity.setRole(BORROWING_PICKUP);
     MessageHeaders messageHeaders = getMessageHeaders();
     when(transactionRepository.findTransactionByItemIdAndStatusNotInClosed(any())).thenReturn(Optional.of(transactionEntity));
-    eventListener.handleCheckOutEvent(CHECK_OUT_EVENT_SAMPLE, messageHeaders);
+    eventListener.handleLoanEvent(CHECK_OUT_EVENT_SAMPLE, messageHeaders);
+    Mockito.verify(transactionRepository).save(any());
+  }
+
+  @Test
+  void handleCheckInEventInPickupFromItemCheckedOutToCheckedIn() {
+    var transactionEntity = createTransactionEntity();
+    transactionEntity.setItemId("8db107f5-12aa-479f-9c07-39e7c9cf2e4d");
+    transactionEntity.setStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_OUT);
+    transactionEntity.setRole(PICKUP);
+    MessageHeaders messageHeaders = getMessageHeaders();
+    when(transactionRepository.findTransactionByItemIdAndStatusNotInClosed(any())).thenReturn(Optional.of(transactionEntity));
+    eventListener.handleLoanEvent(CHECK_IN_EVENT_SAMPLE, messageHeaders);
+    Mockito.verify(transactionRepository).save(any());
+  }
+
+  @Test
+  void handleCheckInEventInLenderFromItemCheckedInToClosedIn() {
+    var transactionEntity = createTransactionEntity();
+    transactionEntity.setItemId("8db107f5-12aa-479f-9c07-39e7c9cf2e4d");
+    transactionEntity.setStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_IN);
+    transactionEntity.setRole(LENDER);
+    MessageHeaders messageHeaders = getMessageHeaders();
+    when(transactionRepository.findTransactionByItemIdAndStatusNotInClosed(any())).thenReturn(Optional.of(transactionEntity));
+    eventListener.handleLoanEvent(CHECK_IN_EVENT_SAMPLE, messageHeaders);
     Mockito.verify(transactionRepository).save(any());
   }
 
@@ -69,7 +96,7 @@ class CirculationCheckOutEventListenerTest extends BaseIT {
     var transactionEntity = createTransactionEntity();
     transactionEntity.setRole(BORROWING_PICKUP);
     MessageHeaders messageHeaders = getMessageHeaders();
-    assertDoesNotThrow(() -> eventListener.handleCheckOutEvent(null, messageHeaders));
+    assertDoesNotThrow(() -> eventListener.handleLoanEvent(null, messageHeaders));
   }
 
   private MessageHeaders getMessageHeaders() {
