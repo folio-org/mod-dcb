@@ -35,7 +35,7 @@ class TransactionAuditServiceTest {
   void logTheErrorForExistedTransactionAuditTest() {
     when(transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(any()))
       .thenReturn(Optional.of(createTransactionAuditEntity()));
-    transactionAuditService.logTheErrorForExistedTransactionAudit(DCB_TRANSACTION_ID, "error_message");
+    transactionAuditService.logErrorIfTransactionAuditExists(DCB_TRANSACTION_ID, "error_message");
     Mockito.verify(transactionMapper, times(0)).mapToEntity(any(), any());
     Mockito.verify(transactionAuditRepository, times(1)).save(any());
   }
@@ -44,7 +44,7 @@ class TransactionAuditServiceTest {
     when(transactionMapper.mapToEntity(any(), any())).thenReturn(createTransactionEntity());
     when(transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(any()))
       .thenReturn(Optional.empty());
-    transactionAuditService.logTheErrorForNotExistedTransactionAudit(DCB_TRANSACTION_ID, createDcbTransactionByRole(LENDER), "error_message");
+    transactionAuditService.logErrorIfTransactionAuditNotExists(DCB_TRANSACTION_ID, createDcbTransactionByRole(LENDER), "error_message");
     Mockito.verify(transactionMapper, times(1)).mapToEntity(any(), any());
     Mockito.verify(transactionAuditRepository, times(1)).save(any());
   }

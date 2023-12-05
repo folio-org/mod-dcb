@@ -4,7 +4,7 @@ import org.folio.dcb.domain.dto.DcbTransaction;
 
 public interface TransactionAuditService {
 
-    void logTheErrorForExistedTransactionAudit(String dcbTransactionId, String errorMsg);
-    void logTheErrorForNotExistedTransactionAudit(String dcbTransactionId, DcbTransaction dcbTransaction, String errorMsg);
+    void logErrorIfTransactionAuditExists(String dcbTransactionId, String errorMsg);
+    void logErrorIfTransactionAuditNotExists(String dcbTransactionId, DcbTransaction dcbTransaction, String errorMsg);
 
 }

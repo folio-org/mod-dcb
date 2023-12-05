@@ -17,33 +17,43 @@ import java.util.UUID;
 @Log4j2
 public class TransactionAuditServiceImpl implements TransactionAuditService {
   private static final String ERROR_ACTION = "ERROR";
+  private static final String DUPLICATE_ERROR_ACTION = "DUPLICATE_ERROR";
+  private static final String DUPLICATE_ERROR_TRANSACTION_ID = "-1";
 
   private final TransactionMapper transactionMapper;
   private final TransactionAuditRepository transactionAuditRepository;
   @Override
-  public void logTheErrorForExistedTransactionAudit(String dcbTransactionId, String errorMsg) {
+  public void logErrorIfTransactionAuditExists(String dcbTransactionId, String errorMsg) {
     log.debug("logTheErrorForExistedTransactionAudit:: dcbTransactionId = {}, err = {}", dcbTransactionId, errorMsg);
-
-    this.logTheErrorForNotExistedTransactionAudit(dcbTransactionId, null, errorMsg);
-  }
-
-  @Override
-  public void logTheErrorForNotExistedTransactionAudit(String dcbTransactionId, DcbTransaction dcbTransaction, String errorMsg) {
     TransactionAuditEntity transactionAuditEntityExisted = transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(dcbTransactionId).orElse(null);
-
-    if(transactionAuditEntityExisted == null && dcbTransaction != null){
-      log.debug("logTheErrorForNotExistedTransactionAudit:: dcbTransactionId = {}, dcbTransaction = {}, err = {}", dcbTransactionId, dcbTransaction, errorMsg);
-
-      TransactionEntity transactionEntity = transactionMapper.mapToEntity(dcbTransactionId, dcbTransaction);
-      TransactionAuditEntity trnAEntError = generateTrnAuditEntityByTrnEntityWithError(dcbTransactionId, transactionEntity, errorMsg);
-
-      transactionAuditRepository.save(trnAEntError);
-    }
 
     if(transactionAuditEntityExisted != null){
       TransactionAuditEntity trnAEntError = generateTrnAuditEntityFromTheFoundOneWithError(transactionAuditEntityExisted, errorMsg);
       transactionAuditRepository.save(trnAEntError);
     }
+  }
+
+  /**
+   * For the case the error happens during DCB transaction creation.
+   * At this time there is no transaction_audit data existed, which refers to current DCB transaction.
+   * So the transaction_audit log is created with empty "before" and "after" states and the DCB transaction content is merged with the error message.
+   * The exceptional case is the attempt of the DCB transaction duplication by the id (it means the TransactionEntity with such an id already exists).
+   * It triggers DUPLICATE_ERROR, which is logged with the particular transaction_audit (DUPLICATE_ERROR_ACTION)
+   * and refers to not existed DCB transaction (transaction_audit.transaction_id = -1)
+   * */
+  @Override
+  public void logErrorIfTransactionAuditNotExists(String dcbTransactionId, DcbTransaction dcbTransaction, String errorMsg) {
+    TransactionAuditEntity transactionAuditEntityExisted = transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(dcbTransactionId).orElse(null);
+    TransactionEntity transactionEntity = transactionMapper.mapToEntity(dcbTransactionId, dcbTransaction);
+    TransactionAuditEntity trnAEntError = generateTrnAuditEntityByTrnEntityWithError(dcbTransactionId, transactionEntity, errorMsg);
+
+    if(transactionAuditEntityExisted != null){
+      log.debug("logTheErrorForNotExistedTransactionAudit:: dcbTransactionId = {}, dcbTransaction = {}, err = {}", dcbTransactionId, dcbTransaction, errorMsg);
+      trnAEntError.setTransactionId(DUPLICATE_ERROR_TRANSACTION_ID);
+      trnAEntError.setAction(DUPLICATE_ERROR_ACTION);
+    }
+
+    transactionAuditRepository.save(trnAEntError);
   }
 
   private TransactionAuditEntity generateTrnAuditEntityFromTheFoundOneWithError(TransactionAuditEntity existed, String errorMsg) {

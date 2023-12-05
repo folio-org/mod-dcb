@@ -26,7 +26,7 @@ public class TransactionApiController implements TransactionsApi {
     try {
       transactionStatusResponse = transactionsService.getTransactionStatusById(dcbTransactionId);
     } catch (Exception ex) {
-      transactionAuditService.logTheErrorForExistedTransactionAudit(dcbTransactionId, ex.getMessage());
+      transactionAuditService.logErrorIfTransactionAuditExists(dcbTransactionId, ex.getMessage());
       throw ex;
     }
 
@@ -41,7 +41,7 @@ public class TransactionApiController implements TransactionsApi {
     try {
       transactionStatusResponse = transactionsService.createCirculationRequest(dcbTransactionId, dcbTransaction);
     } catch (Exception ex) {
-      transactionAuditService.logTheErrorForNotExistedTransactionAudit(dcbTransactionId, dcbTransaction, ex.getMessage());
+      transactionAuditService.logErrorIfTransactionAuditNotExists(dcbTransactionId, dcbTransaction, ex.getMessage());
       throw ex;
     }
 
@@ -56,7 +56,7 @@ public class TransactionApiController implements TransactionsApi {
     try {
       transactionStatusResponse = transactionsService.updateTransactionStatus(dcbTransactionId, transactionStatus);
     } catch (Exception ex) {
-      transactionAuditService.logTheErrorForExistedTransactionAudit(dcbTransactionId, ex.getMessage());
+      transactionAuditService.logErrorIfTransactionAuditExists(dcbTransactionId, ex.getMessage());
       throw ex;
     }
 
