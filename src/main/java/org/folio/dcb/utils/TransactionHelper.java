@@ -50,6 +50,7 @@ public class TransactionHelper {
           case OPEN_IN_TRANSIT -> eventData.setType(EventData.EventType.IN_TRANSIT);
           case OPEN_AWAITING_PICKUP -> eventData.setType(EventData.EventType.AWAITING_PICKUP);
           case CLOSED_CANCELLED -> eventData.setType(EventData.EventType.CANCEL);
+          default -> log.info("parseRequestEvent:: Request status {} is not supported", requestStatus);
         }
         return eventData;
       }
