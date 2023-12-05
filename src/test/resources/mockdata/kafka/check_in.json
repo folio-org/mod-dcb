@@ -1,18 +1,19 @@
 {
   "id": "091a277f-db39-4f3d-bed8-a43e145bb1c6",
-  "type": "CREATED",
+  "type": "UPDATED",
   "tenant": "diku",
   "timestamp": 1695390940007,
   "data": {
     "new": {
-      "id": "d03028bb-0116-4fbf-acd2-16397365b650",
-      "occurredDateTime": "2023-09-22T13:55:39.868+00:00",
-      "itemId": "1714f71f-b845-444b-a79e-a577487a6f7d",
-      "itemStatusPriorToCheckIn": "In transit",
-      "requestQueueSize": 1,
-      "itemLocationId": "fcd64ce1-6995-48f0-840e-89ffa2288371",
-      "servicePointId": "7c5abc9f-f3d7-4856-b8d7-6712462ca007",
-      "performedByUserId": "f4898e8c-ef61-5c0d-83a7-f5232c60e263"
+      "id": "8f77e07f-217f-4dec-bb95-cee23575d712",
+      "requestLevel": "Item",
+      "requestType": "Hold",
+      "requestDate": "2023-11-27T10:47:18.976+00:00",
+      "requesterId": "5d2625ef-81eb-4e61-a8a9-87c94ba3764e",
+      "instanceId": "9d1b77e4-f02e-4b7f-b296-3f2042ddac54",
+      "holdingsRecordId": "10cd3a5a-d36f-4c7a-bc4f-e1ae3cf820c9",
+      "itemId": "5d2625ef-81eb-4e61-a8a9-87c94ba3764e",
+      "status": "Open - Awaiting pickup"
     }
   }
 }
