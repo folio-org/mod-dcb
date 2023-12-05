@@ -91,7 +91,7 @@ public class CirculationEventListener {
             .ifPresent(transactionEntity -> {
               if(eventData.getType() == EventData.EventType.CANCEL) {
                 baseLibraryService.cancelTransactionEntity(transactionEntity);
-              } else if(eventData.getType() == EventData.EventType.IN_TRANSIT){
+              } else if(eventData.getType() == EventData.EventType.IN_TRANSIT && transactionEntity.getRole() == LENDER) {
                 lendingLibraryService.updateStatusByTransactionEntity(transactionEntity);
               } else if(eventData.getType() == EventData.EventType.AWAITING_PICKUP) {
                 if(transactionEntity.getRole() == BORROWING_PICKUP) {
