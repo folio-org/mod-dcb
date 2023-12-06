@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWER;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWING_PICKUP;
@@ -79,15 +78,15 @@ class TransactionApiControllerTest extends BaseIT {
         jsonPath("$.errors[0].code", is("DUPLICATE_ERROR")));
 
     // check for DUPLICATE_ERROR propagated into transactions_audit.
-
-    AtomicReference<TransactionAuditEntity> atomicReferenceOfTransactionAuditEntityExisted = new AtomicReference<>();
-    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> atomicReferenceOfTransactionAuditEntityExisted.set(transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(DCB_TRANSACTION_ID)
-      .orElse(null)));
-
-    TransactionAuditEntity transactionAuditEntity = atomicReferenceOfTransactionAuditEntityExisted.get();
-    Assertions.assertNotNull(transactionAuditEntity);
-    Assertions.assertNotEquals(TRANSACTION_AUDIT_DUPLICATE_ERROR_ACTION, transactionAuditEntity.getAction());
-    Assertions.assertNotEquals(DUPLICATE_ERROR_TRANSACTION_ID, transactionAuditEntity.getTransactionId());
+    systemUserScopedExecutionService.executeAsyncSystemUserScoped(
+      TENANT,
+      () -> {
+        TransactionAuditEntity transactionAuditEntity = transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(DCB_TRANSACTION_ID)
+          .orElse(null);
+        Assertions.assertNotNull(transactionAuditEntity);
+        Assertions.assertNotEquals(TRANSACTION_AUDIT_DUPLICATE_ERROR_ACTION, transactionAuditEntity.getAction());
+        Assertions.assertNotEquals(DUPLICATE_ERROR_TRANSACTION_ID, transactionAuditEntity.getTransactionId());      }
+    );
   }
 
   @Test
@@ -119,15 +118,15 @@ class TransactionApiControllerTest extends BaseIT {
         jsonPath("$.errors[0].code", is("DUPLICATE_ERROR")));
 
     // check for DUPLICATE_ERROR propagated into transactions_audit.
-
-    AtomicReference<TransactionAuditEntity> atomicReferenceOfTransactionAuditEntityExisted = new AtomicReference<>();
-    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> atomicReferenceOfTransactionAuditEntityExisted.set(transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(DCB_TRANSACTION_ID)
-      .orElse(null)));
-
-    TransactionAuditEntity transactionAuditEntity = atomicReferenceOfTransactionAuditEntityExisted.get();
-    Assertions.assertNotNull(transactionAuditEntity);
-    Assertions.assertNotEquals(TRANSACTION_AUDIT_DUPLICATE_ERROR_ACTION, transactionAuditEntity.getAction());
-    Assertions.assertNotEquals(DUPLICATE_ERROR_TRANSACTION_ID, transactionAuditEntity.getTransactionId());
+    systemUserScopedExecutionService.executeAsyncSystemUserScoped(
+      TENANT,
+      () -> {
+        TransactionAuditEntity transactionAuditEntity = transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(DCB_TRANSACTION_ID)
+          .orElse(null);
+        Assertions.assertNotNull(transactionAuditEntity);
+        Assertions.assertNotEquals(TRANSACTION_AUDIT_DUPLICATE_ERROR_ACTION, transactionAuditEntity.getAction());
+        Assertions.assertNotEquals(DUPLICATE_ERROR_TRANSACTION_ID, transactionAuditEntity.getTransactionId());      }
+    );
   }
 
   @Test
@@ -147,13 +146,14 @@ class TransactionApiControllerTest extends BaseIT {
         jsonPath("$.errors[0].code", is("NOT_FOUND_ERROR")));
 
     // check for transactions_audit error content.
-    AtomicReference<TransactionAuditEntity> atomicReferenceOfTransactionAuditEntityExisted = new AtomicReference<>();
-    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> atomicReferenceOfTransactionAuditEntityExisted.set(transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(trnId)
-      .orElse(null)));
-
-    TransactionAuditEntity transactionAuditEntity = atomicReferenceOfTransactionAuditEntityExisted.get();
-    Assertions.assertNotNull(transactionAuditEntity);
-    Assertions.assertEquals(TRANSACTION_AUDIT_ERROR_ACTION, transactionAuditEntity.getAction());
+    systemUserScopedExecutionService.executeAsyncSystemUserScoped(
+      TENANT,
+      () -> {
+        TransactionAuditEntity transactionAuditEntity = transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(trnId)
+          .orElse(null);
+        Assertions.assertNotNull(transactionAuditEntity);
+        Assertions.assertEquals(TRANSACTION_AUDIT_ERROR_ACTION, transactionAuditEntity.getAction());  }
+    );
   }
 
   @Test
@@ -172,13 +172,14 @@ class TransactionApiControllerTest extends BaseIT {
         jsonPath("$.errors[0].code", is("NOT_FOUND_ERROR")));
 
     // check for transactions_audit error content.
-    AtomicReference<TransactionAuditEntity> atomicReferenceOfTransactionAuditEntityExisted = new AtomicReference<>();
-    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> atomicReferenceOfTransactionAuditEntityExisted.set(transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(trnId)
-      .orElse(null)));
-
-    TransactionAuditEntity transactionAuditEntity = atomicReferenceOfTransactionAuditEntityExisted.get();
-    Assertions.assertNotNull(transactionAuditEntity);
-    Assertions.assertEquals(TRANSACTION_AUDIT_ERROR_ACTION, transactionAuditEntity.getAction());
+    systemUserScopedExecutionService.executeAsyncSystemUserScoped(
+      TENANT,
+      () -> {
+        TransactionAuditEntity transactionAuditEntity = transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(trnId)
+          .orElse(null);
+        Assertions.assertNotNull(transactionAuditEntity);
+        Assertions.assertEquals(TRANSACTION_AUDIT_ERROR_ACTION, transactionAuditEntity.getAction());  }
+    );
   }
 
     /**
@@ -356,14 +357,15 @@ class TransactionApiControllerTest extends BaseIT {
         jsonPath("$.errors[0].code", is("DUPLICATE_ERROR")));
 
     // check for DUPLICATE_ERROR propagated into transactions_audit.
-    AtomicReference<TransactionAuditEntity> atomicReferenceOfTransactionAuditEntityExisted = new AtomicReference<>();
-    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> atomicReferenceOfTransactionAuditEntityExisted.set(transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(DCB_TRANSACTION_ID)
-      .orElse(null)));
-
-    TransactionAuditEntity transactionAuditEntity = atomicReferenceOfTransactionAuditEntityExisted.get();
-    Assertions.assertNotNull(transactionAuditEntity);
-    Assertions.assertNotEquals(TRANSACTION_AUDIT_DUPLICATE_ERROR_ACTION, transactionAuditEntity.getAction());
-    Assertions.assertNotEquals(DUPLICATE_ERROR_TRANSACTION_ID, transactionAuditEntity.getTransactionId());
+    systemUserScopedExecutionService.executeAsyncSystemUserScoped(
+      TENANT,
+      () -> {
+        TransactionAuditEntity transactionAuditEntity = transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(DCB_TRANSACTION_ID)
+          .orElse(null);
+        Assertions.assertNotNull(transactionAuditEntity);
+        Assertions.assertNotEquals(TRANSACTION_AUDIT_DUPLICATE_ERROR_ACTION, transactionAuditEntity.getAction());
+        Assertions.assertNotEquals(DUPLICATE_ERROR_TRANSACTION_ID, transactionAuditEntity.getTransactionId());      }
+    );
   }
 
   @Test
@@ -412,14 +414,15 @@ class TransactionApiControllerTest extends BaseIT {
         jsonPath("$.errors[0].code", is("DUPLICATE_ERROR")));
 
     // check for DUPLICATE_ERROR propagated into transactions_audit.
-    AtomicReference<TransactionAuditEntity> atomicReferenceOfTransactionAuditEntityExisted = new AtomicReference<>();
-    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> atomicReferenceOfTransactionAuditEntityExisted.set(transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(DCB_TRANSACTION_ID)
-      .orElse(null)));
-
-    TransactionAuditEntity transactionAuditEntity = atomicReferenceOfTransactionAuditEntityExisted.get();
-    Assertions.assertNotNull(transactionAuditEntity);
-    Assertions.assertNotEquals(TRANSACTION_AUDIT_DUPLICATE_ERROR_ACTION, transactionAuditEntity.getAction());
-    Assertions.assertNotEquals(DUPLICATE_ERROR_TRANSACTION_ID, transactionAuditEntity.getTransactionId());
+    systemUserScopedExecutionService.executeAsyncSystemUserScoped(
+      TENANT,
+      () -> {
+        TransactionAuditEntity transactionAuditEntity = transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(DCB_TRANSACTION_ID)
+          .orElse(null);
+        Assertions.assertNotNull(transactionAuditEntity);
+        Assertions.assertNotEquals(TRANSACTION_AUDIT_DUPLICATE_ERROR_ACTION, transactionAuditEntity.getAction());
+        Assertions.assertNotEquals(DUPLICATE_ERROR_TRANSACTION_ID, transactionAuditEntity.getTransactionId());      }
+    );
   }
 
   @Test
