@@ -40,14 +40,12 @@ public class TransactionEntity extends AuditableEntity {
   private String servicePointId;
   private String servicePointName;
   private String materialType;
-  private String pickupLibraryName;
   private String pickupLibraryCode;
   private String lendingLibraryCode;
   @Convert(converter = UUIDConverter.class)
   private String patronId;
   private String patronGroup;
   private String patronBarcode;
-  private String borrowingLibraryCode;
   private UUID requestId;
   @Enumerated(EnumType.STRING)
   private StatusEnum status;

@@ -49,7 +49,7 @@
         <constraints nullable="false"/>
       </column>
       <column name="item_title" type="text">
-        <constraints nullable="false"/>
+        <constraints nullable="true"/>
       </column>
       <column name="item_barcode" type="text">
         <constraints nullable="false"/>
@@ -58,30 +58,24 @@
         <constraints nullable="false"/>
       </column>
       <column name="service_point_name" type="text">
-        <constraints nullable="false"/>
-      </column>
-      <column name="pickup_library_name" type="text">
-        <constraints nullable="false"/>
+        <constraints nullable="true"/>
       </column>
       <column name="pickup_library_code" type="text">
-        <constraints nullable="false"/>
+        <constraints nullable="true"/>
       </column>
       <column name="material_type" type="text">
-        <constraints nullable="false"/>
+        <constraints nullable="true"/>
       </column>
       <column name="lending_library_code" type="text">
-        <constraints nullable="false"/>
+        <constraints nullable="true"/>
       </column>
       <column name="patron_id" type="UUID">
         <constraints nullable="false"/>
       </column>
       <column name="patron_group" type="text">
-        <constraints nullable="false"/>
+        <constraints nullable="true"/>
       </column>
       <column name="patron_barcode" type="text">
-        <constraints nullable="false"/>
-      </column>
-      <column name="borrowing_library_code" type="text">
         <constraints nullable="false"/>
       </column>
       <column name="status" type="StatusEnum"/>
