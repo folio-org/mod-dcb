@@ -81,11 +81,11 @@ class TransactionApiControllerTest extends BaseIT {
     systemUserScopedExecutionService.executeAsyncSystemUserScoped(
       TENANT,
       () -> {
-        TransactionAuditEntity transactionAuditEntity = transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(DCB_TRANSACTION_ID)
+        TransactionAuditEntity auditExisting = transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(DCB_TRANSACTION_ID)
           .orElse(null);
-        Assertions.assertNotNull(transactionAuditEntity);
-        Assertions.assertNotEquals(TRANSACTION_AUDIT_DUPLICATE_ERROR_ACTION, transactionAuditEntity.getAction());
-        Assertions.assertNotEquals(DUPLICATE_ERROR_TRANSACTION_ID, transactionAuditEntity.getTransactionId());      }
+        Assertions.assertNotNull(auditExisting);
+        Assertions.assertNotEquals(TRANSACTION_AUDIT_DUPLICATE_ERROR_ACTION, auditExisting.getAction());
+        Assertions.assertNotEquals(DUPLICATE_ERROR_TRANSACTION_ID, auditExisting.getTransactionId());      }
     );
   }
 
@@ -121,11 +121,11 @@ class TransactionApiControllerTest extends BaseIT {
     systemUserScopedExecutionService.executeAsyncSystemUserScoped(
       TENANT,
       () -> {
-        TransactionAuditEntity transactionAuditEntity = transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(DCB_TRANSACTION_ID)
+        TransactionAuditEntity auditExisting = transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(DCB_TRANSACTION_ID)
           .orElse(null);
-        Assertions.assertNotNull(transactionAuditEntity);
-        Assertions.assertNotEquals(TRANSACTION_AUDIT_DUPLICATE_ERROR_ACTION, transactionAuditEntity.getAction());
-        Assertions.assertNotEquals(DUPLICATE_ERROR_TRANSACTION_ID, transactionAuditEntity.getTransactionId());      }
+        Assertions.assertNotNull(auditExisting);
+        Assertions.assertNotEquals(TRANSACTION_AUDIT_DUPLICATE_ERROR_ACTION, auditExisting.getAction());
+        Assertions.assertNotEquals(DUPLICATE_ERROR_TRANSACTION_ID, auditExisting.getTransactionId());      }
     );
   }
 
@@ -149,10 +149,10 @@ class TransactionApiControllerTest extends BaseIT {
     systemUserScopedExecutionService.executeAsyncSystemUserScoped(
       TENANT,
       () -> {
-        TransactionAuditEntity transactionAuditEntity = transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(trnId)
+        TransactionAuditEntity auditExisting = transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(trnId)
           .orElse(null);
-        Assertions.assertNotNull(transactionAuditEntity);
-        Assertions.assertEquals(TRANSACTION_AUDIT_ERROR_ACTION, transactionAuditEntity.getAction());  }
+        Assertions.assertNotNull(auditExisting);
+        Assertions.assertEquals(TRANSACTION_AUDIT_ERROR_ACTION, auditExisting.getAction());  }
     );
   }
 
@@ -175,10 +175,10 @@ class TransactionApiControllerTest extends BaseIT {
     systemUserScopedExecutionService.executeAsyncSystemUserScoped(
       TENANT,
       () -> {
-        TransactionAuditEntity transactionAuditEntity = transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(trnId)
+        TransactionAuditEntity auditExisting = transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(trnId)
           .orElse(null);
-        Assertions.assertNotNull(transactionAuditEntity);
-        Assertions.assertEquals(TRANSACTION_AUDIT_ERROR_ACTION, transactionAuditEntity.getAction());  }
+        Assertions.assertNotNull(auditExisting);
+        Assertions.assertEquals(TRANSACTION_AUDIT_ERROR_ACTION, auditExisting.getAction());  }
     );
   }
 
@@ -360,11 +360,11 @@ class TransactionApiControllerTest extends BaseIT {
     systemUserScopedExecutionService.executeAsyncSystemUserScoped(
       TENANT,
       () -> {
-        TransactionAuditEntity transactionAuditEntity = transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(DCB_TRANSACTION_ID)
+        TransactionAuditEntity auditExisting = transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(DCB_TRANSACTION_ID)
           .orElse(null);
-        Assertions.assertNotNull(transactionAuditEntity);
-        Assertions.assertNotEquals(TRANSACTION_AUDIT_DUPLICATE_ERROR_ACTION, transactionAuditEntity.getAction());
-        Assertions.assertNotEquals(DUPLICATE_ERROR_TRANSACTION_ID, transactionAuditEntity.getTransactionId());      }
+        Assertions.assertNotNull(auditExisting);
+        Assertions.assertNotEquals(TRANSACTION_AUDIT_DUPLICATE_ERROR_ACTION, auditExisting.getAction());
+        Assertions.assertNotEquals(DUPLICATE_ERROR_TRANSACTION_ID, auditExisting.getTransactionId());      }
     );
   }
 
@@ -417,11 +417,11 @@ class TransactionApiControllerTest extends BaseIT {
     systemUserScopedExecutionService.executeAsyncSystemUserScoped(
       TENANT,
       () -> {
-        TransactionAuditEntity transactionAuditEntity = transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(DCB_TRANSACTION_ID)
+        TransactionAuditEntity auditExisting = transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(DCB_TRANSACTION_ID)
           .orElse(null);
-        Assertions.assertNotNull(transactionAuditEntity);
-        Assertions.assertNotEquals(TRANSACTION_AUDIT_DUPLICATE_ERROR_ACTION, transactionAuditEntity.getAction());
-        Assertions.assertNotEquals(DUPLICATE_ERROR_TRANSACTION_ID, transactionAuditEntity.getTransactionId());      }
+        Assertions.assertNotNull(auditExisting);
+        Assertions.assertNotEquals(TRANSACTION_AUDIT_DUPLICATE_ERROR_ACTION, auditExisting.getAction());
+        Assertions.assertNotEquals(DUPLICATE_ERROR_TRANSACTION_ID, auditExisting.getTransactionId());      }
     );
   }
 

@@ -25,11 +25,11 @@ public class TransactionAuditServiceImpl implements TransactionAuditService {
   @Override
   public void logErrorIfTransactionAuditExists(String dcbTransactionId, String errorMsg) {
     log.debug("logTheErrorForExistedTransactionAudit:: dcbTransactionId = {}, err = {}", dcbTransactionId, errorMsg);
-    TransactionAuditEntity transactionAuditEntityExisted = transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(dcbTransactionId).orElse(null);
+    TransactionAuditEntity auditExisting = transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(dcbTransactionId).orElse(null);
 
-    if(transactionAuditEntityExisted != null){
-      TransactionAuditEntity trnAEntError = generateTrnAuditEntityFromTheFoundOneWithError(transactionAuditEntityExisted, errorMsg);
-      transactionAuditRepository.save(trnAEntError);
+    if(auditExisting != null){
+      TransactionAuditEntity auditError = generateTrnAuditEntityFromTheFoundOneWithError(auditExisting, errorMsg);
+      transactionAuditRepository.save(auditError);
     }
   }
 
@@ -43,42 +43,42 @@ public class TransactionAuditServiceImpl implements TransactionAuditService {
    * */
   @Override
   public void logErrorIfTransactionAuditNotExists(String dcbTransactionId, DcbTransaction dcbTransaction, String errorMsg) {
-    TransactionAuditEntity transactionAuditEntityExisted = transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(dcbTransactionId).orElse(null);
-    TransactionEntity transactionEntity = transactionMapper.mapToEntity(dcbTransactionId, dcbTransaction);
-    TransactionAuditEntity trnAEntError = generateTrnAuditEntityByTrnEntityWithError(dcbTransactionId, transactionEntity, errorMsg);
+    TransactionAuditEntity auditExisting = transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(dcbTransactionId).orElse(null);
+    TransactionEntity transactionMapped = transactionMapper.mapToEntity(dcbTransactionId, dcbTransaction);
+    TransactionAuditEntity auditError = generateTrnAuditEntityByTrnEntityWithError(dcbTransactionId, transactionMapped, errorMsg);
 
-    if(transactionAuditEntityExisted != null){
+    if(auditExisting != null){
       log.debug("logTheErrorForNotExistedTransactionAudit:: dcbTransactionId = {}, dcbTransaction = {}, err = {}", dcbTransactionId, dcbTransaction, errorMsg);
-      trnAEntError.setTransactionId(DUPLICATE_ERROR_TRANSACTION_ID);
-      trnAEntError.setAction(DUPLICATE_ERROR_ACTION);
+      auditError.setTransactionId(DUPLICATE_ERROR_TRANSACTION_ID);
+      auditError.setAction(DUPLICATE_ERROR_ACTION);
     }
 
-    transactionAuditRepository.save(trnAEntError);
+    transactionAuditRepository.save(auditError);
   }
 
   private TransactionAuditEntity generateTrnAuditEntityFromTheFoundOneWithError(TransactionAuditEntity existed, String errorMsg) {
-    TransactionAuditEntity trnAEntError = new TransactionAuditEntity();
-    trnAEntError.setId(UUID.randomUUID());
-    trnAEntError.setTransactionId(existed.getTransactionId());
-    trnAEntError.setAction(ERROR_ACTION);
-    trnAEntError.setBefore(existed.getAfter());
-    trnAEntError.setAfter(existed.getAfter());
-    trnAEntError.setErrorMessage(errorMsg);
+    TransactionAuditEntity auditError = new TransactionAuditEntity();
+    auditError.setId(UUID.randomUUID());
+    auditError.setTransactionId(existed.getTransactionId());
+    auditError.setAction(ERROR_ACTION);
+    auditError.setBefore(existed.getAfter());
+    auditError.setAfter(existed.getAfter());
+    auditError.setErrorMessage(errorMsg);
 
-    return trnAEntError;
+    return auditError;
   }
 
   private TransactionAuditEntity generateTrnAuditEntityByTrnEntityWithError(String dcbTransactionId, TransactionEntity trnE, String errorMsg) {
     String errorMessage = String.format("dcbTransactionId = %s; dcb transaction content = %s; error message = %s.", dcbTransactionId, trnE.toString(), errorMsg);
 
-    TransactionAuditEntity trnAEntError = new TransactionAuditEntity();
-    trnAEntError.setId(UUID.randomUUID());
-    trnAEntError.setTransactionId(dcbTransactionId);
-    trnAEntError.setAction(ERROR_ACTION);
-    trnAEntError.setBefore(null);
-    trnAEntError.setAfter(null);
-    trnAEntError.setErrorMessage(errorMessage);
+    TransactionAuditEntity auditError = new TransactionAuditEntity();
+    auditError.setId(UUID.randomUUID());
+    auditError.setTransactionId(dcbTransactionId);
+    auditError.setAction(ERROR_ACTION);
+    auditError.setBefore(null);
+    auditError.setAfter(null);
+    auditError.setErrorMessage(errorMessage);
 
-    return trnAEntError;
+    return auditError;
   }
 }
