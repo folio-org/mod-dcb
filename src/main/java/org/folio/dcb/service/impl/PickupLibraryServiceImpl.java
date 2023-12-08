@@ -24,16 +24,16 @@ public class PickupLibraryServiceImpl implements LibraryService {
   private final BaseLibraryService baseLibraryService;
 
   @Override
-  public TransactionStatusResponse createCirculation(String dcbTransactionId, DcbTransaction dcbTransaction, String pickupServicePointId) {
+  public TransactionStatusResponse createCirculation(String dcbTransactionId, DcbTransaction dcbTransaction) {
     var itemVirtual = dcbTransaction.getItem();
     var patron = dcbTransaction.getPatron();
 
     var user = userService.fetchOrCreateUser(patron);
     baseLibraryService.checkUserTypeAndThrowIfMismatch(user.getType());
     baseLibraryService.checkItemExistsInInventoryAndThrow(itemVirtual.getBarcode());
-    circulationItemService.checkIfItemExistsAndCreate(itemVirtual, pickupServicePointId);
+    circulationItemService.checkIfItemExistsAndCreate(itemVirtual, dcbTransaction.getPickup().getServicePointId());
 
-    CirculationRequest holdRequest = requestService.createHoldItemRequest(user, itemVirtual, pickupServicePointId);
+    CirculationRequest holdRequest = requestService.createHoldItemRequest(user, itemVirtual, dcbTransaction.getPickup().getServicePointId());
     baseLibraryService.saveDcbTransaction(dcbTransactionId, dcbTransaction, holdRequest.getId());
 
     return TransactionStatusResponse.builder()

@@ -72,7 +72,7 @@ class BorrowingLibraryServiceTest {
 
   @Test
   void createTransactionTest() {
-    borrowingLibraryService.createCirculation(DCB_TRANSACTION_ID, createDcbTransactionByRole(BORROWER), PICKUP_SERVICE_POINT_ID);
+    borrowingLibraryService.createCirculation(DCB_TRANSACTION_ID, createDcbTransactionByRole(BORROWER));
 
     verify(baseLibraryService).createBorrowingLibraryTransaction(DCB_TRANSACTION_ID, createDcbTransactionByRole(BORROWER), PICKUP_SERVICE_POINT_ID);
   }

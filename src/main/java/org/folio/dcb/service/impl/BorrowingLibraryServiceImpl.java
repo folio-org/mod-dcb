@@ -3,12 +3,14 @@ package org.folio.dcb.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dcb.domain.dto.DcbTransaction;
+import org.folio.dcb.domain.dto.ServicePointRequest;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.CirculationService;
 import org.folio.dcb.service.LibraryService;
+import org.folio.dcb.service.ServicePointService;
 import org.springframework.stereotype.Service;
 import java.util.UUID;
 
@@ -28,10 +30,11 @@ public class BorrowingLibraryServiceImpl implements LibraryService {
   private final CirculationService circulationService;
   private final TransactionRepository transactionRepository;
   private final BaseLibraryService libraryService;
-
+  private final ServicePointService servicePointService;
   @Override
-  public TransactionStatusResponse createCirculation(String dcbTransactionId, DcbTransaction dcbTransaction, String pickupServicePointId) {
-    return libraryService.createBorrowingLibraryTransaction(dcbTransactionId, dcbTransaction, pickupServicePointId);
+  public TransactionStatusResponse createCirculation(String dcbTransactionId, DcbTransaction dcbTransaction) {
+    ServicePointRequest pickupServicePoint = servicePointService.createServicePoint(dcbTransaction.getPickup());
+    return libraryService.createBorrowingLibraryTransaction(dcbTransactionId, dcbTransaction, pickupServicePoint.getId());
   }
 
   @Override
