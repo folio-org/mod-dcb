@@ -34,33 +34,32 @@ public class EntityUtils {
   public static String ITEM_ID = "5b95877d-86c0-4cb7-a0cd-7660b348ae5a";
 
   /**
-   * NOT_EXISTED_PATRON_ID - means
+   * NOT_EXISTED_PATRON_BARCODE - means
    * the Mocked userClient returns empty result,
-   * while requesting it by the query, including such a patron id
+   * while requesting it by the query, including such a patron barcode
    * */
-  public static String NOT_EXISTED_PATRON_ID = "571b0a2c-9456-40b5-a449-d41fe6017082";
+  public static String NOT_EXISTED_PATRON_BARCODE = "DCB_NOT_FOUND_PATRON";
 
   /**
-   * EXISTED_PATRON_ID - means
+   * EXISTED_PATRON_BARCODE - means
    * the Mocked userClient returns result with single value,
-   * while requesting it by the query, including such a patron id
+   * while requesting it by the query, including such a patron barcode
    * */
-  public static String EXISTED_PATRON_ID = "284056f5-0670-4e1e-9e2f-61b9f1ee2d18";
+  public static String EXISTED_PATRON_BARCODE = "DCB_PATRON";
   public static String PICKUP_SERVICE_POINT_ID = "0da8c1e4-1c1f-4dd9-b189-70ba978b7d94";
   public static String DCB_TRANSACTION_ID = "571b0a2c-8883-40b5-a449-d41fe6017082";
   public static String CIRCULATION_REQUEST_ID = "571b0a2c-8883-40b5-a449-d41fe6017083";
 
   public static String CIRCULATION_ITEM_REQUEST_ID = "571b0a2c-8883-40b5-a449-d41fe6017183";
   public static String DCB_USER_TYPE = "dcb";
-  public static String DCB_TYPE_USER_ID = "910c512c-ebc5-40c6-96a5-a20bfd81e154";
+  public static String DCB_TYPE_BARCODE = "DCB_TYPE_USER";
   public static String EXISTED_INVENTORY_ITEM_BARCODE = "INVENTORY_ITEM";
-  public static String PATRON_TYPE_USER_ID = "18c1741d-e678-4c8e-9fe7-cfaeefab5eea";
 
   public static DcbTransaction createDcbTransactionByRole(DcbTransaction.RoleEnum role) {
     return DcbTransaction.builder()
       .item(createDcbItem())
       .patron(switch (role){
-        case BORROWING_PICKUP, BORROWER -> createDcbPatronWithExactPatronId(EXISTED_PATRON_ID);
+        case BORROWING_PICKUP, BORROWER -> createDcbPatronWithExactPatronBarcode(EXISTED_PATRON_BARCODE);
         default -> createDefaultDcbPatron();
         }
       )
@@ -107,16 +106,16 @@ public class EntityUtils {
       .build();
   }
 
-  public static DcbPatron createDcbPatronWithExactPatronId(String patronId) {
+  public static DcbPatron createDcbPatronWithExactPatronBarcode(String patronBarcode) {
     return DcbPatron.builder()
-      .id(patronId)
-      .barcode("DCB_PATRON")
+      .id("18c1741d-e678-4c8e-9fe7-cfaeefab5eea")
+      .barcode(patronBarcode)
       .group("staff")
       .borrowingLibraryCode("E")
       .build();
   }
   public static DcbPatron createDefaultDcbPatron() {
-    return createDcbPatronWithExactPatronId(NOT_EXISTED_PATRON_ID);
+    return createDcbPatronWithExactPatronBarcode(NOT_EXISTED_PATRON_BARCODE);
   }
 
   public static org.folio.dcb.domain.dto.DcbPickup createDcbPickup() {
@@ -140,8 +139,9 @@ public class EntityUtils {
     return User.builder()
       .active(true)
       .patronGroup("staff")
-      .id(NOT_EXISTED_PATRON_ID)
+      .id("18c1741d-e678-4c8e-9fe7-cfaeefab5eea")
       .type(DCB_USER_TYPE)
+      .barcode(EXISTED_PATRON_BARCODE)
       .build();
   }
 
@@ -157,7 +157,7 @@ public class EntityUtils {
       .itemId(ITEM_ID)
       .itemTitle("ITEM TITLE")
       .itemBarcode("DCB_ITEM")
-      .patronId(NOT_EXISTED_PATRON_ID)
+      .patronId("18c1741d-e678-4c8e-9fe7-cfaeefab5eea")
       .patronBarcode("DCB_PATRON")
       .patronGroup("staff")
       .servicePointId(PICKUP_SERVICE_POINT_ID)

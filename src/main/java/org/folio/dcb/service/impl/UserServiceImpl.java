@@ -26,24 +26,23 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public User fetchUser(DcbPatron dcbPatron) {
-    var dcbPatronId = dcbPatron.getId();
     var dcbPatronBarcode = dcbPatron.getBarcode();
 
-    log.debug("fetchUser:: Fetching user by userId {}, userBarcode {}.", dcbPatronId, dcbPatronBarcode);
-    var user = fetchUserByBarcodeAndId(dcbPatronBarcode, dcbPatronId);
+    log.debug("fetchUser:: Fetching user by userBarcode {}.", dcbPatronBarcode);
+    var user = fetchUserByBarcode(dcbPatronBarcode);
 
     if(Objects.isNull(user)) {
-      log.error("fetchUser:: Unable to find existing user with barcode {} and id {}.", dcbPatronBarcode, dcbPatronId);
-      throw new NotFoundException(String.format("Unable to find existing user with barcode %s and id %s.", dcbPatronBarcode, dcbPatronId));
+      log.error("fetchUser:: Unable to find existing user with barcode {}.", dcbPatronBarcode);
+      throw new NotFoundException(String.format("Unable to find existing user with barcode %s.", dcbPatronBarcode));
     }
 
     return user;
   }
 
   public User fetchOrCreateUser(DcbPatron patronDetails) {
-    log.debug("createOrFetchUser:: Trying to create or find user for userId {}, userBarcode {}",
-      patronDetails.getId(), patronDetails.getBarcode());
-    var user = fetchUserByBarcodeAndId(patronDetails.getBarcode(), patronDetails.getId());
+    log.debug("createOrFetchUser:: Trying to create or find user for userBarcode {}",
+      patronDetails.getBarcode());
+    var user = fetchUserByBarcode(patronDetails.getBarcode());
     if(Objects.isNull(user)) {
       log.info("fetchOrCreateUser:: Unable to find existing user with barcode {} and id {}. Hence, creating new user",
         patronDetails.getBarcode(), patronDetails.getId());
@@ -59,10 +58,10 @@ public class UserServiceImpl implements UserService {
     return usersClient.createUser(createVirtualUser(patronDetails, groupId));
   }
 
-  private User fetchUserByBarcodeAndId(String barcode, String id) {
-    log.debug("fetchUserByBarcodeAndId:: Trying to fetch existing user with barcode {} and id {}",
-      barcode, id);
-    return usersClient.fetchUserByBarcodeAndId("barcode==" + barcode + " and id==" + id)
+  private User fetchUserByBarcode(String barcode) {
+    log.debug("fetchUserByBarcodeAndId:: Trying to fetch existing user with barcode {} ",
+      barcode);
+    return usersClient.fetchUserByBarcode("barcode==" + barcode)
       .getUsers()
       .stream()
       .findFirst()

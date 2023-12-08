@@ -28,11 +28,11 @@ import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CLOSED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
 import static org.folio.dcb.utils.EntityUtils.CIRCULATION_REQUEST_ID;
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
-import static org.folio.dcb.utils.EntityUtils.EXISTED_PATRON_ID;
+import static org.folio.dcb.utils.EntityUtils.EXISTED_PATRON_BARCODE;
 import static org.folio.dcb.utils.EntityUtils.PICKUP_SERVICE_POINT_ID;
 import static org.folio.dcb.utils.EntityUtils.createCirculationRequest;
 import static org.folio.dcb.utils.EntityUtils.createDcbItem;
-import static org.folio.dcb.utils.EntityUtils.createDcbPatronWithExactPatronId;
+import static org.folio.dcb.utils.EntityUtils.createDcbPatronWithExactPatronBarcode;
 import static org.folio.dcb.utils.EntityUtils.createDcbTransactionByRole;
 import static org.folio.dcb.utils.EntityUtils.createInventoryItem;
 import static org.folio.dcb.utils.EntityUtils.createTransactionEntity;
@@ -120,7 +120,7 @@ class BaseLibraryServiceTest {
   @Test
   void createBorrowingTransactionTest() {
     var item = createDcbItem();
-    var patron = createDcbPatronWithExactPatronId(EXISTED_PATRON_ID);
+    var patron = createDcbPatronWithExactPatronBarcode(EXISTED_PATRON_BARCODE);
     var user = createUser();
     user.setType("shadow");
 

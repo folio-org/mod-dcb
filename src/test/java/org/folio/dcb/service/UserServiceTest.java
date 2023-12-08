@@ -31,9 +31,9 @@ class UserServiceTest {
 
   @Test
   void fetchUserTest() {
-    when(usersClient.fetchUserByBarcodeAndId(any())).thenReturn(createUserCollection());
+    when(usersClient.fetchUserByBarcode(any())).thenReturn(createUserCollection());
     userService.fetchOrCreateUser(createDefaultDcbPatron());
-    verify(usersClient).fetchUserByBarcodeAndId(any());
+    verify(usersClient).fetchUserByBarcode(any());
     verify(patronGroupService, never()).fetchPatronGroupIdByName("staff");
     verify(usersClient, never()).createUser(any());
   }
@@ -42,10 +42,10 @@ class UserServiceTest {
   void createUserTest() {
     var userCollection = createUserCollection();
     userCollection.setUsers(List.of());
-    when(usersClient.fetchUserByBarcodeAndId(any())).thenReturn(userCollection);
+    when(usersClient.fetchUserByBarcode(any())).thenReturn(userCollection);
     when(patronGroupService.fetchPatronGroupIdByName(any())).thenReturn(UUID.randomUUID().toString());
     userService.fetchOrCreateUser(createDefaultDcbPatron());
-    verify(usersClient).fetchUserByBarcodeAndId(any());
+    verify(usersClient).fetchUserByBarcode(any());
     verify(patronGroupService).fetchPatronGroupIdByName("staff");
     verify(usersClient).createUser(any());
   }

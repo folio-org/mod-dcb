@@ -15,13 +15,12 @@ import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWING_PICKUP;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.PICKUP;
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
-import static org.folio.dcb.utils.EntityUtils.DCB_TYPE_USER_ID;
+import static org.folio.dcb.utils.EntityUtils.DCB_TYPE_BARCODE;
 import static org.folio.dcb.utils.EntityUtils.EXISTED_INVENTORY_ITEM_BARCODE;
-import static org.folio.dcb.utils.EntityUtils.EXISTED_PATRON_ID;
-import static org.folio.dcb.utils.EntityUtils.NOT_EXISTED_PATRON_ID;
-import static org.folio.dcb.utils.EntityUtils.PATRON_TYPE_USER_ID;
+import static org.folio.dcb.utils.EntityUtils.EXISTED_PATRON_BARCODE;
+import static org.folio.dcb.utils.EntityUtils.NOT_EXISTED_PATRON_BARCODE;
 import static org.folio.dcb.utils.EntityUtils.createDcbItem;
-import static org.folio.dcb.utils.EntityUtils.createDcbPatronWithExactPatronId;
+import static org.folio.dcb.utils.EntityUtils.createDcbPatronWithExactPatronBarcode;
 import static org.folio.dcb.utils.EntityUtils.createDefaultDcbPatron;
 import static org.folio.dcb.utils.EntityUtils.createDcbTransactionByRole;
 import static org.folio.dcb.utils.EntityUtils.createTransactionEntity;
@@ -83,7 +82,7 @@ class TransactionApiControllerTest extends BaseIT {
       .andExpect(status().isCreated())
       .andExpect(jsonPath("$.status").value("CREATED"))
       .andExpect(jsonPath("$.item").value(expected))
-      .andExpect(jsonPath("$.patron").value(createDcbPatronWithExactPatronId(EXISTED_PATRON_ID)));
+      .andExpect(jsonPath("$.patron").value(createDcbPatronWithExactPatronBarcode(EXISTED_PATRON_BARCODE)));
 
     //Trying to create another transaction with same transaction id
     this.mockMvc.perform(
@@ -100,6 +99,8 @@ class TransactionApiControllerTest extends BaseIT {
   void createLendingCirculationRequestWithInvalidItemId() throws Exception {
     var dcbTransaction = createDcbTransactionByRole(LENDER);
     dcbTransaction.getItem().setId("5b95877d-86c0-4cb7-a0cd-7660b348ae5b");
+    //set existing user barcode with type dcb
+    dcbTransaction.getPatron().setBarcode("DCB_TYPE_PATRON");
 
     this.mockMvc.perform(
         post("/transactions/" + UUID.randomUUID())
@@ -114,7 +115,7 @@ class TransactionApiControllerTest extends BaseIT {
   @Test
   void createBorrowingPickupCirculationRequestWithInvalidDefaultNotExistedPatronId() throws Exception {
     var dcbTransaction = createDcbTransactionByRole(BORROWING_PICKUP);
-    dcbTransaction.getPatron().setId(NOT_EXISTED_PATRON_ID);
+    dcbTransaction.getPatron().setBarcode(NOT_EXISTED_PATRON_BARCODE);
 
     this.mockMvc.perform(
         post("/transactions/" + UUID.randomUUID())
@@ -335,7 +336,7 @@ class TransactionApiControllerTest extends BaseIT {
       .andExpect(status().isCreated())
       .andExpect(jsonPath("$.status").value("CREATED"))
       .andExpect(jsonPath("$.item").value(createDcbItem()))
-      .andExpect(jsonPath("$.patron").value(createDcbPatronWithExactPatronId(EXISTED_PATRON_ID)));
+      .andExpect(jsonPath("$.patron").value(createDcbPatronWithExactPatronBarcode(EXISTED_PATRON_BARCODE)));
 
     //Trying to create another transaction with same transaction id
     this.mockMvc.perform(
@@ -431,7 +432,7 @@ class TransactionApiControllerTest extends BaseIT {
   void createLendingTransactionWithDifferentUserType() throws Exception {
     removeExistedTransactionFromDbIfSoExists();
     var transaction = createDcbTransactionByRole(LENDER);
-    transaction.getPatron().setId(PATRON_TYPE_USER_ID);
+    transaction.getPatron().setBarcode(EXISTED_PATRON_BARCODE);
     this.mockMvc.perform(
         post("/transactions/" + DCB_TRANSACTION_ID)
           .content(asJsonString(transaction))
@@ -441,7 +442,7 @@ class TransactionApiControllerTest extends BaseIT {
       .andExpect(status().isBadRequest());
 
     transaction = createDcbTransactionByRole(LENDER);
-    transaction.getPatron().setId(DCB_TYPE_USER_ID);
+    transaction.getPatron().setBarcode(DCB_TYPE_BARCODE);
     this.mockMvc.perform(
         post("/transactions/" + DCB_TRANSACTION_ID)
           .content(asJsonString(transaction))
@@ -456,7 +457,7 @@ class TransactionApiControllerTest extends BaseIT {
   void createBorrowingTransactionWithDifferentUserType() throws Exception {
     removeExistedTransactionFromDbIfSoExists();
     var transaction = createDcbTransactionByRole(BORROWER);
-    transaction.getPatron().setId(DCB_TYPE_USER_ID);
+    transaction.getPatron().setBarcode(DCB_TYPE_BARCODE);
 
     this.mockMvc.perform(
         post("/transactions/" + DCB_TRANSACTION_ID)
@@ -467,7 +468,7 @@ class TransactionApiControllerTest extends BaseIT {
       .andExpect(status().isBadRequest());
 
     transaction = createDcbTransactionByRole(BORROWER);
-    transaction.getPatron().setId(PATRON_TYPE_USER_ID);
+    transaction.getPatron().setBarcode(EXISTED_PATRON_BARCODE);
 
     this.mockMvc.perform(
         post("/transactions/" + DCB_TRANSACTION_ID)
@@ -483,7 +484,7 @@ class TransactionApiControllerTest extends BaseIT {
   void createBorrowingPickupTransactionWithDifferentUserType() throws Exception {
     removeExistedTransactionFromDbIfSoExists();
     var transaction = createDcbTransactionByRole(BORROWING_PICKUP);
-    transaction.getPatron().setId(DCB_TYPE_USER_ID);
+    transaction.getPatron().setBarcode(DCB_TYPE_BARCODE);
 
     this.mockMvc.perform(
         post("/transactions/" + DCB_TRANSACTION_ID)
@@ -494,7 +495,6 @@ class TransactionApiControllerTest extends BaseIT {
       .andExpect(status().isBadRequest());
 
     transaction = createDcbTransactionByRole(BORROWING_PICKUP);
-    transaction.getPatron().setId(PATRON_TYPE_USER_ID);
 
     this.mockMvc.perform(
         post("/transactions/" + DCB_TRANSACTION_ID)
@@ -510,7 +510,7 @@ class TransactionApiControllerTest extends BaseIT {
   void createPickupTransactionWithDifferentUserType() throws Exception {
     removeExistedTransactionFromDbIfSoExists();
     var transaction = createDcbTransactionByRole(PICKUP);
-    transaction.getPatron().setId(PATRON_TYPE_USER_ID);
+    transaction.getPatron().setBarcode(EXISTED_PATRON_BARCODE);
 
     this.mockMvc.perform(
         post("/transactions/" + DCB_TRANSACTION_ID)
@@ -521,7 +521,7 @@ class TransactionApiControllerTest extends BaseIT {
       .andExpect(status().isBadRequest());
 
     transaction = createDcbTransactionByRole(PICKUP);
-    transaction.getPatron().setId(DCB_TYPE_USER_ID);
+    transaction.getPatron().setBarcode(DCB_TYPE_BARCODE);
 
     this.mockMvc.perform(
         post("/transactions/" + DCB_TRANSACTION_ID)

@@ -15,5 +15,5 @@ public interface UsersClient {
   User createUser(@RequestBody User user);
 
   @GetMapping
-  UserCollection fetchUserByBarcodeAndId(@RequestParam("query") String query);
+  UserCollection fetchUserByBarcode(@RequestParam("query") String query);
 }
