@@ -3,7 +3,7 @@ package org.folio.dcb.utils;
 import lombok.SneakyThrows;
 import org.folio.dcb.DcbApplication;
 import org.folio.dcb.client.feign.HoldingsStorageClient;
-import org.folio.dcb.domain.dto.CirculationItemRequest;
+import org.folio.dcb.domain.dto.CirculationItem;
 import org.folio.dcb.domain.dto.CirculationRequest;
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.DcbItem;
@@ -101,8 +101,8 @@ public class EntityUtils {
       .build();
   }
 
-  public static CirculationItemRequest createCirculationItemRequest() {
-    return CirculationItemRequest.builder()
+  public static CirculationItem createCirculationItem() {
+    return CirculationItem.builder()
       .id(CIRCULATION_ITEM_REQUEST_ID)
       .build();
   }
