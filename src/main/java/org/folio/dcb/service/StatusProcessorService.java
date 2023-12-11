@@ -19,7 +19,7 @@ import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.*;
 public class StatusProcessorService {
   private StatusProcessor chain;
 
-  private static String STATUS_TRANSITION_ERROR_MSG = "Status transition will not be possible from %s to %s";
+  private static final String STATUS_TRANSITION_ERROR_MSG = "Status transition will not be possible from %s to %s";
 
   public List<TransactionStatus.StatusEnum> lendingChainProcessor(TransactionStatus.StatusEnum fromStatus, TransactionStatus.StatusEnum toStatus) {
     log.debug("lendingChainProcessor:: fetching list of statuses from {} to {}", fromStatus, toStatus);

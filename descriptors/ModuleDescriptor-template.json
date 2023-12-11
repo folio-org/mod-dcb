@@ -172,7 +172,7 @@
   ],
   "permissionSets" : [
     {
-      "permissionName": "dcb.transactions.all",
+      "permissionName": "dcb.all",
       "displayName": "DCB API module - all permissions",
       "description": "All permissions for dcb module",
       "subPermissions": [
