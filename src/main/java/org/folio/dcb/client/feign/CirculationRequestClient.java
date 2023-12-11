@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 @FeignClient(name = "request-storage", configuration = FeignClientConfiguration.class)
 public interface CirculationRequestClient {
-  @GetMapping("/requests/{circulationItemId}")
-  CirculationRequest fetchRequestById(@PathVariable("circulationItemId") String circulationItemId);
+  @GetMapping("/requests/{requestId}")
+  CirculationRequest fetchRequestById(@PathVariable("requestId") String requestId);
 
 }
