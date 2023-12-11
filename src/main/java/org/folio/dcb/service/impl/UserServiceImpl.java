@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.Objects;
 
+import static org.folio.dcb.utils.DCBConstants.DCB_TYPE;
+
 @Service
 @RequiredArgsConstructor
 @Log4j2
@@ -20,7 +22,6 @@ public class UserServiceImpl implements UserService {
 
   private final PatronGroupService patronGroupService;
   private final UsersClient usersClient;
-  private static final String DCB = "dcb";
   private static final String LAST_NAME = "DcbSystem";
 
   @Override
@@ -74,7 +75,7 @@ public class UserServiceImpl implements UserService {
       .barcode(patron.getBarcode())
       .patronGroup(groupId)
       .id(patron.getId())
-      .type(DCB)
+      .type(DCB_TYPE)
       .personal(Personal.builder().lastName(LAST_NAME).build())
       .build();
   }

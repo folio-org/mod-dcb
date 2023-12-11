@@ -15,8 +15,11 @@ import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWING_PICKUP;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.PICKUP;
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
+import static org.folio.dcb.utils.EntityUtils.DCB_TYPE_USER_ID;
+import static org.folio.dcb.utils.EntityUtils.EXISTED_INVENTORY_ITEM_BARCODE;
 import static org.folio.dcb.utils.EntityUtils.EXISTED_PATRON_ID;
 import static org.folio.dcb.utils.EntityUtils.NOT_EXISTED_PATRON_ID;
+import static org.folio.dcb.utils.EntityUtils.PATRON_TYPE_USER_ID;
 import static org.folio.dcb.utils.EntityUtils.createDcbItem;
 import static org.folio.dcb.utils.EntityUtils.createDcbPatronWithExactPatronId;
 import static org.folio.dcb.utils.EntityUtils.createDefaultDcbPatron;
@@ -424,6 +427,200 @@ class TransactionApiControllerTest extends BaseIT {
           .accept(MediaType.APPLICATION_JSON))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.status").value("ITEM_CHECKED_IN"));
+  }
+
+  @Test
+  void transactionStatusUpdateFromCreatedToCancelledAsLenderTest() throws Exception {
+    var transactionID = UUID.randomUUID().toString();
+    var dcbTransaction = createTransactionEntity();
+    dcbTransaction.setStatus(TransactionStatus.StatusEnum.CREATED);
+    dcbTransaction.setRole(LENDER);
+    dcbTransaction.setId(transactionID);
+
+    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> transactionRepository.save(dcbTransaction));
+
+    mockMvc.perform(
+        put("/transactions/" + transactionID + "/status")
+          .content(asJsonString(createTransactionStatus(TransactionStatus.StatusEnum.CANCELLED)))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.status").value("CANCELLED"));
+  }
+
+  @Test
+  void transactionStatusUpdateFromCheckedInToCancelledAsLenderTest() throws Exception {
+    var transactionID = UUID.randomUUID().toString();
+    var dcbTransaction = createTransactionEntity();
+    dcbTransaction.setStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_IN);
+    dcbTransaction.setRole(LENDER);
+    dcbTransaction.setId(transactionID);
+
+    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> transactionRepository.save(dcbTransaction));
+
+    mockMvc.perform(
+        put("/transactions/" + transactionID + "/status")
+          .content(asJsonString(createTransactionStatus(TransactionStatus.StatusEnum.CANCELLED)))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void createLendingTransactionWithDifferentUserType() throws Exception {
+    removeExistedTransactionFromDbIfSoExists();
+    var transaction = createDcbTransactionByRole(LENDER);
+    transaction.getPatron().setId(PATRON_TYPE_USER_ID);
+    this.mockMvc.perform(
+        post("/transactions/" + DCB_TRANSACTION_ID)
+          .content(asJsonString(transaction))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isBadRequest());
+
+    transaction = createDcbTransactionByRole(LENDER);
+    transaction.getPatron().setId(DCB_TYPE_USER_ID);
+    this.mockMvc.perform(
+        post("/transactions/" + DCB_TRANSACTION_ID)
+          .content(asJsonString(transaction))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isCreated());
+
+  }
+
+  @Test
+  void createBorrowingTransactionWithDifferentUserType() throws Exception {
+    removeExistedTransactionFromDbIfSoExists();
+    var transaction = createDcbTransactionByRole(BORROWER);
+    transaction.getPatron().setId(DCB_TYPE_USER_ID);
+
+    this.mockMvc.perform(
+        post("/transactions/" + DCB_TRANSACTION_ID)
+          .content(asJsonString(transaction))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isBadRequest());
+
+    transaction = createDcbTransactionByRole(BORROWER);
+    transaction.getPatron().setId(PATRON_TYPE_USER_ID);
+
+    this.mockMvc.perform(
+        post("/transactions/" + DCB_TRANSACTION_ID)
+          .content(asJsonString(transaction))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isCreated());
+
+  }
+
+  @Test
+  void createBorrowingPickupTransactionWithDifferentUserType() throws Exception {
+    removeExistedTransactionFromDbIfSoExists();
+    var transaction = createDcbTransactionByRole(BORROWING_PICKUP);
+    transaction.getPatron().setId(DCB_TYPE_USER_ID);
+
+    this.mockMvc.perform(
+        post("/transactions/" + DCB_TRANSACTION_ID)
+          .content(asJsonString(transaction))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isBadRequest());
+
+    transaction = createDcbTransactionByRole(BORROWING_PICKUP);
+    transaction.getPatron().setId(PATRON_TYPE_USER_ID);
+
+    this.mockMvc.perform(
+        post("/transactions/" + DCB_TRANSACTION_ID)
+          .content(asJsonString(transaction))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isCreated());
+
+  }
+
+  @Test
+  void createPickupTransactionWithDifferentUserType() throws Exception {
+    removeExistedTransactionFromDbIfSoExists();
+    var transaction = createDcbTransactionByRole(PICKUP);
+    transaction.getPatron().setId(PATRON_TYPE_USER_ID);
+
+    this.mockMvc.perform(
+        post("/transactions/" + DCB_TRANSACTION_ID)
+          .content(asJsonString(transaction))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isBadRequest());
+
+    transaction = createDcbTransactionByRole(PICKUP);
+    transaction.getPatron().setId(DCB_TYPE_USER_ID);
+
+    this.mockMvc.perform(
+        post("/transactions/" + DCB_TRANSACTION_ID)
+          .content(asJsonString(transaction))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isCreated());
+
+  }
+
+  @Test
+  void transactionCreationErrorIfInventoryItemExists() throws Exception {
+    removeExistedTransactionFromDbIfSoExists();
+    var transaction = createDcbTransactionByRole(PICKUP);
+    transaction.getItem().setBarcode(EXISTED_INVENTORY_ITEM_BARCODE);
+
+    this.mockMvc.perform(
+        post("/transactions/" + DCB_TRANSACTION_ID)
+          .content(asJsonString(transaction))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isConflict());
+
+    transaction = createDcbTransactionByRole(BORROWING_PICKUP);
+    transaction.getItem().setBarcode(EXISTED_INVENTORY_ITEM_BARCODE);
+
+    this.mockMvc.perform(
+        post("/transactions/" + DCB_TRANSACTION_ID)
+          .content(asJsonString(transaction))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isConflict());
+
+    transaction = createDcbTransactionByRole(BORROWER);
+    transaction.getItem().setBarcode(EXISTED_INVENTORY_ITEM_BARCODE);
+
+    this.mockMvc.perform(
+        post("/transactions/" + DCB_TRANSACTION_ID)
+          .content(asJsonString(transaction))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isConflict());
+
+    transaction = createDcbTransactionByRole(BORROWING_PICKUP);
+    transaction.getItem().setBarcode("DCB_ITEM");
+
+    this.mockMvc.perform(
+        post("/transactions/" + DCB_TRANSACTION_ID)
+          .content(asJsonString(transaction))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isCreated());
+
   }
 
   private void removeExistedTransactionFromDbIfSoExists() {

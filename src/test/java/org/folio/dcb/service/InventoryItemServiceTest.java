@@ -4,14 +4,17 @@ import feign.FeignException;
 import org.folio.dcb.client.feign.InventoryItemStorageClient;
 import org.folio.dcb.service.impl.ItemServiceImpl;
 import org.folio.spring.exception.NotFoundException;
+import org.folio.spring.model.ResultList;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.UUID;
 
+import static org.folio.dcb.utils.EntityUtils.createDcbItem;
 import static org.folio.dcb.utils.EntityUtils.createInventoryItem;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -42,6 +45,16 @@ class InventoryItemServiceTest {
     var itemId = UUID.randomUUID().toString();
     doThrow(FeignException.NotFound.class).when(inventoryItemStorageClient).findItem(itemId);
     assertThrows(NotFoundException.class, () -> itemService.fetchItemDetailsById(itemId));
+  }
+
+  @Test
+  void fetchItemByBarcode() {
+    var item = createDcbItem();
+    var inventoryItem = createInventoryItem();
+    when(itemService.fetchItemByBarcode(item.getBarcode())).thenReturn(ResultList.of(1, List.of(inventoryItem)));
+
+    var response = itemService.fetchItemByBarcode(item.getBarcode());
+    assertEquals(1, response.getTotalRecords());
   }
 
 }
