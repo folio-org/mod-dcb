@@ -67,7 +67,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: info,health,env,httptrace
+        include: ${ACTUATOR_EXPOSURE:health,info,loggers}
       base-path: /admin
   #  endpoint:
   #    health:
