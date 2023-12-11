@@ -120,14 +120,16 @@ class TransactionServiceTest {
     var dcbTransactionEntity = createTransactionEntity();
     dcbTransactionEntity.setStatus(TransactionStatus.StatusEnum.OPEN);
     when(transactionRepository.findById(DCB_TRANSACTION_ID)).thenReturn(Optional.of(dcbTransactionEntity));
+    var openTransactionStatus = TransactionStatus.builder().status(TransactionStatus.StatusEnum.OPEN).build();
 
-    Assertions.assertThrows(StatusException.class, () -> transactionsService.updateTransactionStatus(DCB_TRANSACTION_ID, TransactionStatus.builder().status(TransactionStatus.StatusEnum.OPEN).build()));
+    Assertions.assertThrows(StatusException.class, () -> transactionsService.updateTransactionStatus(DCB_TRANSACTION_ID, openTransactionStatus));
 
     dcbTransactionEntity.setStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_IN);
-    Assertions.assertThrows(StatusException.class, () -> transactionsService.updateTransactionStatus(DCB_TRANSACTION_ID, TransactionStatus.builder().status(TransactionStatus.StatusEnum.CANCELLED).build()));
+    var cancelledTransactionStatus = TransactionStatus.builder().status(TransactionStatus.StatusEnum.CANCELLED).build();
+    Assertions.assertThrows(StatusException.class, () -> transactionsService.updateTransactionStatus(DCB_TRANSACTION_ID, cancelledTransactionStatus));
 
     dcbTransactionEntity.setStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_OUT);
-    Assertions.assertThrows(StatusException.class, () -> transactionsService.updateTransactionStatus(DCB_TRANSACTION_ID, TransactionStatus.builder().status(TransactionStatus.StatusEnum.CANCELLED).build()));
+    Assertions.assertThrows(StatusException.class, () -> transactionsService.updateTransactionStatus(DCB_TRANSACTION_ID, cancelledTransactionStatus));
   }
 
 }
