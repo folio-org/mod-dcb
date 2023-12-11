@@ -50,20 +50,22 @@ public class StatusProcessorService {
   }
 
   private List<TransactionStatus.StatusEnum> process(StatusProcessorService statusProcessorService, TransactionStatus.StatusEnum fromStatus, TransactionStatus.StatusEnum toStatus) {
-    if(fromStatus.ordinal()>toStatus.ordinal()) {
+    if (fromStatus.ordinal() >= toStatus.ordinal()) {
       throw new StatusException(String.format(STATUS_TRANSITION_ERROR_MSG, fromStatus, toStatus));
     }
+
     List<TransactionStatus.StatusEnum> transactionStatuses = new ArrayList<>();
-    if(CANCELLED == toStatus) {
+    if (CANCELLED == toStatus) {
       transactionStatuses.add(CANCELLED);
       return transactionStatuses;
     }
+
     var processor = statusProcessorService.getChain();
     while (processor != null) {
       if (processor.getCurrentStatus().ordinal() >= fromStatus.ordinal() &&
         processor.getNextStatus().ordinal() <= toStatus.ordinal()) {
         if (processor.isManual()) {
-          throw new IllegalArgumentException(String.format(STATUS_TRANSITION_ERROR_MSG, fromStatus, toStatus));
+          throw new StatusException(String.format(STATUS_TRANSITION_ERROR_MSG, fromStatus, toStatus));
         } else {
           transactionStatuses.add(processor.getNextStatus());
         }
