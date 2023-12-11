@@ -30,6 +30,9 @@ class StatusProcessorServiceTest {
     statusEnumList = statusProcessorService.lendingChainProcessor(TransactionStatus.StatusEnum.OPEN, TransactionStatus.StatusEnum.AWAITING_PICKUP);
     assertEquals(List.of(TransactionStatus.StatusEnum.AWAITING_PICKUP), statusEnumList);
 
+    statusEnumList = statusProcessorService.lendingChainProcessor(TransactionStatus.StatusEnum.AWAITING_PICKUP, TransactionStatus.StatusEnum.ITEM_CHECKED_IN);
+    assertEquals(List.of(TransactionStatus.StatusEnum.ITEM_CHECKED_OUT, TransactionStatus.StatusEnum.ITEM_CHECKED_IN), statusEnumList);
+
     statusEnumList = statusProcessorService.lendingChainProcessor(TransactionStatus.StatusEnum.CREATED, TransactionStatus.StatusEnum.CANCELLED);
     assertEquals(List.of(TransactionStatus.StatusEnum.CANCELLED), statusEnumList);
 
