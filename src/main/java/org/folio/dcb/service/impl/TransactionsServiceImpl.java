@@ -2,7 +2,6 @@ package org.folio.dcb.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.folio.dcb.domain.dto.ServicePointRequest;
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
@@ -10,7 +9,6 @@ import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.exception.ResourceAlreadyExistException;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.LibraryService;
-import org.folio.dcb.service.ServicePointService;
 import org.folio.dcb.service.TransactionsService;
 import org.folio.spring.exception.NotFoundException;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -30,19 +28,17 @@ public class TransactionsServiceImpl implements TransactionsService {
   @Qualifier("borrowingLibraryService")
   private final LibraryService borrowingLibraryService;
   private final TransactionRepository transactionRepository;
-  private final ServicePointService servicePointService;
 
   @Override
   public TransactionStatusResponse createCirculationRequest(String dcbTransactionId, DcbTransaction dcbTransaction) {
     log.debug("createCirculationRequest:: creating new transaction request for role {} ", dcbTransaction.getRole());
     checkTransactionExistsAndThrow(dcbTransactionId);
-    ServicePointRequest pickupServicePoint = servicePointService.createServicePoint(dcbTransaction.getPickup());
 
     return switch (dcbTransaction.getRole()) {
-      case LENDER -> lendingLibraryService.createCirculation(dcbTransactionId, dcbTransaction, pickupServicePoint.getId());
-      case BORROWING_PICKUP -> borrowingPickupLibraryService.createCirculation(dcbTransactionId, dcbTransaction, pickupServicePoint.getId());
-      case PICKUP -> pickupLibraryService.createCirculation(dcbTransactionId, dcbTransaction, pickupServicePoint.getId());
-      case BORROWER -> borrowingLibraryService.createCirculation(dcbTransactionId, dcbTransaction, pickupServicePoint.getId());
+      case LENDER -> lendingLibraryService.createCirculation(dcbTransactionId, dcbTransaction);
+      case BORROWING_PICKUP -> borrowingPickupLibraryService.createCirculation(dcbTransactionId, dcbTransaction);
+      case PICKUP -> pickupLibraryService.createCirculation(dcbTransactionId, dcbTransaction);
+      case BORROWER -> borrowingLibraryService.createCirculation(dcbTransactionId, dcbTransaction);
     };
   }
 

@@ -1,6 +1,6 @@
-CirculationItemRequest:
+CirculationItem:
   type: "object"
-  description: "CirculationItemRequest"
+  description: "CirculationItem"
   properties:
     id:
       description: the system assigned unique ID of the circulation item record
@@ -20,4 +20,22 @@ CirculationItemRequest:
       type: string
     pickupLocation:
       type: string
+    lendingLibraryCode:
+      description: 5 digit agency code which identifies the lending library
+      type: string
   additionalProperties: false
+
+CirculationItemCollection:
+  type: object
+  properties:
+    items:
+      type: array
+      description: "Circulation Item collection"
+      items:
+        $ref: "CirculationItem.yaml#/CirculationItem"
+    totalRecords:
+      type: integer
+  additionalProperties: false
+  required:
+    - circulationItems
+    - totalRecords

@@ -1,7 +1,7 @@
 
 package org.folio.dcb.service;
 
-import org.folio.dcb.domain.dto.CirculationItemRequest;
+import org.folio.dcb.domain.dto.CirculationItem;
 import org.folio.dcb.domain.dto.ItemStatus;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
@@ -99,7 +99,7 @@ class BaseLibraryServiceTest {
     var transactionEntity = createTransactionEntity();
     transactionEntity.setStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_OUT);
     transactionEntity.setRole(BORROWING_PICKUP);
-    when(circulationItemService.fetchItemById(any())).thenReturn(CirculationItemRequest.builder().status(
+    when(circulationItemService.fetchItemById(any())).thenReturn(CirculationItem.builder().status(
       ItemStatus.builder().name(ItemStatus.NameEnum.AVAILABLE).build()).build());
     baseLibraryService.updateStatusByTransactionEntity(transactionEntity);
     Mockito.verify(transactionRepository, times(1)).save(transactionEntity);

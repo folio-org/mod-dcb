@@ -7,8 +7,8 @@
   <changeSet id="createStatusEnum" author="singhAdesh">
     <sql>
       <![CDATA[
-            CREATE TYPE StatusEnum as ENUM ('CREATED', 'OPEN', 'AWAITING_PICKUP', 'ITEM_CHECKED_OUT', 'ITEM_CHECKED_IN', 'CLOSED');
-            ]]>
+      CREATE TYPE StatusEnum as ENUM ('CREATED', 'OPEN', 'AWAITING_PICKUP', 'ITEM_CHECKED_OUT', 'ITEM_CHECKED_IN', 'CLOSED');
+      ]]>
     </sql>
   </changeSet>
 
@@ -16,8 +16,8 @@
   <changeSet id="createCast" author="singhAdesh">
     <sql>
       <![CDATA[
-            CREATE CAST (character varying as StatusEnum) WITH INOUT AS IMPLICIT;
-            ]]>
+      CREATE CAST (character varying as StatusEnum) WITH INOUT AS IMPLICIT;
+      ]]>
     </sql>
   </changeSet>
 
@@ -25,8 +25,8 @@
   <changeSet id="createRoleEnum" author="singhAdesh">
     <sql>
       <![CDATA[
-            CREATE TYPE RoleEnum as ENUM ('BORROWER', 'LENDER', 'PICKUP', 'BORROWING_PICKUP');
-            ]]>
+      CREATE TYPE RoleEnum as ENUM ('BORROWER', 'LENDER', 'PICKUP', 'BORROWING_PICKUP');
+      ]]>
     </sql>
   </changeSet>
 
@@ -34,8 +34,8 @@
   <changeSet id="createRoleCast" author="singhAdesh">
     <sql>
       <![CDATA[
-            CREATE CAST (character varying as RoleEnum) WITH INOUT AS IMPLICIT;
-            ]]>
+      CREATE CAST (character varying as RoleEnum) WITH INOUT AS IMPLICIT;
+      ]]>
     </sql>
   </changeSet>
 

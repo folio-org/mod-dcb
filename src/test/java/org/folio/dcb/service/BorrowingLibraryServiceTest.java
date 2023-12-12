@@ -20,12 +20,15 @@ import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
 import static org.folio.dcb.utils.EntityUtils.PICKUP_SERVICE_POINT_ID;
+import static org.folio.dcb.utils.EntityUtils.createDcbPickup;
 import static org.folio.dcb.utils.EntityUtils.createDcbTransactionByRole;
+import static org.folio.dcb.utils.EntityUtils.createServicePointRequest;
 import static org.folio.dcb.utils.EntityUtils.createTransactionEntity;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -38,6 +41,10 @@ class BorrowingLibraryServiceTest {
   private TransactionRepository transactionRepository;
   @Mock
   private BaseLibraryService baseLibraryService;
+
+  @Mock
+  private ServicePointService servicePointService;
+
 
   @Test
   void testTransactionStatusUpdateFromOpenToAwaitingPickup() {
@@ -72,7 +79,8 @@ class BorrowingLibraryServiceTest {
 
   @Test
   void createTransactionTest() {
-    borrowingLibraryService.createCirculation(DCB_TRANSACTION_ID, createDcbTransactionByRole(BORROWER), PICKUP_SERVICE_POINT_ID);
+    when(servicePointService.createServicePoint(createDcbPickup())).thenReturn(createServicePointRequest());
+    borrowingLibraryService.createCirculation(DCB_TRANSACTION_ID, createDcbTransactionByRole(BORROWER));
 
     verify(baseLibraryService).createBorrowingLibraryTransaction(DCB_TRANSACTION_ID, createDcbTransactionByRole(BORROWER), PICKUP_SERVICE_POINT_ID);
   }
