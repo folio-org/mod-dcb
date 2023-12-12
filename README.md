@@ -46,11 +46,22 @@ mvn clean install
 
 ### Running it
 
-To be added
+Run locally on listening port 8081 (default listening port):
+
+Using Docker to run the local stand-alone instance:
+
+```shell
+DB_HOST=localhost DB_PORT=5432 DB_DATABASE=okapi_modules DB_USERNAME=folio_admin DB_PASSWORD=folio_admin \
+   java -Dserver.port=8081 -jar target/mod-dcb-*.jar
+```
 
 ### Docker
 
-To be added
+Build the docker container with:
+
+```shell
+docker build -t dev.folio/mod-dcb .
+```
 
 ### Module Descriptor
 
