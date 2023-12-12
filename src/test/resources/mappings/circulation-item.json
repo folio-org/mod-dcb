@@ -55,6 +55,32 @@
     {
       "request": {
         "method": "GET",
+        "url": "/circulation-item/items?query=id%3D%3D5b95877d-86c0-4cb7-a0cd-7660b348ae5a%20and%20barcode%3D%3DDCB_ITEM"
+      },
+      "response": {
+        "status": 200,
+        "body": "{\n \"totalRecords\": 1,\n \"items\": [\n {\n \"id\": \"5b95877d-86c0-4cb7-a0cd-7660b348ae5a\",\n \"holdingsRecordId\": \"10cd3a5a-d36f-4c7a-bc4f-e1ae3cf820c9\",\n \"status\": {\n \"name\": \"In transit\",\n \"date\": \"2023-12-08T07:04:48.224+00:00\"\n },\n \"dcbItem\": true,\n  \"materialTypeId\": \"1a54b431-2e4f-452d-9cae-9cee66c9a892\",\n \"permanentLoanTypeId\": \"4dec5417-0765-4767-bed6-b363a2d7d4e2\",\n \"instanceTitle\": \"BATTLE OF WAR\",\n \"barcode\": \"DCB_ITEM\",\n \"pickupLocation\": \"3a40852d-49fd-4df2-a1f9-006e2641a6e9\",\n \"effectiveLocationId\": \"9d1b77e8-f02e-4b7f-b296-3f2042ddac54\"\n  }\n ]\n}",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/circulation-item/items?query=id%3D%3D5b95877d-86c0-4cb7-a0cd-7660b348ae5a%20and%20barcode%3D%3DnewItem"
+      },
+      "response": {
+        "status": 200,
+        "body": "{\n \"totalRecords\": 0,\n \"items\": []\n}",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
         "url": "/circulation-item/8db107f5-12aa-479f-9c07-39e7c9cf2e4d"
       },
       "response": {

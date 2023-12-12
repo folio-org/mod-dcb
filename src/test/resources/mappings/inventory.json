@@ -41,6 +41,19 @@
     {
       "request": {
         "method": "GET",
+        "url": "/item-storage/items?query=barcode%3D%3DnewItem"
+      },
+      "response": {
+        "status": 200,
+        "body": "{\"users\": [], \"totalRecords\": 0, \"resultInfo\": {\"totalRecords\": 0, \"facets\": [],\"diagnostics\": []}}",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
         "url": "/item-storage/items?query=barcode%3D%3DINVENTORY_ITEM"
       },
       "response": {

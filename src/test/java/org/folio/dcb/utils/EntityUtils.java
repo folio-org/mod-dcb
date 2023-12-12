@@ -3,7 +3,7 @@ package org.folio.dcb.utils;
 import lombok.SneakyThrows;
 import org.folio.dcb.DcbApplication;
 import org.folio.dcb.client.feign.HoldingsStorageClient;
-import org.folio.dcb.domain.dto.CirculationItemRequest;
+import org.folio.dcb.domain.dto.CirculationItem;
 import org.folio.dcb.domain.dto.CirculationRequest;
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.DcbItem;
@@ -12,6 +12,7 @@ import org.folio.dcb.domain.dto.DcbPickup;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.dto.User;
 import org.folio.dcb.domain.dto.TransactionStatus;
+import org.folio.dcb.domain.entity.TransactionAuditEntity;
 import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.domain.dto.InventoryItem;
 import org.folio.dcb.domain.dto.UserGroupCollection;
@@ -101,8 +102,8 @@ public class EntityUtils {
       .build();
   }
 
-  public static CirculationItemRequest createCirculationItemRequest() {
-    return CirculationItemRequest.builder()
+  public static CirculationItem createCirculationItem() {
+    return CirculationItem.builder()
       .id(CIRCULATION_ITEM_REQUEST_ID)
       .build();
   }
@@ -212,4 +213,13 @@ public class EntityUtils {
       .build();
   }
 
+  public static TransactionAuditEntity createTransactionAuditEntity(){
+    return TransactionAuditEntity.builder()
+      .id(UUID.randomUUID())
+      .transactionId(UUID.randomUUID().toString())
+      .action("UPDATE")
+      .before("")
+      .after("")
+      .build();
+  }
 }

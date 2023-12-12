@@ -7,6 +7,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,6 +20,7 @@ import org.folio.dcb.domain.entity.base.AuditableEntity;
 import org.folio.dcb.domain.dto.TransactionStatus.StatusEnum;
 import org.folio.dcb.listener.entity.TransactionAuditEntityListener;
 
+import java.io.Serializable;
 import java.util.UUID;
 
 @Entity
@@ -30,7 +32,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class TransactionEntity extends AuditableEntity {
+public class TransactionEntity extends AuditableEntity implements Serializable {
   @Id
   private String id;
   @Convert(converter = UUIDConverter.class)
@@ -51,6 +53,7 @@ public class TransactionEntity extends AuditableEntity {
   private StatusEnum status;
   @Enumerated(EnumType.STRING)
   private DcbTransaction.RoleEnum role;
-
+  @Transient
+  protected TransactionEntity savedState;
 
 }

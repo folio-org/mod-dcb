@@ -23,4 +23,11 @@
     </createTable>
   </changeSet>
 
+  <changeSet id="MODDCB-75" author="dbykov">
+    <comment>to persist the error action and error message</comment>
+    <addColumn tableName="transactions_audit">
+      <column name="error_message" type="text"/>
+    </addColumn>
+  </changeSet>
+
 </databaseChangeLog>
