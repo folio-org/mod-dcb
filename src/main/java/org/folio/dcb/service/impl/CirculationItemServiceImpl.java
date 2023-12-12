@@ -1,16 +1,17 @@
 package org.folio.dcb.service.impl;
 
-import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.dcb.client.feign.CirculationItemClient;
-import org.folio.dcb.domain.dto.CirculationItemRequest;
+import org.folio.dcb.domain.dto.CirculationItem;
 import org.folio.dcb.domain.dto.DcbItem;
 import org.folio.dcb.domain.dto.ItemStatus;
 import org.folio.dcb.service.CirculationItemService;
 import org.folio.dcb.service.ItemService;
 import org.springframework.stereotype.Service;
+
+import java.util.Objects;
 
 import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.IN_TRANSIT;
 import static org.folio.dcb.utils.DCBConstants.HOLDING_ID;
@@ -30,18 +31,22 @@ public class CirculationItemServiceImpl implements CirculationItemService {
   public void checkIfItemExistsAndCreate(DcbItem dcbItem, String pickupServicePointId) {
     var dcbItemId = dcbItem.getId();
     log.debug("checkIfItemExistsAndCreate:: generate Circulation item by DcbItem with id={} if nit doesn't exist.", dcbItemId);
-
-    try {
-      log.debug("fetchOrCreateItem:: trying to find existed Circulation item");
-      circulationItemClient.retrieveCirculationItemById(dcbItemId);
-    } catch (FeignException.NotFound ex) {
+    var circulationItem = fetchCirculationItemByIdAndBarcode(dcbItemId, dcbItem.getBarcode());
+    if(Objects.isNull(circulationItem)) {
       log.warn("Circulation item not found by id={}. Creating it.", dcbItemId);
       createCirculationItem(dcbItem, pickupServicePointId);
     }
-
   }
 
-  public CirculationItemRequest fetchItemById(String itemId) {
+  private CirculationItem fetchCirculationItemByIdAndBarcode(String id, String barcode) {
+    return circulationItemClient.fetchItemByIdAndBarcode("id==" + id + " and barcode==" + barcode)
+      .getItems()
+      .stream()
+      .findFirst()
+      .orElse(null);
+  }
+
+  public CirculationItem fetchItemById(String itemId) {
     log.info("fetchItemById:: fetching item details for id {} ", itemId);
     return circulationItemClient.retrieveCirculationItemById(itemId);
   }
@@ -51,8 +56,8 @@ public class CirculationItemServiceImpl implements CirculationItemService {
     String materialType = StringUtils.isBlank(item.getMaterialType()) ? MATERIAL_TYPE_NAME_BOOK : item.getMaterialType();
     var materialTypeId = itemService.fetchItemMaterialTypeIdByMaterialTypeName(materialType);
 
-    CirculationItemRequest circulationItemRequest =
-      CirculationItemRequest.builder()
+    CirculationItem circulationItem =
+      CirculationItem.builder()
         .id(item.getId())
         .barcode(item.getBarcode())
         .status(ItemStatus.builder()
@@ -65,6 +70,6 @@ public class CirculationItemServiceImpl implements CirculationItemService {
         .pickupLocation(pickupServicePointId)
         .build();
 
-    circulationItemClient.createCirculationItem(item.getId(), circulationItemRequest);
+    circulationItemClient.createCirculationItem(item.getId(), circulationItem);
   }
 }
