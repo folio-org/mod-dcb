@@ -68,6 +68,19 @@
     {
       "request": {
         "method": "GET",
+        "url": "/circulation-item/items?query=id%3D%3D5b95877d-86c0-4cb7-a0cd-7660b348ae5a%20and%20barcode%3D%3DnewItem"
+      },
+      "response": {
+        "status": 200,
+        "body": "{\n \"totalRecords\": 0,\n \"items\": []\n}",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
         "url": "/circulation-item/8db107f5-12aa-479f-9c07-39e7c9cf2e4d"
       },
       "response": {

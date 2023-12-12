@@ -12,6 +12,7 @@ import org.folio.dcb.domain.dto.DcbPickup;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.dto.User;
 import org.folio.dcb.domain.dto.TransactionStatus;
+import org.folio.dcb.domain.entity.TransactionAuditEntity;
 import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.domain.dto.InventoryItem;
 import org.folio.dcb.domain.dto.UserGroupCollection;
@@ -72,9 +73,9 @@ public class EntityUtils {
   public static org.folio.dcb.domain.dto.ServicePointRequest createServicePointRequest() {
     return org.folio.dcb.domain.dto.ServicePointRequest.builder()
       .id(PICKUP_SERVICE_POINT_ID)
-      .name("DCB_TestLibraryName_TestServicePointCode")
-      .code("DCB_TESTLIBRARYNAME_TESTSERVICEPOINTCODE")
-      .discoveryDisplayName("DCB_TestLibraryName_TestServicePointCode")
+      .name("DCB_TestLibraryCode_TestServicePointCode")
+      .code("DCB_TESTLIBRARYCODE_TESTSERVICEPOINTCODE")
+      .discoveryDisplayName("DCB_TestLibraryCode_TestServicePointCode")
       .pickupLocation(true)
       .holdShelfExpiryPeriod(org.folio.dcb.domain.dto.HoldShelfExpiryPeriod.builder().duration(3).intervalId(org.folio.dcb.domain.dto.HoldShelfExpiryPeriod.IntervalIdEnum.DAYS).build())
       .holdShelfClosedLibraryDateManagement(HOLD_SHELF_CLOSED_LIBRARY_DATE_MANAGEMENT)
@@ -112,7 +113,6 @@ public class EntityUtils {
       .id(patronId)
       .barcode("DCB_PATRON")
       .group("staff")
-      .borrowingLibraryCode("E")
       .build();
   }
   public static DcbPatron createDefaultDcbPatron() {
@@ -124,7 +124,6 @@ public class EntityUtils {
       .servicePointId(PICKUP_SERVICE_POINT_ID)
       .servicePointName("TestServicePointCode")
       .libraryCode("TestLibraryCode")
-      .libraryName("TestLibraryName")
       .build();
   }
 
@@ -163,10 +162,8 @@ public class EntityUtils {
       .servicePointId(PICKUP_SERVICE_POINT_ID)
       .servicePointName("TestServicePointCode")
       .pickupLibraryCode("TestLibraryCode")
-      .pickupLibraryName("TestLibraryName")
       .materialType("book")
       .lendingLibraryCode("LEN")
-      .borrowingLibraryCode("BOR")
       .requestId(UUID.fromString(CIRCULATION_REQUEST_ID))
       .build();
   }
@@ -216,4 +213,13 @@ public class EntityUtils {
       .build();
   }
 
+  public static TransactionAuditEntity createTransactionAuditEntity(){
+    return TransactionAuditEntity.builder()
+      .id(UUID.randomUUID())
+      .transactionId(UUID.randomUUID().toString())
+      .action("UPDATE")
+      .before("")
+      .after("")
+      .build();
+  }
 }

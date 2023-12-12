@@ -68,6 +68,7 @@ public class CirculationItemServiceImpl implements CirculationItemService {
         .materialTypeId(materialTypeId)
         .permanentLoanTypeId(LOAN_TYPE_ID)
         .pickupLocation(pickupServicePointId)
+        .lendingLibraryCode(item.getLendingLibraryCode())
         .build();
 
     circulationItemClient.createCirculationItem(item.getId(), circulationItem);
