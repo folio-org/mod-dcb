@@ -14,11 +14,5 @@ public interface LibraryService {
    */
   TransactionStatusResponse createCirculation(String dcbTransactionId, DcbTransaction dcbTransaction, String pickupServicePointId);
 
-  /**
-   * Update transaction status based on transactionEntity
-   * @param transactionEntity - transactionEntity entity
-   */
-  void updateStatusByTransactionEntity(TransactionEntity transactionEntity);
-
   void updateTransactionStatus(TransactionEntity dcbTransaction, TransactionStatus transactionStatus);
 }

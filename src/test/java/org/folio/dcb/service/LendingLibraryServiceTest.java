@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
@@ -28,12 +27,10 @@ import static org.folio.dcb.utils.EntityUtils.createDcbTransactionByRole;
 import static org.folio.dcb.utils.EntityUtils.createTransactionEntity;
 import static org.folio.dcb.utils.EntityUtils.createTransactionStatus;
 import static org.folio.dcb.utils.EntityUtils.createUser;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -70,34 +67,6 @@ class LendingLibraryServiceTest {
     verify(requestService).createPageItemRequest(user, item, PICKUP_SERVICE_POINT_ID);
     verify(baseLibraryService).saveDcbTransaction(DCB_TRANSACTION_ID, createDcbTransactionByRole(LENDER), CIRCULATION_REQUEST_ID);
     Assertions.assertEquals(TransactionStatusResponse.StatusEnum.CREATED, response.getStatus());
-  }
-
-  @Test
-  void updateTransactionTestFromCreatedToOpen() {
-    var transactionEntity = createTransactionEntity();
-    transactionEntity.setStatus(TransactionStatus.StatusEnum.CREATED);
-    transactionEntity.setRole(LENDER);
-
-    lendingLibraryService.updateStatusByTransactionEntity(transactionEntity);
-    Mockito.verify(transactionRepository, times(1)).save(transactionEntity);
-  }
-
-  @Test
-  void updateTransactionTestFromCheckInToClose() {
-    var transactionEntity = createTransactionEntity();
-    transactionEntity.setStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_IN);
-    transactionEntity.setRole(LENDER);
-
-    lendingLibraryService.updateStatusByTransactionEntity(transactionEntity);
-    Mockito.verify(transactionRepository, times(1)).save(transactionEntity);
-  }
-
-  @Test
-  void updateTransactionTestWithInvalidData() {
-    var transactionEntity = createTransactionEntity();
-    transactionEntity.setStatus(TransactionStatus.StatusEnum.CREATED);
-    transactionEntity.setRole(LENDER);
-    assertDoesNotThrow(() -> lendingLibraryService.updateStatusByTransactionEntity(transactionEntity));
   }
 
   @Test
