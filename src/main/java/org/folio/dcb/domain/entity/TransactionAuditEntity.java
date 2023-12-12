@@ -36,6 +36,7 @@ public class TransactionAuditEntity extends TransactionAuditableEntity {
   @ColumnTransformer(write = "?::jsonb")
   @Column(columnDefinition = "jsonb")
   private String after;
+  private String errorMessage;
 
   private String transactionId;
 }

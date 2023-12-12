@@ -3,7 +3,7 @@ package org.folio.dcb.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.ObjectUtils;
-import org.folio.dcb.domain.dto.CirculationItemRequest;
+import org.folio.dcb.domain.dto.CirculationItem;
 import org.folio.dcb.domain.dto.CirculationRequest;
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.TransactionStatus;
@@ -88,13 +88,13 @@ public class BaseLibraryService {
 
   public void updateStatusByTransactionEntity(TransactionEntity transactionEntity) {
     log.debug("updateTransactionStatus:: Received checkIn event for itemId: {}", transactionEntity.getItemId());
-    CirculationItemRequest circulationItemRequest = circulationItemService.fetchItemById(transactionEntity.getItemId());
-    var circulationItemRequestStatus = circulationItemRequest.getStatus().getName();
-    if (OPEN == transactionEntity.getStatus() && AWAITING_PICKUP == circulationItemRequestStatus) {
+    CirculationItem circulationItem = circulationItemService.fetchItemById(transactionEntity.getItemId());
+    var circulationItemStatus = circulationItem.getStatus().getName();
+    if (OPEN == transactionEntity.getStatus() && AWAITING_PICKUP == circulationItemStatus) {
       log.info(UPDATE_STATUS_BY_TRANSACTION_ENTITY_LOG_MESSAGE_PATTERN,
         transactionEntity.getStatus().getValue(), TransactionStatus.StatusEnum.AWAITING_PICKUP.getValue());
       updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.AWAITING_PICKUP);
-    } else if (TransactionStatus.StatusEnum.AWAITING_PICKUP == transactionEntity.getStatus() && CHECKED_OUT == circulationItemRequestStatus) {
+    } else if (TransactionStatus.StatusEnum.AWAITING_PICKUP == transactionEntity.getStatus() && CHECKED_OUT == circulationItemStatus) {
       log.info(UPDATE_STATUS_BY_TRANSACTION_ENTITY_LOG_MESSAGE_PATTERN,
         transactionEntity.getStatus().getValue(), ITEM_CHECKED_OUT.getValue());
       updateTransactionEntity(transactionEntity, ITEM_CHECKED_OUT);
@@ -104,7 +104,7 @@ public class BaseLibraryService {
       updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.ITEM_CHECKED_IN);
     } else {
       log.info("updateStatusByTransactionEntity:: Item status is {}. So status of transaction is not updated",
-        circulationItemRequestStatus);
+        circulationItemStatus);
     }
 
   }
