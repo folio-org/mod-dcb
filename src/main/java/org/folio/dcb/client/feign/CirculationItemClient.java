@@ -18,5 +18,5 @@ public interface CirculationItemClient {
   @GetMapping("/{circulationItemId}")
   CirculationItem retrieveCirculationItemById(@PathVariable("circulationItemId") String circulationItemId);
 
-  @GetMapping("/items")
+  @GetMapping
   CirculationItemCollection fetchItemByIdAndBarcode(@RequestParam("query") String query);}
