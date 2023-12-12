@@ -1,6 +1,7 @@
 package org.folio.dcb.listener;
 
 import org.folio.dcb.controller.BaseIT;
+import org.folio.dcb.domain.dto.ItemStatus;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.listener.kafka.CirculationEventListener;
 import org.folio.dcb.repository.TransactionRepository;
@@ -31,7 +32,8 @@ import static org.mockito.Mockito.*;
 class CirculationRequestEventListenerTest extends BaseIT {
 
   private static final String CHECK_IN_EVENT_SAMPLE = getMockDataAsString("mockdata/kafka/check_in.json");
-
+  private static final String CHECK_IN_TRANSIT_EVENT_SAMPLE = getMockDataAsString("mockdata/kafka/check_in_transit.json");
+  private static final String CHECK_IN_UNDEFINED_EVENT_SAMPLE = getMockDataAsString("mockdata/kafka/request_undefined.json");
   private static final String REQUEST_CANCEL_EVENT_SAMPLE = getMockDataAsString("mockdata/kafka/cancel_request.json");
 
   @InjectMocks
@@ -88,6 +90,40 @@ class CirculationRequestEventListenerTest extends BaseIT {
     when(transactionRepository.findTransactionByRequestIdAndStatusNotInClosed(any())).thenReturn(Optional.of(transactionEntity));
     eventListener.handleRequestEvent(REQUEST_CANCEL_EVENT_SAMPLE, messageHeaders);
     Mockito.verify(transactionRepository).save(any());
+  }
+
+  @Test
+  void handleOpenRequestTest() {
+    var transactionEntity = createTransactionEntity();
+    transactionEntity.setItemId("5b95877e-86c0-4cb7-a0cd-7660b348ae5d");
+    transactionEntity.setStatus(TransactionStatus.StatusEnum.CREATED);
+    transactionEntity.setRole(LENDER);
+
+    var circulationItem = createCirculationItem();
+    circulationItem.setStatus(org.folio.dcb.domain.dto.ItemStatus.builder().name(ItemStatus.NameEnum.IN_TRANSIT).build());
+
+    MessageHeaders messageHeaders = getMessageHeaders();
+    when(transactionRepository.findTransactionByRequestIdAndStatusNotInClosed(any())).thenReturn(Optional.of(transactionEntity));
+    when(circulationItemService.fetchItemById(anyString())).thenReturn(circulationItem);
+    eventListener.handleRequestEvent(CHECK_IN_TRANSIT_EVENT_SAMPLE, messageHeaders);
+    Mockito.verify(transactionRepository).save(any());
+  }
+
+  @Test
+  void handleUndefinedEventTest() {
+    var transactionEntity = createTransactionEntity();
+    transactionEntity.setItemId("5b95877e-86c0-4cb7-a0cd-7660b348ae5d");
+    transactionEntity.setStatus(TransactionStatus.StatusEnum.CREATED);
+    transactionEntity.setRole(LENDER);
+
+    var circulationItem = createCirculationItem();
+    circulationItem.setStatus(org.folio.dcb.domain.dto.ItemStatus.builder().name(ItemStatus.NameEnum.IN_TRANSIT).build());
+
+    MessageHeaders messageHeaders = getMessageHeaders();
+    when(transactionRepository.findTransactionByRequestIdAndStatusNotInClosed(any())).thenReturn(Optional.of(transactionEntity));
+    when(circulationItemService.fetchItemById(anyString())).thenReturn(circulationItem);
+    eventListener.handleRequestEvent(CHECK_IN_UNDEFINED_EVENT_SAMPLE, messageHeaders);
+    Mockito.verify(transactionRepository, times(0)).save(any());
   }
 
   @Test

@@ -38,10 +38,6 @@ public class BorrowingLibraryServiceImpl implements LibraryService {
   }
 
   @Override
-  public void updateStatusByTransactionEntity(TransactionEntity transactionEntity) {
-  }
-
-  @Override
   public void updateTransactionStatus(TransactionEntity dcbTransaction, TransactionStatus transactionStatus) {
     log.debug("updateTransactionStatus:: Updating dcbTransaction {} to status {} ", dcbTransaction, transactionStatus);
     var currentStatus = dcbTransaction.getStatus();

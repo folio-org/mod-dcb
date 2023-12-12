@@ -26,6 +26,7 @@ import static org.folio.dcb.utils.EntityUtils.createTransactionEntity;
 import static org.folio.dcb.utils.EntityUtils.getMockDataAsString;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -33,6 +34,8 @@ class CirculationLoanEventListenerTest extends BaseIT {
 
   private static final String CHECK_OUT_EVENT_SAMPLE = getMockDataAsString("mockdata/kafka/check_out.json");
   private static final String CHECK_IN_EVENT_SAMPLE = getMockDataAsString("mockdata/kafka/loan_check_in.json");
+  private static final String NO_ITEM_ID_EVENT_SAMPLE = getMockDataAsString("mockdata/kafka/loan_check_in_no_item_id.json");
+  private static final String CHECK_IN_UNDEFINED_SAMPLE = getMockDataAsString("mockdata/kafka/loan_undefined.json");
 
   @Mock
   private BorrowingPickupLibraryServiceImpl libraryService;
@@ -80,6 +83,18 @@ class CirculationLoanEventListenerTest extends BaseIT {
   }
 
   @Test
+  void handleEmptyEventTest() {
+    var transactionEntity = createTransactionEntity();
+    transactionEntity.setItemId("8db107f5-12aa-479f-9c07-39e7c9cf2e4d");
+    transactionEntity.setStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_OUT);
+    transactionEntity.setRole(PICKUP);
+    MessageHeaders messageHeaders = getMessageHeaders();
+    when(transactionRepository.findTransactionByItemIdAndStatusNotInClosed(any())).thenReturn(Optional.of(transactionEntity));
+    eventListener.handleLoanEvent(NO_ITEM_ID_EVENT_SAMPLE, messageHeaders);
+    Mockito.verify(transactionRepository, times(0)).save(any());
+  }
+
+  @Test
   void handleCheckInEventInBorrowingPickupFromItemCheckedOutToCheckedIn() {
     var transactionEntity = createTransactionEntity();
     transactionEntity.setItemId("8db107f5-12aa-479f-9c07-39e7c9cf2e4d");
@@ -101,6 +116,18 @@ class CirculationLoanEventListenerTest extends BaseIT {
     when(transactionRepository.findTransactionByItemIdAndStatusNotInClosed(any())).thenReturn(Optional.of(transactionEntity));
     eventListener.handleLoanEvent(CHECK_IN_EVENT_SAMPLE, messageHeaders);
     Mockito.verify(transactionRepository).save(any());
+  }
+
+  @Test
+  void handleUndefinedEvent() {
+    var transactionEntity = createTransactionEntity();
+    transactionEntity.setItemId("8db107f5-12aa-479f-9c07-39e7c9cf2e4d");
+    transactionEntity.setStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_IN);
+    transactionEntity.setRole(LENDER);
+    MessageHeaders messageHeaders = getMessageHeaders();
+    when(transactionRepository.findTransactionByItemIdAndStatusNotInClosed(any())).thenReturn(Optional.of(transactionEntity));
+    eventListener.handleLoanEvent(CHECK_IN_UNDEFINED_SAMPLE, messageHeaders);
+    Mockito.verify(transactionRepository, times(0)).save(any());
   }
 
   @Test

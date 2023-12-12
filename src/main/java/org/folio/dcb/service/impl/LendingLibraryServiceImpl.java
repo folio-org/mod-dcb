@@ -17,8 +17,6 @@ import org.folio.dcb.service.UserService;
 import org.springframework.stereotype.Service;
 
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.AWAITING_PICKUP;
-import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CLOSED;
-import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_IN;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_OUT;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
@@ -83,19 +81,7 @@ public class LendingLibraryServiceImpl implements LibraryService {
     }
   }
 
-  @Override
-  public void updateStatusByTransactionEntity(TransactionEntity transactionEntity) {
-    log.debug("updateTransactionStatus:: Received checkIn event for itemId: {}", transactionEntity.getItemId());
-    if (CREATED == transactionEntity.getStatus()) {
-      log.info("updateTransactionStatus:: Transaction status updated from CREATED to OPEN for itemId: {}", transactionEntity.getItemId());
-      updateTransactionEntity(transactionEntity, OPEN);
-    } else if (ITEM_CHECKED_IN == transactionEntity.getStatus()) {
-      log.info("updateTransactionStatus:: Transaction status updated from CHECKED_IN to CLOSED for itemId: {}", transactionEntity.getItemId());
-      updateTransactionEntity(transactionEntity, CLOSED);
-    }
-  }
-
-  private void updateTransactionEntity(TransactionEntity transactionEntity, TransactionStatus.StatusEnum transactionStatusEnum) {
+  private void updateTransactionEntity (TransactionEntity transactionEntity, TransactionStatus.StatusEnum transactionStatusEnum) {
     log.info("updateTransactionEntity:: updating transaction entity from {} to {}", transactionEntity.getStatus(), transactionStatusEnum);
     transactionEntity.setStatus(transactionStatusEnum);
     transactionRepository.save(transactionEntity);

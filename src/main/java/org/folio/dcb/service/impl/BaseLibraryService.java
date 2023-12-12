@@ -3,7 +3,6 @@ package org.folio.dcb.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.ObjectUtils;
-import org.folio.dcb.domain.dto.CirculationItem;
 import org.folio.dcb.domain.dto.CirculationRequest;
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.TransactionStatus;
@@ -23,13 +22,10 @@ import org.springframework.stereotype.Service;
 import java.util.Objects;
 import java.util.UUID;
 
-import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.AWAITING_PICKUP;
-import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.CHECKED_OUT;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CANCELLED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CLOSED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_IN;
-import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_OUT;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
 import static org.folio.dcb.utils.DCBConstants.DCB_TYPE;
 import static org.folio.dcb.utils.DCBConstants.SHADOW_TYPE;
@@ -38,8 +34,6 @@ import static org.folio.dcb.utils.DCBConstants.SHADOW_TYPE;
 @RequiredArgsConstructor
 @Log4j2
 public class BaseLibraryService {
-
-  private static final String UPDATE_STATUS_BY_TRANSACTION_ENTITY_LOG_MESSAGE_PATTERN = "updateStatusByTransactionEntity:: Updated item status from {} to {}";
 
   private final TransactionRepository transactionRepository;
   private final CirculationService circulationService;
@@ -86,29 +80,6 @@ public class BaseLibraryService {
     }
   }
 
-  public void updateStatusByTransactionEntity(TransactionEntity transactionEntity) {
-    log.debug("updateTransactionStatus:: Received checkIn event for itemId: {}", transactionEntity.getItemId());
-    CirculationItem circulationItem = circulationItemService.fetchItemById(transactionEntity.getItemId());
-    var circulationItemStatus = circulationItem.getStatus().getName();
-    if (OPEN == transactionEntity.getStatus() && AWAITING_PICKUP == circulationItemStatus) {
-      log.info(UPDATE_STATUS_BY_TRANSACTION_ENTITY_LOG_MESSAGE_PATTERN,
-        transactionEntity.getStatus().getValue(), TransactionStatus.StatusEnum.AWAITING_PICKUP.getValue());
-      updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.AWAITING_PICKUP);
-    } else if (TransactionStatus.StatusEnum.AWAITING_PICKUP == transactionEntity.getStatus() && CHECKED_OUT == circulationItemStatus) {
-      log.info(UPDATE_STATUS_BY_TRANSACTION_ENTITY_LOG_MESSAGE_PATTERN,
-        transactionEntity.getStatus().getValue(), ITEM_CHECKED_OUT.getValue());
-      updateTransactionEntity(transactionEntity, ITEM_CHECKED_OUT);
-    } else if(ITEM_CHECKED_OUT == transactionEntity.getStatus()){
-      log.info(UPDATE_STATUS_BY_TRANSACTION_ENTITY_LOG_MESSAGE_PATTERN,
-        transactionEntity.getStatus().getValue(), TransactionStatus.StatusEnum.ITEM_CHECKED_IN.getValue());
-      updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.ITEM_CHECKED_IN);
-    } else {
-      log.info("updateStatusByTransactionEntity:: Item status is {}. So status of transaction is not updated",
-        circulationItemStatus);
-    }
-
-  }
-
   public void updateTransactionStatus(TransactionEntity dcbTransaction, TransactionStatus transactionStatus) {
     log.debug("updateTransactionStatus:: Updating dcbTransaction {} to status {} ", dcbTransaction, transactionStatus);
     var currentStatus = dcbTransaction.getStatus();
@@ -150,7 +121,7 @@ public class BaseLibraryService {
       throw new ResourceAlreadyExistException(String.format("Unable to create item with barcode %s as it exists in inventory ", itemBarcode));
   }
 
-  private void updateTransactionEntity(TransactionEntity transactionEntity, TransactionStatus.StatusEnum transactionStatusEnum) {
+  public void updateTransactionEntity(TransactionEntity transactionEntity, TransactionStatus.StatusEnum transactionStatusEnum) {
     log.debug("updateTransactionEntity:: updating transaction entity from {} to {}", transactionEntity.getStatus(), transactionStatusEnum);
     transactionEntity.setStatus(transactionStatusEnum);
     transactionRepository.save(transactionEntity);

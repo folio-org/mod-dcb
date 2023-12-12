@@ -44,11 +44,6 @@ public class PickupLibraryServiceImpl implements LibraryService {
   }
 
   @Override
-  public void updateStatusByTransactionEntity(TransactionEntity transactionEntity) {
-    baseLibraryService.updateStatusByTransactionEntity(transactionEntity);
-  }
-
-  @Override
   public void updateTransactionStatus(TransactionEntity dcbTransaction, TransactionStatus transactionStatus) {
     baseLibraryService.updateTransactionStatus(dcbTransaction, transactionStatus);
   }
