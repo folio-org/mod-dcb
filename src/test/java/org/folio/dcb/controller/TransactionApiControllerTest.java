@@ -2,8 +2,11 @@ package org.folio.dcb.controller;
 
 import org.folio.dcb.domain.dto.DcbItem;
 import org.folio.dcb.domain.dto.TransactionStatus;
+import org.folio.dcb.domain.entity.TransactionAuditEntity;
+import org.folio.dcb.repository.TransactionAuditRepository;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.spring.service.SystemUserScopedExecutionService;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -35,8 +38,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 class TransactionApiControllerTest extends BaseIT {
 
+  private static final String TRANSACTION_AUDIT_ERROR_ACTION = "ERROR";
+  private static final String TRANSACTION_AUDIT_DUPLICATE_ERROR_ACTION = "DUPLICATE_ERROR";
+  private static final String DUPLICATE_ERROR_TRANSACTION_ID = "-1";
+
   @Autowired
   private TransactionRepository transactionRepository;
+  @Autowired
+  private TransactionAuditRepository transactionAuditRepository;
 
   @Autowired
   private SystemUserScopedExecutionService systemUserScopedExecutionService;
@@ -65,6 +74,17 @@ class TransactionApiControllerTest extends BaseIT {
           .accept(MediaType.APPLICATION_JSON))
       .andExpectAll(status().is4xxClientError(),
         jsonPath("$.errors[0].code", is("DUPLICATE_ERROR")));
+
+    // check for DUPLICATE_ERROR propagated into transactions_audit.
+    systemUserScopedExecutionService.executeAsyncSystemUserScoped(
+      TENANT,
+      () -> {
+        TransactionAuditEntity auditExisting = transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(DCB_TRANSACTION_ID)
+          .orElse(null);
+        Assertions.assertNotNull(auditExisting);
+        Assertions.assertNotEquals(TRANSACTION_AUDIT_DUPLICATE_ERROR_ACTION, auditExisting.getAction());
+        Assertions.assertNotEquals(DUPLICATE_ERROR_TRANSACTION_ID, auditExisting.getTransactionId());      }
+    );
   }
 
   @Test
@@ -94,6 +114,17 @@ class TransactionApiControllerTest extends BaseIT {
           .accept(MediaType.APPLICATION_JSON))
       .andExpectAll(status().is4xxClientError(),
         jsonPath("$.errors[0].code", is("DUPLICATE_ERROR")));
+
+    // check for DUPLICATE_ERROR propagated into transactions_audit.
+    systemUserScopedExecutionService.executeAsyncSystemUserScoped(
+      TENANT,
+      () -> {
+        TransactionAuditEntity auditExisting = transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(DCB_TRANSACTION_ID)
+          .orElse(null);
+        Assertions.assertNotNull(auditExisting);
+        Assertions.assertNotEquals(TRANSACTION_AUDIT_DUPLICATE_ERROR_ACTION, auditExisting.getAction());
+        Assertions.assertNotEquals(DUPLICATE_ERROR_TRANSACTION_ID, auditExisting.getTransactionId());      }
+    );
   }
 
   @Test
@@ -101,14 +132,26 @@ class TransactionApiControllerTest extends BaseIT {
     var dcbTransaction = createDcbTransactionByRole(LENDER);
     dcbTransaction.getItem().setId("5b95877d-86c0-4cb7-a0cd-7660b348ae5b");
 
+    String trnId = UUID.randomUUID().toString();
+
     this.mockMvc.perform(
-        post("/transactions/" + UUID.randomUUID())
+        post("/transactions/" + trnId)
           .content(asJsonString(dcbTransaction))
           .headers(defaultHeaders())
           .contentType(MediaType.APPLICATION_JSON)
           .accept(MediaType.APPLICATION_JSON))
       .andExpectAll(status().is4xxClientError(),
         jsonPath("$.errors[0].code", is("NOT_FOUND_ERROR")));
+
+    // check for transactions_audit error content.
+    systemUserScopedExecutionService.executeAsyncSystemUserScoped(
+      TENANT,
+      () -> {
+        TransactionAuditEntity auditExisting = transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(trnId)
+          .orElse(null);
+        Assertions.assertNotNull(auditExisting);
+        Assertions.assertEquals(TRANSACTION_AUDIT_ERROR_ACTION, auditExisting.getAction());  }
+    );
   }
 
   @Test
@@ -116,14 +159,25 @@ class TransactionApiControllerTest extends BaseIT {
     var dcbTransaction = createDcbTransactionByRole(BORROWING_PICKUP);
     dcbTransaction.getPatron().setId(NOT_EXISTED_PATRON_ID);
 
+    String trnId = UUID.randomUUID().toString();
     this.mockMvc.perform(
-        post("/transactions/" + UUID.randomUUID())
+        post("/transactions/" + trnId)
           .content(asJsonString(dcbTransaction))
           .headers(defaultHeaders())
           .contentType(MediaType.APPLICATION_JSON)
           .accept(MediaType.APPLICATION_JSON))
       .andExpectAll(status().is4xxClientError(),
         jsonPath("$.errors[0].code", is("NOT_FOUND_ERROR")));
+
+    // check for transactions_audit error content.
+    systemUserScopedExecutionService.executeAsyncSystemUserScoped(
+      TENANT,
+      () -> {
+        TransactionAuditEntity auditExisting = transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(trnId)
+          .orElse(null);
+        Assertions.assertNotNull(auditExisting);
+        Assertions.assertEquals(TRANSACTION_AUDIT_ERROR_ACTION, auditExisting.getAction());  }
+    );
   }
 
     /**
@@ -300,6 +354,16 @@ class TransactionApiControllerTest extends BaseIT {
       .andExpectAll(status().is4xxClientError(),
         jsonPath("$.errors[0].code", is("DUPLICATE_ERROR")));
 
+    // check for DUPLICATE_ERROR propagated into transactions_audit.
+    systemUserScopedExecutionService.executeAsyncSystemUserScoped(
+      TENANT,
+      () -> {
+        TransactionAuditEntity auditExisting = transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(DCB_TRANSACTION_ID)
+          .orElse(null);
+        Assertions.assertNotNull(auditExisting);
+        Assertions.assertNotEquals(TRANSACTION_AUDIT_DUPLICATE_ERROR_ACTION, auditExisting.getAction());
+        Assertions.assertNotEquals(DUPLICATE_ERROR_TRANSACTION_ID, auditExisting.getTransactionId());      }
+    );
   }
 
   @Test
@@ -346,6 +410,17 @@ class TransactionApiControllerTest extends BaseIT {
           .accept(MediaType.APPLICATION_JSON))
       .andExpectAll(status().is4xxClientError(),
         jsonPath("$.errors[0].code", is("DUPLICATE_ERROR")));
+
+    // check for DUPLICATE_ERROR propagated into transactions_audit.
+    systemUserScopedExecutionService.executeAsyncSystemUserScoped(
+      TENANT,
+      () -> {
+        TransactionAuditEntity auditExisting = transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(DCB_TRANSACTION_ID)
+          .orElse(null);
+        Assertions.assertNotNull(auditExisting);
+        Assertions.assertNotEquals(TRANSACTION_AUDIT_DUPLICATE_ERROR_ACTION, auditExisting.getAction());
+        Assertions.assertNotEquals(DUPLICATE_ERROR_TRANSACTION_ID, auditExisting.getTransactionId());      }
+    );
   }
 
   @Test
