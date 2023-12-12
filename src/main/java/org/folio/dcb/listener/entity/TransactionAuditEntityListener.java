@@ -3,32 +3,26 @@ package org.folio.dcb.listener.entity;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.PostPersist;
+import jakarta.persistence.PostLoad;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.SerializationUtils;
 import org.folio.dcb.domain.entity.TransactionAuditEntity;
 import org.folio.dcb.domain.entity.TransactionEntity;
-import org.folio.dcb.service.impl.TransactionsServiceImpl;
 import org.folio.dcb.utils.BeanUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
 
 @Component
 @Log4j2
 public class TransactionAuditEntityListener {
   private static final String CREATE_ACTION = "CREATE";
   private static final String UPDATE_ACTION = "UPDATE";
-
   @Autowired
   private BeanUtil beanUtil;
   @Autowired
   private ObjectMapper objectMapper;
-  private static final Map<String, TransactionEntity> originalStateCache = new HashMap<>();
 
   @PrePersist
   public void onPrePersist(Object entity) throws JsonProcessingException {
@@ -44,37 +38,25 @@ public class TransactionAuditEntityListener {
     getEntityManager().persist(transactionAuditEntity);
   }
 
-  @PostPersist
-  public void onPostPersist(Object entity) {
-    TransactionEntity transactionEntity = (TransactionEntity) entity;
-    originalStateCache.put(transactionEntity.getId(), transactionEntity);
-  }
-
   @PreUpdate
   public void onPreUpdate(Object entity) throws JsonProcessingException {
     log.debug("onPreUpdate:: creating transaction audit record");
     TransactionEntity transactionEntity = (TransactionEntity) entity;
     TransactionAuditEntity transactionAuditEntity = new TransactionAuditEntity();
-    transactionAuditEntity.setBefore(objectMapper.writeValueAsString(getTransactionEntity(transactionEntity.getId())));
+    transactionAuditEntity.setBefore(objectMapper.writeValueAsString(transactionEntity.getSavedState()));
     transactionAuditEntity.setAfter(objectMapper.writeValueAsString(transactionEntity));
     transactionAuditEntity.setTransactionId(transactionEntity.getId());
     transactionAuditEntity.setAction(UPDATE_ACTION);
 
     log.info("onPreUpdate:: creating transaction audit record {} with action {}", transactionEntity.getId(), UPDATE_ACTION);
     getEntityManager().persist(transactionAuditEntity);
-    originalStateCache.put(transactionEntity.getId(), transactionEntity);
   }
 
-  private TransactionEntity getTransactionEntity(String transactionId) {
-    // Try to get the original state from the cache
-    TransactionEntity originalState = originalStateCache.get(transactionId);
-
-    // If not found, fetch it from the database
-    if (Objects.isNull(originalState)) {
-      originalState = getTransactionsService().getTransactionEntityOrThrow(transactionId);
-      originalStateCache.put(transactionId, originalState);
-    }
-    return originalState;
+  //This method will be invoked when the transactionEntity is loaded and the transactionEntity is stored in a transient field
+  //The stored value will be used in onPreUpdate method's setBefore method.
+  @PostLoad
+  public void saveState(TransactionEntity transactionEntity){
+    transactionEntity.setSavedState(SerializationUtils.clone((transactionEntity)));
   }
 
   //EntityListeners are instantiated by JPA, not Spring,
@@ -83,7 +65,4 @@ public class TransactionAuditEntityListener {
     return beanUtil.getBean(EntityManager.class);
   }
 
-  private TransactionsServiceImpl getTransactionsService() {
-    return beanUtil.getBean(TransactionsServiceImpl.class);
-  }
 }

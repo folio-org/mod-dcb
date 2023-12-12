@@ -26,11 +26,9 @@ public class TransactionMapper {
       .servicePointId(pickup.getServicePointId())
       .servicePointName(pickup.getServicePointName())
       .pickupLibraryCode(pickup.getLibraryCode())
-      .pickupLibraryName(pickup.getLibraryName())
       .patronBarcode(patron.getBarcode())
       .patronId(patron.getId())
       .patronGroup(patron.getGroup())
-      .borrowingLibraryCode(patron.getBorrowingLibraryCode())
 
       .role(dcbTransaction.getRole())
       .build();

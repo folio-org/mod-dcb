@@ -3,6 +3,7 @@ package org.folio.dcb.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.ObjectUtils;
+import org.folio.dcb.domain.dto.CirculationItemRequest;
 import org.folio.dcb.domain.dto.CirculationRequest;
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.TransactionStatus;
@@ -22,10 +23,13 @@ import org.springframework.stereotype.Service;
 import java.util.Objects;
 import java.util.UUID;
 
+import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.AWAITING_PICKUP;
+import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.CHECKED_OUT;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CANCELLED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CLOSED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_IN;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_OUT;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
 import static org.folio.dcb.utils.DCBConstants.DCB_TYPE;
 import static org.folio.dcb.utils.DCBConstants.SHADOW_TYPE;
@@ -34,6 +38,8 @@ import static org.folio.dcb.utils.DCBConstants.SHADOW_TYPE;
 @RequiredArgsConstructor
 @Log4j2
 public class BaseLibraryService {
+
+  private static final String UPDATE_STATUS_BY_TRANSACTION_ENTITY_LOG_MESSAGE_PATTERN = "updateStatusByTransactionEntity:: Updated item status from {} to {}";
 
   private final TransactionRepository transactionRepository;
   private final CirculationService circulationService;

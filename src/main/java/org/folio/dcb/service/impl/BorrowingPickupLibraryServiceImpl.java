@@ -18,8 +18,8 @@ public class BorrowingPickupLibraryServiceImpl implements LibraryService {
   private final BaseLibraryService baseLibraryService;
 
   @Override
-  public TransactionStatusResponse createCirculation(String dcbTransactionId, DcbTransaction dcbTransaction, String pickupServicePointId) {
-    return baseLibraryService.createBorrowingLibraryTransaction(dcbTransactionId, dcbTransaction, pickupServicePointId);
+  public TransactionStatusResponse createCirculation(String dcbTransactionId, DcbTransaction dcbTransaction) {
+    return baseLibraryService.createBorrowingLibraryTransaction(dcbTransactionId, dcbTransaction, dcbTransaction.getPickup().getServicePointId());
   }
 
   @Override

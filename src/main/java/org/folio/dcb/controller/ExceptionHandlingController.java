@@ -34,15 +34,21 @@ public class ExceptionHandlingController {
   }
 
   @ResponseStatus(HttpStatus.NOT_FOUND)
-  @ExceptionHandler(NotFoundException.class)
-  public Errors handleNotFoundException(NotFoundException ex) {
+  @ExceptionHandler({
+    NotFoundException.class,
+    FeignException.NotFound.class
+  })
+  public Errors handleNotFoundException(Exception ex) {
     logExceptionMessage(ex);
     return createExternalError(ex.getMessage(), NOT_FOUND_ERROR);
   }
 
   @ResponseStatus(HttpStatus.CONFLICT)
-  @ExceptionHandler(ResourceAlreadyExistException.class)
-  public Errors handleAlreadyExistException(ResourceAlreadyExistException ex) {
+  @ExceptionHandler({
+    ResourceAlreadyExistException.class,
+    FeignException.Conflict.class
+  })
+  public Errors handleAlreadyExistException(Exception ex) {
     logExceptionMessage(ex);
     return createExternalError(ex.getMessage(), DUPLICATE_ERROR);
   }
@@ -59,7 +65,8 @@ public class ExceptionHandlingController {
     MissingServletRequestParameterException.class,
     MethodArgumentTypeMismatchException.class,
     HttpMessageNotReadableException.class,
-    IllegalArgumentException.class
+    IllegalArgumentException.class,
+    FeignException.BadRequest.class
   })
   public Errors handleValidationErrors(Exception ex) {
     logExceptionMessage(ex);

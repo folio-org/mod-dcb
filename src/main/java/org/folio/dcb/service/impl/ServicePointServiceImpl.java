@@ -24,8 +24,8 @@ public class ServicePointServiceImpl implements ServicePointService {
 
     ServicePointRequest servicePointRequest = createServicePointRequest(
       pickupServicePoint.getServicePointId(),
-      getServicePointName(pickupServicePoint.getLibraryName(), pickupServicePoint.getServicePointName()),
-      getServicePointCode(pickupServicePoint.getLibraryName(), pickupServicePoint.getServicePointName())
+      getServicePointName(pickupServicePoint.getLibraryCode(), pickupServicePoint.getServicePointName()),
+      getServicePointCode(pickupServicePoint.getLibraryCode(), pickupServicePoint.getServicePointName())
     );
 
      try{
@@ -52,11 +52,11 @@ public class ServicePointServiceImpl implements ServicePointService {
       .build();
   }
 
-  private String getServicePointName(String libraryName, String servicePointName){
-    return String.format("DCB_%s_%s", libraryName, servicePointName);
+  private String getServicePointName(String libraryCode, String servicePointName){
+    return String.format("DCB_%s_%s", libraryCode, servicePointName);
   }
 
-  private String getServicePointCode(String libraryName, String servicePointName){
-    return String.format("DCB_%s_%s", libraryName, servicePointName).replaceAll("\\s+","").toUpperCase();
+  private String getServicePointCode(String libraryCode, String servicePointName){
+    return String.format("DCB_%s_%s", libraryCode, servicePointName).replaceAll("\\s+","").toUpperCase();
   }
 }

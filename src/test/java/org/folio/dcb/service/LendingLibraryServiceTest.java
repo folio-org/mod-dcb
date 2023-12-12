@@ -22,8 +22,10 @@ import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
 import static org.folio.dcb.utils.EntityUtils.PICKUP_SERVICE_POINT_ID;
 import static org.folio.dcb.utils.EntityUtils.createCirculationRequest;
 import static org.folio.dcb.utils.EntityUtils.createDcbItem;
+import static org.folio.dcb.utils.EntityUtils.createDcbPickup;
 import static org.folio.dcb.utils.EntityUtils.createDefaultDcbPatron;
 import static org.folio.dcb.utils.EntityUtils.createDcbTransactionByRole;
+import static org.folio.dcb.utils.EntityUtils.createServicePointRequest;
 import static org.folio.dcb.utils.EntityUtils.createTransactionEntity;
 import static org.folio.dcb.utils.EntityUtils.createTransactionStatus;
 import static org.folio.dcb.utils.EntityUtils.createUser;
@@ -50,6 +52,8 @@ class LendingLibraryServiceTest {
   private CirculationServiceImpl circulationService;
   @Mock
   private BaseLibraryService baseLibraryService;
+  @Mock
+  private ServicePointService servicePointService;
 
   @Test
   void createTransactionTest() {
@@ -59,10 +63,11 @@ class LendingLibraryServiceTest {
 
     when(userService.fetchOrCreateUser(any()))
       .thenReturn(user);
+    when(servicePointService.createServicePoint(createDcbPickup())).thenReturn(createServicePointRequest());
     when(requestService.createPageItemRequest(any(), any(), anyString())).thenReturn(createCirculationRequest());
     doNothing().when(baseLibraryService).saveDcbTransaction(any(), any(), any());
 
-    var response = lendingLibraryService.createCirculation(DCB_TRANSACTION_ID, createDcbTransactionByRole(LENDER), PICKUP_SERVICE_POINT_ID);
+    var response = lendingLibraryService.createCirculation(DCB_TRANSACTION_ID, createDcbTransactionByRole(LENDER));
     verify(userService).fetchOrCreateUser(patron);
     verify(requestService).createPageItemRequest(user, item, PICKUP_SERVICE_POINT_ID);
     verify(baseLibraryService).saveDcbTransaction(DCB_TRANSACTION_ID, createDcbTransactionByRole(LENDER), CIRCULATION_REQUEST_ID);
