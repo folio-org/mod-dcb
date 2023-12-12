@@ -42,26 +42,24 @@ public class CirculationEventListener {
     var eventData = parseLoanEvent(data);
     if (Objects.nonNull(eventData)) {
       String itemId = eventData.getItemId();
-      if (Objects.nonNull(itemId)) {
-          systemUserScopedExecutionService.executeAsyncSystemUserScoped(tenantId, () ->
-            transactionRepository.findTransactionByItemIdAndStatusNotInClosed(UUID.fromString(itemId))
-              .ifPresent(transactionEntity -> {
-                if(eventData.getType() == EventData.EventType.CHECK_OUT) {
-                  if(transactionEntity.getRole() == BORROWING_PICKUP || transactionEntity.getRole() == PICKUP) {
-                    baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.ITEM_CHECKED_OUT);
-                  }
-                } else if(eventData.getType() == EventData.EventType.CHECK_IN) {
-                  if(transactionEntity.getRole() == LENDER) {
-                    baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.CLOSED);
-                  } else if(transactionEntity.getRole() == BORROWING_PICKUP || transactionEntity.getRole() == PICKUP) {
-                    baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.ITEM_CHECKED_IN);
-                  }
-                } else {
-                  log.info("handleLoanEvent:: status for event {} can not be updated", eventData.getType());
-                }
-              })
-          );
-      }
+      systemUserScopedExecutionService.executeAsyncSystemUserScoped(tenantId, () ->
+        transactionRepository.findTransactionByItemIdAndStatusNotInClosed(UUID.fromString(itemId))
+          .ifPresent(transactionEntity -> {
+            if(eventData.getType() == EventData.EventType.CHECK_OUT) {
+              if(transactionEntity.getRole() == BORROWING_PICKUP || transactionEntity.getRole() == PICKUP) {
+                baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.ITEM_CHECKED_OUT);
+              }
+            } else if(eventData.getType() == EventData.EventType.CHECK_IN) {
+              if(transactionEntity.getRole() == LENDER) {
+                baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.CLOSED);
+              } else if(transactionEntity.getRole() == BORROWING_PICKUP || transactionEntity.getRole() == PICKUP) {
+                baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.ITEM_CHECKED_IN);
+              }
+            } else {
+              log.info("handleLoanEvent:: status for event {} can not be updated", eventData.getType());
+            }
+          })
+      );
     }
   }
 

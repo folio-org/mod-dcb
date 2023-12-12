@@ -34,6 +34,7 @@ class CirculationLoanEventListenerTest extends BaseIT {
 
   private static final String CHECK_OUT_EVENT_SAMPLE = getMockDataAsString("mockdata/kafka/check_out.json");
   private static final String CHECK_IN_EVENT_SAMPLE = getMockDataAsString("mockdata/kafka/loan_check_in.json");
+  private static final String NO_ITEM_ID_EVENT_SAMPLE = getMockDataAsString("mockdata/kafka/loan_check_in_no_item_id.json");
   private static final String CHECK_IN_UNDEFINED_SAMPLE = getMockDataAsString("mockdata/kafka/loan_undefined.json");
 
   @Mock
@@ -89,7 +90,7 @@ class CirculationLoanEventListenerTest extends BaseIT {
     transactionEntity.setRole(PICKUP);
     MessageHeaders messageHeaders = getMessageHeaders();
     when(transactionRepository.findTransactionByItemIdAndStatusNotInClosed(any())).thenReturn(Optional.of(transactionEntity));
-    eventListener.handleLoanEvent(null, messageHeaders);
+    eventListener.handleLoanEvent(NO_ITEM_ID_EVENT_SAMPLE, messageHeaders);
     Mockito.verify(transactionRepository, times(0)).save(any());
   }
 
