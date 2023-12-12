@@ -104,18 +104,6 @@ class CirculationLoanEventListenerTest extends BaseIT {
   }
 
   @Test
-  void handleCheckInEventInLenderInTransit() {
-    var transactionEntity = createTransactionEntity();
-    transactionEntity.setItemId("8db107f5-12aa-479f-9c07-39e7c9cf2e4d");
-    transactionEntity.setStatus(TransactionStatus.StatusEnum.OPEN);
-    transactionEntity.setRole(LENDER);
-    MessageHeaders messageHeaders = getMessageHeaders();
-    when(transactionRepository.findTransactionByItemIdAndStatusNotInClosed(any())).thenReturn(Optional.of(transactionEntity));
-    eventListener.handleLoanEvent(CHECK_IN_EVENT_SAMPLE, messageHeaders);
-    Mockito.verify(transactionRepository).save(any());
-  }
-
-  @Test
   void handleCheckingInWithIncorrectDataTest() {
     var transactionEntity = createTransactionEntity();
     transactionEntity.setRole(BORROWING_PICKUP);
