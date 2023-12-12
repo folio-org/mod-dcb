@@ -27,7 +27,7 @@ public class TransactionAuditServiceImpl implements TransactionAuditService {
     log.debug("logTheErrorForExistedTransactionAudit:: dcbTransactionId = {}, err = {}", dcbTransactionId, errorMsg);
     TransactionAuditEntity auditExisting = transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(dcbTransactionId).orElse(null);
 
-    if(auditExisting != null){
+    if (auditExisting != null) {
       TransactionAuditEntity auditError = generateTrnAuditEntityFromTheFoundOneWithError(auditExisting, errorMsg);
       transactionAuditRepository.save(auditError);
     }
@@ -35,7 +35,7 @@ public class TransactionAuditServiceImpl implements TransactionAuditService {
 
   /**
    * For the case the error happens during DCB transaction creation.
-   * At this time there is no transaction_audit data existed, which refers to current DCB transaction.
+   * At this time there is no transaction_audit data persisted, which refers to current DCB transaction.
    * So the transaction_audit log is created with empty "before" and "after" states and the DCB transaction content is merged with the error message.
    * The exceptional case is the attempt of the DCB transaction duplication by the id (it means the TransactionEntity with such an id already exists).
    * It triggers DUPLICATE_ERROR, which is logged with the particular transaction_audit (DUPLICATE_ERROR_ACTION)
@@ -47,7 +47,7 @@ public class TransactionAuditServiceImpl implements TransactionAuditService {
     TransactionEntity transactionMapped = transactionMapper.mapToEntity(dcbTransactionId, dcbTransaction);
     TransactionAuditEntity auditError = generateTrnAuditEntityByTrnEntityWithError(dcbTransactionId, transactionMapped, errorMsg);
 
-    if(auditExisting != null){
+    if (auditExisting != null) {
       log.debug("logTheErrorForNotExistedTransactionAudit:: dcbTransactionId = {}, dcbTransaction = {}, err = {}", dcbTransactionId, dcbTransaction, errorMsg);
       auditError.setTransactionId(DUPLICATE_ERROR_TRANSACTION_ID);
       auditError.setAction(DUPLICATE_ERROR_ACTION);

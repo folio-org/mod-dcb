@@ -42,8 +42,6 @@ class TransactionApiControllerTest extends BaseIT {
   private static final String TRANSACTION_AUDIT_DUPLICATE_ERROR_ACTION = "DUPLICATE_ERROR";
   private static final String DUPLICATE_ERROR_TRANSACTION_ID = "-1";
 
-
-
   @Autowired
   private TransactionRepository transactionRepository;
   @Autowired
