@@ -56,6 +56,8 @@ public class CirculationEventListener {
                     baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.CLOSED);
                   } else if(transactionEntity.getRole() == BORROWING_PICKUP || transactionEntity.getRole() == PICKUP) {
                     baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.ITEM_CHECKED_IN);
+                  } else {
+                    log.info("handleLoanEvent:: status for event {} can not be updated", eventData.getType());
                   }
                 }
               })
@@ -81,10 +83,10 @@ public class CirculationEventListener {
                 baseLibraryService.cancelTransactionEntity(transactionEntity);
               } else if(eventData.getType() == EventData.EventType.IN_TRANSIT && transactionEntity.getRole() == LENDER) {
                 baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.OPEN);
-              } else if(eventData.getType() == EventData.EventType.AWAITING_PICKUP) {
-                if(transactionEntity.getRole() == BORROWING_PICKUP || transactionEntity.getRole() == PICKUP) {
-                  baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.AWAITING_PICKUP);
-                }
+              } else if(eventData.getType() == EventData.EventType.AWAITING_PICKUP && (transactionEntity.getRole() == BORROWING_PICKUP || transactionEntity.getRole() == PICKUP)) {
+                baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.AWAITING_PICKUP);
+              } else {
+                log.info("handleRequestEvent:: status for event {} can not be updated", eventData.getType());
               }
             })
         );
