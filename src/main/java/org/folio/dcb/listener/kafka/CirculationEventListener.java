@@ -43,7 +43,6 @@ public class CirculationEventListener {
     if (Objects.nonNull(eventData)) {
       String itemId = eventData.getItemId();
       if (Objects.nonNull(itemId)) {
-          log.info("updateTransactionStatus:: Received checkOut event for itemId: {}", itemId);
           systemUserScopedExecutionService.executeAsyncSystemUserScoped(tenantId, () ->
             transactionRepository.findTransactionByItemIdAndStatusNotInClosed(UUID.fromString(itemId))
               .ifPresent(transactionEntity -> {
@@ -56,9 +55,9 @@ public class CirculationEventListener {
                     baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.CLOSED);
                   } else if(transactionEntity.getRole() == BORROWING_PICKUP || transactionEntity.getRole() == PICKUP) {
                     baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.ITEM_CHECKED_IN);
-                  } else {
-                    log.info("handleLoanEvent:: status for event {} can not be updated", eventData.getType());
                   }
+                } else {
+                  log.info("handleLoanEvent:: status for event {} can not be updated", eventData.getType());
                 }
               })
           );
