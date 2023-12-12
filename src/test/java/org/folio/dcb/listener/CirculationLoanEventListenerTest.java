@@ -22,7 +22,8 @@ import java.util.Optional;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWING_PICKUP;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.PICKUP;
-import static org.folio.dcb.utils.EntityUtils.*;
+import static org.folio.dcb.utils.EntityUtils.createTransactionEntity;
+import static org.folio.dcb.utils.EntityUtils.getMockDataAsString;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -65,6 +66,17 @@ class CirculationLoanEventListenerTest extends BaseIT {
     MessageHeaders messageHeaders = getMessageHeaders();
     when(transactionRepository.findTransactionByItemIdAndStatusNotInClosed(any())).thenReturn(Optional.of(transactionEntity));
     eventListener.handleLoanEvent(CHECK_OUT_EVENT_SAMPLE, messageHeaders);
+    Mockito.verify(transactionRepository).save(any());
+  }
+
+  @Test
+  void handleLoanEventForPickupRole() {
+    var transactionEntity = createTransactionEntity();
+    transactionEntity.setRole(PICKUP);
+    transactionEntity.setStatus(TransactionStatus.StatusEnum.AWAITING_PICKUP);
+    MessageHeaders messageHeaders = getMessageHeaders();
+    when(transactionRepository.findTransactionByItemIdAndStatusNotInClosed(any())).thenReturn(Optional.of(transactionEntity));
+    eventListener.handleLoanEvent(CHECK_IN_EVENT_SAMPLE, messageHeaders);
     Mockito.verify(transactionRepository).save(any());
   }
 
