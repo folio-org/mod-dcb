@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.*;
-import static org.folio.dcb.utils.EntityUtils.createCirculationItemRequest;
+import static org.folio.dcb.utils.EntityUtils.createCirculationItem;
 import static org.folio.dcb.utils.EntityUtils.createTransactionEntity;
 import static org.folio.dcb.utils.EntityUtils.getMockDataAsString;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -53,7 +53,7 @@ class CirculationRequestEventListenerTest extends BaseIT {
     transactionEntity.setStatus(TransactionStatus.StatusEnum.OPEN);
     transactionEntity.setRole(PICKUP);
 
-    var circulationItem = createCirculationItemRequest();
+    var circulationItem = createCirculationItem();
     circulationItem.setStatus(org.folio.dcb.domain.dto.ItemStatus.builder().name(org.folio.dcb.domain.dto.ItemStatus.NameEnum.AWAITING_PICKUP).build());
 
     MessageHeaders messageHeaders = getMessageHeaders();
@@ -70,7 +70,7 @@ class CirculationRequestEventListenerTest extends BaseIT {
     transactionEntity.setStatus(TransactionStatus.StatusEnum.OPEN);
     transactionEntity.setRole(BORROWING_PICKUP);
 
-    var circulationItem = createCirculationItemRequest();
+    var circulationItem = createCirculationItem();
     circulationItem.setStatus(org.folio.dcb.domain.dto.ItemStatus.builder().name(org.folio.dcb.domain.dto.ItemStatus.NameEnum.AWAITING_PICKUP).build());
 
     MessageHeaders messageHeaders = getMessageHeaders();
