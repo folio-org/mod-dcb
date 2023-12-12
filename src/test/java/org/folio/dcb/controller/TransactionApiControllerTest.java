@@ -424,6 +424,36 @@ class TransactionApiControllerTest extends BaseIT {
   }
 
   @Test
+  void createBorrowerCirculationRequestWithoutExistingItemTest() throws Exception {
+    removeExistedTransactionFromDbIfSoExists();
+    var dcbTransaction = createDcbTransactionByRole(BORROWER);
+    dcbTransaction.getItem().setBarcode("newItem");
+    var dcbItem = createDcbItem();
+    dcbItem.setBarcode("newItem");
+
+    this.mockMvc.perform(
+        post("/transactions/" + DCB_TRANSACTION_ID)
+          .content(asJsonString(dcbTransaction))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isCreated())
+      .andExpect(jsonPath("$.status").value("CREATED"))
+      .andExpect(jsonPath("$.item").value(dcbItem))
+      .andExpect(jsonPath("$.patron").value(createDcbPatronWithExactPatronId(EXISTED_PATRON_ID)));
+
+    //Trying to create another transaction with same transaction id
+    this.mockMvc.perform(
+        post("/transactions/" + DCB_TRANSACTION_ID)
+          .content(asJsonString(createDcbTransactionByRole(BORROWER)))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpectAll(status().is4xxClientError(),
+        jsonPath("$.errors[0].code", is("DUPLICATE_ERROR")));
+  }
+
+  @Test
   void transactionStatusUpdateFromAwaitingPickupToItemCheckedOut() throws Exception {
     var transactionID = UUID.randomUUID().toString();
     var dcbTransaction = createTransactionEntity();
