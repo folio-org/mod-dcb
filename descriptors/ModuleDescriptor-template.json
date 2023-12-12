@@ -69,7 +69,7 @@
   ],
   "provides": [
     {
-      "id": "mod-dcb",
+      "id": "transactions",
       "version": "1.0",
       "handlers": [
         {
@@ -89,8 +89,9 @@
             "inventory-storage.holdings.item.get",
             "circulation.requests.item.post",
             "circulation.requests.item.put",
-            "circulation-item-storage.items.item.post",
-            "circulation-item-storage.items.item.get",
+            "circulation-item.item.post",
+            "circulation-item.collection.get",
+            "circulation-item.item.get",
             "inventory-storage.material-types.collection.get",
             "inventory-storage.loan-types.collection.get",
             "circulation-storage.requests.item.get",
@@ -172,8 +173,8 @@
   ],
   "permissionSets" : [
     {
-      "permissionName": "dcb.transactions.all",
-      "displayName": "DCB API module - all permissions",
+      "permissionName": "dcb.all",
+      "displayName": "DCB module - all permissions",
       "description": "All permissions for dcb module",
       "subPermissions": [
         "dcb.transactions.post",
@@ -218,7 +219,11 @@
       { "name": "DB_QUERYTIMEOUT", "value": "60000" },
       { "name": "DB_CHARSET", "value": "UTF-8" },
       { "name": "DB_MAXPOOLSIZE", "value": "5" },
-      { "name": "SYSTEM_USER_PASSWORD", "value": "dcb-system-user" }
+      { "name": "SYSTEM_USER_PASSWORD", "value": "dcb-system-user" },
+      { "name": "KAFKA_HOST", "value": "10.0.2.15" },
+      { "name": "KAFKA_PORT", "value": "9092" },
+      { "name": "OKAPI_URL",  "value": "http://okapi:9130" },
+      { "name": "ENV", "value": "folio" }
     ]
   }
 }
