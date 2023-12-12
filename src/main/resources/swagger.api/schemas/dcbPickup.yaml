@@ -2,9 +2,6 @@ DcbPickup:
   description: Pickup Location metadata required for the pickup service point
   type: object
   properties:
-    libraryName:
-      description: The name of the pickup library
-      type: string
     libraryCode:
       description: The code which identifies the pickup library
       type: string

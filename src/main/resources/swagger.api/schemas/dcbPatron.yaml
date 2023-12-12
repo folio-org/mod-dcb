@@ -11,6 +11,3 @@ DcbPatron:
     barcode:
       description: The barcode of the patron
       type: string
-    borrowingLibraryCode:
-      description: The code which identifies the borrowing library
-      type: string
