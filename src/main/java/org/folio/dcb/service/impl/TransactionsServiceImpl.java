@@ -7,8 +7,10 @@ import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.exception.ResourceAlreadyExistException;
+import org.folio.dcb.exception.StatusException;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.LibraryService;
+import org.folio.dcb.service.StatusProcessorService;
 import org.folio.dcb.service.TransactionsService;
 import org.folio.spring.exception.NotFoundException;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -28,6 +30,7 @@ public class TransactionsServiceImpl implements TransactionsService {
   @Qualifier("borrowingLibraryService")
   private final LibraryService borrowingLibraryService;
   private final TransactionRepository transactionRepository;
+  private final StatusProcessorService statusProcessorService;
 
   @Override
   public TransactionStatusResponse createCirculationRequest(String dcbTransactionId, DcbTransaction dcbTransaction) {
@@ -46,21 +49,23 @@ public class TransactionsServiceImpl implements TransactionsService {
   public TransactionStatusResponse updateTransactionStatus(String dcbTransactionId, TransactionStatus transactionStatus) {
     return transactionRepository.findById(dcbTransactionId).map(dcbTransaction -> {
       if (dcbTransaction.getStatus() == transactionStatus.getStatus()) {
-        throw new IllegalArgumentException(String.format(
+        throw new StatusException(String.format(
           "Current transaction status equal to new transaction status: dcbTransactionId: %s, status: %s", dcbTransactionId, transactionStatus.getStatus()
         ));
       } else if (transactionStatus.getStatus() == TransactionStatus.StatusEnum.CANCELLED
                   && (dcbTransaction.getStatus() == TransactionStatus.StatusEnum.ITEM_CHECKED_IN ||
                         dcbTransaction.getStatus() == TransactionStatus.StatusEnum.ITEM_CHECKED_OUT)) {
-        throw new IllegalArgumentException(String.format(
+        throw new StatusException(String.format(
           "Cannot cancel transaction dcbTransactionId: %s. Transaction already in status: %s: ", dcbTransactionId, dcbTransaction.getStatus()
         ));
       }
       switch (dcbTransaction.getRole()) {
-        case LENDER -> lendingLibraryService.updateTransactionStatus(dcbTransaction, transactionStatus);
+        case LENDER -> statusProcessorService.lendingChainProcessor(dcbTransaction.getStatus(), transactionStatus.getStatus())
+          .forEach(statusEnum -> lendingLibraryService.updateTransactionStatus(dcbTransaction, TransactionStatus.builder().status(statusEnum).build()));
         case BORROWING_PICKUP -> borrowingPickupLibraryService.updateTransactionStatus(dcbTransaction, transactionStatus);
         case PICKUP -> pickupLibraryService.updateTransactionStatus(dcbTransaction, transactionStatus);
-        case BORROWER -> borrowingLibraryService.updateTransactionStatus(dcbTransaction, transactionStatus);
+        case BORROWER -> statusProcessorService.borrowingChainProcessor(dcbTransaction.getStatus(), transactionStatus.getStatus())
+          .forEach(statusEnum -> borrowingLibraryService.updateTransactionStatus(dcbTransaction, TransactionStatus.builder().status(statusEnum).build()));
       }
 
       return TransactionStatusResponse.builder()
