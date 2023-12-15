@@ -793,10 +793,10 @@ class TransactionApiControllerTest extends BaseIT {
 
   private void removeExistingTransactionsByItemId(String itemId) {
     systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () ->
-      transactionRepository.findTransactionByItemIdAndStatusNotInClosed(UUID.fromString(itemId))
-        .ifPresent(transactionEntity -> {
-          transactionRepository.deleteById(transactionEntity.getId());
-        })
+        transactionRepository.findTransactionsByItemIdAndStatusNotInClosed(UUID.fromString(itemId))
+          .forEach(transactionEntity -> {
+            transactionRepository.deleteById(transactionEntity.getId());
+          })
     );
   }
 }
