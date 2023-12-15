@@ -54,6 +54,7 @@ class TransactionApiControllerTest extends BaseIT {
   @Test
   void createLendingCirculationRequestTest() throws Exception {
     removeExistedTransactionFromDbIfSoExists();
+    removeExistingTransactionsByItemId(ITEM_ID);
 
     this.mockMvc.perform(
         post("/transactions/" + DCB_TRANSACTION_ID)
@@ -91,6 +92,7 @@ class TransactionApiControllerTest extends BaseIT {
   @Test
   void createBorrowingPickupCirculationRequestTest() throws Exception {
     removeExistedTransactionFromDbIfSoExists();
+    removeExistingTransactionsByItemId(ITEM_ID);
 
     DcbItem expected = createDcbItem();
 //    expected.setPickupLocation("3a40852d-49fd-4df2-a1f9-6e2641a6e91f"); // temporary stub
@@ -354,6 +356,7 @@ class TransactionApiControllerTest extends BaseIT {
   @Test
   void createTransactionForPickupLibrary() throws Exception {
     removeExistedTransactionFromDbIfSoExists();
+    removeExistingTransactionsByItemId(ITEM_ID);
 
     this.mockMvc.perform(
         post("/transactions/" + DCB_TRANSACTION_ID)
