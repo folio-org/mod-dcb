@@ -125,6 +125,20 @@ class BaseLibraryServiceTest {
   }
 
   @Test
+  void createDuplicateBorrowingTransactionTest() {
+    var item = createDcbItem();
+    var user = createUser();
+    user.setType("shadow");
+
+    when(userService.fetchUser(any()))
+      .thenReturn(user);
+    when(itemService.fetchItemByBarcode(item.getBarcode())).thenReturn(new ResultList<>());
+    when(circulationItemService.checkIfItemExistsAndCreate(any(), any())).thenReturn(createCirculationItem());
+    when(transactionRepository.findTransactionsByItemIdAndStatusNotInClosed(any())).thenReturn(List.of(createTransactionEntity()));
+    assertThrows(ResourceAlreadyExistException.class, () -> baseLibraryService.createBorrowingLibraryTransaction(DCB_TRANSACTION_ID, createDcbTransactionByRole(BORROWER), PICKUP_SERVICE_POINT_ID));
+  }
+
+  @Test
   void checkItemIfExistsInInventory() {
     var item = createDcbItem();
     var inventoryItem = createInventoryItem();
