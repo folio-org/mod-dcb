@@ -54,6 +54,13 @@ public class ExceptionHandlingController {
     return createExternalError(ex.getMessage(), DUPLICATE_ERROR);
   }
 
+  @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+  @ExceptionHandler(FeignException.UnprocessableEntity.class)
+  public Errors handleUnProcessableEntityErrors(Exception ex) {
+    logExceptionMessage(ex);
+    return createExternalError(ex.getMessage(), VALIDATION_ERROR);
+  }
+
   @ResponseStatus(HttpStatus.BAD_GATEWAY)
   @ExceptionHandler(FeignException.BadGateway.class)
   public Errors handleBadGatewayException(FeignException.BadGateway ex) {
