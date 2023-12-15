@@ -21,6 +21,7 @@ import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
 import static org.folio.dcb.utils.EntityUtils.DCB_TYPE_USER_ID;
 import static org.folio.dcb.utils.EntityUtils.EXISTED_INVENTORY_ITEM_BARCODE;
 import static org.folio.dcb.utils.EntityUtils.EXISTED_PATRON_ID;
+import static org.folio.dcb.utils.EntityUtils.ITEM_ID;
 import static org.folio.dcb.utils.EntityUtils.NOT_EXISTED_PATRON_ID;
 import static org.folio.dcb.utils.EntityUtils.PATRON_TYPE_USER_ID;
 import static org.folio.dcb.utils.EntityUtils.createDcbItem;
@@ -410,6 +411,7 @@ class TransactionApiControllerTest extends BaseIT {
   @Test
   void createBorrowerCirculationRequestTest() throws Exception {
     removeExistedTransactionFromDbIfSoExists();
+    removeExistingTransactionsByItemId(ITEM_ID);
 
     this.mockMvc.perform(
         post("/transactions/" + DCB_TRANSACTION_ID)
@@ -447,6 +449,8 @@ class TransactionApiControllerTest extends BaseIT {
   @Test
   void createBorrowerCirculationRequestWithoutExistingItemTest() throws Exception {
     removeExistedTransactionFromDbIfSoExists();
+    removeExistingTransactionsByItemId(ITEM_ID);
+
     var dcbTransaction = createDcbTransactionByRole(BORROWER);
     dcbTransaction.getItem().setBarcode("newItem");
     var dcbItem = createDcbItem();
@@ -576,6 +580,8 @@ class TransactionApiControllerTest extends BaseIT {
   @Test
   void createLendingTransactionWithDifferentUserType() throws Exception {
     removeExistedTransactionFromDbIfSoExists();
+    removeExistingTransactionsByItemId(ITEM_ID);
+
     var transaction = createDcbTransactionByRole(LENDER);
     transaction.getPatron().setId(PATRON_TYPE_USER_ID);
     this.mockMvc.perform(
@@ -601,6 +607,8 @@ class TransactionApiControllerTest extends BaseIT {
   @Test
   void createBorrowingTransactionWithDifferentUserType() throws Exception {
     removeExistedTransactionFromDbIfSoExists();
+    removeExistingTransactionsByItemId(ITEM_ID);
+
     var transaction = createDcbTransactionByRole(BORROWER);
     transaction.getPatron().setId(DCB_TYPE_USER_ID);
 
@@ -628,6 +636,8 @@ class TransactionApiControllerTest extends BaseIT {
   @Test
   void createBorrowingPickupTransactionWithDifferentUserType() throws Exception {
     removeExistedTransactionFromDbIfSoExists();
+    removeExistingTransactionsByItemId(ITEM_ID);
+
     var transaction = createDcbTransactionByRole(BORROWING_PICKUP);
     transaction.getPatron().setId(DCB_TYPE_USER_ID);
 
@@ -655,6 +665,8 @@ class TransactionApiControllerTest extends BaseIT {
   @Test
   void createPickupTransactionWithDifferentUserType() throws Exception {
     removeExistedTransactionFromDbIfSoExists();
+    removeExistingTransactionsByItemId(ITEM_ID);
+
     var transaction = createDcbTransactionByRole(PICKUP);
     transaction.getPatron().setId(PATRON_TYPE_USER_ID);
 
@@ -682,6 +694,8 @@ class TransactionApiControllerTest extends BaseIT {
   @Test
   void transactionCreationErrorIfInventoryItemExists() throws Exception {
     removeExistedTransactionFromDbIfSoExists();
+    removeExistingTransactionsByItemId(ITEM_ID);
+
     var transaction = createDcbTransactionByRole(PICKUP);
     transaction.getItem().setBarcode(EXISTED_INVENTORY_ITEM_BARCODE);
 
@@ -772,5 +786,14 @@ class TransactionApiControllerTest extends BaseIT {
         transactionRepository.deleteById(DCB_TRANSACTION_ID);
       }
     });
+  }
+
+  private void removeExistingTransactionsByItemId(String itemId) {
+    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () ->
+      transactionRepository.findTransactionByItemIdAndStatusNotInClosed(UUID.fromString(itemId))
+        .ifPresent(transactionEntity -> {
+          transactionRepository.deleteById(transactionEntity.getId());
+        })
+    );
   }
 }
