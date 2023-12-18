@@ -27,6 +27,7 @@ import static org.folio.dcb.utils.EntityUtils.CIRCULATION_REQUEST_ID;
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
 import static org.folio.dcb.utils.EntityUtils.EXISTED_PATRON_ID;
 import static org.folio.dcb.utils.EntityUtils.PICKUP_SERVICE_POINT_ID;
+import static org.folio.dcb.utils.EntityUtils.createCirculationItem;
 import static org.folio.dcb.utils.EntityUtils.createCirculationRequest;
 import static org.folio.dcb.utils.EntityUtils.createDcbItem;
 import static org.folio.dcb.utils.EntityUtils.createDcbPatronWithExactPatronId;
@@ -115,12 +116,26 @@ class BaseLibraryServiceTest {
     when(requestService.createHoldItemRequest(any(), any(), anyString())).thenReturn(createCirculationRequest());
     when(transactionMapper.mapToEntity(any(), any())).thenReturn(createTransactionEntity());
     when(itemService.fetchItemByBarcode(item.getBarcode())).thenReturn(new ResultList<>());
-
+    when(circulationItemService.checkIfItemExistsAndCreate(any(), any())).thenReturn(createCirculationItem());
     var response = baseLibraryService.createBorrowingLibraryTransaction(DCB_TRANSACTION_ID, createDcbTransactionByRole(BORROWER), PICKUP_SERVICE_POINT_ID);
     verify(userService).fetchUser(patron);
     verify(requestService).createHoldItemRequest(user, item, PICKUP_SERVICE_POINT_ID);
     verify(transactionRepository).save(any());
     Assertions.assertEquals(TransactionStatusResponse.StatusEnum.CREATED, response.getStatus());
+  }
+
+  @Test
+  void createDuplicateBorrowingTransactionTest() {
+    var item = createDcbItem();
+    var user = createUser();
+    user.setType("shadow");
+
+    when(userService.fetchUser(any()))
+      .thenReturn(user);
+    when(itemService.fetchItemByBarcode(item.getBarcode())).thenReturn(new ResultList<>());
+    when(circulationItemService.checkIfItemExistsAndCreate(any(), any())).thenReturn(createCirculationItem());
+    when(transactionRepository.findTransactionsByItemIdAndStatusNotInClosed(any())).thenReturn(List.of(createTransactionEntity()));
+    assertThrows(ResourceAlreadyExistException.class, () -> baseLibraryService.createBorrowingLibraryTransaction(DCB_TRANSACTION_ID, createDcbTransactionByRole(BORROWER), PICKUP_SERVICE_POINT_ID));
   }
 
   @Test

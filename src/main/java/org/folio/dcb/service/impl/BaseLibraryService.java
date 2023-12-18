@@ -3,6 +3,7 @@ package org.folio.dcb.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.ObjectUtils;
+import org.folio.dcb.domain.dto.CirculationItem;
 import org.folio.dcb.domain.dto.CirculationRequest;
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.TransactionStatus;
@@ -52,8 +53,8 @@ public class BaseLibraryService {
       throw new IllegalArgumentException(String.format("User with type %s is retrieved. so unable to create transaction", user.getType()));
     }
     checkItemExistsInInventoryAndThrow(itemVirtual.getBarcode());
-    circulationItemService.checkIfItemExistsAndCreate(itemVirtual, pickupServicePointId);
-
+    CirculationItem item = circulationItemService.checkIfItemExistsAndCreate(itemVirtual, pickupServicePointId);
+    checkOpenTransactionExistsAndThrow(item.getId());
     CirculationRequest holdRequest = requestService.createHoldItemRequest(user, itemVirtual, pickupServicePointId);
     saveDcbTransaction(dcbTransactionId, dcbTransaction, holdRequest.getId());
 
@@ -119,6 +120,12 @@ public class BaseLibraryService {
   public void checkItemExistsInInventoryAndThrow(String itemBarcode) {
     if(itemService.fetchItemByBarcode(itemBarcode).getTotalRecords() != 0)
       throw new ResourceAlreadyExistException(String.format("Unable to create item with barcode %s as it exists in inventory ", itemBarcode));
+  }
+
+  public void checkOpenTransactionExistsAndThrow(String itemId) {
+    if(!transactionRepository.findTransactionsByItemIdAndStatusNotInClosed(UUID.fromString(itemId)).isEmpty()){
+      throw new ResourceAlreadyExistException(String.format("Item with id %s already has an open DCB transaction ", itemId));
+    }
   }
 
   public void updateTransactionEntity(TransactionEntity transactionEntity, TransactionStatus.StatusEnum transactionStatusEnum) {

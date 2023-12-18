@@ -2,6 +2,7 @@ package org.folio.dcb.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.folio.dcb.domain.dto.CirculationItem;
 import org.folio.dcb.domain.dto.CirculationRequest;
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.TransactionStatus;
@@ -31,8 +32,8 @@ public class PickupLibraryServiceImpl implements LibraryService {
     var user = userService.fetchOrCreateUser(patron);
     baseLibraryService.checkUserTypeAndThrowIfMismatch(user.getType());
     baseLibraryService.checkItemExistsInInventoryAndThrow(itemVirtual.getBarcode());
-    circulationItemService.checkIfItemExistsAndCreate(itemVirtual, dcbTransaction.getPickup().getServicePointId());
-
+    CirculationItem item = circulationItemService.checkIfItemExistsAndCreate(itemVirtual, dcbTransaction.getPickup().getServicePointId());
+    baseLibraryService.checkOpenTransactionExistsAndThrow(item.getId());
     CirculationRequest holdRequest = requestService.createHoldItemRequest(user, itemVirtual, dcbTransaction.getPickup().getServicePointId());
     baseLibraryService.saveDcbTransaction(dcbTransactionId, dcbTransaction, holdRequest.getId());
 

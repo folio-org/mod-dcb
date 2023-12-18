@@ -28,14 +28,15 @@ public class CirculationItemServiceImpl implements CirculationItemService {
 
 
   @Override
-  public void checkIfItemExistsAndCreate(DcbItem dcbItem, String pickupServicePointId) {
+  public CirculationItem checkIfItemExistsAndCreate(DcbItem dcbItem, String pickupServicePointId) {
     var dcbItemId = dcbItem.getId();
     log.debug("checkIfItemExistsAndCreate:: generate Circulation item by DcbItem with id={} if nit doesn't exist.", dcbItemId);
     var circulationItem = fetchCirculationItemByIdAndBarcode(dcbItemId, dcbItem.getBarcode());
     if(Objects.isNull(circulationItem)) {
       log.warn("Circulation item not found by id={}. Creating it.", dcbItemId);
-      createCirculationItem(dcbItem, pickupServicePointId);
+      circulationItem = createCirculationItem(dcbItem, pickupServicePointId);
     }
+    return circulationItem;
   }
 
   private CirculationItem fetchCirculationItemByIdAndBarcode(String id, String barcode) {
@@ -51,7 +52,7 @@ public class CirculationItemServiceImpl implements CirculationItemService {
     return circulationItemClient.retrieveCirculationItemById(itemId);
   }
 
-  private void createCirculationItem(DcbItem item, String pickupServicePointId){
+  private CirculationItem createCirculationItem(DcbItem item, String pickupServicePointId){
     //SetupDefaultMaterialTypeIfNotGiven
     String materialType = StringUtils.isBlank(item.getMaterialType()) ? MATERIAL_TYPE_NAME_BOOK : item.getMaterialType();
     var materialTypeId = itemService.fetchItemMaterialTypeIdByMaterialTypeName(materialType);
@@ -71,6 +72,6 @@ public class CirculationItemServiceImpl implements CirculationItemService {
         .lendingLibraryCode(item.getLendingLibraryCode())
         .build();
 
-    circulationItemClient.createCirculationItem(item.getId(), circulationItem);
+    return circulationItemClient.createCirculationItem(item.getId(), circulationItem);
   }
 }
