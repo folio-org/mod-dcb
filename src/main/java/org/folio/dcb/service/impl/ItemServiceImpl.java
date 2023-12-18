@@ -1,6 +1,5 @@
 package org.folio.dcb.service.impl;
 
-import feign.FeignException;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dcb.client.feign.InventoryItemStorageClient;
@@ -20,16 +19,6 @@ public class ItemServiceImpl implements ItemService {
   private final MaterialTypeClient materialTypeClient;
 
   @Override
-  public InventoryItem fetchItemDetailsById(String itemId) {
-    log.debug("fetchItemDetailsById:: Trying to fetch item details for itemId {}", itemId);
-    try {
-      return inventoryItemStorageClient.findItem(itemId);
-    } catch (FeignException.NotFound ex) {
-      throw new NotFoundException(String.format("Item not found for itemId %s ", itemId));
-    }
-  }
-
-  @Override
   public String fetchItemMaterialTypeIdByMaterialTypeName(String materialTypeName) {
     log.debug("fetchItemMaterialTypeIdByMaterialTypeName:: Fetching ItemMaterialTypeId by MaterialTypeName={}", materialTypeName);
     return materialTypeClient.fetchMaterialTypeByQuery(String.format("name==\"%s\"", materialTypeName))
@@ -43,7 +32,17 @@ public class ItemServiceImpl implements ItemService {
   @Override
   public ResultList<InventoryItem> fetchItemByBarcode(String itemBarcode) {
     log.debug("fetchItemByBarcode:: fetching item details for barcode {} ", itemBarcode);
-    return inventoryItemStorageClient.fetchItemByBarcode("barcode==" + itemBarcode);
+    return inventoryItemStorageClient.fetchItemByQuery("barcode==" + itemBarcode);
+  }
+
+  @Override
+  public InventoryItem fetchItemByIdAndBarcode(String id, String barcode) {
+    log.debug("fetchItemByBarcode:: fetching item details for id {} , barcode {} ", id, barcode);
+    return inventoryItemStorageClient.fetchItemByQuery("barcode==" + barcode + " and id==" + id)
+      .getResult()
+      .stream()
+      .findFirst()
+      .orElseThrow(() -> new NotFoundException(String.format("Unable to find existing item with id %s and barcode %s.", id, barcode)));
   }
 
 }

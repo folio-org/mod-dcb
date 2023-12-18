@@ -88,6 +88,40 @@ class TransactionApiControllerTest extends BaseIT {
   }
 
   @Test
+  void createLendingCirculationRequestWithValidIdAndInvalidBarcode() throws Exception {
+    removeExistedTransactionFromDbIfSoExists();
+    var dcbTransaction = createDcbTransactionByRole(LENDER);
+    dcbTransaction.getItem().setBarcode("DCB_ITEM1");
+
+    this.mockMvc.perform(
+        post("/transactions/" + DCB_TRANSACTION_ID)
+          .content(asJsonString(dcbTransaction))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpectAll(status().is4xxClientError(),
+        jsonPath("$.errors[0].code", is("NOT_FOUND_ERROR")));
+
+  }
+
+  @Test
+  void createCirculationRequestWithInvalidUUID() throws Exception {
+    removeExistedTransactionFromDbIfSoExists();
+    var dcbTransaction = createDcbTransactionByRole(LENDER);
+    //Setting a non UUID for itemId
+    dcbTransaction.getItem().setId("1234");
+
+    this.mockMvc.perform(
+        post("/transactions/" + DCB_TRANSACTION_ID)
+          .content(asJsonString(dcbTransaction))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpectAll(status().is4xxClientError(),
+        jsonPath("$.errors[0].code", is("VALIDATION_ERROR")));
+  }
+
+  @Test
   void createBorrowingPickupCirculationRequestTest() throws Exception {
     removeExistedTransactionFromDbIfSoExists();
 
