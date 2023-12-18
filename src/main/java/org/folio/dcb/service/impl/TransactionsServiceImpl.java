@@ -53,8 +53,9 @@ public class TransactionsServiceImpl implements TransactionsService {
           "Current transaction status equal to new transaction status: dcbTransactionId: %s, status: %s", dcbTransactionId, transactionStatus.getStatus()
         ));
       } else if (transactionStatus.getStatus() == TransactionStatus.StatusEnum.CANCELLED
-                  && (dcbTransaction.getStatus() == TransactionStatus.StatusEnum.ITEM_CHECKED_IN ||
-                        dcbTransaction.getStatus() == TransactionStatus.StatusEnum.ITEM_CHECKED_OUT)) {
+        && (dcbTransaction.getStatus() == TransactionStatus.StatusEnum.ITEM_CHECKED_IN ||
+        dcbTransaction.getStatus() == TransactionStatus.StatusEnum.ITEM_CHECKED_OUT) ||
+        dcbTransaction.getStatus() == TransactionStatus.StatusEnum.CLOSED) {
         throw new StatusException(String.format(
           "Cannot cancel transaction dcbTransactionId: %s. Transaction already in status: %s: ", dcbTransactionId, dcbTransaction.getStatus()
         ));
