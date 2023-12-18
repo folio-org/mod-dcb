@@ -5,6 +5,9 @@ InventoryItem:
     id:
       description: Item id
       $ref: "uuid.yaml"
+    barcode:
+      description: Barcode of the item
+      type: string
     holdingsRecordId:
       description: ID of the holdings record the item is a member of
       $ref: "uuid.yaml"

@@ -90,6 +90,40 @@ class TransactionApiControllerTest extends BaseIT {
   }
 
   @Test
+  void createLendingCirculationRequestWithValidIdAndInvalidBarcode() throws Exception {
+    removeExistedTransactionFromDbIfSoExists();
+    var dcbTransaction = createDcbTransactionByRole(LENDER);
+    dcbTransaction.getItem().setBarcode("DCB_ITEM1");
+
+    this.mockMvc.perform(
+        post("/transactions/" + DCB_TRANSACTION_ID)
+          .content(asJsonString(dcbTransaction))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpectAll(status().is4xxClientError(),
+        jsonPath("$.errors[0].code", is("NOT_FOUND_ERROR")));
+
+  }
+
+  @Test
+  void createCirculationRequestWithInvalidUUID() throws Exception {
+    removeExistedTransactionFromDbIfSoExists();
+    var dcbTransaction = createDcbTransactionByRole(LENDER);
+    //Setting a non UUID for itemId
+    dcbTransaction.getItem().setId("1234");
+
+    this.mockMvc.perform(
+        post("/transactions/" + DCB_TRANSACTION_ID)
+          .content(asJsonString(dcbTransaction))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpectAll(status().is4xxClientError(),
+        jsonPath("$.errors[0].code", is("VALIDATION_ERROR")));
+  }
+
+  @Test
   void createBorrowingPickupCirculationRequestTest() throws Exception {
     removeExistedTransactionFromDbIfSoExists();
     removeExistingTransactionsByItemId(ITEM_ID);
@@ -227,6 +261,38 @@ class TransactionApiControllerTest extends BaseIT {
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.status").value("ITEM_CHECKED_IN"));
   }
+
+  @Test
+  void transactionStatusCancelledFromClosedTest() throws Exception {
+
+    var transactionID = UUID.randomUUID().toString();
+    var dcbTransaction = createTransactionEntity();
+    dcbTransaction.setStatus(TransactionStatus.StatusEnum.OPEN);
+    dcbTransaction.setRole(BORROWER);
+    dcbTransaction.setId(transactionID);
+
+    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> transactionRepository.save(dcbTransaction));
+
+    this.mockMvc.perform(
+        put("/transactions/" + transactionID + "/status")
+          .content(asJsonString(createTransactionStatus(TransactionStatus.StatusEnum.CLOSED)))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.status").value("CLOSED"));
+
+    // Trying to Cancel the closed transaction
+    this.mockMvc.perform(
+        put("/transactions/" + transactionID + "/status")
+          .content(asJsonString(createTransactionStatus(TransactionStatus.StatusEnum.CANCELLED)))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpectAll(status().is4xxClientError(),
+        jsonPath("$.errors[0].code", is("VALIDATION_ERROR")));
+  }
+
   @Test
   void transactionStatusUpdateFromCreatedToOpenForPickupLibTest() throws Exception {
 
@@ -794,9 +860,7 @@ class TransactionApiControllerTest extends BaseIT {
   private void removeExistingTransactionsByItemId(String itemId) {
     systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () ->
         transactionRepository.findTransactionsByItemIdAndStatusNotInClosed(UUID.fromString(itemId))
-          .forEach(transactionEntity -> {
-            transactionRepository.deleteById(transactionEntity.getId());
-          })
+          .forEach(transactionEntity -> transactionRepository.deleteById(transactionEntity.getId()))
     );
   }
 }

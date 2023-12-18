@@ -4,12 +4,6 @@ import org.folio.dcb.domain.dto.InventoryItem;
 import org.folio.spring.model.ResultList;
 
 public interface ItemService {
-  /**
-   * Get item details of an inventory by itemId
-   * @param itemId - id of an item
-   * @return InventoryItem
-   */
-  InventoryItem fetchItemDetailsById(String itemId);
 
   /**
    * Provides material type Id by material type name.
@@ -24,4 +18,11 @@ public interface ItemService {
    * @return InventoryItem
    */
   ResultList<InventoryItem> fetchItemByBarcode(String itemBarcode);
+  /**
+   * Get item details of an inventory by item id and Barcode
+   * @param itemBarcode - barcode of an item
+   * @param id - id of an item
+   * @return InventoryItem
+   */
+  InventoryItem fetchItemByIdAndBarcode(String id, String itemBarcode);
 }

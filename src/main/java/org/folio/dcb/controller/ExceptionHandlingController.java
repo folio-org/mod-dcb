@@ -7,6 +7,7 @@ import org.folio.dcb.exception.StatusException;
 import org.folio.spring.exception.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -75,7 +76,8 @@ public class ExceptionHandlingController {
     HttpMessageNotReadableException.class,
     IllegalArgumentException.class,
     StatusException.class,
-    FeignException.BadRequest.class
+    FeignException.BadRequest.class,
+    MethodArgumentNotValidException.class
   })
   public Errors handleValidationErrors(Exception ex) {
     logExceptionMessage(ex);
