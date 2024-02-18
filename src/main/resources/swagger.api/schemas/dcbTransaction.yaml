@@ -7,6 +7,9 @@ DcbTransaction:
       $ref: 'dcbPatron.yaml#/DcbPatron'
     pickup:
       $ref: 'dcbPickup.yaml#/DcbPickup'
+    requestId:
+      description: ID of the existing circulation TLR
+      type: string
     role:
       type: string
       enum:

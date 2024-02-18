@@ -39,11 +39,12 @@ public class TransactionsServiceImpl implements TransactionsService {
   private final StatusProcessorService statusProcessorService;
   private final TransactionMapper transactionMapper;
   private final TransactionAuditRepository transactionAuditRepository;
+  private final BaseTransactionsService baseTransactionsService;
 
   @Override
   public TransactionStatusResponse createCirculationRequest(String dcbTransactionId, DcbTransaction dcbTransaction) {
     log.debug("createCirculationRequest:: creating new transaction request for role {} ", dcbTransaction.getRole());
-    checkTransactionExistsAndThrow(dcbTransactionId);
+    baseTransactionsService.checkTransactionExistsAndThrow(dcbTransactionId);
 
     return switch (dcbTransaction.getRole()) {
       case LENDER -> lendingLibraryService.createCirculation(dcbTransactionId, dcbTransaction);
@@ -125,10 +126,4 @@ public class TransactionsServiceImpl implements TransactionsService {
       .orElseThrow(() -> new NotFoundException(String.format("DCB Transaction was not found by id= %s ", dcbTransactionId)));
   }
 
-  private void checkTransactionExistsAndThrow(String dcbTransactionId) {
-    if(transactionRepository.existsById(dcbTransactionId)) {
-      throw new ResourceAlreadyExistException(
-        String.format("unable to create transaction with id %s as it already exists", dcbTransactionId));
-    }
-  }
 }
