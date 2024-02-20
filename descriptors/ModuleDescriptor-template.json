@@ -122,6 +122,17 @@
             "circulation.check-out-by-barcode.post",
             "circulation.check-in-by-barcode.post"
           ]
+        },
+        {
+          "methods": [
+            "POST"
+          ],
+          "pathPattern": "/ecs-tlr-transaction/{ecsTlrTransactionId}",
+          "permissionsRequired": [
+            "dcb.transactions.post"
+          ],
+          "modulePermissions": [
+          ]
         }
       ]
     },

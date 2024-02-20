@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 @Log4j2
 public class BaseTransactionsService {
+
   private final TransactionRepository transactionRepository;
 
   public void checkTransactionExistsAndThrow(String dcbTransactionId) {
