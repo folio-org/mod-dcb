@@ -141,6 +141,17 @@
             "dcb.transactions.collection.get"
           ],
           "modulePermissions": []
+        },
+        {
+          "methods": [
+            "POST"
+          ],
+          "pathPattern": "/ecs-tlr-transaction/{ecsTlrTransactionId}",
+          "permissionsRequired": [
+            "dcb.transactions.post"
+          ],
+          "modulePermissions": [
+          ]
         }
       ]
     },

@@ -57,7 +57,7 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
-  /ecs-tlr-transaction/{dcbTransactionId}:
+  /ecs-tlr-transaction/{ecsTlrTransactionId}:
     description: ECS TLR Transaction endpoint
     post:
       description: Create transaction for existing circulation TLR
@@ -65,7 +65,7 @@ paths:
       tags:
         - ecs-tlr-transaction
       parameters:
-        - $ref: '#/components/parameters/dcbTransactionId'
+        - $ref: '#/components/parameters/ecsTlrTransactionId'
       requestBody:
         $ref: "#/components/requestBodies/DCBTransaction"
       responses:
@@ -168,6 +168,12 @@ components:
     dcbTransactionId:
       in: path
       name: dcbTransactionId
+      schema:
+        type: string
+      required: true
+    ecsTlrTransactionId:
+      in: path
+      name: ecsTlrTransactionId
       schema:
         type: string
       required: true

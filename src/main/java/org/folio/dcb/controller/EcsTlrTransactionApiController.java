@@ -1,6 +1,6 @@
 package org.folio.dcb.controller;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
@@ -13,19 +13,20 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @Log4j2
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class EcsTlrTransactionApiController implements EcsTlrTransactionApi {
+
   private final EcsTlrTransactionsService ecsTlrTransactionsService;
   private final TransactionAuditService transactionAuditService;
 
   @Override
-  public ResponseEntity<TransactionStatusResponse> createEcsTlrTransaction(String dcbTransactionId, DcbTransaction dcbTransaction) {
-    log.info("createEcsTlrTransaction:: creating ECS TLR Transaction {} with id {} ", dcbTransaction, dcbTransactionId);
+  public ResponseEntity<TransactionStatusResponse> createEcsTlrTransaction(String ecsTlrTransactionId, DcbTransaction dcbTransaction) {
+    log.info("createEcsTlrTransaction:: creating ECS TLR Transaction {} with id {} ", dcbTransaction, ecsTlrTransactionId);
     TransactionStatusResponse transactionStatusResponse;
     try {
-      transactionStatusResponse = ecsTlrTransactionsService.createEcsTlrTransaction(dcbTransactionId, dcbTransaction);
+      transactionStatusResponse = ecsTlrTransactionsService.createEcsTlrTransaction(ecsTlrTransactionId, dcbTransaction);
     } catch (Exception ex) {
-      transactionAuditService.logErrorIfTransactionAuditNotExists(dcbTransactionId, dcbTransaction, ex.getMessage());
+      transactionAuditService.logErrorIfTransactionAuditNotExists(ecsTlrTransactionId, dcbTransaction, ex.getMessage());
       throw ex;
     }
     return ResponseEntity.status(HttpStatus.CREATED)
