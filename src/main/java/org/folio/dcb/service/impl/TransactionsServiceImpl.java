@@ -6,6 +6,7 @@ import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.entity.TransactionEntity;
+import org.folio.dcb.exception.ResourceAlreadyExistException;
 import org.folio.dcb.exception.StatusException;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.LibraryService;
@@ -30,12 +31,11 @@ public class TransactionsServiceImpl implements TransactionsService {
   private final LibraryService borrowingLibraryService;
   private final TransactionRepository transactionRepository;
   private final StatusProcessorService statusProcessorService;
-  private final BaseTransactionsService baseTransactionsService;
 
   @Override
   public TransactionStatusResponse createCirculationRequest(String dcbTransactionId, DcbTransaction dcbTransaction) {
     log.debug("createCirculationRequest:: creating new transaction request for role {} ", dcbTransaction.getRole());
-    baseTransactionsService.checkTransactionExistsAndThrow(dcbTransactionId);
+    checkTransactionExistsAndThrow(dcbTransactionId);
 
     return switch (dcbTransaction.getRole()) {
       case LENDER -> lendingLibraryService.createCirculation(dcbTransactionId, dcbTransaction);
@@ -96,6 +96,13 @@ public class TransactionsServiceImpl implements TransactionsService {
   public TransactionEntity getTransactionEntityOrThrow(String dcbTransactionId) {
     return transactionRepository.findById(dcbTransactionId)
       .orElseThrow(() -> new NotFoundException(String.format("DCB Transaction was not found by id= %s ", dcbTransactionId)));
+  }
+
+  private void checkTransactionExistsAndThrow(String dcbTransactionId) {
+    if(transactionRepository.existsById(dcbTransactionId)) {
+      throw new ResourceAlreadyExistException(
+        String.format("unable to create transaction with id %s as it already exists", dcbTransactionId));
+    }
   }
 
 }
