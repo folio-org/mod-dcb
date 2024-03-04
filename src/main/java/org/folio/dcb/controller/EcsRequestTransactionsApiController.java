@@ -5,7 +5,7 @@ import lombok.extern.log4j.Log4j2;
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.rest.resource.EcsRequestTransactionsApi;
-import org.folio.dcb.service.EcsTlrTransactionsService;
+import org.folio.dcb.service.EcsRequestTransactionsService;
 import org.folio.dcb.service.TransactionAuditService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,22 +14,22 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Log4j2
 @RequiredArgsConstructor
-public class EcsTlrTransactionApiController implements EcsRequestTransactionsApi {
+public class EcsRequestTransactionsApiController implements EcsRequestTransactionsApi {
 
-  private final EcsTlrTransactionsService ecsTlrTransactionsService;
+  private final EcsRequestTransactionsService ecsRequestTransactionsService;
   private final TransactionAuditService transactionAuditService;
 
   @Override
   public ResponseEntity<TransactionStatusResponse> createEcsRequestTransactions(
-            String ecsTlrTransactionsId, DcbTransaction dcbTransaction) {
-    log.info("createEcsTlrTransaction:: creating ECS TLR Transaction {} with id {} ",
-      dcbTransaction, ecsTlrTransactionsId);
+            String ecsRequestTransactionId, DcbTransaction dcbTransaction) {
+    log.info("createEcsRequestTransactions:: creating ECS Request Transaction {} with ID {}",
+      dcbTransaction, ecsRequestTransactionId);
     TransactionStatusResponse transactionStatusResponse;
     try {
-      transactionStatusResponse = ecsTlrTransactionsService.createEcsTlrTransactions(
-        ecsTlrTransactionsId, dcbTransaction);
+      transactionStatusResponse = ecsRequestTransactionsService.createEcsRequestTransactions(
+        ecsRequestTransactionId, dcbTransaction);
     } catch (Exception ex) {
-      transactionAuditService.logErrorIfTransactionAuditNotExists(ecsTlrTransactionsId,
+      transactionAuditService.logErrorIfTransactionAuditNotExists(ecsRequestTransactionId,
         dcbTransaction, ex.getMessage());
       throw ex;
     }
