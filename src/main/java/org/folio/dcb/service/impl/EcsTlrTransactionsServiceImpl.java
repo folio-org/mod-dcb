@@ -26,12 +26,15 @@ public class EcsTlrTransactionsServiceImpl implements EcsTlrTransactionsService 
   private final CirculationRequestService circulationRequestService;
 
   @Override
-  public TransactionStatusResponse createEcsTlrTransaction(String dcbTransactionId, DcbTransaction dcbTransaction) {
+  public TransactionStatusResponse createEcsTlrTransactions(String ecsTlrTransactionsId,
+                                                            DcbTransaction dcbTransaction) {
     log.info("createCirculationRequest:: creating new transaction request for role {} ",
       dcbTransaction.getRole());
-    checkEcsTransactionExistsAndThrow(dcbTransactionId);
-    CirculationRequest circulationRequest = circulationRequestService.fetchRequestById(dcbTransaction.getRequestId());
-    if(circulationRequest != null && RequestStatus.isRequestOpen(RequestStatus.from(circulationRequest.getStatus()))) {
+    checkEcsTransactionExistsAndThrow(ecsTlrTransactionsId);
+    CirculationRequest circulationRequest = circulationRequestService.fetchRequestById(
+      dcbTransaction.getRequestId());
+    if(circulationRequest != null && RequestStatus.isRequestOpen(
+      RequestStatus.from(circulationRequest.getStatus()))) {
       if (dcbTransaction.getRole() == LENDER) {
         dcbTransaction.setItem(DcbItem.builder()
           .id(String.valueOf(circulationRequest.getItemId()))
@@ -44,7 +47,8 @@ public class EcsTlrTransactionsServiceImpl implements EcsTlrTransactionsService 
         dcbTransaction.setPickup(DcbPickup.builder()
           .servicePointId(String.valueOf(circulationRequest.getPickupServicePointId()))
           .build());
-        baseLibraryService.saveDcbTransaction(dcbTransactionId, dcbTransaction, dcbTransaction.getRequestId());
+        baseLibraryService.saveDcbTransaction(ecsTlrTransactionsId, dcbTransaction,
+          dcbTransaction.getRequestId());
       } else {
         throw new IllegalArgumentException("Unimplemented role: " + dcbTransaction.getRole());
       }
