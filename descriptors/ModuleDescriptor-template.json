@@ -127,9 +127,9 @@
           "methods": [
             "POST"
           ],
-          "pathPattern": "/ecs-tlr-transaction/{ecsTlrTransactionId}",
+          "pathPattern": "/ecs-tlr-transactions/{ecsTlrTransactionId}",
           "permissionsRequired": [
-            "dcb.transactions.post"
+            "ecs-tlr.transactions.post"
           ],
           "modulePermissions": [
           ]

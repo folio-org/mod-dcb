@@ -20,16 +20,19 @@ public class EcsTlrTransactionApiController implements EcsRequestTransactionsApi
   private final TransactionAuditService transactionAuditService;
 
   @Override
-  public ResponseEntity<TransactionStatusResponse> createEcsRequestTransactions(String ecsTlrTransactionId, DcbTransaction dcbTransaction) {
-    log.info("createEcsTlrTransaction:: creating ECS TLR Transaction {} with id {} ", dcbTransaction, ecsTlrTransactionId);
+  public ResponseEntity<TransactionStatusResponse> createEcsRequestTransactions(
+            String ecsTlrTransactionId, DcbTransaction dcbTransaction) {
+    log.info("createEcsTlrTransaction:: creating ECS TLR Transaction {} with id {} ",
+      dcbTransaction, ecsTlrTransactionId);
     TransactionStatusResponse transactionStatusResponse;
     try {
-      transactionStatusResponse = ecsTlrTransactionsService.createEcsTlrTransaction(ecsTlrTransactionId, dcbTransaction);
+      transactionStatusResponse = ecsTlrTransactionsService.createEcsTlrTransaction(
+        ecsTlrTransactionId, dcbTransaction);
     } catch (Exception ex) {
-      transactionAuditService.logErrorIfTransactionAuditNotExists(ecsTlrTransactionId, dcbTransaction, ex.getMessage());
+      transactionAuditService.logErrorIfTransactionAuditNotExists(ecsTlrTransactionId,
+        dcbTransaction, ex.getMessage());
       throw ex;
     }
-    return ResponseEntity.status(HttpStatus.CREATED)
-      .body(transactionStatusResponse);
+    return ResponseEntity.status(HttpStatus.CREATED).body(transactionStatusResponse);
   }
 }
