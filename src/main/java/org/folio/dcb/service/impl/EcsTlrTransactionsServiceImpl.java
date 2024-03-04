@@ -59,7 +59,7 @@ public class EcsTlrTransactionsServiceImpl implements EcsTlrTransactionsService 
   }
 
   private void checkEcsTransactionExistsAndThrow(String dcbTransactionId) {
-    if(transactionRepository.existsById(dcbTransactionId)) {
+    if (transactionRepository.existsById(dcbTransactionId)) {
       throw new ResourceAlreadyExistException(
         String.format("unable to create ECS transaction with ID %s as it already exists",
           dcbTransactionId));
