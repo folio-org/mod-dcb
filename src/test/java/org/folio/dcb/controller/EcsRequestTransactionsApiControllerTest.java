@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
 import static org.folio.dcb.utils.EntityUtils.CIRCULATION_REQUEST_ID;
-import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
 import static org.folio.dcb.utils.EntityUtils.createEcsRequestTransactionByRole;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -56,7 +55,7 @@ public class EcsRequestTransactionsApiControllerTest extends BaseIT {
       TENANT,
       () -> {
         TransactionAuditEntity auditExisting = transactionAuditRepository
-          .findLatestTransactionAuditEntityByDcbTransactionId(DCB_TRANSACTION_ID)
+          .findLatestTransactionAuditEntityByDcbTransactionId(CIRCULATION_REQUEST_ID)
           .orElse(null);
         Assertions.assertNotNull(auditExisting);
         Assertions.assertNotEquals(TRANSACTION_AUDIT_DUPLICATE_ERROR_ACTION, auditExisting.getAction());
@@ -66,8 +65,8 @@ public class EcsRequestTransactionsApiControllerTest extends BaseIT {
 
   private void removeExistedTransactionFromDbIfSoExists() {
     systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> {
-      if (transactionRepository.existsById(DCB_TRANSACTION_ID)){
-        transactionRepository.deleteById(DCB_TRANSACTION_ID);
+      if (transactionRepository.existsById(CIRCULATION_REQUEST_ID)){
+        transactionRepository.deleteById(CIRCULATION_REQUEST_ID);
       }
     });
   }
