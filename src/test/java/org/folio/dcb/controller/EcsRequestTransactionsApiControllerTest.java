@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
+import static org.folio.dcb.utils.EntityUtils.CIRCULATION_REQUEST_ID;
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
 import static org.folio.dcb.utils.EntityUtils.createEcsRequestTransactionByRole;
 import static org.hamcrest.Matchers.is;
@@ -33,7 +34,7 @@ public class EcsRequestTransactionsApiControllerTest extends BaseIT {
     removeExistedTransactionFromDbIfSoExists();
 
     this.mockMvc.perform(
-        post("/ecs-request-transactions/" + DCB_TRANSACTION_ID)
+        post("/ecs-request-transactions/" + CIRCULATION_REQUEST_ID)
           .content(asJsonString(createEcsRequestTransactionByRole(LENDER)))
           .headers(defaultHeaders())
           .contentType(MediaType.APPLICATION_JSON)
@@ -42,7 +43,7 @@ public class EcsRequestTransactionsApiControllerTest extends BaseIT {
 
     //Trying to create another transaction with same transaction id
     this.mockMvc.perform(
-        post("/ecs-request-transactions/" + DCB_TRANSACTION_ID)
+        post("/ecs-request-transactions/" + CIRCULATION_REQUEST_ID)
           .content(asJsonString(createEcsRequestTransactionByRole(LENDER)))
           .headers(defaultHeaders())
           .contentType(MediaType.APPLICATION_JSON)
