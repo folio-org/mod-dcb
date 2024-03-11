@@ -20,7 +20,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class EcsRequestTransactionsApiControllerTest extends BaseIT {
+class EcsRequestTransactionsApiControllerTest extends BaseIT {
 
   private static final String TRANSACTION_AUDIT_DUPLICATE_ERROR_ACTION = "DUPLICATE_ERROR";
   private static final String DUPLICATE_ERROR_TRANSACTION_ID = "-1";
