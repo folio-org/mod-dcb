@@ -21,7 +21,7 @@ public class EcsRequestTransactionsApiController implements EcsRequestTransactio
 
   @Override
   public ResponseEntity<TransactionStatusResponse> createEcsRequestTransactions(
-            String ecsRequestTransactionId, DcbTransaction dcbTransaction) {
+    String ecsRequestTransactionId, DcbTransaction dcbTransaction) {
     log.info("createEcsRequestTransactions:: creating ECS Request Transaction {} with ID {}",
       dcbTransaction, ecsRequestTransactionId);
     TransactionStatusResponse transactionStatusResponse;
