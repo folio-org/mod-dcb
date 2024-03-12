@@ -86,6 +86,7 @@
             "users.item.post",
             "usergroups.collection.get",
             "inventory-storage.items.item.get",
+            "inventory-storage.items.collection.get",
             "inventory-storage.holdings.item.get",
             "circulation.requests.item.post",
             "circulation.requests.item.put",

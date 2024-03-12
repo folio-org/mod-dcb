@@ -7,6 +7,7 @@ import org.folio.dcb.exception.StatusException;
 import org.folio.spring.exception.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -54,6 +55,13 @@ public class ExceptionHandlingController {
     return createExternalError(ex.getMessage(), DUPLICATE_ERROR);
   }
 
+  @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+  @ExceptionHandler(FeignException.UnprocessableEntity.class)
+  public Errors handleUnProcessableEntityErrors(Exception ex) {
+    logExceptionMessage(ex);
+    return createExternalError(ex.getMessage(), VALIDATION_ERROR);
+  }
+
   @ResponseStatus(HttpStatus.BAD_GATEWAY)
   @ExceptionHandler(FeignException.BadGateway.class)
   public Errors handleBadGatewayException(FeignException.BadGateway ex) {
@@ -68,7 +76,8 @@ public class ExceptionHandlingController {
     HttpMessageNotReadableException.class,
     IllegalArgumentException.class,
     StatusException.class,
-    FeignException.BadRequest.class
+    FeignException.BadRequest.class,
+    MethodArgumentNotValidException.class
   })
   public Errors handleValidationErrors(Exception ex) {
     logExceptionMessage(ex);

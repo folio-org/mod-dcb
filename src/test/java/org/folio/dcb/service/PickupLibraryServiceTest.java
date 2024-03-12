@@ -12,6 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.PICKUP;
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
 import static org.folio.dcb.utils.EntityUtils.PICKUP_SERVICE_POINT_ID;
+import static org.folio.dcb.utils.EntityUtils.createCirculationItem;
 import static org.folio.dcb.utils.EntityUtils.createCirculationRequest;
 import static org.folio.dcb.utils.EntityUtils.createDcbItem;
 import static org.folio.dcb.utils.EntityUtils.createDcbTransactionByRole;
@@ -45,11 +46,13 @@ class PickupLibraryServiceTest {
     var item = createDcbItem();
     var patron = createDefaultDcbPatron();
     var user = createUser();
+    var circulationItem = createCirculationItem();
+    circulationItem.setId(item.getId());
 
     when(userService.fetchOrCreateUser(any()))
       .thenReturn(user);
     when(requestService.createHoldItemRequest(any(), any(), anyString())).thenReturn(createCirculationRequest());
-    doNothing().when(circulationItemService).checkIfItemExistsAndCreate(any(), any());
+    when(circulationItemService.checkIfItemExistsAndCreate(any(), any())).thenReturn(circulationItem);
     doNothing().when(baseLibraryService).saveDcbTransaction(any(), any(), any());
 
     var response = pickupLibraryService.createCirculation(DCB_TRANSACTION_ID, createDcbTransactionByRole(PICKUP));

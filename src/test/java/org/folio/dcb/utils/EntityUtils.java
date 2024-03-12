@@ -195,6 +195,7 @@ public class EntityUtils {
     return InventoryItem.builder()
       .id(UUID.randomUUID().toString())
       .holdingsRecordId(UUID.randomUUID().toString())
+      .barcode("DCB_ITEM")
       .build();
   }
 
