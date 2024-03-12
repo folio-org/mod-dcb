@@ -5,5 +5,5 @@ import org.folio.dcb.domain.dto.TransactionStatusResponse;
 
 public interface EcsRequestTransactionsService {
   TransactionStatusResponse createEcsRequestTransactions(String ecsRequestTransactionsId,
-                                                         DcbTransaction dcbTransaction);
+     DcbTransaction dcbTransaction);
 }
