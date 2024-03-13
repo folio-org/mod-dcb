@@ -33,7 +33,7 @@ public class EcsRequestTransactionsServiceImpl implements EcsRequestTransactions
     checkEcsRequestTransactionExistsAndThrow(ecsRequestTransactionsId);
     CirculationRequest circulationRequest = circulationRequestService.fetchRequestById(
       dcbTransaction.getRequestId());
-    if(circulationRequest != null && RequestStatus.isRequestOpen(
+    if (circulationRequest != null && RequestStatus.isRequestOpen(
       RequestStatus.from(circulationRequest.getStatus()))) {
       if (dcbTransaction.getRole() == LENDER) {
         dcbTransaction.setItem(DcbItem.builder()
