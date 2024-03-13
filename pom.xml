@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.1.5</version>
+    <version>3.2.3</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
   <groupId>org.folio</groupId>
@@ -28,22 +28,18 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <rest-assured.version>5.1.1</rest-assured.version>
     <mvn-failsafe.version>3.2.1</mvn-failsafe.version>
-    <sonar.exclusions>
-      <!-- define sonar exclusions here -->
-      src/main/java/org/folio/template/FolioSpringTemplateApplication.java
-    </sonar.exclusions>
     <argLine/>
 
     <!-- runtime dependencies -->
-    <folio-spring-base.version>7.2.2</folio-spring-base.version>
-    <folio-spring-system-user.version>7.2.0</folio-spring-system-user.version>
-    <openapi-generator.version>6.2.1</openapi-generator.version>
+    <folio-spring-base.version>8.1.0</folio-spring-base.version>
+    <folio-spring-system-user.version>8.1.0</folio-spring-system-user.version>
+    <openapi-generator.version>7.3.0</openapi-generator.version>
     <mapstruct.version>1.5.2.Final</mapstruct.version>
     <kafkaclients.version>3.6.0</kafkaclients.version>
 
     <!-- test dependencies -->
     <wiremock.version>3.2.0</wiremock.version>
-    <testcontainers.version>1.17.6</testcontainers.version>
+    <testcontainers.version>1.19.3</testcontainers.version>
   </properties>
 
   <dependencyManagement>
@@ -217,7 +213,7 @@
       <plugin>
         <artifactId>maven-resources-plugin</artifactId>
         <groupId>org.apache.maven.plugins</groupId>
-        <version>3.3.0</version>
+        <version>3.3.1</version>
         <executions>
           <execution>
             <id>filter-descriptor-inputs</id>
@@ -307,6 +303,7 @@
                     <supportingFilesToGenerate>ApiUtil.java</supportingFilesToGenerate>
                     <generateModelDocumentation>true</generateModelDocumentation>
                     <configOptions>
+                      <generatedConstructorWithRequiredArgs>false</generatedConstructorWithRequiredArgs>
                       <dateLibrary>java</dateLibrary>
                       <interfaceOnly>true</interfaceOnly>
                       <useSpringBoot3>true</useSpringBoot3>
@@ -319,7 +316,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>3.0.0-M7</version>
+        <version>3.2.5</version>
         <configuration>
           <useSystemClassLoader>false</useSystemClassLoader>
           <argLine>@{argLine} -Dfile.encoding=UTF-8</argLine>
@@ -329,7 +326,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-release-plugin</artifactId>
-        <version>3.0.0-M6</version>
+        <version>3.0.1</version>
         <configuration>
           <preparationGoals>clean verify</preparationGoals>
           <tagNameFormat>v@{project.version}</tagNameFormat>
