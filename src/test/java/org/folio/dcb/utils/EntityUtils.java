@@ -147,6 +147,7 @@ public class EntityUtils {
   public static UserCollection createUserCollection() {
     return UserCollection.builder()
       .users(List.of(createUser()))
+      .totalRecords(1)
       .build();
   }
 
