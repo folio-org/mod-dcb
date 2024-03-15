@@ -191,7 +191,8 @@
       "subPermissions": [
         "dcb.transactions.post",
         "dcb.transactions.put",
-        "dcb.transactions.get"
+        "dcb.transactions.get",
+        "ecs-tlr.transactions.post"
       ]
     },
     {
@@ -208,6 +209,11 @@
       "permissionName": "dcb.transactions.put",
       "displayName": "update transaction details",
       "description": "update transaction details"
+    },
+    {
+      "permissionName": "ecs-tlr.transactions.post",
+      "displayName": "creates new ecs request transaction",
+      "description": "creates new ecs request transaction"
     }
   ],
   "launchDescriptor": {
