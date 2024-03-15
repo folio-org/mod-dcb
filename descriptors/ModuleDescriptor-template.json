@@ -215,7 +215,8 @@
         "dcb.transactions.post",
         "dcb.transactions.put",
         "dcb.transactions.get",
-        "dcb.transactions.collection.get"
+        "dcb.transactions.collection.get",
+        "ecs-tlr.transactions.post"
       ]
     },
     {
@@ -237,6 +238,11 @@
       "permissionName": "dcb.transactions.collection.get",
       "displayName": "get updated transaction detail list",
       "description": "get list of transaction updated between a given query range"
+    },
+    {
+      "permissionName": "ecs-tlr.transactions.post",
+      "displayName": "creates new ecs request transaction",
+      "description": "creates new ecs request transaction"
     }
   ],
   "metadata": {
