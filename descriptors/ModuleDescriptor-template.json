@@ -122,16 +122,24 @@
             "circulation.check-out-by-barcode.post",
             "circulation.check-in-by-barcode.post"
           ]
-        },
+        }
+      ]
+    },
+    {
+      "id": "ecs-request-transactions",
+      "version": "1.0",
+      "handlers": [
         {
           "methods": [
             "POST"
           ],
-          "pathPattern": "/ecs-tlr-transactions/{ecsTlrTransactionId}",
+          "pathPattern": "/ecs-request-transactions/{ecsRequestTransactionId}",
           "permissionsRequired": [
             "ecs-tlr.transactions.post"
           ],
           "modulePermissions": [
+            "circulation-storage.requests.item.get",
+            "circulation-storage.requests.collection.get"
           ]
         }
       ]
@@ -191,8 +199,7 @@
       "subPermissions": [
         "dcb.transactions.post",
         "dcb.transactions.put",
-        "dcb.transactions.get",
-        "ecs-tlr.transactions.post"
+        "dcb.transactions.get"
       ]
     },
     {
@@ -211,7 +218,15 @@
       "description": "update transaction details"
     },
     {
-      "permissionName": "ecs-tlr.transactions.post",
+      "permissionName": "ecs-request.all",
+      "displayName": "ECS request - all permissions",
+      "description": "All permissions for ECS request module",
+      "subPermissions": [
+        "ecs-request.transactions.post"
+      ]
+    },
+    {
+      "permissionName": "ecs-request.transactions.post",
       "displayName": "creates new ecs request transaction",
       "description": "creates new ecs request transaction"
     }
