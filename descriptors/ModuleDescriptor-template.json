@@ -199,7 +199,8 @@
       "subPermissions": [
         "dcb.transactions.post",
         "dcb.transactions.put",
-        "dcb.transactions.get"
+        "dcb.transactions.get",
+        "ecs-request.transactions.post"
       ]
     },
     {
@@ -218,17 +219,9 @@
       "description": "update transaction details"
     },
     {
-      "permissionName": "ecs-request.all",
-      "displayName": "ECS request - all permissions",
-      "description": "All permissions for ECS request module",
-      "subPermissions": [
-        "ecs-request.transactions.post"
-      ]
-    },
-    {
       "permissionName": "ecs-request.transactions.post",
-      "displayName": "creates new ecs request transaction",
-      "description": "creates new ecs request transaction"
+      "displayName": "creates new ECS request transaction",
+      "description": "creates new ECS request transaction"
     }
   ],
   "launchDescriptor": {
