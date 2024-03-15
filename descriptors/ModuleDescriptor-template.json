@@ -224,7 +224,8 @@
         "dcb.transactions.put",
         "dcb.transactions.get",
         "dcb.transactions.collection.get",
-        "ecs-tlr.transactions.post"
+        "dcb.transactions.get",
+        "ecs-request.transactions.post"
       ]
     },
     {
@@ -257,8 +258,8 @@
     },
     {
       "permissionName": "ecs-request.transactions.post",
-      "displayName": "creates new ecs request transaction",
-      "description": "creates new ecs request transaction"
+      "displayName": "creates new ECS request transaction",
+      "description": "creates new ECS request transaction"
     }
   ],
   "metadata": {
