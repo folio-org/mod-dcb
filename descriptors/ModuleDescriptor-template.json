@@ -200,7 +200,7 @@
         "dcb.transactions.post",
         "dcb.transactions.put",
         "dcb.transactions.get",
-        "ecs-request.transactions.post"
+        "dcb.ecs-request.transactions.post"
       ]
     },
     {
@@ -219,7 +219,7 @@
       "description": "update transaction details"
     },
     {
-      "permissionName": "ecs-request.transactions.post",
+      "permissionName": "dcb.ecs-request.transactions.post",
       "displayName": "creates new ECS request transaction",
       "description": "creates new ECS request transaction"
     }
