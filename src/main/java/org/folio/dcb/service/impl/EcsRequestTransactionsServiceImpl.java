@@ -36,19 +36,7 @@ public class EcsRequestTransactionsServiceImpl implements EcsRequestTransactions
     if (circulationRequest != null && RequestStatus.isRequestOpen(
       RequestStatus.from(circulationRequest.getStatus()))) {
       if (dcbTransaction.getRole() == LENDER) {
-        dcbTransaction.setItem(DcbItem.builder()
-          .id(String.valueOf(circulationRequest.getItemId()))
-            .barcode(circulationRequest.getItem().getBarcode())
-          .build());
-        dcbTransaction.setPatron(DcbPatron.builder()
-          .id(String.valueOf(circulationRequest.getRequesterId()))
-          .barcode(circulationRequest.getRequester().getBarcode())
-          .build());
-        dcbTransaction.setPickup(DcbPickup.builder()
-          .servicePointId(String.valueOf(circulationRequest.getPickupServicePointId()))
-          .build());
-        baseLibraryService.saveDcbTransaction(ecsRequestTransactionsId, dcbTransaction,
-          dcbTransaction.getRequestId());
+        createLenderEcsRequestTransactions(ecsRequestTransactionsId, dcbTransaction, circulationRequest);
       } else {
         throw new IllegalArgumentException("Unimplemented role: " + dcbTransaction.getRole());
       }
@@ -68,5 +56,22 @@ public class EcsRequestTransactionsServiceImpl implements EcsRequestTransactions
         String.format("unable to create ECS transaction with ID %s as it already exists",
           dcbTransactionId));
     }
+  }
+
+  private void createLenderEcsRequestTransactions(String ecsRequestTransactionsId,
+    DcbTransaction dcbTransaction, CirculationRequest circulationRequest) {
+    dcbTransaction.setItem(DcbItem.builder()
+      .id(String.valueOf(circulationRequest.getItemId()))
+      .barcode(circulationRequest.getItem().getBarcode())
+      .build());
+    dcbTransaction.setPatron(DcbPatron.builder()
+      .id(String.valueOf(circulationRequest.getRequesterId()))
+      .barcode(circulationRequest.getRequester().getBarcode())
+      .build());
+    dcbTransaction.setPickup(DcbPickup.builder()
+      .servicePointId(String.valueOf(circulationRequest.getPickupServicePointId()))
+      .build());
+    baseLibraryService.saveDcbTransaction(ecsRequestTransactionsId, dcbTransaction,
+      dcbTransaction.getRequestId());
   }
 }
