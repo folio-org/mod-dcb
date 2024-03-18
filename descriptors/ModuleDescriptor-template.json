@@ -154,7 +154,7 @@
           ],
           "pathPattern": "/ecs-request-transactions/{ecsRequestTransactionId}",
           "permissionsRequired": [
-            "ecs-tlr.transactions.post"
+            "ecs-request.transactions.post"
           ],
           "modulePermissions": [
             "circulation-storage.requests.item.get",
