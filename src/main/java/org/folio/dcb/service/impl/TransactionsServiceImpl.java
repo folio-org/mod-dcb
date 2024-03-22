@@ -99,9 +99,10 @@ public class TransactionsServiceImpl implements TransactionsService {
   }
 
   private void checkTransactionExistsAndThrow(String dcbTransactionId) {
-    if(transactionRepository.existsById(dcbTransactionId)) {
+    if (transactionRepository.existsById(dcbTransactionId)) {
       throw new ResourceAlreadyExistException(
         String.format("unable to create transaction with id %s as it already exists", dcbTransactionId));
     }
   }
+
 }

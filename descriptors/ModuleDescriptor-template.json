@@ -126,6 +126,25 @@
       ]
     },
     {
+      "id": "ecs-request-transactions",
+      "version": "1.0",
+      "handlers": [
+        {
+          "methods": [
+            "POST"
+          ],
+          "pathPattern": "/ecs-request-transactions/{ecsRequestTransactionId}",
+          "permissionsRequired": [
+            "dcb.ecs-request.transactions.post"
+          ],
+          "modulePermissions": [
+            "circulation-storage.requests.item.get",
+            "circulation-storage.requests.collection.get"
+          ]
+        }
+      ]
+    },
+    {
       "id": "_tenant",
       "version": "2.0",
       "interfaceType": "system",
@@ -180,7 +199,8 @@
       "subPermissions": [
         "dcb.transactions.post",
         "dcb.transactions.put",
-        "dcb.transactions.get"
+        "dcb.transactions.get",
+        "dcb.ecs-request.transactions.post"
       ]
     },
     {
@@ -197,6 +217,11 @@
       "permissionName": "dcb.transactions.put",
       "displayName": "update transaction details",
       "description": "update transaction details"
+    },
+    {
+      "permissionName": "dcb.ecs-request.transactions.post",
+      "displayName": "creates new ECS request transaction",
+      "description": "creates new ECS request transaction"
     }
   ],
   "launchDescriptor": {

@@ -22,7 +22,7 @@ public class CirculationRequestServiceImpl implements CirculationRequestService 
   private final CirculationRequestClient circulationRequestClient;
   private final FolioExecutionContext folioExecutionContext;
 
-  private CirculationRequest fetchRequestById(String requestId) {
+  public CirculationRequest fetchRequestById(String requestId) {
     log.info("fetchRequestById:: fetching request for id {} ", requestId);
     try {
       return circulationRequestClient.fetchRequestById(requestId);
