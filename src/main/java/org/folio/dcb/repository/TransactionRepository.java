@@ -24,10 +24,9 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
   @Query(value = "SELECT * FROM transactions where request_id = :requestId AND status != 'CLOSED'", nativeQuery = true)
   Optional<TransactionEntity> findTransactionByRequestIdAndStatusNotInClosed(@Param("requestId") UUID itemId);
 
-  @Query("SELECT COUNT(t) FROM TransactionEntity t WHERE t.updatedDate >= :fromDate AND t.updatedDate <= :toDate")
-  int countTransactionsByDateRange(OffsetDateTime fromDate, OffsetDateTime toDate);
-
-  @Query("SELECT t FROM TransactionEntity t WHERE t.updatedDate >= :fromDate AND t.updatedDate <= :toDate")
+  @Query(value = "SELECT * FROM transactions t WHERE t.updated_date >= :fromDate AND t.updated_date <= :toDate",
+    countQuery = "SELECT COUNT(*) FROM transactions t WHERE t.updated_date >= :fromDate AND t.updated_date <= :toDate",
+    nativeQuery = true)
   Page<TransactionEntity> findTransactionsByDateRange(OffsetDateTime fromDate, OffsetDateTime toDate, Pageable pageable);
 
 }
