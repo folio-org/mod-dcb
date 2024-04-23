@@ -92,7 +92,7 @@ public class TransactionsServiceImpl implements TransactionsService {
   public TransactionStatusResponseCollection getTransactionStatusList(OffsetDateTime fromDate, OffsetDateTime toDate, Integer pageNumber, Integer pageSize) {
     log.info("getTransactionStatusList:: fromDate {}, toDate {}, pageNumber {}, pageSize {}",
       fromDate, toDate, pageNumber, pageSize);
-    var pageable = PageRequest.of(pageNumber, pageSize, Sort.by("updatedDate"));
+    var pageable = PageRequest.of(pageNumber, pageSize, Sort.by("updated_Date"));
     var transactionEntityPage= transactionRepository.findTransactionsByDateRange(fromDate, toDate, pageable);
     var transactionStatusResponseList= transactionMapper.mapToDto(transactionEntityPage);
     return TransactionStatusResponseCollection
