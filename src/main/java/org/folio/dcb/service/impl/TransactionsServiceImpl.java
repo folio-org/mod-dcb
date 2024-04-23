@@ -5,7 +5,9 @@ import lombok.extern.log4j.Log4j2;
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
+import org.folio.dcb.domain.dto.TransactionStatusResponseCollection;
 import org.folio.dcb.domain.entity.TransactionEntity;
+import org.folio.dcb.domain.mapper.TransactionMapper;
 import org.folio.dcb.exception.ResourceAlreadyExistException;
 import org.folio.dcb.exception.StatusException;
 import org.folio.dcb.repository.TransactionRepository;
@@ -14,7 +16,10 @@ import org.folio.dcb.service.StatusProcessorService;
 import org.folio.dcb.service.TransactionsService;
 import org.folio.spring.exception.NotFoundException;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import java.time.OffsetDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +36,7 @@ public class TransactionsServiceImpl implements TransactionsService {
   private final LibraryService borrowingLibraryService;
   private final TransactionRepository transactionRepository;
   private final StatusProcessorService statusProcessorService;
+  private final TransactionMapper transactionMapper;
 
   @Override
   public TransactionStatusResponse createCirculationRequest(String dcbTransactionId, DcbTransaction dcbTransaction) {
@@ -80,6 +86,20 @@ public class TransactionsServiceImpl implements TransactionsService {
     TransactionEntity transactionEntity = getTransactionEntityOrThrow(dcbTransactionId);
 
     return generateTransactionStatusResponseFromTransactionEntity(transactionEntity);
+  }
+
+  @Override
+  public TransactionStatusResponseCollection getTransactionStatusList(OffsetDateTime fromDate, OffsetDateTime toDate, Integer pageNumber, Integer pageSize) {
+    log.info("getTransactionStatusList:: fromDate {}, toDate {}, pageNumber {}, pageSize {}",
+      fromDate, toDate, pageNumber, pageSize);
+    var pageable = PageRequest.of(pageNumber, pageSize, Sort.by("updatedDate"));
+    var transactionStatusResponseList= transactionMapper.mapToDto(transactionRepository.findTransactionsByDateRange(fromDate, toDate, pageable));
+    var totalRecordCount = transactionRepository.countTransactionsByDateRange(fromDate, toDate);
+    return TransactionStatusResponseCollection
+      .builder()
+      .transactions(transactionStatusResponseList)
+      .totalRecords(totalRecordCount)
+      .build();
   }
 
   private TransactionStatusResponse generateTransactionStatusResponseFromTransactionEntity(TransactionEntity transactionEntity) {
