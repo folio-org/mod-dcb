@@ -19,5 +19,14 @@ TransactionStatusResponseCollection:
       description: "transaction collection"
       items:
         $ref: 'transactionStatusResponse.yaml#/TransactionStatusResponseList'
+    currentPageNumber:
+      type: integer
+      description: "Page Number of the current request"
+    currentPageSize:
+      type: integer
+      description: "Number of items fetched"
+    maximumPageNumber:
+      type: integer
+      description: "maximum page Number to fetch total records with current page size"
     totalRecords:
       type: integer

@@ -97,10 +97,14 @@ public class TransactionsServiceImpl implements TransactionsService {
     var pageable = PageRequest.of(pageNumber, pageSize, Sort.by("created_Date"));
     var transactionAuditEntityPage= transactionAuditRepository.findUpdatedTransactionsByDateRange(fromDate, toDate, pageable);
     var transactionStatusResponseList= transactionMapper.mapToDto(transactionAuditEntityPage);
+    var totalRecords = (int)transactionAuditEntityPage.getTotalElements();
     return TransactionStatusResponseCollection
       .builder()
       .transactions(transactionStatusResponseList)
-      .totalRecords((int)transactionAuditEntityPage.getTotalElements())
+      .totalRecords(totalRecords)
+      .currentPageNumber(pageNumber)
+      .currentPageSize(pageSize)
+      .maximumPageNumber((int) Math.ceil((double) totalRecords / pageSize))
       .build();
   }
 
