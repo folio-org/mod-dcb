@@ -19,8 +19,8 @@ public interface TransactionAuditRepository extends JpaRepository<TransactionAud
     "and created_date = (SELECT MAX(created_date) FROM transactions_audit WHERE transaction_id = :trnId);", nativeQuery = true)
   Optional<TransactionAuditEntity> findLatestTransactionAuditEntityByDcbTransactionId(@Param("trnId") String trnId);
 
-  @Query(value = "SELECT * FROM transactions t WHERE t.created_date >= :fromDate AND t.created_date <= :toDate",
-    countQuery = "SELECT COUNT(*) FROM transactions t WHERE t.created_date >= :fromDate AND t.created_date <= :toDate",
+  @Query(value = "SELECT * FROM transactions_audit t WHERE t.created_date >= :fromDate AND t.created_date <= :toDate",
+    countQuery = "SELECT COUNT(*) FROM transactions_audit t WHERE t.created_date >= :fromDate AND t.created_date <= :toDate",
     nativeQuery = true)
   Page<TransactionAuditEntity> findTransactionsByDateRange(OffsetDateTime fromDate, OffsetDateTime toDate, Pageable pageable);
 
