@@ -95,7 +95,7 @@ public class TransactionsServiceImpl implements TransactionsService {
     log.info("getTransactionStatusList:: fromDate {}, toDate {}, pageNumber {}, pageSize {}",
       fromDate, toDate, pageNumber, pageSize);
     var pageable = PageRequest.of(pageNumber, pageSize, Sort.by("created_Date"));
-    var transactionAuditEntityPage= transactionAuditRepository.findTransactionsByDateRange(fromDate, toDate, pageable);
+    var transactionAuditEntityPage= transactionAuditRepository.findUpdatedTransactionsByDateRange(fromDate, toDate, pageable);
     var transactionStatusResponseList= transactionMapper.mapToDto(transactionAuditEntityPage);
     return TransactionStatusResponseCollection
       .builder()
