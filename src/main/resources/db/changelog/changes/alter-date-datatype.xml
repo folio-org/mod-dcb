@@ -9,6 +9,7 @@
       <![CDATA[
       ALTER TABLE transactions ALTER COLUMN created_date TYPE timestamp with time zone;
       ALTER TABLE transactions ALTER COLUMN updated_date TYPE timestamp with time zone;
+      ALTER TABLE transactions_audit ALTER COLUMN created_date TYPE timestamp with time zone;
       ]]>
     </sql>
   </changeSet>

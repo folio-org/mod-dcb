@@ -21,12 +21,12 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
-    show-sql: false
+    show-sql: true
   liquibase:
     enabled: true
     change-log: classpath:db/changelog/changelog-master.xml
   jackson:
-    default-property-inclusion: non_empty
+    default-property-inclusion: non_null
     deserialization:
       fail-on-unknown-properties: false
       accept-single-value-as-array: true

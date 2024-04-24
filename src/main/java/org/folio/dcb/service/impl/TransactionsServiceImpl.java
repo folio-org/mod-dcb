@@ -10,6 +10,7 @@ import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.domain.mapper.TransactionMapper;
 import org.folio.dcb.exception.ResourceAlreadyExistException;
 import org.folio.dcb.exception.StatusException;
+import org.folio.dcb.repository.TransactionAuditRepository;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.LibraryService;
 import org.folio.dcb.service.StatusProcessorService;
@@ -37,6 +38,7 @@ public class TransactionsServiceImpl implements TransactionsService {
   private final TransactionRepository transactionRepository;
   private final StatusProcessorService statusProcessorService;
   private final TransactionMapper transactionMapper;
+  private final TransactionAuditRepository transactionAuditRepository;
 
   @Override
   public TransactionStatusResponse createCirculationRequest(String dcbTransactionId, DcbTransaction dcbTransaction) {
@@ -93,12 +95,12 @@ public class TransactionsServiceImpl implements TransactionsService {
     log.info("getTransactionStatusList:: fromDate {}, toDate {}, pageNumber {}, pageSize {}",
       fromDate, toDate, pageNumber, pageSize);
     var pageable = PageRequest.of(pageNumber, pageSize, Sort.by("updated_Date"));
-    var transactionEntityPage= transactionRepository.findTransactionsByDateRange(fromDate, toDate, pageable);
-    var transactionStatusResponseList= transactionMapper.mapToDto(transactionEntityPage);
+    var transactionAuditEntityPage= transactionAuditRepository.findTransactionsByDateRange(fromDate, toDate, pageable);
+    var transactionStatusResponseList= transactionMapper.mapToDto(transactionAuditEntityPage);
     return TransactionStatusResponseCollection
       .builder()
       .transactions(transactionStatusResponseList)
-      .totalRecords((int)transactionEntityPage.getTotalElements())
+      .totalRecords((int)transactionAuditEntityPage.getTotalElements())
       .build();
   }
 
