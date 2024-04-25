@@ -39,6 +39,7 @@ public class CirculationEventListener {
     concurrency = "#{folioKafkaProperties.listener['loan'].concurrency}")
   public void handleLoanEvent(String data, MessageHeaders messageHeaders) {
     String tenantId = getHeaderValue(messageHeaders, XOkapiHeaders.TENANT, null).get(0);
+    log.info("The loan event data is {}", data);
     var eventData = parseLoanEvent(data);
     if (Objects.nonNull(eventData)) {
       String itemId = eventData.getItemId();
@@ -69,6 +70,7 @@ public class CirculationEventListener {
     concurrency = "#{folioKafkaProperties.listener['request'].concurrency}")
   public void handleRequestEvent(String data, MessageHeaders messageHeaders) {
     String tenantId = getHeaderValue(messageHeaders, XOkapiHeaders.TENANT, null).get(0);
+    log.info("The request event data is {}", data);
     var eventData = parseRequestEvent(data);
     if (Objects.nonNull(eventData)) {
       String requestId = eventData.getRequestId();
@@ -80,7 +82,8 @@ public class CirculationEventListener {
                 baseLibraryService.cancelTransactionEntity(transactionEntity);
               } else if(eventData.getType() == EventData.EventType.IN_TRANSIT && transactionEntity.getRole() == LENDER) {
                 baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.OPEN);
-              } else if(eventData.getType() == EventData.EventType.AWAITING_PICKUP && (transactionEntity.getRole() == BORROWING_PICKUP || transactionEntity.getRole() == PICKUP)) {
+              } else if(eventData.getType() == EventData.EventType.AWAITING_PICKUP && (transactionEntity.getRole() == BORROWING_PICKUP
+                || transactionEntity.getRole() == PICKUP)) {
                 baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.AWAITING_PICKUP);
               } else {
                 log.info("handleRequestEvent:: status for event {} can not be updated", eventData.getType());
