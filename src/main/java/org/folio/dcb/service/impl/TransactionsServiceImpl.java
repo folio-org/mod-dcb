@@ -104,7 +104,7 @@ public class TransactionsServiceImpl implements TransactionsService {
       .totalRecords(totalRecords)
       .currentPageNumber(pageNumber)
       .currentPageSize(pageSize)
-      .maximumPageNumber((int) Math.ceil((double) totalRecords / pageSize))
+      .maximumPageNumber((int) Math.floor((double) totalRecords / pageSize) - 1)
       .build();
   }
 

@@ -29,4 +29,5 @@ TransactionStatusResponseCollection:
       type: integer
       description: "maximum page Number to fetch total records with current page size"
     totalRecords:
+      description: "total number of records which are matched to the current search"
       type: integer
