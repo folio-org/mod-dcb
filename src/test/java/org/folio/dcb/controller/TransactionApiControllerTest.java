@@ -11,6 +11,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWER;
@@ -847,6 +849,44 @@ class TransactionApiControllerTest extends BaseIT {
           .contentType(MediaType.APPLICATION_JSON)
           .accept(MediaType.APPLICATION_JSON))
       .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void getTransactionListTest() throws Exception {
+    removeExistedTransactionFromDbIfSoExists();
+    var startDate = OffsetDateTime.now(ZoneOffset.UTC);
+    var dcbTransaction = createDcbTransactionByRole(BORROWER);
+
+    this.mockMvc.perform(
+        post("/transactions/" + DCB_TRANSACTION_ID)
+          .content(asJsonString(dcbTransaction))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isCreated());
+
+
+    this.mockMvc.perform(
+        put("/transactions/" + DCB_TRANSACTION_ID + "/status")
+          .content(asJsonString(createTransactionStatus(TransactionStatus.StatusEnum.CLOSED)))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.status").value("CLOSED"));
+
+    var endDate = OffsetDateTime.now(ZoneOffset.UTC);
+
+    this.mockMvc.perform(
+        get("/transactions/status")
+          .headers(defaultHeaders())
+          .param("fromDate", String.valueOf(startDate))
+          .param("toDate", String.valueOf(endDate))
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpectAll(status().is(200),
+        jsonPath("$.totalRecords", is(5)));
+
   }
 
   private void removeExistedTransactionFromDbIfSoExists() {
