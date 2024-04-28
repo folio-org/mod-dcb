@@ -855,9 +855,10 @@ class TransactionApiControllerTest extends BaseIT {
 
   @Test
   void getTransactionStatusUpdateListTest() throws Exception {
-    removeExistedTransactionFromDbIfSoExists();
     var startDate1 = OffsetDateTime.now(ZoneOffset.UTC);
     var dcbTransaction = createDcbTransactionByRole(BORROWER);
+    removeExistedTransactionFromDbIfSoExists();
+    removeExistingTransactionsByItemId(dcbTransaction.getItem().getId());
 
     // Creating new transaction
     this.mockMvc.perform(

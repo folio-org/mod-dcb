@@ -1,7 +1,5 @@
 package org.folio.dcb.domain.mapper;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.folio.dcb.domain.dto.DcbItem;
 import org.folio.dcb.domain.dto.DcbPatron;
@@ -10,6 +8,7 @@ import org.folio.dcb.domain.dto.TransactionStatusResponseList;
 import org.folio.dcb.domain.entity.TransactionAuditEntity;
 import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.domain.dto.DcbTransaction;
+import org.folio.dcb.utils.JsonUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 import java.util.List;
@@ -17,8 +16,6 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class TransactionMapper {
-
-  private final ObjectMapper objectMapper;
 
   public TransactionEntity mapToEntity(String transactionId, DcbTransaction dcbTransaction) {
     if(dcbTransaction == null || dcbTransaction.getItem() == null || dcbTransaction.getPatron() == null || dcbTransaction.getPickup() == null) {
@@ -51,7 +48,7 @@ public class TransactionMapper {
     var transactionList = transactionAuditEntityPage.getContent();
     return transactionList
       .stream()
-      .map(transactionAuditEntity -> getTransactionEntity(objectMapper, transactionAuditEntity))
+      .map(transactionAuditEntity -> JsonUtils.jsonToObject(transactionAuditEntity.getAfter(), TransactionEntity.class))
       .map(transactionEntity -> TransactionStatusResponseList
         .builder()
         .id(transactionEntity.getId())
@@ -65,14 +62,6 @@ public class TransactionMapper {
         .build())
       .toList();
 
-  }
-
-  private TransactionEntity getTransactionEntity(ObjectMapper mapper, TransactionAuditEntity transactionAuditEntity) {
-    try {
-      return mapper.readValue(transactionAuditEntity.getAfter(), TransactionEntity.class);
-    } catch (JsonProcessingException e) {
-      throw new RuntimeException(e);
-    }
   }
 
   public DcbItem mapTransactionEntityToDcbItem(TransactionEntity transactionEntity) {
