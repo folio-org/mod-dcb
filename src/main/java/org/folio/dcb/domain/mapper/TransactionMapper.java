@@ -1,6 +1,5 @@
 package org.folio.dcb.domain.mapper;
 
-import lombok.RequiredArgsConstructor;
 import org.folio.dcb.domain.dto.DcbItem;
 import org.folio.dcb.domain.dto.DcbPatron;
 import org.folio.dcb.domain.dto.DcbPickup;
@@ -14,7 +13,6 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-@RequiredArgsConstructor
 public class TransactionMapper {
 
   public TransactionEntity mapToEntity(String transactionId, DcbTransaction dcbTransaction) {
