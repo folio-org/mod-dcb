@@ -2,9 +2,13 @@ package org.folio.dcb.service;
 
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
+import org.folio.dcb.domain.dto.TransactionStatusResponseList;
+import org.folio.dcb.domain.entity.TransactionAuditEntity;
 import org.folio.dcb.domain.entity.TransactionEntity;
+import org.folio.dcb.domain.mapper.TransactionMapper;
 import org.folio.dcb.exception.ResourceAlreadyExistException;
 import org.folio.dcb.exception.StatusException;
+import org.folio.dcb.repository.TransactionAuditRepository;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.impl.LendingLibraryServiceImpl;
 import org.folio.dcb.service.impl.TransactionsServiceImpl;
@@ -15,7 +19,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -30,6 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -44,6 +51,10 @@ class TransactionServiceTest {
   private TransactionRepository transactionRepository;
   @Mock
   private StatusProcessorService statusProcessorService;
+  @Mock
+  private TransactionAuditRepository transactionAuditRepository;
+  @Mock
+  private TransactionMapper transactionMapper;
 
   @Test
   void createLendingCirculationRequestTest() {
@@ -123,6 +134,46 @@ class TransactionServiceTest {
 
     dcbTransactionEntity.setStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_OUT);
     Assertions.assertThrows(StatusException.class, () -> transactionsService.updateTransactionStatus(DCB_TRANSACTION_ID, cancelledTransactionStatus));
+  }
+
+  @Test
+  void getTransactionStatusListTest() {
+    var startDate = OffsetDateTime.now().minusDays(1L);
+    var endDate = OffsetDateTime.now();
+    Page<TransactionAuditEntity> pageMock = mock(Page.class);
+    when(transactionAuditRepository.findUpdatedTransactionsByDateRange(any(), any(), any()))
+      .thenReturn(pageMock);
+    when(pageMock.getTotalElements()).thenReturn(10L);
+    when(transactionMapper.mapToDto(pageMock))
+      .thenReturn(List.of(TransactionStatusResponseList
+        .builder()
+        .id(DCB_TRANSACTION_ID)
+        .status(TransactionStatusResponseList.StatusEnum.ITEM_CHECKED_OUT)
+        .role(TransactionStatusResponseList.RoleEnum.LENDER)
+        .build()));
+    var response = transactionsService.getTransactionStatusList(startDate, endDate, 0, 3);
+    assertEquals(0, response.getCurrentPageNumber());
+    assertEquals(3, response.getCurrentPageSize());
+    assertEquals(3, response.getMaximumPageNumber());
+    assertEquals(10, response.getTotalRecords());
+
+    response = transactionsService.getTransactionStatusList(startDate, endDate, 0, 5);
+    assertEquals(0, response.getCurrentPageNumber());
+    assertEquals(5, response.getCurrentPageSize());
+    assertEquals(1, response.getMaximumPageNumber());
+    assertEquals(10, response.getTotalRecords());
+
+    response = transactionsService.getTransactionStatusList(startDate, endDate, 4, 2);
+    assertEquals(4, response.getCurrentPageNumber());
+    assertEquals(2, response.getCurrentPageSize());
+    assertEquals(4, response.getMaximumPageNumber());
+    assertEquals(10, response.getTotalRecords());
+
+    response = transactionsService.getTransactionStatusList(startDate, endDate, 10, 10);
+    assertEquals(10, response.getCurrentPageNumber());
+    assertEquals(10, response.getCurrentPageSize());
+    assertEquals(0, response.getMaximumPageNumber());
+    assertEquals(10, response.getTotalRecords());
   }
 
 }

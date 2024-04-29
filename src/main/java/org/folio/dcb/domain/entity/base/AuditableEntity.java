@@ -13,7 +13,7 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Getter
@@ -26,7 +26,7 @@ public abstract class AuditableEntity {
   @JsonIgnore
   @CreatedDate
   @Column(name = "created_date", nullable = false, updatable = false)
-  private LocalDateTime createdDate;
+  private OffsetDateTime createdDate;
 
   @JsonIgnore
   @CreatedBy
@@ -36,7 +36,7 @@ public abstract class AuditableEntity {
   @JsonIgnore
   @LastModifiedDate
   @Column(name = "updated_date")
-  private LocalDateTime updatedDate;
+  private OffsetDateTime updatedDate;
 
   @JsonIgnore
   @LastModifiedBy

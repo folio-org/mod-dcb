@@ -2,3 +2,32 @@ TransactionStatusResponse:
   allOf:
     - $ref: 'transactionStatus.yaml#/TransactionStatus'
     - $ref: 'dcbTransaction.yaml#/DcbTransaction'
+
+TransactionStatusResponseList:
+  properties:
+    id:
+      description: "Unique identifier of a transaction"
+      $ref: "uuid.yaml"
+  allOf:
+    - $ref: 'transactionStatusResponse.yaml#/TransactionStatusResponse'
+
+TransactionStatusResponseCollection:
+  type: object
+  properties:
+    transactions:
+      type: array
+      description: "transaction collection"
+      items:
+        $ref: 'transactionStatusResponse.yaml#/TransactionStatusResponseList'
+    currentPageNumber:
+      type: integer
+      description: "Page Number of the current request"
+    currentPageSize:
+      type: integer
+      description: "Number of items fetched"
+    maximumPageNumber:
+      type: integer
+      description: "maximum page Number to fetch total records with current page size"
+    totalRecords:
+      description: "total number of records which are matched to the current search"
+      type: integer

@@ -303,7 +303,7 @@
                     <generateModelDocumentation>true</generateModelDocumentation>
                     <configOptions>
                       <generatedConstructorWithRequiredArgs>false</generatedConstructorWithRequiredArgs>
-                      <dateLibrary>java</dateLibrary>
+                      <dateLibrary>java8</dateLibrary>
                       <interfaceOnly>true</interfaceOnly>
                       <useSpringBoot3>true</useSpringBoot3>
                       <additionalModelTypeAnnotations>@lombok.Builder @lombok.NoArgsConstructor @lombok.AllArgsConstructor</additionalModelTypeAnnotations>
