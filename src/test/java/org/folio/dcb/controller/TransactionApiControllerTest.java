@@ -930,7 +930,7 @@ class TransactionApiControllerTest extends BaseIT {
       .andExpect(jsonPath("$.transactions[*].status",
         containsInRelativeOrder("AWAITING_PICKUP", "ITEM_CHECKED_OUT", "ITEM_CHECKED_IN", "CLOSED")));
 
-    // Now try to get all the records from startDate1 to endDate2 with pageSize
+    // Now try to get all the records from startDate1 to endDate2 without pageSize(default pageSize)
     this.mockMvc.perform(
         get("/transactions/status")
           .headers(defaultHeaders())

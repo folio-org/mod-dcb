@@ -212,8 +212,8 @@
     },
     {
       "permissionName": "dcb.transactions.collection.get",
-      "displayName": "get transaction detail list",
-      "description": "get list of transaction details"
+      "displayName": "get updated transaction detail list",
+      "description": "get list of transaction updated between a given query range"
     }
   ],
   "launchDescriptor": {
