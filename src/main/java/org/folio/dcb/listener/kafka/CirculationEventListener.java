@@ -39,6 +39,7 @@ public class CirculationEventListener {
     concurrency = "#{folioKafkaProperties.listener['loan'].concurrency}")
   public void handleLoanEvent(String data, MessageHeaders messageHeaders) {
     String tenantId = getHeaderValue(messageHeaders, XOkapiHeaders.TENANT, null).get(0);
+    log.info(data);
     var eventData = parseLoanEvent(data);
     if (Objects.nonNull(eventData)) {
       String itemId = eventData.getItemId();
@@ -69,6 +70,7 @@ public class CirculationEventListener {
     concurrency = "#{folioKafkaProperties.listener['request'].concurrency}")
   public void handleRequestEvent(String data, MessageHeaders messageHeaders) {
     String tenantId = getHeaderValue(messageHeaders, XOkapiHeaders.TENANT, null).get(0);
+    log.info(data);
     var eventData = parseRequestEvent(data);
     if (Objects.nonNull(eventData)) {
       String requestId = eventData.getRequestId();
