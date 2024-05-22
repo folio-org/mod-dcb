@@ -7,6 +7,8 @@ public class EventData {
   private EventType type;
   private String itemId;
   private String requestId;
+  private String instanceTitle;
+  private String requesterLastName;
 
   public enum EventType {
     CHECK_IN, CHECK_OUT, IN_TRANSIT, AWAITING_PICKUP, CANCEL

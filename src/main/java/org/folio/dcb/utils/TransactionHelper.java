@@ -55,6 +55,13 @@ public class TransactionHelper {
           case CLOSED_CANCELLED -> eventData.setType(EventData.EventType.CANCEL);
           default -> log.info("parseRequestEvent:: Request status {} is not supported", requestStatus);
         }
+        if (kafkaEvent.getNewNode().has("instance") && kafkaEvent.getNewNode().get("instance").has("title")) {
+          eventData.setInstanceTitle(kafkaEvent.getNewNode().get("instance").get("title").asText());
+        }
+
+        if (kafkaEvent.getNewNode().has("requester") && kafkaEvent.getNewNode().get("requester").has("lastName")) {
+          eventData.setRequesterLastName(kafkaEvent.getNewNode().get("requester").get("lastName").asText());
+        }
         return eventData;
       }
     return null;
