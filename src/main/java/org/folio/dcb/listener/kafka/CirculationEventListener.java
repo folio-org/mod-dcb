@@ -41,9 +41,9 @@ public class CirculationEventListener {
     String tenantId = getHeaderValue(messageHeaders, XOkapiHeaders.TENANT, null).get(0);
     log.info("loan event triggered");
     var eventData = parseLoanEvent(data);
-    if (Objects.nonNull(eventData)) {
+    if (Objects.nonNull(eventData) && eventData.isDcb()) {
       log.info(data);
-      log.info("dcb and non dcb flow");
+      log.info("dcb flow");
       String itemId = eventData.getItemId();
       systemUserScopedExecutionService.executeAsyncSystemUserScoped(tenantId, () ->
         transactionRepository.findTransactionByItemIdAndStatusNotInClosed(UUID.fromString(itemId))

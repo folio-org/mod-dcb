@@ -37,6 +37,9 @@ public class TransactionHelper {
             eventData.setType(EventData.EventType.CHECK_IN);
           }
         }
+        if (kafkaEvent.getNewNode().has("isDcb")) {
+          eventData.setDcb(kafkaEvent.getNewNode().get("isDcb").asBoolean());
+        }
         return eventData;
       }
     return null;

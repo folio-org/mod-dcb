@@ -9,6 +9,7 @@ public class EventData {
   private String requestId;
   private String instanceTitle;
   private String requesterLastName;
+  private boolean isDcb;
 
   public enum EventType {
     CHECK_IN, CHECK_OUT, IN_TRANSIT, AWAITING_PICKUP, CANCEL
