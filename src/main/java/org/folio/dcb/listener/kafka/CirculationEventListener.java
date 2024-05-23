@@ -39,21 +39,23 @@ public class CirculationEventListener {
     concurrency = "#{folioKafkaProperties.listener['loan'].concurrency}")
   public void handleLoanEvent(String data, MessageHeaders messageHeaders) {
     String tenantId = getHeaderValue(messageHeaders, XOkapiHeaders.TENANT, null).get(0);
-    log.info(data);
+    log.info("loan event triggered");
     var eventData = parseLoanEvent(data);
     if (Objects.nonNull(eventData)) {
+      log.info(data);
+      log.info("dcb and non dcb flow");
       String itemId = eventData.getItemId();
       systemUserScopedExecutionService.executeAsyncSystemUserScoped(tenantId, () ->
         transactionRepository.findTransactionByItemIdAndStatusNotInClosed(UUID.fromString(itemId))
           .ifPresent(transactionEntity -> {
-            if(eventData.getType() == EventData.EventType.CHECK_OUT) {
-              if(transactionEntity.getRole() == BORROWING_PICKUP || transactionEntity.getRole() == PICKUP) {
+            if (eventData.getType() == EventData.EventType.CHECK_OUT) {
+              if (transactionEntity.getRole() == BORROWING_PICKUP || transactionEntity.getRole() == PICKUP) {
                 baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.ITEM_CHECKED_OUT);
               }
-            } else if(eventData.getType() == EventData.EventType.CHECK_IN) {
-              if(transactionEntity.getRole() == LENDER) {
+            } else if (eventData.getType() == EventData.EventType.CHECK_IN) {
+              if (transactionEntity.getRole() == LENDER) {
                 baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.CLOSED);
-              } else if(transactionEntity.getRole() == BORROWING_PICKUP || transactionEntity.getRole() == PICKUP) {
+              } else if (transactionEntity.getRole() == BORROWING_PICKUP || transactionEntity.getRole() == PICKUP) {
                 baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.ITEM_CHECKED_IN);
               }
             } else {
@@ -75,7 +77,7 @@ public class CirculationEventListener {
       log.info(data);
       String instanceTitle = eventData.getInstanceTitle();
       String requesterLastName = eventData.getRequesterLastName();
-      if (instanceTitle.equals("DCB_INSTANCE") || requesterLastName.equals("DcbSystem")) {
+      if ("DCB_INSTANCE".equals(instanceTitle) || "DcbSystem".equals(requesterLastName)) {
         log.info("dcb flow");
         String requestId = eventData.getRequestId();
         if (Objects.nonNull(requestId)) {
