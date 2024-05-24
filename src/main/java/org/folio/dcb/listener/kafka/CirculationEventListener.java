@@ -40,9 +40,9 @@ public class CirculationEventListener {
   public void handleLoanEvent(String data, MessageHeaders messageHeaders) {
     String tenantId = getHeaderValue(messageHeaders, XOkapiHeaders.TENANT, null).get(0);
     log.info("loan event triggered");
+    log.info(data);
     var eventData = parseLoanEvent(data);
     if (Objects.nonNull(eventData) && eventData.isDcb()) {
-      log.info(data);
       log.info("dcb flow for a loan event");
       String itemId = eventData.getItemId();
       systemUserScopedExecutionService.executeAsyncSystemUserScoped(tenantId, () ->
