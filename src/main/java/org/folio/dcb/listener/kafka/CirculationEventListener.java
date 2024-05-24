@@ -43,7 +43,7 @@ public class CirculationEventListener {
     var eventData = parseLoanEvent(data);
     if (Objects.nonNull(eventData) && eventData.isDcb()) {
       log.info(data);
-      log.info("dcb flow");
+      log.info("dcb flow for a loan event");
       String itemId = eventData.getItemId();
       systemUserScopedExecutionService.executeAsyncSystemUserScoped(tenantId, () ->
         transactionRepository.findTransactionByItemIdAndStatusNotInClosed(UUID.fromString(itemId))
@@ -72,13 +72,14 @@ public class CirculationEventListener {
     concurrency = "#{folioKafkaProperties.listener['request'].concurrency}")
   public void handleRequestEvent(String data, MessageHeaders messageHeaders) {
     String tenantId = getHeaderValue(messageHeaders, XOkapiHeaders.TENANT, null).get(0);
+    log.info("request event triggered");
     var eventData = parseRequestEvent(data);
     if (Objects.nonNull(eventData)) {
       log.info(data);
       String instanceTitle = eventData.getInstanceTitle();
       String requesterLastName = eventData.getRequesterLastName();
       if ("DCB_INSTANCE".equals(instanceTitle) || "DcbSystem".equals(requesterLastName)) {
-        log.info("dcb flow");
+        log.info("dcb flow for a request event");
         String requestId = eventData.getRequestId();
         if (Objects.nonNull(requestId)) {
           systemUserScopedExecutionService.executeAsyncSystemUserScoped(tenantId, () ->
