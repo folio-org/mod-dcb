@@ -39,8 +39,6 @@ public class CirculationEventListener {
     concurrency = "#{folioKafkaProperties.listener['loan'].concurrency}")
   public void handleLoanEvent(String data, MessageHeaders messageHeaders) {
     String tenantId = getHeaderValue(messageHeaders, XOkapiHeaders.TENANT, null).get(0);
-    log.info("loan event triggered");
-    log.info(data);
     var eventData = parseLoanEvent(data);
     if (Objects.nonNull(eventData) && eventData.isDcb()) {
       log.info("dcb flow for a loan event");
@@ -72,10 +70,8 @@ public class CirculationEventListener {
     concurrency = "#{folioKafkaProperties.listener['request'].concurrency}")
   public void handleRequestEvent(String data, MessageHeaders messageHeaders) {
     String tenantId = getHeaderValue(messageHeaders, XOkapiHeaders.TENANT, null).get(0);
-    log.info("request event triggered");
     var eventData = parseRequestEvent(data);
     if (Objects.nonNull(eventData)) {
-      log.info(data);
       String instanceTitle = eventData.getInstanceTitle();
       String requesterLastName = eventData.getRequesterLastName();
       if ("DCB_INSTANCE".equals(instanceTitle) || "DcbSystem".equals(requesterLastName)) {
