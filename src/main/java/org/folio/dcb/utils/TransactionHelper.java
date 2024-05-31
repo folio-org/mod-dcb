@@ -15,6 +15,12 @@ import static org.folio.dcb.utils.KafkaEvent.STATUS;
 public class TransactionHelper {
   private static final String LOAN_ACTION_CHECKED_OUT = "checkedout";
   private static final String LOAN_ACTION_CHECKED_IN = "checkedin";
+  public static final String IS_DCB = "isDcb";
+  public static final String INSTANCE = "instance";
+  public static final String REQUESTER = "requester";
+  public static final String TITLE = "title";
+  public static final String LASTNAME = "lastName";
+
   private TransactionHelper(){}
 
   public static List<String> getHeaderValue(MessageHeaders headers, String headerName, String defaultValue) {
@@ -37,8 +43,8 @@ public class TransactionHelper {
             eventData.setType(EventData.EventType.CHECK_IN);
           }
         }
-        if (kafkaEvent.getNewNode().has("isDcb")) {
-          eventData.setDcb(kafkaEvent.getNewNode().get("isDcb").asBoolean());
+        if (kafkaEvent.getNewNode().has(IS_DCB)) {
+          eventData.setDcb(kafkaEvent.getNewNode().get(IS_DCB).asBoolean());
         }
         return eventData;
       }
@@ -58,12 +64,12 @@ public class TransactionHelper {
           case CLOSED_CANCELLED -> eventData.setType(EventData.EventType.CANCEL);
           default -> log.info("parseRequestEvent:: Request status {} is not supported", requestStatus);
         }
-        if (kafkaEvent.getNewNode().has("instance") && kafkaEvent.getNewNode().get("instance").has("title")) {
-          eventData.setInstanceTitle(kafkaEvent.getNewNode().get("instance").get("title").asText());
+        if (kafkaEvent.getNewNode().has(INSTANCE) && kafkaEvent.getNewNode().get(INSTANCE).has(TITLE)) {
+          eventData.setInstanceTitle(kafkaEvent.getNewNode().get(INSTANCE).get(TITLE).asText());
         }
 
-        if (kafkaEvent.getNewNode().has("requester") && kafkaEvent.getNewNode().get("requester").has("lastName")) {
-          eventData.setRequesterLastName(kafkaEvent.getNewNode().get("requester").get("lastName").asText());
+        if (kafkaEvent.getNewNode().has(REQUESTER) && kafkaEvent.getNewNode().get(REQUESTER).has(LASTNAME)) {
+          eventData.setRequesterLastName(kafkaEvent.getNewNode().get(REQUESTER).get(LASTNAME).asText());
         }
         return eventData;
       }
