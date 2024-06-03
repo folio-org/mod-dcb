@@ -33,9 +33,6 @@ public class CirculationEventListener {
   private final SystemUserScopedExecutionService systemUserScopedExecutionService;
   private final BaseLibraryService baseLibraryService;
 
-  public static final String DCB_INSTANCE_TITLE = "DCB_INSTANCE";
-  public static final String DCB_REQUESTER_LASTNAME = "DcbSystem";
-
   @KafkaListener(
     id = CHECK_OUT_LOAN_LISTENER_ID,
     topicPattern = "#{folioKafkaProperties.listener['loan'].topicPattern}",
@@ -43,8 +40,9 @@ public class CirculationEventListener {
   public void handleLoanEvent(String data, MessageHeaders messageHeaders) {
     String tenantId = getHeaderValue(messageHeaders, XOkapiHeaders.TENANT, null).get(0);
     var eventData = parseLoanEvent(data);
+    log.info(data);
     if (Objects.nonNull(eventData) && eventData.isDcb()) {
-      log.debug("dcb flow for a loan event");
+      log.info("dcb flow for a loan event");
       String itemId = eventData.getItemId();
       systemUserScopedExecutionService.executeAsyncSystemUserScoped(tenantId, () ->
         transactionRepository.findTransactionByItemIdAndStatusNotInClosed(UUID.fromString(itemId))
@@ -74,11 +72,9 @@ public class CirculationEventListener {
   public void handleRequestEvent(String data, MessageHeaders messageHeaders) {
     String tenantId = getHeaderValue(messageHeaders, XOkapiHeaders.TENANT, null).get(0);
     var eventData = parseRequestEvent(data);
-    if (Objects.nonNull(eventData)) {
-      String instanceTitle = eventData.getInstanceTitle();
-      String requesterLastName = eventData.getRequesterLastName();
-      if (DCB_INSTANCE_TITLE.equals(instanceTitle) || DCB_REQUESTER_LASTNAME.equals(requesterLastName)) {
-        log.debug("dcb flow for a request event");
+    log.info(data);
+    if (Objects.nonNull(eventData) && eventData.isDcb() ) {
+        log.info("dcb flow for a request event");
         String requestId = eventData.getRequestId();
         if (Objects.nonNull(requestId)) {
           systemUserScopedExecutionService.executeAsyncSystemUserScoped(tenantId, () ->
@@ -97,6 +93,5 @@ public class CirculationEventListener {
           );
         }
       }
-    }
   }
 }

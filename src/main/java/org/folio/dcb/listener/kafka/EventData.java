@@ -7,8 +7,6 @@ public class EventData {
   private EventType type;
   private String itemId;
   private String requestId;
-  private String instanceTitle;
-  private String requesterLastName;
   private boolean isDcb;
 
   public enum EventType {
