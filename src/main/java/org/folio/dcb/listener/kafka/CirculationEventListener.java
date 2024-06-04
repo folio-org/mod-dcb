@@ -40,9 +40,8 @@ public class CirculationEventListener {
   public void handleLoanEvent(String data, MessageHeaders messageHeaders) {
     String tenantId = getHeaderValue(messageHeaders, XOkapiHeaders.TENANT, null).get(0);
     var eventData = parseLoanEvent(data);
-    log.info(data);
     if (Objects.nonNull(eventData) && eventData.isDcb()) {
-      log.info("dcb flow for a loan event");
+      log.debug("dcb flow for a loan event");
       String itemId = eventData.getItemId();
       systemUserScopedExecutionService.executeAsyncSystemUserScoped(tenantId, () ->
         transactionRepository.findTransactionByItemIdAndStatusNotInClosed(UUID.fromString(itemId))
@@ -72,9 +71,8 @@ public class CirculationEventListener {
   public void handleRequestEvent(String data, MessageHeaders messageHeaders) {
     String tenantId = getHeaderValue(messageHeaders, XOkapiHeaders.TENANT, null).get(0);
     var eventData = parseRequestEvent(data);
-    log.info(data);
     if (Objects.nonNull(eventData) && eventData.isDcb() ) {
-        log.info("dcb flow for a request event");
+        log.debug("dcb flow for a request event");
         String requestId = eventData.getRequestId();
         if (Objects.nonNull(requestId)) {
           systemUserScopedExecutionService.executeAsyncSystemUserScoped(tenantId, () ->
