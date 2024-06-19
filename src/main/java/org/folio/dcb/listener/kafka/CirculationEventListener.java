@@ -40,19 +40,20 @@ public class CirculationEventListener {
   public void handleLoanEvent(String data, MessageHeaders messageHeaders) {
     String tenantId = getHeaderValue(messageHeaders, XOkapiHeaders.TENANT, null).get(0);
     var eventData = parseLoanEvent(data);
-    if (Objects.nonNull(eventData)) {
+    if (Objects.nonNull(eventData) && eventData.isDcb()) {
+      log.debug("dcb flow for a loan event");
       String itemId = eventData.getItemId();
       systemUserScopedExecutionService.executeAsyncSystemUserScoped(tenantId, () ->
         transactionRepository.findTransactionByItemIdAndStatusNotInClosed(UUID.fromString(itemId))
           .ifPresent(transactionEntity -> {
-            if(eventData.getType() == EventData.EventType.CHECK_OUT) {
-              if(transactionEntity.getRole() == BORROWING_PICKUP || transactionEntity.getRole() == PICKUP) {
+            if (eventData.getType() == EventData.EventType.CHECK_OUT) {
+              if (transactionEntity.getRole() == BORROWING_PICKUP || transactionEntity.getRole() == PICKUP) {
                 baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.ITEM_CHECKED_OUT);
               }
-            } else if(eventData.getType() == EventData.EventType.CHECK_IN) {
-              if(transactionEntity.getRole() == LENDER) {
+            } else if (eventData.getType() == EventData.EventType.CHECK_IN) {
+              if (transactionEntity.getRole() == LENDER) {
                 baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.CLOSED);
-              } else if(transactionEntity.getRole() == BORROWING_PICKUP || transactionEntity.getRole() == PICKUP) {
+              } else if (transactionEntity.getRole() == BORROWING_PICKUP || transactionEntity.getRole() == PICKUP) {
                 baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.ITEM_CHECKED_IN);
               }
             } else {
@@ -70,24 +71,25 @@ public class CirculationEventListener {
   public void handleRequestEvent(String data, MessageHeaders messageHeaders) {
     String tenantId = getHeaderValue(messageHeaders, XOkapiHeaders.TENANT, null).get(0);
     var eventData = parseRequestEvent(data);
-    if (Objects.nonNull(eventData)) {
-      String requestId = eventData.getRequestId();
-      if (Objects.nonNull(requestId)) {
-        systemUserScopedExecutionService.executeAsyncSystemUserScoped(tenantId, () ->
-          transactionRepository.findTransactionByRequestIdAndStatusNotInClosed(UUID.fromString(requestId))
-            .ifPresent(transactionEntity -> {
-              if(eventData.getType() == EventData.EventType.CANCEL) {
-                baseLibraryService.cancelTransactionEntity(transactionEntity);
-              } else if(eventData.getType() == EventData.EventType.IN_TRANSIT && transactionEntity.getRole() == LENDER) {
-                baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.OPEN);
-              } else if(eventData.getType() == EventData.EventType.AWAITING_PICKUP && (transactionEntity.getRole() == BORROWING_PICKUP || transactionEntity.getRole() == PICKUP)) {
-                baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.AWAITING_PICKUP);
-              } else {
-                log.info("handleRequestEvent:: status for event {} can not be updated", eventData.getType());
-              }
-            })
-        );
+    if (Objects.nonNull(eventData) && eventData.isDcb() ) {
+        log.debug("dcb flow for a request event");
+        String requestId = eventData.getRequestId();
+        if (Objects.nonNull(requestId)) {
+          systemUserScopedExecutionService.executeAsyncSystemUserScoped(tenantId, () ->
+            transactionRepository.findTransactionByRequestIdAndStatusNotInClosed(UUID.fromString(requestId))
+              .ifPresent(transactionEntity -> {
+                if (eventData.getType() == EventData.EventType.CANCEL) {
+                  baseLibraryService.cancelTransactionEntity(transactionEntity);
+                } else if (eventData.getType() == EventData.EventType.IN_TRANSIT && transactionEntity.getRole() == LENDER) {
+                  baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.OPEN);
+                } else if (eventData.getType() == EventData.EventType.AWAITING_PICKUP && (transactionEntity.getRole() == BORROWING_PICKUP || transactionEntity.getRole() == PICKUP)) {
+                  baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.AWAITING_PICKUP);
+                } else {
+                  log.info("handleRequestEvent:: status for event {} can not be updated", eventData.getType());
+                }
+              })
+          );
+        }
       }
-    }
   }
 }

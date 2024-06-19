@@ -1,0 +1,32 @@
+{
+  "id": "eea9968f-6f3d-4d0b-913b-f3c611e42c0a",
+  "type": "CREATED",
+  "tenant": "diku",
+  "timestamp": 1716552894320,
+  "data": {
+    "new": {
+      "id": "2fed8b86-fa8d-46eb-82ea-f8c03cb467f2",
+      "userId": "2205005b-ca51-4a04-87fd-938eefa8f6de",
+      "itemId": "a7f7af20-0abf-4b38-9ce7-816e238f61af",
+      "itemEffectiveLocationIdAtCheckOut": "53cf956f-c1df-410b-8bea-27f712cca7c0",
+      "status": {
+        "name": "Open"
+      },
+      "loanDate": "2024-05-24T12:14:50.550Z",
+      "dueDate": "2024-05-24T13:14:50.550+00:00",
+      "action": "checkedout",
+      "itemStatus": "Checked out",
+      "loanPolicyId": "43198de5-f56a-4a53-a0bd-5a324418967a",
+      "checkoutServicePointId": "c4c90014-c8c9-4ade-8f24-b5e313319f4b",
+      "patronGroupIdAtCheckout": "3684a786-6671-4268-8ed0-9db82ebca60b",
+      "overdueFinePolicyId": "cd3f6cac-fa17-4079-9fae-2fb28e521412",
+      "lostItemPolicyId": "ed892c0e-52e0-4cd9-8133-c0ef07b4a709",
+      "metadata": {
+        "createdDate": "2024-05-24T12:14:54.309+00:00",
+        "createdByUserId": "21457ab5-4635-4e56-906a-908f05e9233b",
+        "updatedDate": "2024-05-24T12:14:54.309+00:00",
+        "updatedByUserId": "21457ab5-4635-4e56-906a-908f05e9233b"
+      }
+    }
+  }
+}

@@ -1,0 +1,103 @@
+{
+  "id": "2e8a8d25-9cf8-43ed-b5fd-88617d939cab",
+  "type": "UPDATED",
+  "tenant": "diku",
+  "timestamp": 1716872463152,
+  "data": {
+    "old": {
+      "id": "d6667e78-7587-4b14-8333-a46caeedc641",
+      "requestLevel": "Item",
+      "requestType": "Page",
+      "requestDate": "2024-05-28T04:58:19.856+00:00",
+      "requesterId": "b63e6332-2aa4-41a7-a81c-9841c8de4d41",
+      "instanceId": "69640328-788e-43fc-9c3c-af39e243f3b7",
+      "holdingsRecordId": "0c45bb50-7c9b-48b0-86eb-178a494e25fe",
+      "itemId": "eedd13c4-7d40-4b1e-8f77-b0b9d19a896b",
+      "status": "Open - Not yet filled",
+      "position": 1,
+      "instance": {
+        "title": "ABA Journal",
+        "identifiers": [
+          {
+            "value": "0747-0088",
+            "identifierTypeId": "913300b2-03ed-469a-8179-c1092c991227"
+          },
+          {
+            "value": "84641839",
+            "identifierTypeId": "c858e4f2-2b6b-4385-842b-60732ee14abb"
+          }
+        ]
+      },
+      "item": {
+        "barcode": "A1429864347"
+      },
+      "requester": {
+        "firstName": "SREEJA",
+        "lastName": "MANGARAPU",
+        "barcode": "ms12"
+      },
+      "fulfillmentPreference": "Hold Shelf",
+      "pickupServicePointId": "3a40852d-49fd-4df2-a1f9-6e2641a6e91f",
+      "metadata": {
+        "createdDate": "2024-05-28T04:58:22.610+00:00",
+        "createdByUserId": "21457ab5-4635-4e56-906a-908f05e9233b",
+        "updatedDate": "2024-05-28T04:58:22.729+00:00",
+        "updatedByUserId": "21457ab5-4635-4e56-906a-908f05e9233b"
+      },
+      "searchIndex": {
+        "callNumberComponents": {
+          "callNumber": "K1 .M44"
+        },
+        "shelvingOrder": "K1 .M44 v.72:no.6-7,10-12 1986:July-Aug.,Oct.-Dec.",
+        "pickupServicePointName": "Circ Desk 1"
+      }
+    },
+    "new": {
+      "id": "d6667e78-7587-4b14-8333-a46caeedc641",
+      "requestLevel": "Item",
+      "requestType": "Page",
+      "requestDate": "2024-05-28T04:58:19.856+00:00",
+      "requesterId": "b63e6332-2aa4-41a7-a81c-9841c8de4d41",
+      "instanceId": "69640328-788e-43fc-9c3c-af39e243f3b7",
+      "holdingsRecordId": "0c45bb50-7c9b-48b0-86eb-178a494e25fe",
+      "itemId": "eedd13c4-7d40-4b1e-8f77-b0b9d19a896b",
+      "status": "Closed - Filled",
+      "instance": {
+        "title": "ABA Journal",
+        "identifiers": [
+          {
+            "value": "0747-0088",
+            "identifierTypeId": "913300b2-03ed-469a-8179-c1092c991227"
+          },
+          {
+            "value": "84641839",
+            "identifierTypeId": "c858e4f2-2b6b-4385-842b-60732ee14abb"
+          }
+        ]
+      },
+      "item": {
+        "barcode": "A1429864347"
+      },
+      "requester": {
+        "firstName": "SREEJA",
+        "lastName": "MANGARAPU",
+        "barcode": "ms12"
+      },
+      "fulfillmentPreference": "Hold Shelf",
+      "pickupServicePointId": "3a40852d-49fd-4df2-a1f9-6e2641a6e91f",
+      "metadata": {
+        "createdDate": "2024-05-28T04: 58: 22.610+00: 00",
+        "createdByUserId": "21457ab5-4635-4e56-906a-908f05e9233b",
+        "updatedDate": "2024-05-28T05: 01: 03.133+00: 00",
+        "updatedByUserId": "21457ab5-4635-4e56-906a-908f05e9233b"
+      },
+      "searchIndex": {
+        "callNumberComponents": {
+          "callNumber": "K1 .M44"
+        },
+        "shelvingOrder": "K1 .M44 v.72:no.6-7,10-12 1986:July-Aug.,Oct.-Dec.",
+        "pickupServicePointName": "Circ Desk 1"
+      }
+    }
+  }
+}
