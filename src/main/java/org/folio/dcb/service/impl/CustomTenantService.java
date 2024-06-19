@@ -234,7 +234,7 @@ public class CustomTenantService extends TenantService {
         .id(HOLDING_ID)
         .instanceId(INSTANCE_ID)
         .permanentLocationId(LOCATION_ID)
-        .sourceId(holdingSourcesClient.querySourceByName(SOURCE).getId())
+        .sourceId(holdingSourcesClient.querySourceByName(SOURCE).getResult().get(0).getId())
         .build();
 
       holdingsStorageClient.createHolding(holding);
