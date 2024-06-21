@@ -38,7 +38,7 @@ public class EcsRequestTransactionsServiceImpl implements EcsRequestTransactions
 
   @Override
   public TransactionStatusResponse createEcsRequestTransactions(String ecsRequestTransactionsId,
-                                                                DcbTransaction dcbTransaction) {
+    DcbTransaction dcbTransaction) {
     log.info("createEcsRequestTransactions:: creating new transaction request for role {} ",
       dcbTransaction.getRole());
     checkEcsRequestTransactionExistsAndThrow(ecsRequestTransactionsId);
@@ -90,8 +90,11 @@ public class EcsRequestTransactionsServiceImpl implements EcsRequestTransactions
   }
 
   private void createBorrowerEcsRequestTransactions(String ecsRequestTransactionsId,
-                                                    DcbTransaction dcbTransaction, CirculationRequest circulationRequest) {
+    DcbTransaction dcbTransaction, CirculationRequest circulationRequest) {
     var itemVirtual = dcbTransaction.getItem();
+    if (itemVirtual == null) {
+      throw new IllegalArgumentException("Item is required for borrower transaction");
+    }
     baseLibraryService.checkItemExistsInInventoryAndThrow(itemVirtual.getBarcode());
     CirculationItem item = circulationItemService.checkIfItemExistsAndCreate(itemVirtual, circulationRequest.getPickupServicePointId());
     circulationRequest.setItemId(UUID.fromString(item.getId()));

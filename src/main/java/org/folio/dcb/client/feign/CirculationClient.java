@@ -23,5 +23,5 @@ public interface CirculationClient {
 
   @PutMapping("/requests/{requestId}")
   CirculationRequest updateRequest(@PathVariable("requestId") String requestId,
-                                   @RequestBody CirculationRequest circulationRequest);
+    @RequestBody CirculationRequest circulationRequest);
 }
