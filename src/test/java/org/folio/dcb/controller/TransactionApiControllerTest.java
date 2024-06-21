@@ -11,6 +11,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWER;
@@ -30,6 +32,8 @@ import static org.folio.dcb.utils.EntityUtils.createDefaultDcbPatron;
 import static org.folio.dcb.utils.EntityUtils.createDcbTransactionByRole;
 import static org.folio.dcb.utils.EntityUtils.createTransactionEntity;
 import static org.folio.dcb.utils.EntityUtils.createTransactionStatus;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInRelativeOrder;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -847,6 +851,119 @@ class TransactionApiControllerTest extends BaseIT {
           .contentType(MediaType.APPLICATION_JSON)
           .accept(MediaType.APPLICATION_JSON))
       .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void getTransactionStatusUpdateListTest() throws Exception {
+    var startDate1 = OffsetDateTime.now(ZoneOffset.UTC);
+    var dcbTransaction = createDcbTransactionByRole(BORROWER);
+    removeExistedTransactionFromDbIfSoExists();
+    removeExistingTransactionsByItemId(dcbTransaction.getItem().getId());
+
+    // Creating new transaction
+    this.mockMvc.perform(
+        post("/transactions/" + DCB_TRANSACTION_ID)
+          .content(asJsonString(dcbTransaction))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isCreated());
+
+    // Update transaction from CREATED to OPEN
+    this.mockMvc.perform(
+        put("/transactions/" + DCB_TRANSACTION_ID + "/status")
+          .content(asJsonString(createTransactionStatus(TransactionStatus.StatusEnum.OPEN)))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.status").value("OPEN"));
+
+    var endDate1 = OffsetDateTime.now(ZoneOffset.UTC);
+
+    // There is one update happened(CREATED -> OPEN), so we will get one record
+    this.mockMvc.perform(
+        get("/transactions/status")
+          .headers(defaultHeaders())
+          .param("fromDate", String.valueOf(startDate1))
+          .param("toDate", String.valueOf(endDate1))
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().is(200))
+      .andExpect(jsonPath("$.totalRecords", is(1)))
+      .andExpect(jsonPath("$.currentPageNumber", is(0)))
+      .andExpect(jsonPath("$.currentPageSize", is(1000)))
+      .andExpect(jsonPath("$.maximumPageNumber", is(0)))
+      .andExpect(jsonPath("$.transactions[*].status",
+        containsInRelativeOrder("OPEN")))
+      .andExpect(jsonPath("$.transactions[*].id",
+        contains(DCB_TRANSACTION_ID)));
+
+    var startDate2 = OffsetDateTime.now(ZoneOffset.UTC);
+
+    // Update transaction from OPEN to CLOSED
+    this.mockMvc.perform(
+        put("/transactions/" + DCB_TRANSACTION_ID + "/status")
+          .content(asJsonString(createTransactionStatus(TransactionStatus.StatusEnum.CLOSED)))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.status").value("CLOSED"));
+
+    var endDate2 = OffsetDateTime.now(ZoneOffset.UTC);
+
+    // There are 4 update happened(OPEN -> AWAITING_PICKUP, AWAITING_PICKUP -> ITEM_CHECKED_OUT
+    // ITEM_CHECKED_OUT -> ITEM_CHECKED_IN, ITEM_CHECKED_IN -> CLOSED), so we will get 4 record
+    this.mockMvc.perform(
+        get("/transactions/status")
+          .headers(defaultHeaders())
+          .param("fromDate", String.valueOf(startDate2))
+          .param("toDate", String.valueOf(endDate2))
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().is(200))
+      .andExpect(jsonPath("$.totalRecords", is(4)))
+      .andExpect(jsonPath("$.currentPageNumber", is(0)))
+      .andExpect(jsonPath("$.currentPageSize", is(1000)))
+      .andExpect(jsonPath("$.maximumPageNumber", is(0)))
+      .andExpect(jsonPath("$.transactions[*].status",
+        containsInRelativeOrder("AWAITING_PICKUP", "ITEM_CHECKED_OUT", "ITEM_CHECKED_IN", "CLOSED")));
+
+    // Now try to get all the records from startDate1 to endDate2 without pageSize(default pageSize)
+    this.mockMvc.perform(
+        get("/transactions/status")
+          .headers(defaultHeaders())
+          .param("fromDate", String.valueOf(startDate1))
+          .param("toDate", String.valueOf(endDate2))
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().is(200))
+      .andExpect(jsonPath("$.totalRecords", is(5)))
+      .andExpect(jsonPath("$.currentPageNumber", is(0)))
+      .andExpect(jsonPath("$.currentPageSize", is(1000)))
+      .andExpect(jsonPath("$.maximumPageNumber", is(0)))
+      .andExpect(jsonPath("$.transactions[*].status",
+        containsInRelativeOrder("OPEN", "AWAITING_PICKUP", "ITEM_CHECKED_OUT", "ITEM_CHECKED_IN", "CLOSED")));
+
+    // Now try to get the records based on pagination from startDate1 to endDate2.
+    this.mockMvc.perform(
+        get("/transactions/status")
+          .headers(defaultHeaders())
+          .param("fromDate", String.valueOf(startDate1))
+          .param("toDate", String.valueOf(endDate2))
+          .param("pageNumber", String.valueOf(1))
+          .param("pageSize",String.valueOf(2))
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().is(200))
+      .andExpect(jsonPath("$.totalRecords", is(5)))
+      .andExpect(jsonPath("$.currentPageNumber", is(1)))
+      .andExpect(jsonPath("$.currentPageSize", is(2)))
+      .andExpect(jsonPath("$.maximumPageNumber", is(2)))
+      .andExpect(jsonPath("$.transactions[*].status",
+        containsInRelativeOrder("ITEM_CHECKED_OUT", "ITEM_CHECKED_IN")));
+
   }
 
   private void removeExistedTransactionFromDbIfSoExists() {

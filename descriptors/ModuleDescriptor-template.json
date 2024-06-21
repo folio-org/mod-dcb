@@ -8,11 +8,11 @@
     },
     {
       "id": "users",
-      "version": "16.0"
+      "version": "16.1"
     },
     {
       "id": "inventory",
-      "version": "13.0"
+      "version": "13.1"
     },
     {
       "id": "login",
@@ -24,11 +24,11 @@
     },
     {
       "id": "item-storage",
-      "version": "10.0"
+      "version": "10.1"
     },
     {
       "id": "holdings-storage",
-      "version": "6.0"
+      "version": "6.0 7.0"
     },
     {
       "id": "service-points",
@@ -40,7 +40,7 @@
     },
     {
       "id": "inventory",
-      "version": "13.0"
+      "version": "13.1"
     },
     {
       "id": "material-types",
@@ -122,6 +122,16 @@
             "circulation.check-out-by-barcode.post",
             "circulation.check-in-by-barcode.post"
           ]
+        },
+        {
+          "methods": [
+            "GET"
+          ],
+          "pathPattern": "/transactions/status",
+          "permissionsRequired": [
+            "dcb.transactions.collection.get"
+          ],
+          "modulePermissions": []
         }
       ]
     },
@@ -156,6 +166,7 @@
             "users.collection.get",
             "users.item.post",
             "login.item.post",
+            "login.item.delete",
             "perms.users.item.post",
             "perms.users.get",
             "perms.users.assign.immutable",
@@ -200,6 +211,8 @@
         "dcb.transactions.post",
         "dcb.transactions.put",
         "dcb.transactions.get",
+        "dcb.transactions.collection.get",
+        "dcb.transactions.get",
         "dcb.ecs-request.transactions.post"
       ]
     },
@@ -217,6 +230,11 @@
       "permissionName": "dcb.transactions.put",
       "displayName": "update transaction details",
       "description": "update transaction details"
+    },
+    {
+      "permissionName": "dcb.transactions.collection.get",
+      "displayName": "get updated transaction detail list",
+      "description": "get list of transaction updated between a given query range"
     },
     {
       "permissionName": "dcb.ecs-request.transactions.post",

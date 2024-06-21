@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.TransactionStatus;
+import org.folio.dcb.domain.dto.TransactionStatusResponseCollection;
 import org.folio.dcb.rest.resource.TransactionsApi;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.service.TransactionAuditService;
@@ -11,6 +12,7 @@ import org.folio.dcb.service.TransactionsService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+import java.time.OffsetDateTime;
 
 @RestController
 @Log4j2
@@ -63,4 +65,13 @@ public class TransactionApiController implements TransactionsApi {
     return ResponseEntity.status(HttpStatus.OK)
       .body(transactionStatusResponse);
   }
+
+  @Override
+  public ResponseEntity<TransactionStatusResponseCollection> getTransactionStatusList(OffsetDateTime fromDate, OffsetDateTime toDate, Integer pageNumber, Integer pageSize) {
+    log.info("getTransactionStatusList:: fetching transaction lists with fromDate {}, toDate {}, pageNumber {}, pageSize {}",
+      fromDate, toDate, pageNumber, pageSize);
+    return ResponseEntity.status(HttpStatus.OK)
+      .body(transactionsService.getTransactionStatusList(fromDate, toDate, pageNumber, pageSize));
+  }
+
 }

@@ -57,6 +57,24 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
+  /transactions/status:
+    parameters:
+      - $ref: '#/components/parameters/fromDate'
+      - $ref: '#/components/parameters/toDate'
+      - $ref: '#/components/parameters/pageNumber'
+      - $ref: '#/components/parameters/pageSize'
+    get:
+      description: Get a list of updated transactions between from date and to date with optional filtering and pagination
+      operationId: getTransactionStatusList
+      tags:
+        - circulation
+      responses:
+        '200':
+          $ref: '#/components/responses/TransactionStatusResponseCollection'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /ecs-request-transactions/{ecsRequestTransactionId}:
     description: ECS TLR Transaction endpoint
     post:
@@ -105,6 +123,12 @@ components:
         application/json:
           schema:
             $ref: "schemas/transactionStatusResponse.yaml#/TransactionStatusResponse"
+    TransactionStatusResponseCollection:
+      description: List of TransactionResponse object
+      content:
+        application/json:
+          schema:
+            $ref: "schemas/transactionStatusResponse.yaml#/TransactionStatusResponseCollection"
     NotFound:
       description: Resource not found
       content:
@@ -153,6 +177,42 @@ components:
       schema:
         type: string
       required: true
+    fromDate:
+      in: query
+      name: fromDate
+      description: Start date for filtering transactions
+      schema:
+        type: string
+        format: date-time
+      required: true
+    toDate:
+      in: query
+      name: toDate
+      description: End date for filtering transactions
+      schema:
+        type: string
+        format: date-time
+      required: true
+    pageNumber:
+      in: query
+      name: pageNumber
+      description: Page number for pagination (optional)
+      schema:
+        type: integer
+        default: 0
+        minimum: 0
+        maximum: 2147483647
+      required: false
+    pageSize:
+      in: query
+      name: pageSize
+      description: Number of items per page (optional)
+      schema:
+        type: integer
+        default: 1000
+        minimum: 1
+        maximum: 2147483647
+      required: false
   schemas:
     InventoryItem:
       $ref: 'schemas/InventoryItem.yaml#/InventoryItem'

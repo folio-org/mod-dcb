@@ -34,6 +34,7 @@ dcb API provides the following URLs:
 | GET    | /transactions/{dcbTransactionId}/status                      | dcb.transactions.get      | Gets status of transaction based on transactionId                                   |
 | POST   | /transactions/{dcbTransactionId}                                             | dcb.transactions.post        | create new transaction                                                              |
 | PUT    | /transactions/{dcbTransactionId}/status                            | dcb.transactions.put         | Update the status of the transaction and it will trigger automatic action if needed |
+| GET    | /transactions/{dcbTransactionId}/status                            | dcb.transactions.collection.get         | get list of transaction updated between a given query range |
 
 ## Installing and deployment
 

@@ -8,5 +8,6 @@
   <include file="changes/create-audit-table.xml" relativeToChangelogFile="true"/>
   <include file="changes/add-request-to-transaction.xml" relativeToChangelogFile="true"/>
   <include file="changes/set-optional-fields-nullable.xml" relativeToChangelogFile="true"/>
+  <include file="changes/alter-date-datatype.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

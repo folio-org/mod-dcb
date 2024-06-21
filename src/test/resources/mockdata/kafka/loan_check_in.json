@@ -19,6 +19,7 @@
       "loanPolicyId":"d9cd0bed-1b49-4b5e-a7bd-064b8d177231",
       "checkoutServicePointId":"7c5abc9f-f3d7-4856-b8d7-6712462ca007",
       "patronGroupIdAtCheckout":"3684a786-6671-4268-8ed0-9db82ebca60b",
+      "isDcb":true,
       "overdueFinePolicyId":"cd3f6cac-fa17-4079-9fae-2fb28e521412",
       "lostItemPolicyId":"ed892c0e-52e0-4cd9-8133-c0ef07b4a709",
       "metadata":{
