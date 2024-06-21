@@ -22,5 +22,6 @@ public interface CirculationClient {
   void checkOutByBarcode(@RequestBody CheckOutRequest checkOutRequest);
 
   @PutMapping("/requests/{requestId}")
-  CirculationRequest cancelRequest(@PathVariable("requestId") String requestId, @RequestBody CirculationRequest circulationRequest);
+  CirculationRequest updateRequest(@PathVariable("requestId") String requestId,
+                                   @RequestBody CirculationRequest circulationRequest);
 }
