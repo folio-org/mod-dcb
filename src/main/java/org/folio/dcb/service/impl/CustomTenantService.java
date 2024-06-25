@@ -33,6 +33,7 @@ import static org.folio.dcb.utils.DCBConstants.CANCELLATION_REASON_ID;
 import static org.folio.dcb.utils.DCBConstants.CODE;
 import static org.folio.dcb.utils.DCBConstants.DCB_CANCELLATION_REASON_NAME;
 import static org.folio.dcb.utils.DCBConstants.HOLDING_ID;
+import static org.folio.dcb.utils.DCBConstants.HOLDING_SOURCE;
 import static org.folio.dcb.utils.DCBConstants.INSTANCE_ID;
 import static org.folio.dcb.utils.DCBConstants.INSTANCE_TITLE;
 import static org.folio.dcb.utils.DCBConstants.INSTANCE_TYPE_ID;
@@ -45,7 +46,6 @@ import static org.folio.dcb.utils.DCBConstants.SERVICE_POINT_ID;
 import static org.folio.dcb.utils.DCBConstants.SOURCE;
 import static org.folio.dcb.utils.DCBConstants.LOAN_TYPE_ID;
 import static org.folio.dcb.utils.DCBConstants.DCB_LOAN_TYPE_NAME;
-import static org.folio.dcb.utils.DCBConstants.holdingSource;
 
 @Log4j2
 @Service
@@ -260,7 +260,7 @@ public class CustomTenantService extends TenantService {
       .builder()
       .id(UUID.randomUUID().toString())
       .name(SOURCE)
-      .source(holdingSource)
+      .source(HOLDING_SOURCE)
       .build());
   }
 

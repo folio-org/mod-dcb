@@ -24,5 +24,5 @@ public class DCBConstants {
   public static final String DCB_CANCELLATION_REASON_NAME = "DCB Cancelled";
   public static final String DCB_TYPE = "dcb";
   public static final String SHADOW_TYPE = "shadow";
-  public static final String holdingSource = "folio";
+  public static final String HOLDING_SOURCE = "folio";
 }
