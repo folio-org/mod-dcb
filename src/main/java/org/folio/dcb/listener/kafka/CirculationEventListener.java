@@ -70,11 +70,13 @@ public class CirculationEventListener {
     concurrency = "#{folioKafkaProperties.listener['request'].concurrency}")
   public void handleRequestEvent(String data, MessageHeaders messageHeaders) {
     String tenantId = getHeaderValue(messageHeaders, XOkapiHeaders.TENANT, null).get(0);
+    log.info("This got called {}", data);
     var eventData = parseRequestEvent(data);
-    if (Objects.nonNull(eventData) && eventData.isDcb() ) {
-        log.debug("dcb flow for a request event");
+    if (Objects.nonNull(eventData) && eventData.isDcb()) {
+        log.info("dcb flow for a request event");
         String requestId = eventData.getRequestId();
         if (Objects.nonNull(requestId)) {
+          log.info("Inside the main if condition....");
           systemUserScopedExecutionService.executeAsyncSystemUserScoped(tenantId, () ->
             transactionRepository.findTransactionByRequestIdAndStatusNotInClosed(UUID.fromString(requestId))
               .ifPresent(transactionEntity -> {

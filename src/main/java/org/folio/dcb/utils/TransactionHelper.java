@@ -53,25 +53,33 @@ public class TransactionHelper {
 
   public static EventData parseRequestEvent(String eventPayload){
       KafkaEvent kafkaEvent = new KafkaEvent(eventPayload);
+      log.info("The payload is {}", eventPayload);
       if(kafkaEvent.getEventType() == KafkaEvent.EventType.UPDATED && kafkaEvent.hasNewNode()
         && kafkaEvent.getNewNode().has(STATUS)){
+        log.info("Inside the if condition...");
         EventData eventData = new EventData();
         eventData.setRequestId(kafkaEvent.getNewNode().get("id").asText());
         RequestStatus requestStatus = RequestStatus.from(kafkaEvent.getNewNode().get(STATUS).asText());
+        log.info("The request status is {}", requestStatus);
         switch (requestStatus) {
           case OPEN_IN_TRANSIT -> eventData.setType(EventData.EventType.IN_TRANSIT);
           case OPEN_AWAITING_PICKUP -> eventData.setType(EventData.EventType.AWAITING_PICKUP);
           case CLOSED_CANCELLED -> eventData.setType(EventData.EventType.CANCEL);
           default -> log.info("parseRequestEvent:: Request status {} is not supported", requestStatus);
         }
+log.info("Outside the switch statements ");
         eventData.setDcb(checkDcbRequest(kafkaEvent));
         return eventData;
       }
     return null;
   }
   private static boolean checkDcbRequest(KafkaEvent kafkaEvent) {
-    return (kafkaEvent.getNewNode().has(INSTANCE) && kafkaEvent.getNewNode().get(INSTANCE).has(TITLE)
-      && kafkaEvent.getNewNode().get(INSTANCE).get(TITLE).asText().equals(DCB_INSTANCE_TITLE)) || (kafkaEvent.getNewNode().has(REQUESTER)
-      && kafkaEvent.getNewNode().get(REQUESTER).has(LASTNAME) && kafkaEvent.getNewNode().get(REQUESTER).get(LASTNAME).asText().equals(DCB_REQUESTER_LASTNAME));
+    log.info("The kafkaEvent is {}", kafkaEvent);
+    return (kafkaEvent.getNewNode().has(INSTANCE)
+      && kafkaEvent.getNewNode().get(INSTANCE).has(TITLE)
+      && kafkaEvent.getNewNode().get(INSTANCE).get(TITLE).asText().equals(DCB_INSTANCE_TITLE))
+      || (kafkaEvent.getNewNode().has(REQUESTER)
+      && kafkaEvent.getNewNode().get(REQUESTER).has(LASTNAME)
+      && kafkaEvent.getNewNode().get(REQUESTER).get(LASTNAME).asText().equals(DCB_REQUESTER_LASTNAME));
   }
 }
