@@ -21,7 +21,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
+import java.util.UUID;
+
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -67,5 +72,45 @@ class CustomTenantServiceTest {
 
     service.createOrUpdateTenant(new TenantAttributes());
     verify(systemUserService).setupSystemUser();
+  }
+
+  @Test
+  void testHoldingsCreationWhileEnablingTenant() {
+    when(instanceTypeClient.queryInstanceTypeByName(any())).thenReturn(new ResultList<>());
+    when(locationUnitClient.getCampusByName(any())).thenReturn(new ResultList<>());
+    when(inventoryClient.getInstanceById(any())).thenThrow(FeignException.NotFound.class);
+    when(locationUnitClient.getLibraryByName(any())).thenReturn(new ResultList<>());
+    when(servicePointClient.getServicePointByName(any())).thenReturn(new ResultList<>());
+    when(locationsClient.queryLocationsByName(any())).thenReturn(new ResultList<>());
+    when(loanTypeClient.queryLoanTypeByName(any())).thenReturn(new ResultList<>());
+    when(holdingsStorageClient.findHolding(any())).thenReturn(HoldingsStorageClient.Holding.builder().build());
+    service.createOrUpdateTenant(new TenantAttributes());
+    verify(systemUserService).setupSystemUser();
+
+    when(holdingsStorageClient.findHolding(any())).thenThrow(FeignException.NotFound.class);
+    when(holdingSourcesClient.querySourceByName("FOLIO"))
+      .thenReturn(ResultList.of(1, List.of(createHoldingRecordSource())));
+
+    service.createOrUpdateTenant(new TenantAttributes());
+    verify(systemUserService, times(2)).setupSystemUser();
+    verify(holdingSourcesClient, never()).createHoldingsRecordSource(any());
+    verify(holdingsStorageClient).createHolding(any());
+
+    when(holdingSourcesClient.querySourceByName("FOLIO"))
+      .thenReturn(ResultList.of(0, List.of()));
+    when(holdingSourcesClient.createHoldingsRecordSource(any()))
+      .thenReturn(createHoldingRecordSource());
+
+    service.createOrUpdateTenant(new TenantAttributes());
+    verify(systemUserService, times(3)).setupSystemUser();
+    verify(holdingSourcesClient).createHoldingsRecordSource(any());
+    verify(holdingsStorageClient, times(2)).createHolding(any());
+  }
+
+  private HoldingSourcesClient.HoldingSource createHoldingRecordSource() {
+    return HoldingSourcesClient.HoldingSource
+      .builder()
+      .id(UUID.randomUUID().toString())
+      .build();
   }
 }
