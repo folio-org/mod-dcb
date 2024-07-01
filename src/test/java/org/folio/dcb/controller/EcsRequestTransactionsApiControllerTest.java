@@ -1,5 +1,15 @@
 package org.folio.dcb.controller;
 
+import static org.folio.dcb.utils.EntityUtils.CIRCULATION_REQUEST_ID;
+import static org.folio.dcb.utils.EntityUtils.createBorrowingEcsRequestTransactionByRole;
+import static org.folio.dcb.utils.EntityUtils.createLendingEcsRequestTransactionByRole;
+import static org.hamcrest.Matchers.is;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.UUID;
+
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.entity.TransactionAuditEntity;
 import org.folio.dcb.repository.TransactionAuditRepository;
@@ -9,16 +19,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-
-import java.util.UUID;
-
-import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
-import static org.folio.dcb.utils.EntityUtils.CIRCULATION_REQUEST_ID;
-import static org.folio.dcb.utils.EntityUtils.createEcsRequestTransactionByRole;
-import static org.hamcrest.Matchers.is;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class EcsRequestTransactionsApiControllerTest extends BaseIT {
 
@@ -38,7 +38,7 @@ class EcsRequestTransactionsApiControllerTest extends BaseIT {
 
     this.mockMvc.perform(
         post("/ecs-request-transactions/" + CIRCULATION_REQUEST_ID)
-          .content(asJsonString(createEcsRequestTransactionByRole(LENDER)))
+          .content(asJsonString(createLendingEcsRequestTransactionByRole()))
           .headers(defaultHeaders())
           .contentType(MediaType.APPLICATION_JSON)
           .accept(MediaType.APPLICATION_JSON))
@@ -47,7 +47,7 @@ class EcsRequestTransactionsApiControllerTest extends BaseIT {
     //Trying to create another transaction with same transaction id
     this.mockMvc.perform(
         post("/ecs-request-transactions/" + CIRCULATION_REQUEST_ID)
-          .content(asJsonString(createEcsRequestTransactionByRole(LENDER)))
+          .content(asJsonString(createLendingEcsRequestTransactionByRole()))
           .headers(defaultHeaders())
           .contentType(MediaType.APPLICATION_JSON)
           .accept(MediaType.APPLICATION_JSON))
@@ -68,8 +68,21 @@ class EcsRequestTransactionsApiControllerTest extends BaseIT {
   }
 
   @Test
+  void createBorrowingEcsRequestTest() throws Exception {
+    removeExistedTransactionFromDbIfSoExists();
+
+    this.mockMvc.perform(
+        post("/ecs-request-transactions/" + CIRCULATION_REQUEST_ID)
+          .content(asJsonString(createBorrowingEcsRequestTransactionByRole()))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isCreated());
+  }
+
+  @Test
   void checkErrorStatusForInvalidRequest() throws Exception {
-    DcbTransaction dcbTransaction = createEcsRequestTransactionByRole(LENDER);
+    DcbTransaction dcbTransaction = createLendingEcsRequestTransactionByRole();
     dcbTransaction.setRequestId(UUID.randomUUID().toString());
     this.mockMvc.perform(
         post("/ecs-request-transactions/" + CIRCULATION_REQUEST_ID)

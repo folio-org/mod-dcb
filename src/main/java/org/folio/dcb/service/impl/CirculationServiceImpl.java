@@ -46,7 +46,7 @@ public class CirculationServiceImpl implements CirculationService {
     CirculationRequest request = circulationStorageService.getCancellationRequestIfOpenOrNull(dcbTransaction.getRequestId().toString());
     if (request != null){
       try {
-        circulationClient.cancelRequest(request.getId(), request);
+        circulationClient.updateRequest(request.getId(), request);
       } catch (FeignException e) {
         log.warn("cancelRequest:: error cancelling request using request id {} ", dcbTransaction.getRequestId(), e);
         throw new CirculationRequestException(String.format("Error cancelling request using request id %s", dcbTransaction.getRequestId()));

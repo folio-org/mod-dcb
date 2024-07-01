@@ -12,4 +12,5 @@ public interface RequestService {
    */
   CirculationRequest createPageItemRequest(User user, DcbItem dcbItem, String pickupServicePointId);
   CirculationRequest createHoldItemRequest(User user, DcbItem dcbItem, String pickupServicePointId);
+  void updateCirculationRequest(CirculationRequest circulationRequest);
 }
