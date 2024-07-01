@@ -149,7 +149,13 @@
           ],
           "modulePermissions": [
             "circulation-storage.requests.item.get",
-            "circulation-storage.requests.collection.get"
+            "circulation-storage.requests.collection.get",
+            "circulation.requests.item.put",
+            "inventory-storage.items.item.get",
+            "inventory-storage.items.collection.get",
+            "circulation-item.item.post",
+            "circulation-item.collection.get",
+            "circulation-item.item.get"
           ]
         }
       ]
