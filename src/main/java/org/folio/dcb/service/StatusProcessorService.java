@@ -28,7 +28,7 @@ public class StatusProcessorService {
     StatusProcessor checkInProcessor = new StatusProcessor(ITEM_CHECKED_OUT, ITEM_CHECKED_IN, false, closeProcessor);
     StatusProcessor checkoutProcessor = new StatusProcessor(AWAITING_PICKUP, ITEM_CHECKED_OUT, false, checkInProcessor);
     StatusProcessor awaitingPickupProcessor = new StatusProcessor(OPEN, AWAITING_PICKUP, false, checkoutProcessor);
-    StatusProcessor openProcessor = new StatusProcessor(CREATED, OPEN, true, awaitingPickupProcessor);
+    StatusProcessor openProcessor = new StatusProcessor(CREATED, OPEN, false, awaitingPickupProcessor);
     startChain.setChain(openProcessor);
     var statuses = process(startChain, fromStatus, toStatus);
     log.info("lendingChainProcessor:: Following statuses needs to be transitioned {} ", statuses);
