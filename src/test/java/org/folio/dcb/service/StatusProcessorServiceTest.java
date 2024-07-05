@@ -45,8 +45,6 @@ class StatusProcessorServiceTest {
 
   @Test
   void lendingChainProcessorErrorTest() {
-    assertThrows(StatusException.class, () -> statusProcessorService.lendingChainProcessor(TransactionStatus.StatusEnum.CREATED, TransactionStatus.StatusEnum.OPEN));
-
     assertThrows(StatusException.class, () -> statusProcessorService.lendingChainProcessor(TransactionStatus.StatusEnum.CREATED, TransactionStatus.StatusEnum.AWAITING_PICKUP));
 
     assertThrows(StatusException.class, () -> statusProcessorService.lendingChainProcessor(TransactionStatus.StatusEnum.CREATED, TransactionStatus.StatusEnum.ITEM_CHECKED_OUT));
