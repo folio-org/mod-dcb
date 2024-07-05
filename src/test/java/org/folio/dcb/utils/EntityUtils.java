@@ -75,10 +75,19 @@ public class EntityUtils {
       .build();
   }
 
-  public static DcbTransaction createEcsRequestTransactionByRole(DcbTransaction.RoleEnum role) {
+  public static DcbTransaction createLendingEcsRequestTransactionByRole() {
     return DcbTransaction.builder()
       .requestId(REQUEST_ID)
-      .role(role)
+      .role(DcbTransaction.RoleEnum.LENDER)
+      .pickup(createDcbPickup())
+      .build();
+  }
+
+  public static DcbTransaction createBorrowingEcsRequestTransactionByRole() {
+    return DcbTransaction.builder()
+      .requestId(REQUEST_ID)
+      .item(createDcbItem())
+      .role(DcbTransaction.RoleEnum.BORROWER)
       .pickup(createDcbPickup())
       .build();
   }

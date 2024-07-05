@@ -1,20 +1,29 @@
 package org.folio.dcb.service.impl;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
+import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWER;
+import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
+
+import java.util.UUID;
+
+import org.folio.dcb.domain.dto.CirculationItem;
 import org.folio.dcb.domain.dto.CirculationRequest;
 import org.folio.dcb.domain.dto.DcbItem;
 import org.folio.dcb.domain.dto.DcbPatron;
 import org.folio.dcb.domain.dto.DcbPickup;
 import org.folio.dcb.domain.dto.DcbTransaction;
+import org.folio.dcb.domain.dto.Item;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.exception.ResourceAlreadyExistException;
 import org.folio.dcb.repository.TransactionRepository;
+import org.folio.dcb.service.CirculationItemService;
 import org.folio.dcb.service.CirculationRequestService;
 import org.folio.dcb.service.EcsRequestTransactionsService;
+import org.folio.dcb.service.RequestService;
 import org.folio.dcb.utils.RequestStatus;
 import org.springframework.stereotype.Service;
-import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
 @Service
 @RequiredArgsConstructor
@@ -23,7 +32,9 @@ public class EcsRequestTransactionsServiceImpl implements EcsRequestTransactions
 
   private final BaseLibraryService baseLibraryService;
   private final TransactionRepository transactionRepository;
+  private final RequestService requestService;
   private final CirculationRequestService circulationRequestService;
+  private final CirculationItemService circulationItemService;
 
   @Override
   public TransactionStatusResponse createEcsRequestTransactions(String ecsRequestTransactionsId,
@@ -37,6 +48,9 @@ public class EcsRequestTransactionsServiceImpl implements EcsRequestTransactions
       RequestStatus.from(circulationRequest.getStatus()))) {
       if (dcbTransaction.getRole() == LENDER) {
         createLenderEcsRequestTransactions(ecsRequestTransactionsId, dcbTransaction, circulationRequest);
+      } else if(dcbTransaction.getRole() == BORROWER) {
+        createBorrowerEcsRequestTransactions(ecsRequestTransactionsId, dcbTransaction,
+          circulationRequest);
       } else {
         throw new IllegalArgumentException("Unimplemented role: " + dcbTransaction.getRole());
       }
@@ -64,6 +78,31 @@ public class EcsRequestTransactionsServiceImpl implements EcsRequestTransactions
       .id(String.valueOf(circulationRequest.getItemId()))
       .barcode(circulationRequest.getItem().getBarcode())
       .build());
+    dcbTransaction.setPatron(DcbPatron.builder()
+      .id(String.valueOf(circulationRequest.getRequesterId()))
+      .barcode(circulationRequest.getRequester().getBarcode())
+      .build());
+    dcbTransaction.setPickup(DcbPickup.builder()
+      .servicePointId(String.valueOf(circulationRequest.getPickupServicePointId()))
+      .build());
+    baseLibraryService.saveDcbTransaction(ecsRequestTransactionsId, dcbTransaction,
+      dcbTransaction.getRequestId());
+  }
+
+  private void createBorrowerEcsRequestTransactions(String ecsRequestTransactionsId,
+    DcbTransaction dcbTransaction, CirculationRequest circulationRequest) {
+    var itemVirtual = dcbTransaction.getItem();
+    if (itemVirtual == null) {
+      throw new IllegalArgumentException("Item is required for borrower transaction");
+    }
+    baseLibraryService.checkItemExistsInInventoryAndThrow(itemVirtual.getBarcode());
+    CirculationItem item = circulationItemService.checkIfItemExistsAndCreate(itemVirtual, circulationRequest.getPickupServicePointId());
+    circulationRequest.setItemId(UUID.fromString(item.getId()));
+    circulationRequest.setItem(Item.builder()
+      .barcode(item.getBarcode())
+      .build());
+    circulationRequest.setHoldingsRecordId(UUID.fromString(item.getHoldingsRecordId()));
+    requestService.updateCirculationRequest(circulationRequest);
     dcbTransaction.setPatron(DcbPatron.builder()
       .id(String.valueOf(circulationRequest.getRequesterId()))
       .barcode(circulationRequest.getRequester().getBarcode())
