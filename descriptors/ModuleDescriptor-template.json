@@ -120,7 +120,9 @@
           ],
           "modulePermissions": [
             "circulation.check-out-by-barcode.post",
-            "circulation.check-in-by-barcode.post"
+            "circulation.check-in-by-barcode.post",
+            "circulation-storage.requests.item.get",
+            "circulation.requests.item.put"
           ]
         },
         {
