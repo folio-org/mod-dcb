@@ -1,0 +1,32 @@
+{
+  "id": "4b69c307-6da7-4a84-a3ba-dd8d82adb1e9",
+  "type": "UPDATED",
+  "tenant": "diku",
+  "timestamp": 1716799007827,
+  "data": {
+    "new": {
+      "id": "3cc7715a-74c3-44d4-ad4e-35710fad402a",
+      "requestLevel": "Item",
+      "requestType": "Page",
+      "requestDate": "2024-05-27T08:34:50.916+00:00",
+      "requesterId": "ff249ee0-078b-467f-a70d-837353989769",
+      "instanceId": "b40e947e-4b17-4038-9bbe-5f2a964ced3f",
+      "holdingsRecordId": "a9f01644-063b-41cb-a0b2-6ef1efa429e0",
+      "itemId": "9cf94c9b-9b25-49bc-8c61-2afcb7be9eb3",
+      "status": "Closed - Cancelled",
+      "position": 1,
+      "instance": {
+        "title": "2000 Philippine provincial poverty statistics.",
+        "item": {
+          "barcode": "test2"
+        }
+      },
+      "requester": {
+        "lastName": "DcbSystem",
+        "barcode": "dcbDemo21"
+      }
+    }
+  }
+}
+
+

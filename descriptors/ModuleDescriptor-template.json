@@ -28,7 +28,7 @@
     },
     {
       "id": "holdings-storage",
-      "version": "6.0"
+      "version": "6.0 7.0"
     },
     {
       "id": "service-points",
@@ -120,8 +120,20 @@
           ],
           "modulePermissions": [
             "circulation.check-out-by-barcode.post",
-            "circulation.check-in-by-barcode.post"
+            "circulation.check-in-by-barcode.post",
+            "circulation-storage.requests.item.get",
+            "circulation.requests.item.put"
           ]
+        },
+        {
+          "methods": [
+            "GET"
+          ],
+          "pathPattern": "/transactions/status",
+          "permissionsRequired": [
+            "dcb.transactions.collection.get"
+          ],
+          "modulePermissions": []
         }
       ]
     },
@@ -181,7 +193,8 @@
       "subPermissions": [
         "dcb.transactions.post",
         "dcb.transactions.put",
-        "dcb.transactions.get"
+        "dcb.transactions.get",
+        "dcb.transactions.collection.get"
       ]
     },
     {
@@ -198,6 +211,11 @@
       "permissionName": "dcb.transactions.put",
       "displayName": "update transaction details",
       "description": "update transaction details"
+    },
+    {
+      "permissionName": "dcb.transactions.collection.get",
+      "displayName": "get updated transaction detail list",
+      "description": "get list of transaction updated between a given query range"
     }
   ],
   "launchDescriptor": {

@@ -15,6 +15,14 @@ import static org.folio.dcb.utils.KafkaEvent.STATUS;
 public class TransactionHelper {
   private static final String LOAN_ACTION_CHECKED_OUT = "checkedout";
   private static final String LOAN_ACTION_CHECKED_IN = "checkedin";
+  public static final String IS_DCB = "isDcb";
+  public static final String INSTANCE = "instance";
+  public static final String REQUESTER = "requester";
+  public static final String TITLE = "title";
+  public static final String LASTNAME = "lastName";
+  public static final String DCB_INSTANCE_TITLE = "DCB_INSTANCE";
+  public static final String DCB_REQUESTER_LASTNAME = "DcbSystem";
+
   private TransactionHelper(){}
 
   public static List<String> getHeaderValue(MessageHeaders headers, String headerName, String defaultValue) {
@@ -37,6 +45,7 @@ public class TransactionHelper {
             eventData.setType(EventData.EventType.CHECK_IN);
           }
         }
+        eventData.setDcb(!kafkaEvent.getNewNode().has(IS_DCB) || kafkaEvent.getNewNode().get(IS_DCB).asBoolean());
         return eventData;
       }
     return null;
@@ -55,8 +64,14 @@ public class TransactionHelper {
           case CLOSED_CANCELLED -> eventData.setType(EventData.EventType.CANCEL);
           default -> log.info("parseRequestEvent:: Request status {} is not supported", requestStatus);
         }
+        eventData.setDcb(checkDcbRequest(kafkaEvent));
         return eventData;
       }
     return null;
+  }
+  private static boolean checkDcbRequest(KafkaEvent kafkaEvent) {
+    return (kafkaEvent.getNewNode().has(INSTANCE) && kafkaEvent.getNewNode().get(INSTANCE).has(TITLE)
+      && kafkaEvent.getNewNode().get(INSTANCE).get(TITLE).asText().equals(DCB_INSTANCE_TITLE)) || (kafkaEvent.getNewNode().has(REQUESTER)
+      && kafkaEvent.getNewNode().get(REQUESTER).has(LASTNAME) && kafkaEvent.getNewNode().get(REQUESTER).get(LASTNAME).asText().equals(DCB_REQUESTER_LASTNAME));
   }
 }

@@ -33,6 +33,8 @@ import static org.mockito.Mockito.when;
 class CirculationLoanEventListenerTest extends BaseIT {
 
   private static final String CHECK_OUT_EVENT_SAMPLE = getMockDataAsString("mockdata/kafka/check_out.json");
+  private static final String LOAN_EVENT_WITH_OUT_IS_DCB = getMockDataAsString("mockdata/kafka/loan_sample_without_isdcb.json");
+  private static final String CHECK_OUT_EVENT_SAMPLE_FOR_DCB = getMockDataAsString("mockdata/kafka/check_out_dcb.json");
   private static final String CHECK_IN_EVENT_SAMPLE = getMockDataAsString("mockdata/kafka/loan_check_in.json");
   private static final String NO_ITEM_ID_EVENT_SAMPLE = getMockDataAsString("mockdata/kafka/loan_check_in_no_item_id.json");
   private static final String CHECK_IN_UNDEFINED_SAMPLE = getMockDataAsString("mockdata/kafka/loan_undefined.json");
@@ -47,16 +49,31 @@ class CirculationLoanEventListenerTest extends BaseIT {
   private TransactionRepository transactionRepository;
 
   @Test
-  void handleCheckingOutTest() {
+  void handleCheckingOutForNonDcbTest() {
+    MessageHeaders messageHeaders = getMessageHeaders();
+    eventListener.handleLoanEvent(CHECK_OUT_EVENT_SAMPLE, messageHeaders);
+    Mockito.verify(transactionRepository, times(0)).save(any());
+  }
+
+  @Test
+  void handleLoanEventWhenIsDcbFieldIsNotPresent() {
+    MessageHeaders messageHeaders = getMessageHeaders();
+    eventListener.handleLoanEvent(LOAN_EVENT_WITH_OUT_IS_DCB, messageHeaders);
+    Mockito.verify(transactionRepository, times(0)).save(any());
+  }
+
+  @Test
+  void handleCheckingOutForDcbTest() {
     var transactionEntity = createTransactionEntity();
     transactionEntity.setRole(BORROWING_PICKUP);
     transactionEntity.setStatus(TransactionStatus.StatusEnum.AWAITING_PICKUP);
     transactionEntity.setItemId("8db107f5-12aa-479f-9c07-39e7c9cf2e4d");
     MessageHeaders messageHeaders = getMessageHeaders();
     when(transactionRepository.findTransactionByItemIdAndStatusNotInClosed(any())).thenReturn(Optional.of(transactionEntity));
-    eventListener.handleLoanEvent(CHECK_OUT_EVENT_SAMPLE, messageHeaders);
+    eventListener.handleLoanEvent(CHECK_OUT_EVENT_SAMPLE_FOR_DCB, messageHeaders);
     Mockito.verify(transactionRepository).save(any());
   }
+
 
   @Test
   void handleCheckInEventInBorrowingFromOpenToAwaitingPickup_1() {
@@ -67,7 +84,7 @@ class CirculationLoanEventListenerTest extends BaseIT {
     MessageHeaders messageHeaders = getMessageHeaders();
     when(transactionRepository.findTransactionByItemIdAndStatusNotInClosed(any())).thenReturn(Optional.of(transactionEntity));
     eventListener.handleLoanEvent(CHECK_OUT_EVENT_SAMPLE, messageHeaders);
-    Mockito.verify(transactionRepository).save(any());
+    Mockito.verify(transactionRepository, times(0)).save(any());
   }
 
   @Test
@@ -78,7 +95,7 @@ class CirculationLoanEventListenerTest extends BaseIT {
     transactionEntity.setRole(PICKUP);
     MessageHeaders messageHeaders = getMessageHeaders();
     when(transactionRepository.findTransactionByItemIdAndStatusNotInClosed(any())).thenReturn(Optional.of(transactionEntity));
-    eventListener.handleLoanEvent(CHECK_IN_EVENT_SAMPLE, messageHeaders);
+    eventListener.handleLoanEvent(CHECK_OUT_EVENT_SAMPLE_FOR_DCB, messageHeaders);
     Mockito.verify(transactionRepository).save(any());
   }
 
@@ -102,7 +119,7 @@ class CirculationLoanEventListenerTest extends BaseIT {
     transactionEntity.setRole(BORROWING_PICKUP);
     MessageHeaders messageHeaders = getMessageHeaders();
     when(transactionRepository.findTransactionByItemIdAndStatusNotInClosed(any())).thenReturn(Optional.of(transactionEntity));
-    eventListener.handleLoanEvent(CHECK_IN_EVENT_SAMPLE, messageHeaders);
+    eventListener.handleLoanEvent(CHECK_OUT_EVENT_SAMPLE_FOR_DCB, messageHeaders);
     Mockito.verify(transactionRepository).save(any());
   }
 

@@ -25,6 +25,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
+import java.util.UUID;
 
 import static org.folio.dcb.service.impl.ServicePointServiceImpl.HOLD_SHELF_CLOSED_LIBRARY_DATE_MANAGEMENT;
 import static org.folio.dcb.utils.DCBConstants.CAMPUS_ID;
@@ -32,6 +33,7 @@ import static org.folio.dcb.utils.DCBConstants.CANCELLATION_REASON_ID;
 import static org.folio.dcb.utils.DCBConstants.CODE;
 import static org.folio.dcb.utils.DCBConstants.DCB_CANCELLATION_REASON_NAME;
 import static org.folio.dcb.utils.DCBConstants.HOLDING_ID;
+import static org.folio.dcb.utils.DCBConstants.HOLDING_SOURCE;
 import static org.folio.dcb.utils.DCBConstants.INSTANCE_ID;
 import static org.folio.dcb.utils.DCBConstants.INSTANCE_TITLE;
 import static org.folio.dcb.utils.DCBConstants.INSTANCE_TYPE_ID;
@@ -44,6 +46,7 @@ import static org.folio.dcb.utils.DCBConstants.SERVICE_POINT_ID;
 import static org.folio.dcb.utils.DCBConstants.SOURCE;
 import static org.folio.dcb.utils.DCBConstants.LOAN_TYPE_ID;
 import static org.folio.dcb.utils.DCBConstants.DCB_LOAN_TYPE_NAME;
+
 @Log4j2
 @Service
 @Primary
@@ -230,16 +233,35 @@ public class CustomTenantService extends TenantService {
       holdingsStorageClient.findHolding(HOLDING_ID);
     } catch (FeignException.NotFound ex) {
       log.debug("createHolding:: creating holding");
+      var holdingResourceList = holdingSourcesClient.querySourceByName(SOURCE);
+      String holdingResourceId;
+      if (holdingResourceList.getTotalRecords() == 0) {
+        var holdingResource = createHoldingResource();
+        holdingResourceId = holdingResource.getId();
+      } else {
+        log.info("createHolding:: holdingResource record already exists");
+        holdingResourceId = holdingResourceList.getResult().get(0).getId();
+      }
       HoldingsStorageClient.Holding holding = HoldingsStorageClient.Holding.builder()
         .id(HOLDING_ID)
         .instanceId(INSTANCE_ID)
         .permanentLocationId(LOCATION_ID)
-        .sourceId(holdingSourcesClient.querySourceByName(SOURCE).getId())
+        .sourceId(holdingResourceId)
         .build();
 
       holdingsStorageClient.createHolding(holding);
       log.info("createHolding:: holding created");
     }
+  }
+
+  private HoldingSourcesClient.HoldingSource createHoldingResource() {
+    log.info("createHoldingResource:: Creating a new Holding Record source");
+    return holdingSourcesClient.createHoldingsRecordSource(HoldingSourcesClient.HoldingSource
+      .builder()
+      .id(UUID.randomUUID().toString())
+      .name(SOURCE)
+      .source(HOLDING_SOURCE)
+      .build());
   }
 
   private void createCancellationReason(){
