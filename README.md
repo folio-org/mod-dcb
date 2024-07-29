@@ -88,6 +88,7 @@ requires and provides, the permissions, and the additional module metadata.
 | ENV                    |        folio        | Environment. Logical name of the deployment, must be set if Kafka/Elasticsearch are shared for environments, `a-z (any case)`, `0-9`, `-`, `_` symbols only allowed        |
 | SYSTEM\_USER\_NAME     |   dcb-system-user   | Username of the system user                                                                                                                                                |
 | SYSTEM\_USER\_PASSWORD |          -          | Password of the system user                                                                                                                                                |
+| SYSTEM\_USER\_ENABLED  |        true         | Defines if system user must be created at service tenant initialization or used for egress service requests                                                         |
 | ACTUATOR\_EXPOSURE     | health,info,loggers | Back End Module Health Check Protocol                                                                                                                                      |
 ## Additional information
 
