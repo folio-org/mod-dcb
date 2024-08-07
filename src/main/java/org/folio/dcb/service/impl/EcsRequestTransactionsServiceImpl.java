@@ -102,7 +102,7 @@ public class EcsRequestTransactionsServiceImpl implements EcsRequestTransactions
       .barcode(item.getBarcode())
       .build());
     circulationRequest.setHoldingsRecordId(UUID.fromString(item.getHoldingsRecordId()));
-    //requestService.updateCirculationRequest(circulationRequest);
+    requestService.updateCirculationRequest(circulationRequest);
     dcbTransaction.setPatron(DcbPatron.builder()
       .id(String.valueOf(circulationRequest.getRequesterId()))
       .barcode(circulationRequest.getRequester().getBarcode())
