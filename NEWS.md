@@ -1,3 +1,8 @@
+## v1.1.2 2024-08-07
+
+* MODDCB-112: Kafka TLS configuration is not present
+* MODDCB-109: Add missed permissions in mod-dcb
+
 ## v1.1.1 2024-07-17
 
 * MODDCB-112: Kafka TLS configuration is not present
