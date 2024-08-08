@@ -97,6 +97,7 @@ public class BaseLibraryService {
     } else if(CANCELLED == requestedStatus) {
       log.info("updateTransactionStatus:: Cancelling transaction with id: {} for Borrower/Pickup role", dcbTransaction.getId());
       cancelTransactionRequest(dcbTransaction);
+      updateTransactionEntity(dcbTransaction, requestedStatus);
     } else {
       String errorMessage = String.format("updateTransactionStatus:: status update from %s to %s is not implemented", currentStatus, requestedStatus);
       log.warn(errorMessage);

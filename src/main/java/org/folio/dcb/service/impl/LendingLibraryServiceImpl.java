@@ -76,6 +76,7 @@ public class LendingLibraryServiceImpl implements LibraryService {
     } else if(CANCELLED == requestedStatus) {
       log.info("updateTransactionStatus:: Cancelling transaction with id: {} for Lender role", dcbTransaction.getId());
       baseLibraryService.cancelTransactionRequest(dcbTransaction);
+      updateTransactionEntity(dcbTransaction, requestedStatus);
     } else {
       String errorMessage = String.format("updateTransactionStatus:: status update from %s to %s is not implemented",
         currentStatus, requestedStatus);
