@@ -12,6 +12,12 @@ CirculationRequest:
         - Hold
         - Recall
         - Page
+    ecsRequestPhase:
+      description: Stage in ECS request process, absence of this field means this is a single-tenant request
+      type: string
+      enum:
+        - Primary
+        - Secondary
     requestLevel:
       description: Level of the request - Item or Title
       type: string

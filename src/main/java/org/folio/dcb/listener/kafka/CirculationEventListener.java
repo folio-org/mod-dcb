@@ -71,7 +71,7 @@ public class CirculationEventListener {
   public void handleRequestEvent(String data, MessageHeaders messageHeaders) {
     String tenantId = getHeaderValue(messageHeaders, XOkapiHeaders.TENANT, null).get(0);
     var eventData = parseRequestEvent(data);
-    if (Objects.nonNull(eventData) && eventData.isDcb() ) {
+    if (Objects.nonNull(eventData)) {
         log.debug("dcb flow for a request event");
         String requestId = eventData.getRequestId();
         if (Objects.nonNull(requestId)) {
