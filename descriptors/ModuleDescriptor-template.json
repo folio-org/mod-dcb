@@ -165,6 +165,7 @@
             "inventory-storage.locations.collection.get",
             "inventory-storage.holdings.item.get",
             "inventory-storage.holdings-sources.collection.get",
+            "inventory-storage.holdings-sources.item.post",
             "inventory-storage.holdings.item.post",
             "inventory-storage.locations.item.post",
             "inventory-storage.service-points.item.post",
