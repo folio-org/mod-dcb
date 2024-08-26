@@ -1,4 +1,14 @@
-## v1.0.0 2024-03-20
+## v1.1.2 2024-08-07
+
+* MODDCB-112: Kafka TLS configuration is not present
+* MODDCB-109: Add missed permissions in mod-dcb
+
+## v1.1.1 2024-07-17
+
+* MODDCB-112: Kafka TLS configuration is not present
+
+
+## v1.1.0 2024-03-20
 
 * MODDCB-81: Optional DCBTransaction fields should be nullable
 * MODDCB-79: TC module submission include: ${ACTUATOR_EXPOSURE:health,info,loggers}
