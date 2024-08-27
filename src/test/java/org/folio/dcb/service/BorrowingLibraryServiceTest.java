@@ -11,6 +11,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.UUID;
+
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWER;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.AWAITING_PICKUP;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CLOSED;
@@ -19,11 +21,11 @@ import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_OUT;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
-import static org.folio.dcb.utils.EntityUtils.PICKUP_SERVICE_POINT_ID;
 import static org.folio.dcb.utils.EntityUtils.createDcbPickup;
 import static org.folio.dcb.utils.EntityUtils.createDcbTransactionByRole;
 import static org.folio.dcb.utils.EntityUtils.createServicePointRequest;
 import static org.folio.dcb.utils.EntityUtils.createTransactionEntity;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
@@ -79,10 +81,13 @@ class BorrowingLibraryServiceTest {
 
   @Test
   void createTransactionTest() {
-    when(servicePointService.createServicePoint(createDcbPickup())).thenReturn(createServicePointRequest());
-    borrowingLibraryService.createCirculation(DCB_TRANSACTION_ID, createDcbTransactionByRole(BORROWER));
-
-    verify(baseLibraryService).createBorrowingLibraryTransaction(DCB_TRANSACTION_ID, createDcbTransactionByRole(BORROWER), PICKUP_SERVICE_POINT_ID);
+    var servicePointRequest = createServicePointRequest();
+    var dcbTransaction = createDcbTransactionByRole(BORROWER);
+    servicePointRequest.setId(UUID.randomUUID().toString());
+    when(servicePointService.createServicePointIfNotExists(createDcbPickup())).thenReturn(servicePointRequest);
+    borrowingLibraryService.createCirculation(DCB_TRANSACTION_ID, dcbTransaction);
+    assertEquals(servicePointRequest.getId(), dcbTransaction.getPickup().getServicePointId());
+    verify(baseLibraryService).createBorrowingLibraryTransaction(DCB_TRANSACTION_ID, dcbTransaction, servicePointRequest.getId());
   }
 
   @Test
