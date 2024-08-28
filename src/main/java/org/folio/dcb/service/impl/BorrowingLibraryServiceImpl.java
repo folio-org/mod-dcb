@@ -33,7 +33,8 @@ public class BorrowingLibraryServiceImpl implements LibraryService {
   private final ServicePointService servicePointService;
   @Override
   public TransactionStatusResponse createCirculation(String dcbTransactionId, DcbTransaction dcbTransaction) {
-    ServicePointRequest pickupServicePoint = servicePointService.createServicePoint(dcbTransaction.getPickup());
+    ServicePointRequest pickupServicePoint = servicePointService.createServicePointIfNotExists(dcbTransaction.getPickup());
+    dcbTransaction.getPickup().setServicePointId(pickupServicePoint.getId());
     return libraryService.createBorrowingLibraryTransaction(dcbTransactionId, dcbTransaction, pickupServicePoint.getId());
   }
 
