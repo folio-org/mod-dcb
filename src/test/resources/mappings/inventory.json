@@ -198,6 +198,19 @@
     {
       "request": {
         "method": "GET",
+        "url": "/service-points?query=name==DCB_TestLibraryCode_TestServicePointCode"
+      },
+      "response": {
+        "status": 200,
+        "body": "{\n    \"servicepoints\": [\n        {\n            \"id\": \"9d1b77e8-f02e-4b7f-b296-3f2042ddac55\",\n            \"name\": \"DCB\",\n            \"code\": \"000\",\n            \"discoveryDisplayName\": \"DCB\",\n            \"pickupLocation\": true,\n            \"holdShelfExpiryPeriod\": {\n                \"duration\": 3,\n                \"intervalId\": \"Days\"\n            },\n            \"holdShelfClosedLibraryDateManagement\": \"Keep_the_current_due_date\",\n            \"staffSlips\": [],\n            \"metadata\": {\n                \"createdDate\": \"2023-10-27T11:14:16.834+00:00\",\n                \"createdByUserId\": \"ec3caecb-d565-530c-937b-65a9c4ab371b\",\n                \"updatedDate\": \"2023-10-27T11:14:16.834+00:00\",\n                \"updatedByUserId\": \"ec3caecb-d565-530c-937b-65a9c4ab371b\"\n            }\n        }\n    ],\n    \"totalRecords\": 1\n}",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
         "url": "/locations?query=name==DCB"
       },
       "response": {
