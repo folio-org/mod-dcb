@@ -82,6 +82,7 @@
           ],
           "modulePermissions": [
             "inventory-storage.service-points.item.post",
+            "inventory-storage.service-points.collection.get",
             "users.collection.get",
             "users.item.post",
             "usergroups.collection.get",
