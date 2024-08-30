@@ -50,6 +50,9 @@ CirculationRequest:
     status:
       description: Status of the request
       type: string
+    position:
+      description: Position of the request in the queue
+      type: integer
     cancellationReasonId:
       description: The id of the request reason
       type: string
