@@ -1,0 +1,72 @@
+CalendarCollection:
+  description: Collection of calendars
+  type: object
+  properties:
+    calendars:
+      type: array
+      description: Each calendar returned in the response
+      items:
+        $ref: "Calendar.yaml#/Calendar"
+    totalRecords:
+      type: integer
+      description: Number of calendars in the response
+Calendar:
+  description: A single calendar
+  type: object
+  properties:
+    id:
+      description: A unique UUID identifying this calendar
+      type: string
+      format: uuid
+    name:
+      description: A user-provided name used to label this calendar
+      type: string
+    startDate:
+      type: string
+      format: date
+      description: The first effective date (inclusive, YYYY-MM-DD) of this calendar
+    endDate:
+      type: string
+      format: date
+      description: The first effective date (inclusive, YYYY-MM-DD) of this calendar
+    assignments:
+      description: A list of all service points that this calendar is assigned to
+      type: array
+      items:
+        type: string
+        format: uuid
+        description: A UUID uniquely identifying a service point
+    normalHours:
+      description: A list of objects describing when the calendar is normally open
+      type: array
+      items:
+        $ref: "Calendar.yaml#/NormalHours"
+NormalHours:
+  description: A range of hours when a calendar is open
+  type: object
+  properties:
+    calendarId:
+      description: The UUID of the calendar which these hours are for
+      type: string
+      format: uuid
+    startDay:
+      description: The first weekday (inclusive) of this range
+      $ref: 'Calendar.yaml#/Weekday'
+    startTime:
+      description: The time when this opening starts, inclusive
+      type: string
+      format: time
+    endDay:
+      description: The last weekday (inclusive) of this range
+      $ref: 'Calendar.yaml#/Weekday'
+    endTime:
+      description:
+        The last minute of this opening, inclusive (11:59 if it should be open at 11:59 and closed at
+        12:00)
+      type: string
+      format: time
+Weekday:
+  description:
+    A day of the week.  Either SUNDAY, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, or SATURDAY
+  type: string
+  format: Weekday
