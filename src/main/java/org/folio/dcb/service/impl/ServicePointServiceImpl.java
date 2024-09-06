@@ -38,10 +38,11 @@ public class ServicePointServiceImpl implements ServicePointService {
       var servicePointRequest = createServicePointRequest(servicePointId,
         servicePointName, servicePointCode);
       ServicePointRequest servicePointResponse = servicePointClient.createServicePoint(servicePointRequest);
-      calendarService.findAndAddServicePointIdToCalendar(DCB_CALENDAR_NAME, UUID.fromString(servicePointId));
+      calendarService.addServicePointIdToCalendar(DCB_CALENDAR_NAME, UUID.fromString(servicePointId));
       return servicePointResponse;
     } else {
       log.info("createServicePointIfNotExists:: servicePoint Exists with name {}, hence reusing it", servicePointName);
+      calendarService.associateServicePointIdWithDefaultCalendarIfAbsent(UUID.fromString(servicePointRequestList.get(0).getId()));
       return servicePointRequestList.get(0);
     }
   }

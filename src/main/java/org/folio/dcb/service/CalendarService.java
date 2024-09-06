@@ -9,6 +9,8 @@ public interface CalendarService {
 
   Calendar createCalendar(Calendar calendar);
 
-  void findAndAddServicePointIdToCalendar(String calendarName, UUID servicePointIdList);
+  void addServicePointIdToCalendar(String calendarName, UUID servicePointId);
+
+  void associateServicePointIdWithDefaultCalendarIfAbsent(UUID servicePointId);
 
 }
