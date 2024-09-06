@@ -307,6 +307,7 @@ public class CustomTenantService extends TenantService {
             .endTime(LocalTime.of(23, 59).toString())
             .build()))
         .assignments(List.of())
+        .exceptions(List.of())
         .build();
       calendarService.createCalendar(newCalendar);
     } else {

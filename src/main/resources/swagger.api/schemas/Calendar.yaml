@@ -41,6 +41,11 @@ Calendar:
       type: array
       items:
         $ref: "Calendar.yaml#/NormalHours"
+    exceptions:
+      description: A list of objects describing exceptions to the normal hours
+      type: array
+      items:
+        $ref: "Calendar.yaml#/ExceptionRange"
 NormalHours:
   description: A range of hours when a calendar is open
   type: object
@@ -70,3 +75,51 @@ Weekday:
     A day of the week.  Either SUNDAY, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, or SATURDAY
   type: string
   format: Weekday
+ExceptionRange:
+  description: An exception to a calendar, consisting of a set of openings (or none if a closure)
+  type: object
+  properties:
+    calendarId:
+      description: The UUID of the calendar which this exception is for
+      type: string
+      format: uuid
+    name:
+      description: A user-provided label for this exception
+      type: string
+    startDate:
+      description: The first effective date (inclusive, YYYY-MM-DD) of this exception range
+      type: string
+      format: date
+    endDate:
+      description: The first effective date (inclusive, YYYY-MM-DD) of this exception range
+      type: string
+      format: date
+    openings:
+      description: The openings during this exception
+      type: array
+      items:
+        $ref: "Calendar.yaml#/ExceptionalOpening"
+ExceptionalOpening:
+  description: An opening as part of an exception
+  type: object
+  properties:
+    exceptionId:
+      description: The UUID of the exception which this opening is for
+      type: string
+      format: uuid
+    startDate:
+      description: The first effective date (inclusive, YYYY-MM-DD) of this opening
+      type: string
+      format: date
+    startTime:
+      description: The first opening time (inclusive) of this opening
+      type: string
+      format: time
+    endDate:
+      description: The first effective date (inclusive, YYYY-MM-DD) of this opening
+      type: string
+      format: date
+    endTime:
+      description: The last open time (inclusive) of this opening
+      type: string
+      format: time
