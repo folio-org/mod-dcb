@@ -306,6 +306,7 @@ public class CustomTenantService extends TenantService {
             .endDay(DayOfWeek.SATURDAY.toString())
             .endTime(LocalTime.of(23, 59).toString())
             .build()))
+        .assignments(List.of())
         .build();
       calendarService.createCalendar(newCalendar);
     } else {
