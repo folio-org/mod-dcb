@@ -33,7 +33,7 @@ public class CalendarServiceImpl implements CalendarService {
 
   @Override
   public void addServicePointIdToDefaultCalendar(UUID servicePointId) {
-    log.debug("updateCalendarWithServicePointList:: find calendar by name {} to update servicePointId {}",
+    log.info("addServicePointIdToDefaultCalendar:: find calendar by name {} to update servicePointId {}",
       DCB_CALENDAR_NAME, servicePointId);
     var calendar = findCalendarByName(DCB_CALENDAR_NAME);
     updateCalendarIfExists(DCB_CALENDAR_NAME, servicePointId, calendar);
@@ -44,7 +44,7 @@ public class CalendarServiceImpl implements CalendarService {
       calendar.getAssignments().add(servicePointId);
       calendarClient.updateCalendar(calendar.getId(), calendar);
     } else {
-      log.warn("findAndAddServicePointIdToCalendar:: Calendar with name {} is not found", calendarName);
+      log.warn("updateCalendarIfExists:: Calendar with name {} is not found", calendarName);
       throw new IllegalArgumentException("Calendar with name " + calendarName + " is not found");
     }
   }
