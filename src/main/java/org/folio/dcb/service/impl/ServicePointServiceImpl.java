@@ -11,8 +11,6 @@ import org.folio.dcb.service.CalendarService;
 import org.folio.dcb.service.ServicePointService;
 import org.springframework.stereotype.Service;
 
-import static org.folio.dcb.utils.DCBConstants.DCB_CALENDAR_NAME;
-
 @Service
 @Log4j2
 @RequiredArgsConstructor
@@ -38,7 +36,7 @@ public class ServicePointServiceImpl implements ServicePointService {
       var servicePointRequest = createServicePointRequest(servicePointId,
         servicePointName, servicePointCode);
       ServicePointRequest servicePointResponse = servicePointClient.createServicePoint(servicePointRequest);
-      calendarService.addServicePointIdToCalendar(DCB_CALENDAR_NAME, UUID.fromString(servicePointId));
+      calendarService.addServicePointIdToDefaultCalendar(UUID.fromString(servicePointResponse.getId()));
       return servicePointResponse;
     } else {
       log.info("createServicePointIfNotExists:: servicePoint Exists with name {}, hence reusing it", servicePointName);

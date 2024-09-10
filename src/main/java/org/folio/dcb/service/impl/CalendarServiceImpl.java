@@ -32,11 +32,11 @@ public class CalendarServiceImpl implements CalendarService {
   }
 
   @Override
-  public void addServicePointIdToCalendar(String calendarName, UUID servicePointId) {
+  public void addServicePointIdToDefaultCalendar(UUID servicePointId) {
     log.debug("updateCalendarWithServicePointList:: find calendar by name {} to update servicePointId {}",
-      calendarName, servicePointId);
-    var calendar = findCalendarByName(calendarName);
-    updateCalendarIfExists(calendarName, servicePointId, calendar);
+      DCB_CALENDAR_NAME, servicePointId);
+    var calendar = findCalendarByName(DCB_CALENDAR_NAME);
+    updateCalendarIfExists(DCB_CALENDAR_NAME, servicePointId, calendar);
   }
 
   private void updateCalendarIfExists(String calendarName, UUID servicePointId, Calendar calendar) {
@@ -73,7 +73,7 @@ public class CalendarServiceImpl implements CalendarService {
     log.debug("findCalendarByName:: Finding calendar with name {} from calendarList {}", calendarName, calendars);
     return calendars
       .stream()
-      .filter(calendar ->  calendar.getName().equals(calendarName))
+      .filter(calendar -> calendar.getName().equals(calendarName))
       .findFirst()
       .orElse(null);
   }
