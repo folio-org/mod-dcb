@@ -3,6 +3,8 @@ package org.folio.dcb.utils;
 import lombok.SneakyThrows;
 import org.folio.dcb.DcbApplication;
 import org.folio.dcb.client.feign.HoldingsStorageClient;
+import org.folio.dcb.domain.dto.Calendar;
+import org.folio.dcb.domain.dto.CalendarCollection;
 import org.folio.dcb.domain.dto.CirculationItem;
 import org.folio.dcb.domain.dto.CirculationRequest;
 import org.folio.dcb.domain.dto.DcbTransaction;
@@ -24,6 +26,8 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -223,5 +227,18 @@ public class EntityUtils {
       .before("")
       .after("")
       .build();
+  }
+
+  public static CalendarCollection getCalendarCollection(String calendarName) {
+    var calendar = Calendar.builder()
+      .name(calendarName)
+      .startDate(LocalDate.now())
+      .endDate(LocalDate.now().plusYears(10))
+      .assignments(new ArrayList<>())
+      .build();
+    var calendarCollection = new CalendarCollection();
+    calendarCollection.setCalendars(List.of(calendar));
+    calendarCollection.setTotalRecords(1);
+    return calendarCollection;
   }
 }

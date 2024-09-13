@@ -21,7 +21,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
+import java.util.UUID;
+
+import static org.folio.dcb.utils.DCBConstants.DCB_CALENDAR_NAME;
+import static org.folio.dcb.utils.EntityUtils.getCalendarCollection;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -51,6 +58,8 @@ class CustomTenantServiceTest {
   @Mock
   private CancellationReasonClient cancellationReasonClient;
 
+  @Mock
+  private CalendarService calendarService;
 
   @InjectMocks
   private CustomTenantService service;
@@ -67,5 +76,38 @@ class CustomTenantServiceTest {
 
     service.createOrUpdateTenant(new TenantAttributes());
     verify(systemUserService).setupSystemUser();
+  }
+
+  @Test
+  void testCalendarCreation_DefaultCalendarNotExists() {
+    when(instanceTypeClient.queryInstanceTypeByName(any())).thenReturn(new ResultList<>());
+    when(locationUnitClient.getCampusByName(any())).thenReturn(new ResultList<>());
+    when(inventoryClient.getInstanceById(any())).thenThrow(FeignException.NotFound.class);
+    when(locationUnitClient.getLibraryByName(any())).thenReturn(new ResultList<>());
+    when(servicePointClient.getServicePointByName(any())).thenReturn(new ResultList<>());
+    when(locationsClient.queryLocationsByName(any())).thenReturn(new ResultList<>());
+    when(loanTypeClient.queryLoanTypeByName(any())).thenReturn(new ResultList<>());
+    when(holdingsStorageClient.findHolding(any())).thenReturn(HoldingsStorageClient.Holding.builder().build());
+    when(calendarService.findCalendarByName(DCB_CALENDAR_NAME)).thenReturn(null);
+
+    service.createOrUpdateTenant(new TenantAttributes());
+    verify(calendarService).createCalendar(any());
+  }
+
+  @Test
+  void testCalendarCreation_DefaultCalendarExists() {
+    when(instanceTypeClient.queryInstanceTypeByName(any())).thenReturn(new ResultList<>());
+    when(locationUnitClient.getCampusByName(any())).thenReturn(new ResultList<>());
+    when(inventoryClient.getInstanceById(any())).thenThrow(FeignException.NotFound.class);
+    when(locationUnitClient.getLibraryByName(any())).thenReturn(new ResultList<>());
+    when(servicePointClient.getServicePointByName(any())).thenReturn(new ResultList<>());
+    when(locationsClient.queryLocationsByName(any())).thenReturn(new ResultList<>());
+    when(loanTypeClient.queryLoanTypeByName(any())).thenReturn(new ResultList<>());
+    when(holdingsStorageClient.findHolding(any())).thenReturn(HoldingsStorageClient.Holding.builder().build());
+    when(calendarService.findCalendarByName(DCB_CALENDAR_NAME)).thenReturn(null);
+
+    when(calendarService.findCalendarByName(DCB_CALENDAR_NAME)).thenReturn(getCalendarCollection(DCB_CALENDAR_NAME).getCalendars().get(0));
+    service.createOrUpdateTenant(new TenantAttributes());
+    verify(calendarService, never()).createCalendar(any());
   }
 }
