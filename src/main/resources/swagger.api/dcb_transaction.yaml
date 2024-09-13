@@ -208,3 +208,5 @@ components:
       $ref: 'schemas/CirculationItem.yaml#/CirculationItemCollection'
     MaterialTypeCollection:
       $ref: 'schemas/MaterialType.yaml#/MaterialTypeCollection'
+    CalendarCollection:
+      $ref: 'schemas/Calendar.yaml#/CalendarCollection'

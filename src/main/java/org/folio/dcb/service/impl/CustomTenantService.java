@@ -11,9 +11,12 @@ import org.folio.dcb.client.feign.InventoryServicePointClient;
 import org.folio.dcb.client.feign.LoanTypeClient;
 import org.folio.dcb.client.feign.LocationUnitClient;
 import org.folio.dcb.client.feign.LocationsClient;
+import org.folio.dcb.domain.dto.Calendar;
 import org.folio.dcb.domain.dto.HoldShelfExpiryPeriod;
+import org.folio.dcb.domain.dto.NormalHours;
 import org.folio.dcb.domain.dto.ServicePointRequest;
 import org.folio.dcb.listener.kafka.service.KafkaService;
+import org.folio.dcb.service.CalendarService;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.liquibase.FolioSpringLiquibase;
 import org.folio.spring.service.PrepareSystemUserService;
@@ -24,13 +27,18 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 import static org.folio.dcb.service.impl.ServicePointServiceImpl.HOLD_SHELF_CLOSED_LIBRARY_DATE_MANAGEMENT;
 import static org.folio.dcb.utils.DCBConstants.CAMPUS_ID;
 import static org.folio.dcb.utils.DCBConstants.CANCELLATION_REASON_ID;
 import static org.folio.dcb.utils.DCBConstants.CODE;
+import static org.folio.dcb.utils.DCBConstants.DCB_CALENDAR_NAME;
 import static org.folio.dcb.utils.DCBConstants.DCB_CANCELLATION_REASON_NAME;
 import static org.folio.dcb.utils.DCBConstants.HOLDING_ID;
 import static org.folio.dcb.utils.DCBConstants.HOLDING_SOURCE;
@@ -64,10 +72,15 @@ public class CustomTenantService extends TenantService {
   private final LocationUnitClient locationUnitClient;
   private final CancellationReasonClient cancellationReasonClient;
   private final LoanTypeClient loanTypeClient;
+  private final CalendarService calendarService;
 
 
-  public CustomTenantService(JdbcTemplate jdbcTemplate, FolioExecutionContext context,
-                             FolioSpringLiquibase folioSpringLiquibase, PrepareSystemUserService systemUserService, KafkaService kafkaService, InstanceClient inventoryClient, InstanceTypeClient instanceTypeClient, HoldingsStorageClient holdingsStorageClient, LocationsClient locationsClient, HoldingSourcesClient holdingSourcesClient, InventoryServicePointClient servicePointClient, LocationUnitClient locationUnitClient, LoanTypeClient loanTypeClient, CancellationReasonClient cancellationReasonClient) {
+  public CustomTenantService(JdbcTemplate jdbcTemplate, FolioExecutionContext context, FolioSpringLiquibase folioSpringLiquibase,
+                             PrepareSystemUserService systemUserService, KafkaService kafkaService, InstanceClient inventoryClient,
+                             InstanceTypeClient instanceTypeClient, HoldingsStorageClient holdingsStorageClient,
+                             LocationsClient locationsClient, HoldingSourcesClient holdingSourcesClient,
+                             InventoryServicePointClient servicePointClient, LocationUnitClient locationUnitClient,
+                             LoanTypeClient loanTypeClient, CancellationReasonClient cancellationReasonClient, CalendarService calendarService) {
     super(jdbcTemplate, context, folioSpringLiquibase);
 
     this.systemUserService = systemUserService;
@@ -81,6 +94,7 @@ public class CustomTenantService extends TenantService {
     this.locationUnitClient = locationUnitClient;
     this.loanTypeClient = loanTypeClient;
     this.cancellationReasonClient = cancellationReasonClient;
+    this.calendarService = calendarService;
   }
 
   @Override
@@ -98,6 +112,7 @@ public class CustomTenantService extends TenantService {
     createHolding();
     createCancellationReason();
     createLoanType();
+    createCalendarIfNotExists();
   }
 
   private void createLoanType() {
@@ -274,6 +289,29 @@ public class CustomTenantService extends TenantService {
         .description(DCB_CANCELLATION_REASON_NAME)
         .name(DCB_CANCELLATION_REASON_NAME).build());
       log.info("createCancellationReason:: cancellation reason created");
+    }
+  }
+
+  private void createCalendarIfNotExists() {
+    Calendar calendar = calendarService.findCalendarByName(DCB_CALENDAR_NAME);
+    if (calendar == null) {
+      log.info("createCalendarIfNotExists:: calendar with name {} doesn't exists, so creating new calendar", DCB_CALENDAR_NAME);
+      Calendar newCalendar = Calendar.builder()
+        .name(DCB_CALENDAR_NAME)
+        .startDate(LocalDate.now())
+        .endDate(LocalDate.now().plusYears(10))
+        .normalHours(List.of(NormalHours.builder()
+          .startDay(DayOfWeek.SUNDAY.name())
+          .startTime(LocalTime.of(0, 0).toString())
+          .endDay(DayOfWeek.SATURDAY.toString())
+          .endTime(LocalTime.of(23, 59).toString())
+          .build()))
+        .assignments(List.of(UUID.fromString(SERVICE_POINT_ID)))
+        .exceptions(List.of())
+        .build();
+      calendarService.createCalendar(newCalendar);
+    } else {
+      log.info("createCalendarIfNotExists:: calendar with name {} already exists", DCB_CALENDAR_NAME);
     }
   }
 }

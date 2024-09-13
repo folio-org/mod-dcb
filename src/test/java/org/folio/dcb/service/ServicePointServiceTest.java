@@ -29,15 +29,20 @@ class ServicePointServiceTest {
   @Mock
   private InventoryServicePointClient inventoryServicePointClient;
 
+  @Mock
+  private CalendarService calendarService;
+
   @Test
   void createServicePointIfNotExistsTest(){
     when(inventoryServicePointClient.getServicePointByName(any()))
       .thenReturn(ResultList.of(0, List.of()));
     when(inventoryServicePointClient.createServicePoint(any()))
       .thenReturn(createServicePointRequest());
-    servicePointService.createServicePointIfNotExists(createDcbPickup());
+    var response = servicePointService.createServicePointIfNotExists(createDcbPickup());
     verify(inventoryServicePointClient).createServicePoint(any());
     verify(inventoryServicePointClient).getServicePointByName(any());
+    verify(calendarService).addServicePointIdToDefaultCalendar(UUID.fromString(response.getId()));
+    verify(calendarService, never()).associateServicePointIdWithDefaultCalendarIfAbsent(any());
   }
 
   @Test
@@ -51,6 +56,8 @@ class ServicePointServiceTest {
     assertEquals(servicePointId, response.getId());
     verify(inventoryServicePointClient, never()).createServicePoint(any());
     verify(inventoryServicePointClient).getServicePointByName(any());
+    verify(calendarService).associateServicePointIdWithDefaultCalendarIfAbsent(UUID.fromString(response.getId()));
+    verify(calendarService, never()).addServicePointIdToDefaultCalendar(any());
   }
 
 }

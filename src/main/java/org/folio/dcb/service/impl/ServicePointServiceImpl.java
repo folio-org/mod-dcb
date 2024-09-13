@@ -7,6 +7,7 @@ import org.folio.dcb.client.feign.InventoryServicePointClient;
 import org.folio.dcb.domain.dto.DcbPickup;
 import org.folio.dcb.domain.dto.HoldShelfExpiryPeriod;
 import org.folio.dcb.domain.dto.ServicePointRequest;
+import org.folio.dcb.service.CalendarService;
 import org.folio.dcb.service.ServicePointService;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 public class ServicePointServiceImpl implements ServicePointService {
 
   private final InventoryServicePointClient servicePointClient;
+  private final CalendarService calendarService;
   public static final String HOLD_SHELF_CLOSED_LIBRARY_DATE_MANAGEMENT = "Keep_the_current_due_date";
 
   @Override
@@ -33,9 +35,12 @@ public class ServicePointServiceImpl implements ServicePointService {
         servicePointId, servicePointName, servicePointCode);
       var servicePointRequest = createServicePointRequest(servicePointId,
         servicePointName, servicePointCode);
-      return servicePointClient.createServicePoint(servicePointRequest);
+      ServicePointRequest servicePointResponse = servicePointClient.createServicePoint(servicePointRequest);
+      calendarService.addServicePointIdToDefaultCalendar(UUID.fromString(servicePointResponse.getId()));
+      return servicePointResponse;
     } else {
       log.info("createServicePointIfNotExists:: servicePoint Exists with name {}, hence reusing it", servicePointName);
+      calendarService.associateServicePointIdWithDefaultCalendarIfAbsent(UUID.fromString(servicePointRequestList.get(0).getId()));
       return servicePointRequestList.get(0);
     }
   }
