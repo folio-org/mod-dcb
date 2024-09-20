@@ -1,18 +1,23 @@
 package org.folio.dcb.service;
 
-import feign.FeignException;
 import org.folio.dcb.client.feign.InventoryServicePointClient;
 import org.folio.dcb.service.impl.ServicePointServiceImpl;
+import org.folio.spring.model.ResultList;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
+import java.util.UUID;
+
 import static org.folio.dcb.utils.EntityUtils.createDcbPickup;
 import static org.folio.dcb.utils.EntityUtils.createServicePointRequest;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -24,30 +29,35 @@ class ServicePointServiceTest {
   @Mock
   private InventoryServicePointClient inventoryServicePointClient;
 
-  @Test
-  void createServicePointTest(){
-    when(inventoryServicePointClient.createServicePoint(any())).thenReturn(createServicePointRequest());
-    assertEquals(servicePointService.createServicePoint(createDcbPickup()), createServicePointRequest());
-  }
+  @Mock
+  private CalendarService calendarService;
 
   @Test
-  void returnServicePointRequestWhenServicePointExist(){
-    String url = "http://service-points";
-    when(inventoryServicePointClient.createServicePoint(any())).thenThrow(new FeignException.UnprocessableEntity("Service Point Exists", generateRequest(url), null, null));
-    assertEquals(servicePointService.createServicePoint(createDcbPickup()), createServicePointRequest());
+  void createServicePointIfNotExistsTest(){
+    when(inventoryServicePointClient.getServicePointByName(any()))
+      .thenReturn(ResultList.of(0, List.of()));
+    when(inventoryServicePointClient.createServicePoint(any()))
+      .thenReturn(createServicePointRequest());
+    var response = servicePointService.createServicePointIfNotExists(createDcbPickup());
+    verify(inventoryServicePointClient).createServicePoint(any());
+    verify(inventoryServicePointClient).getServicePointByName(any());
+    verify(calendarService).addServicePointIdToDefaultCalendar(UUID.fromString(response.getId()));
+    verify(calendarService, never()).associateServicePointIdWithDefaultCalendarIfAbsent(any());
   }
 
-  feign.Response generateResponse(String url,String message, int status){
-    return feign.Response.builder()
-      .status(status)
-      .request(feign.Request.create(feign.Request.HttpMethod.GET, url, new java.util.HashMap<>(), null, new feign.RequestTemplate()))
-      .body(message, java.nio.charset.StandardCharsets.UTF_8)
-      .build();
+  @Test
+  void createServicePointIfExistsTest(){
+    var servicePointRequest = createServicePointRequest();
+    var servicePointId = UUID.randomUUID().toString();
+    servicePointRequest.setId(servicePointId);
+    when(inventoryServicePointClient.getServicePointByName(any()))
+      .thenReturn(ResultList.of(0, List.of(servicePointRequest)));
+    var response = servicePointService.createServicePointIfNotExists(createDcbPickup());
+    assertEquals(servicePointId, response.getId());
+    verify(inventoryServicePointClient, never()).createServicePoint(any());
+    verify(inventoryServicePointClient).getServicePointByName(any());
+    verify(calendarService).associateServicePointIdWithDefaultCalendarIfAbsent(UUID.fromString(response.getId()));
+    verify(calendarService, never()).addServicePointIdToDefaultCalendar(any());
   }
-
-  feign.Request generateRequest(String url){
-    return feign.Request.create(feign.Request.HttpMethod.GET, url, new java.util.HashMap<>(), null, new feign.RequestTemplate());
-  }
-
 
 }
