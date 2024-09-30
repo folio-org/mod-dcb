@@ -232,8 +232,8 @@ public class EntityUtils {
   public static CalendarCollection getCalendarCollection(String calendarName) {
     var calendar = Calendar.builder()
       .name(calendarName)
-      .startDate(LocalDate.now())
-      .endDate(LocalDate.now().plusYears(10))
+      .startDate(LocalDate.now().toString())
+      .endDate(LocalDate.now().plusYears(10).toString())
       .assignments(new ArrayList<>())
       .build();
     var calendarCollection = new CalendarCollection();
