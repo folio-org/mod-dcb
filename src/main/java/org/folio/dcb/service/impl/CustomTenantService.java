@@ -277,8 +277,8 @@ public class CustomTenantService extends TenantService {
       log.info("createCalendarIfNotExists:: calendar with name {} doesn't exists, so creating new calendar", DCB_CALENDAR_NAME);
       Calendar newCalendar = Calendar.builder()
         .name(DCB_CALENDAR_NAME)
-        .startDate(LocalDate.now())
-        .endDate(LocalDate.now().plusYears(10))
+        .startDate(LocalDate.now().toString())
+        .endDate(LocalDate.now().plusYears(10).toString())
         .normalHours(List.of(NormalHours.builder()
           .startDay(DayOfWeek.SUNDAY.name())
           .startTime(LocalTime.of(0, 0).toString())
