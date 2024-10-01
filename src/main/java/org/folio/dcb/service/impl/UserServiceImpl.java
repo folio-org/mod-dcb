@@ -63,7 +63,7 @@ public class UserServiceImpl implements UserService {
   private User fetchUserByBarcodeAndId(String barcode, String id) {
     log.debug("fetchUserByBarcodeAndId:: Trying to fetch existing user with barcode {} and id {}",
       barcode, id);
-    return usersClient.fetchUserByBarcodeAndId("barcode==" + StringUtil.cqlEncode(barcode) + " and id==" + id)
+    return usersClient.fetchUserByBarcodeAndId("barcode==" + StringUtil.cqlEncode(barcode) + " and id==" + StringUtil.cqlEncode(id))
       .getUsers()
       .stream()
       .findFirst()
