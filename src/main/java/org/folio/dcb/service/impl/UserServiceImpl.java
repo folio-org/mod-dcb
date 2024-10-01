@@ -9,6 +9,7 @@ import org.folio.dcb.domain.dto.User;
 import org.folio.dcb.service.PatronGroupService;
 import org.folio.dcb.service.UserService;
 import org.folio.spring.exception.NotFoundException;
+import org.folio.util.StringUtil;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
@@ -62,7 +63,7 @@ public class UserServiceImpl implements UserService {
   private User fetchUserByBarcodeAndId(String barcode, String id) {
     log.debug("fetchUserByBarcodeAndId:: Trying to fetch existing user with barcode {} and id {}",
       barcode, id);
-    return usersClient.fetchUserByBarcodeAndId("barcode==" + barcode + " and id==" + id)
+    return usersClient.fetchUserByBarcodeAndId(StringUtil.cqlEncode("barcode==" + barcode + " and id==" + id))
       .getUsers()
       .stream()
       .findFirst()
