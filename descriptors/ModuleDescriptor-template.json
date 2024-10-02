@@ -65,6 +65,10 @@
     {
       "id": "instance-types",
       "version": "2.0"
+    },
+    {
+      "id": "calendar",
+      "version": "5.0"
     }
   ],
   "provides": [
@@ -82,6 +86,7 @@
           ],
           "modulePermissions": [
             "inventory-storage.service-points.item.post",
+            "inventory-storage.service-points.collection.get",
             "users.collection.get",
             "users.item.post",
             "usergroups.collection.get",
@@ -97,7 +102,9 @@
             "inventory-storage.loan-types.collection.get",
             "circulation-storage.requests.item.get",
             "circulation-storage.cancellation-reasons.item.get",
-            "circulation-storage.cancellation-reasons.item.post"
+            "circulation-storage.cancellation-reasons.item.post",
+            "calendar.endpoint.calendars.get",
+            "calendar.endpoint.calendars.calendarId.put"
           ]
         },
         {
@@ -165,7 +172,9 @@
             "inventory-storage.loan-types.collection.post",
             "inventory-storage.loan-types.item.post",
             "circulation-storage.cancellation-reasons.item.get",
-            "circulation-storage.cancellation-reasons.item.post"
+            "circulation-storage.cancellation-reasons.item.post",
+            "calendar.endpoint.calendars.get",
+            "calendar.endpoint.calendars.post"
           ]
         },
         {

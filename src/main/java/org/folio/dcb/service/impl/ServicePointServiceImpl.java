@@ -1,12 +1,13 @@
 package org.folio.dcb.service.impl;
 
-import feign.FeignException;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dcb.client.feign.InventoryServicePointClient;
 import org.folio.dcb.domain.dto.DcbPickup;
 import org.folio.dcb.domain.dto.HoldShelfExpiryPeriod;
 import org.folio.dcb.domain.dto.ServicePointRequest;
+import org.folio.dcb.service.CalendarService;
 import org.folio.dcb.service.ServicePointService;
 import org.springframework.stereotype.Service;
 
@@ -16,28 +17,32 @@ import org.springframework.stereotype.Service;
 public class ServicePointServiceImpl implements ServicePointService {
 
   private final InventoryServicePointClient servicePointClient;
+  private final CalendarService calendarService;
   public static final String HOLD_SHELF_CLOSED_LIBRARY_DATE_MANAGEMENT = "Keep_the_current_due_date";
 
   @Override
-  public ServicePointRequest createServicePoint(DcbPickup pickupServicePoint) {
+  public ServicePointRequest createServicePointIfNotExists(DcbPickup pickupServicePoint) {
     log.debug("createServicePoint:: automate service point creation {} ", pickupServicePoint);
-
-    ServicePointRequest servicePointRequest = createServicePointRequest(
-      pickupServicePoint.getServicePointId(),
-      getServicePointName(pickupServicePoint.getLibraryCode(), pickupServicePoint.getServicePointName()),
-      getServicePointCode(pickupServicePoint.getLibraryCode(), pickupServicePoint.getServicePointName())
-    );
-
-     try{
-       return servicePointClient.createServicePoint(servicePointRequest);
-     } catch (FeignException.UnprocessableEntity e){
-       if(e.getMessage().contains("Service Point Exists")){
-         log.warn("Service point already exists");
-         return servicePointRequest;
-       } else{
-         throw new IllegalArgumentException(e);
-       }
-     }
+    String servicePointName = getServicePointName(pickupServicePoint.getLibraryCode(),
+      pickupServicePoint.getServicePointName());
+    var servicePointRequestList = servicePointClient
+      .getServicePointByName(servicePointName).getResult();
+    if (servicePointRequestList.isEmpty()) {
+      String servicePointId = UUID.randomUUID().toString();
+      String servicePointCode = getServicePointCode(pickupServicePoint.getLibraryCode(),
+        pickupServicePoint.getServicePointName());
+      log.info("createServicePointIfNotExists:: creating ServicePoint with id {}, name {} and code {}",
+        servicePointId, servicePointName, servicePointCode);
+      var servicePointRequest = createServicePointRequest(servicePointId,
+        servicePointName, servicePointCode);
+      ServicePointRequest servicePointResponse = servicePointClient.createServicePoint(servicePointRequest);
+      calendarService.addServicePointIdToDefaultCalendar(UUID.fromString(servicePointResponse.getId()));
+      return servicePointResponse;
+    } else {
+      log.info("createServicePointIfNotExists:: servicePoint Exists with name {}, hence reusing it", servicePointName);
+      calendarService.associateServicePointIdWithDefaultCalendarIfAbsent(UUID.fromString(servicePointRequestList.get(0).getId()));
+      return servicePointRequestList.get(0);
+    }
   }
 
   private ServicePointRequest createServicePointRequest(String id, String name, String code){
