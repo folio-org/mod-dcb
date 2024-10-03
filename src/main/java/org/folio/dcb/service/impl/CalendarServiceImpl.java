@@ -27,7 +27,7 @@ public class CalendarServiceImpl implements CalendarService {
 
   @Override
   public Calendar createCalendar(Calendar calendar) {
-    log.debug("createCalendar:: Creating new calendar with details {}", calendar);
+    log.info("createCalendar:: Creating new calendar with details {}", calendar);
     return calendarClient.createCalendar(calendar);
   }
 
