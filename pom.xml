@@ -33,6 +33,8 @@
       src/main/java/org/folio/template/FolioSpringTemplateApplication.java
     </sonar.exclusions>
     <argLine/>
+    <folio-util.version>35.1.0</folio-util.version>
+
 
     <!-- runtime dependencies -->
     <folio-spring-base.version>7.2.2</folio-spring-base.version>
@@ -198,7 +200,11 @@
       <artifactId>log4j-slf4j2-impl</artifactId>
       <scope>test</scope>
     </dependency>
-
+    <dependency>
+      <groupId>org.folio</groupId>
+      <artifactId>util</artifactId>
+      <version>${folio-util.version}</version>
+    </dependency>
   </dependencies>
 
   <build>
