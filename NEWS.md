@@ -1,8 +1,10 @@
+## v1.X.X (Unreleased)
+* MODDCB-134 Use new permissions instead source-storage.records.get
+
 ## v1.1.3 2024-10-02
 
 * MODDCB-114: Supplier side: Unable to produce service point pickup location in pick lists
 * MODDCB-119: Add DCB calendar and assignment of SPs to it
-* MODDCB-134 Use new permissions instead source-storage.records.get
 
 ## v1.1.2 2024-08-07
 
