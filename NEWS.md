@@ -1,3 +1,6 @@
+## v1.X.X (Unreleased)
+* MODDCB-134 Use new permissions instead source-storage.records.get
+
 ## v1.1.5 2024-10-03
 
 * MODDCB-114: Supplier side: Unable to produce service point pickup location in pick lists

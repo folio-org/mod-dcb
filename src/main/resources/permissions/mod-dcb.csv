@@ -10,7 +10,12 @@ inventory.items.item.get
 inventory.instances.item.get
 users.collection.get
 users.item.get
-source-storage.records.get
+source-storage.stream.marc-record-identifiers.collection.post
+source-storage.records.collection.get
+source-storage.records.item.get
+source-storage.records.formatted.item.get
+source-storage.stream.records.collection.get
+source-storage.records.matching.collection.post
 circulation.requests.item.get
 circulation.requests.item.post
 circulation.requests.collection.get
