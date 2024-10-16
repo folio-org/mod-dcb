@@ -1,3 +1,7 @@
+## v2.0.0
+
+* MODDCB-129: Upgrade "holdings-storage" to 8.0
+
 ## v1.1.5 2024-10-03
 
 * MODDCB-114: Supplier side: Unable to produce service point pickup location in pick lists
