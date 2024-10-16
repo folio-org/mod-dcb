@@ -1,5 +1,7 @@
-## v1.X.X (Unreleased)
-* MODDCB-134 Use new permissions instead source-storage.records.get
+## v2.0.0
+
+* MODDCB-129: Upgrade "holdings-storage" to 8.0
+* * MODDCB-134 Use new permissions instead source-storage.records.ge
 
 ## v1.1.5 2024-10-03
 
