@@ -130,6 +130,13 @@
     </dependency>
 
     <dependency>
+      <groupId>org.folio</groupId>
+      <artifactId>folio-spring-testing</artifactId>
+      <version>${folio-spring-base.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
       <groupId>org.mapstruct</groupId>
       <artifactId>mapstruct</artifactId>
       <version>${mapstruct.version}</version>
