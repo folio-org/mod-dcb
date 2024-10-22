@@ -12,7 +12,6 @@ import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
 import java.nio.file.Path;
 import org.folio.spring.integration.XOkapiHeaders;
-import org.folio.spring.testing.extension.EnablePostgres;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
