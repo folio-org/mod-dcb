@@ -7,6 +7,7 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import lombok.SneakyThrows;
 import org.folio.spring.config.properties.FolioEnvironment;
 import org.folio.spring.integration.XOkapiHeaders;
+import org.folio.spring.testing.extension.EnablePostgres;
 import org.folio.tenant.domain.dto.TenantAttributes;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterAll;
@@ -44,7 +45,7 @@ public class BaseIT {
   public static WireMockServer wireMockServer;
   protected static final String TOKEN = "test_token";
   public static final String TENANT = "diku";
-  protected static PostgreSQLContainer<?> postgreDBContainer = new PostgreSQLContainer<>("postgres:12-alpine");
+  protected static PostgreSQLContainer<?> postgreDBContainer = new PostgreSQLContainer<>("postgres:16-alpine");
   public final static int WIRE_MOCK_PORT = TestSocketUtils.findAvailableTcpPort();
   protected static final ObjectMapper OBJECT_MAPPER = new ObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_NULL)
     .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)

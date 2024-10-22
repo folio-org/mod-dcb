@@ -12,6 +12,7 @@ import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
 import java.nio.file.Path;
 import org.folio.spring.integration.XOkapiHeaders;
+import org.folio.spring.testing.extension.EnablePostgres;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,6 +30,7 @@ import org.testcontainers.utility.DockerImageName;
 
 @org.testcontainers.junit.jupiter.Testcontainers
 @WireMockTest(httpPort = 9999)
+
 class FolioDcbApplicationIT {
 
   private static final Logger LOG = LoggerFactory.getLogger(FolioDcbApplicationIT.class);
@@ -44,7 +46,7 @@ class FolioDcbApplicationIT {
 
   @Container
   private static final PostgreSQLContainer<?> POSTGRES =
-    new PostgreSQLContainer<>("postgres:12-alpine")
+    new PostgreSQLContainer<>("postgres:16-alpine")
       .withNetwork(NETWORK)
       .withNetworkAliases("mypostgres")
       .withExposedPorts(5432)
