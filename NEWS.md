@@ -1,3 +1,25 @@
+## v2.0.0
+
+* MODDCB-129: Upgrade "holdings-storage" to 8.0
+* * MODDCB-134 Use new permissions instead source-storage.records.ge
+
+## v1.1.5 2024-10-03
+
+* MODDCB-114: Supplier side: Unable to produce service point pickup location in pick lists
+* MODDCB-119: Add DCB calendar and assignment of SPs to it
+* MODDCB-130: DCB Patron barcode issue
+
+## v1.1.4 2024-10-02
+
+* MODDCB-114: Supplier side: Unable to produce service point pickup location in pick lists
+* MODDCB-119: Add DCB calendar and assignment of SPs to it
+* MODDCB-130: DCB Patron barcode issue
+
+## v1.1.3 2024-10-02
+
+* MODDCB-114: Supplier side: Unable to produce service point pickup location in pick lists
+* MODDCB-119: Add DCB calendar and assignment of SPs to it
+
 ## v1.1.2 2024-08-07
 
 * MODDCB-112: Kafka TLS configuration is not present

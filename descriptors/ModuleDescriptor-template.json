@@ -12,7 +12,7 @@
     },
     {
       "id": "inventory",
-      "version": "13.1"
+      "version": "14.0"
     },
     {
       "id": "login",
@@ -28,7 +28,7 @@
     },
     {
       "id": "holdings-storage",
-      "version": "6.0 7.0"
+      "version": "6.0 7.0 8.0"
     },
     {
       "id": "service-points",
@@ -37,10 +37,6 @@
     {
       "id": "circulation-item",
       "version": "1.0"
-    },
-    {
-      "id": "inventory",
-      "version": "13.1"
     },
     {
       "id": "material-types",
@@ -278,7 +274,12 @@
         "inventory.instances.item.get",
         "users.collection.get",
         "users.item.get",
-        "source-storage.records.get",
+        "source-storage.stream.marc-record-identifiers.collection.post",
+        "source-storage.records.collection.get",
+        "source-storage.records.item.get",
+        "source-storage.records.formatted.item.get",
+        "source-storage.stream.records.collection.get",
+        "source-storage.records.matching.collection.post",
         "circulation.requests.item.get",
         "circulation.requests.item.post",
         "circulation.requests.collection.get",
@@ -296,7 +297,7 @@
     "dockerPull": false,
     "dockerArgs": {
       "HostConfig": {
-        "Memory": 357913941,
+        "Memory": 702293850,
         "PortBindings": { "8081/tcp": [ { "HostPort": "%p" } ] }
       }
     },
