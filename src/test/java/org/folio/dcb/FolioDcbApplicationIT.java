@@ -3,6 +3,7 @@ package org.folio.dcb;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.RestAssured.when;
+import static org.folio.dcb.controller.BaseIT.POSTGRES_IMAGE_NAME;
 import static org.hamcrest.Matchers.is;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
@@ -29,6 +30,7 @@ import org.testcontainers.utility.DockerImageName;
 
 @org.testcontainers.junit.jupiter.Testcontainers
 @WireMockTest(httpPort = 9999)
+
 class FolioDcbApplicationIT {
 
   private static final Logger LOG = LoggerFactory.getLogger(FolioDcbApplicationIT.class);
@@ -44,7 +46,7 @@ class FolioDcbApplicationIT {
 
   @Container
   private static final PostgreSQLContainer<?> POSTGRES =
-    new PostgreSQLContainer<>("postgres:12-alpine")
+    new PostgreSQLContainer<>(POSTGRES_IMAGE_NAME)
       .withNetwork(NETWORK)
       .withNetworkAliases("mypostgres")
       .withExposedPorts(5432)
