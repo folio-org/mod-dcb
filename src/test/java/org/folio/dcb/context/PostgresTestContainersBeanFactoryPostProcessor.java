@@ -8,12 +8,14 @@ import org.springframework.stereotype.Component;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 
+import static org.folio.dcb.controller.BaseIT.POSTGRES_IMAGE_NAME;
+
 @Component
 @Profile("testcontainers-pg")
 public class PostgresTestContainersBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
 
   @Container
-  public static PostgreSQLContainer<?> postgreDBContainer = new PostgreSQLContainer<>("postgres:16-alpine");
+  public static PostgreSQLContainer<?> postgreDBContainer = new PostgreSQLContainer<>(POSTGRES_IMAGE_NAME);
 
   @Override
   public void postProcessBeanFactory(ConfigurableListableBeanFactory configurableListableBeanFactory) throws BeansException {
