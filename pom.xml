@@ -27,19 +27,22 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <rest-assured.version>5.1.1</rest-assured.version>
     <mvn-failsafe.version>3.2.1</mvn-failsafe.version>
-    <folio-util.version>35.2.0</folio-util.version>
+    <folio-util.version>35.3.0</folio-util.version>
     <argLine />
 
     <!-- runtime dependencies -->
     <folio-spring-base.version>8.2.0</folio-spring-base.version>
     <folio-spring-system-user.version>8.1.0</folio-spring-system-user.version>
     <openapi-generator.version>7.3.0</openapi-generator.version>
-    <mapstruct.version>1.5.2.Final</mapstruct.version>
+    <mapstruct.version>1.6.2</mapstruct.version>
     <kafkaclients.version>3.6.0</kafkaclients.version>
+    <maven-surefire-plugin.version>3.5.1</maven-surefire-plugin.version>
+    <maven-release-plugin.version>3.1.1</maven-release-plugin.version>
+    <maven-enforcer-plugin.version>3.5.0</maven-enforcer-plugin.version>
 
     <!-- test dependencies -->
     <wiremock.version>3.2.0</wiremock.version>
-    <testcontainers.version>1.19.3</testcontainers.version>
+    <testcontainers.version>1.20.2</testcontainers.version>
   </properties>
 
   <dependencyManagement>
@@ -319,7 +322,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>3.2.5</version>
+        <version>${maven-surefire-plugin.version}</version>
         <configuration>
           <useSystemClassLoader>false</useSystemClassLoader>
           <argLine>@{argLine} -Dfile.encoding=UTF-8</argLine>
@@ -329,7 +332,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-release-plugin</artifactId>
-        <version>3.0.1</version>
+        <version>${maven-release-plugin.version}</version>
         <configuration>
           <preparationGoals>clean verify</preparationGoals>
           <tagNameFormat>v@{project.version}</tagNameFormat>
@@ -341,7 +344,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
-        <version>3.1.0</version>
+        <version>${maven-enforcer-plugin.version}</version>
         <executions>
           <execution>
             <id>enforce-maven</id>
