@@ -31,9 +31,8 @@
     <argLine />
 
     <!-- runtime dependencies -->
-    <folio-spring-base.version>8.2.0</folio-spring-base.version>
-    <folio-spring-system-user.version>8.1.0</folio-spring-system-user.version>
-    <openapi-generator.version>7.3.0</openapi-generator.version>
+    <folio-spring-support.version>8.2.0</folio-spring-support.version>
+    <openapi-generator.version>7.9.0</openapi-generator.version>
     <mapstruct.version>1.6.2</mapstruct.version>
     <kafkaclients.version>3.6.0</kafkaclients.version>
     <maven-surefire-plugin.version>3.5.1</maven-surefire-plugin.version>
@@ -70,7 +69,7 @@
     <dependency>
       <groupId>org.folio</groupId>
       <artifactId>folio-spring-base</artifactId>
-      <version>${folio-spring-base.version}</version>
+      <version>${folio-spring-support.version}</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.datatype</groupId>
@@ -79,7 +78,7 @@
     <dependency>
       <groupId>org.folio</groupId>
       <artifactId>folio-spring-system-user</artifactId>
-      <version>${folio-spring-system-user.version}</version>
+      <version>${folio-spring-support.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -309,11 +308,10 @@
                     <supportingFilesToGenerate>ApiUtil.java</supportingFilesToGenerate>
                     <generateModelDocumentation>true</generateModelDocumentation>
                     <configOptions>
-                      <generatedConstructorWithRequiredArgs>false</generatedConstructorWithRequiredArgs>
+                      <generateBuilders>true</generateBuilders>
                       <dateLibrary>java8</dateLibrary>
                       <interfaceOnly>true</interfaceOnly>
                       <useSpringBoot3>true</useSpringBoot3>
-                      <additionalModelTypeAnnotations>@lombok.Builder @lombok.NoArgsConstructor @lombok.AllArgsConstructor</additionalModelTypeAnnotations>
                     </configOptions>
                   </configuration>
                 </execution>
