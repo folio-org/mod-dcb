@@ -1,7 +1,23 @@
-## v2.0.0
+## v1.2.0 2024-10-30
 
+* MODDCB-98: Implement GET API for transaction updates
+* MODDCB-102: Code changes for Check-out event improvement
+* MODDCB-106: API version update of mod inventory storage
+* MODDCB-107: Source id is not setting up properly while creating holdings in DCB
+* MODDCB-108: Creating a holding source in mod-dcb
+* MODDCB-109: Add missed permissions in mod-dcb
+* MODDCB-112: Kafka TLS configuration is not present
+* MODDCB-114: Supplier side: Unable to produce service point pickup location in pick lists
+* MODDCB-118: Add missing holding source permission
+* MODDCB-119: Add DCB calendar and assignment of SPs to it
+* MODDCB-121: SYSTEM_USER env var is not taking affect
 * MODDCB-129: Upgrade "holdings-storage" to 8.0
-* * MODDCB-134 Use new permissions instead source-storage.records.ge
+* MODDCB-130: DCB Patron barcode issue
+* MODDCB-133: inventory API version update from 13.3 to 14.0
+* MODDCB-134: Use new permissions instead source-storage.records.get
+* MODDCB-136: Increase memory for DCB
+* MODDCB-137: Update Spring support version for Ramsons
+* MODDCB-140: Update pom.xml and interface dependencies for Ramsons
 
 ## v1.1.5 2024-10-03
 
