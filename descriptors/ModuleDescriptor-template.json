@@ -4,11 +4,11 @@
   "requires": [
     {
       "id": "circulation",
-      "version": "14.2"
+      "version": "14.4"
     },
     {
       "id": "users",
-      "version": "16.1"
+      "version": "16.3"
     },
     {
       "id": "inventory",
@@ -20,7 +20,7 @@
     },
     {
       "id": "permissions",
-      "version": "5.6"
+      "version": "5.7"
     },
     {
       "id": "item-storage",
@@ -28,7 +28,7 @@
     },
     {
       "id": "holdings-storage",
-      "version": "6.0 7.0 8.0"
+      "version": "8.0"
     },
     {
       "id": "service-points",
@@ -48,7 +48,7 @@
     },
     {
       "id": "locations",
-      "version": "3.0"
+      "version": "3.1"
     },
     {
       "id": "location-units",
