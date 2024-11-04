@@ -232,7 +232,6 @@
         "dcb.transactions.put",
         "dcb.transactions.get",
         "dcb.transactions.collection.get",
-        "dcb.transactions.get",
         "dcb.ecs-request.transactions.post"
       ]
     },
