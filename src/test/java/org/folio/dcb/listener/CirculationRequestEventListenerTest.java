@@ -91,7 +91,7 @@ class CirculationRequestEventListenerTest extends BaseIT {
     MessageHeaders messageHeaders = getMessageHeaders();
     when(transactionRepository.findTransactionByRequestIdAndStatusNotInClosed(any())).thenReturn(Optional.of(transactionEntity));
     eventListener.handleRequestEvent(REQUEST_CANCEL_EVENT_SAMPLE, messageHeaders);
-    Mockito.verify(transactionRepository, times(0)).save(any());
+    Mockito.verify(transactionRepository, times(1)).save(any());
   }
 
   @Test
@@ -118,7 +118,7 @@ class CirculationRequestEventListenerTest extends BaseIT {
     when(circulationItemService.fetchItemById(anyString())).thenReturn(circulationItem);
     MessageHeaders messageHeaders = getMessageHeaders();
     eventListener.handleRequestEvent(CHECK_IN_TRANSIT_EVENT_SAMPLE, messageHeaders);
-    Mockito.verify(transactionRepository, times(0)).save(any());
+    Mockito.verify(transactionRepository, times(1)).save(any());
   }
 
   @Test

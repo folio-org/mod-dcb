@@ -60,6 +60,7 @@ public class EntityUtils {
   public static String DCB_TYPE_USER_ID = "910c512c-ebc5-40c6-96a5-a20bfd81e154";
   public static String EXISTED_INVENTORY_ITEM_BARCODE = "INVENTORY_ITEM";
   public static String PATRON_TYPE_USER_ID = "18c1741d-e678-4c8e-9fe7-cfaeefab5eea";
+  public static String REQUEST_ID = "398501a2-5c97-4ba6-9ee7-d1cd6433cb98";
 
   public static DcbTransaction createDcbTransactionByRole(DcbTransaction.RoleEnum role) {
     return DcbTransaction.builder()
@@ -70,6 +71,23 @@ public class EntityUtils {
         }
       )
       .role(role)
+      .pickup(createDcbPickup())
+      .build();
+  }
+
+  public static DcbTransaction createLendingEcsRequestTransactionByRole() {
+    return DcbTransaction.builder()
+      .requestId(REQUEST_ID)
+      .role(DcbTransaction.RoleEnum.LENDER)
+      .pickup(createDcbPickup())
+      .build();
+  }
+
+  public static DcbTransaction createBorrowingEcsRequestTransactionByRole() {
+    return DcbTransaction.builder()
+      .requestId(REQUEST_ID)
+      .item(createDcbItem())
+      .role(DcbTransaction.RoleEnum.BORROWER)
       .pickup(createDcbPickup())
       .build();
   }

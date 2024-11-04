@@ -1,0 +1,29 @@
+{
+  "mappings": [
+    {
+      "request": {
+        "method": "GET",
+        "url": "/request-storage/requests/398501a2-5c97-4ba6-9ee7-d1cd6433cb98"
+      },
+      "response": {
+        "status": 200,
+        "body": "{\n    \"id\" : \"398501a2-5c97-4ba6-9ee7-d1cd6433cb98\",\n    \"requestLevel\" : \"Item\",\n    \"requestType\" : \"Page\",\n    \"requestDate\" : \"2024-03-07T13:54:08.655+00:00\",\n    \"requesterId\" : \"2205005b-ca51-4a04-87fd-938eefa8f6de\",\n    \"instanceId\" : \"5bf370e0-8cca-4d9c-82e4-5170ab2a0a39\",\n    \"holdingsRecordId\" : \"e3ff6133-b9a2-4d4c-a1c9-dc1867d4df19\",\n    \"itemId\" : \"100d10bf-2f06-4aa0-be15-0b95b2d9f9e3\",\n    \"status\" : \"Open - Not yet filled\",\n    \"position\" : 1,\n    \"instance\" : {\n      \"title\" : \"A semantic web primer\",\n      \"identifiers\" : [ {\n        \"identifierTypeId\" : \"8261054f-be78-422d-bd51-4ed9f33c3422\",\n        \"value\" : \"0262012103\"\n      }, {\n        \"identifierTypeId\" : \"8261054f-be78-422d-bd51-4ed9f33c3422\",\n        \"value\" : \"9780262012102\"\n      }, {\n        \"identifierTypeId\" : \"c858e4f2-2b6b-4385-842b-60732ee14abb\",\n        \"value\" : \"2003065165\"\n      } ],\n      \"contributorNames\" : [ {\n        \"name\" : \"Antoniou, Grigoris\"\n      }, {\n        \"name\" : \"Van Harmelen, Frank\"\n      } ],\n      \"publication\" : [ {\n        \"publisher\" : \"MIT Press\",\n        \"place\" : \"Cambridge, Mass. \",\n        \"dateOfPublication\" : \"c2004\",\n        \"role\" : \"Publisher\"\n      } ]\n    },\n    \"item\" : {\n      \"barcode\" : \"90000\",\n      \"location\" : {\n        \"name\" : \"Annex\",\n        \"libraryName\" : \"Datalogisk Institut\",\n        \"code\" : \"KU/CC/DI/A\"\n      },\n      \"enumeration\" : \"\",\n      \"status\" : \"Paged\",\n      \"callNumber\" : \"TK5105.88815 . A58 2004 FT MEADE\",\n      \"callNumberComponents\" : {\n        \"callNumber\" : \"TK5105.88815 . A58 2004 FT MEADE\"\n      }\n    },\n    \"requester\" : {\n      \"lastName\" : \"rick\",\n      \"firstName\" : \"psych\",\n      \"barcode\" : \"123\",\n      \"patronGroup\" : {\n        \"id\" : \"3684a786-6671-4268-8ed0-9db82ebca60b\",\n        \"group\" : \"staff\",\n        \"desc\" : \"Staff Member\"\n      },\n      \"patronGroupId\" : \"3684a786-6671-4268-8ed0-9db82ebca60b\"\n    },\n    \"fulfillmentPreference\" : \"Hold Shelf\",\n    \"pickupServicePointId\" : \"3a40852d-49fd-4df2-a1f9-6e2641a6e91f\",\n    \"metadata\" : {\n      \"createdDate\" : \"2024-03-07T13:54:13.484+00:00\",\n      \"createdByUserId\" : \"5600bae3-4ca8-42dd-bef5-4502aaea6dc7\",\n      \"updatedDate\" : \"2024-03-07T13:54:14.768+00:00\",\n      \"updatedByUserId\" : \"5600bae3-4ca8-42dd-bef5-4502aaea6dc7\"\n    },\n    \"pickupServicePoint\" : {\n      \"name\" : \"Circ Desk 1\",\n      \"code\" : \"cd1\",\n      \"discoveryDisplayName\" : \"Circulation Desk -- Hallway\",\n      \"description\" : null,\n      \"shelvingLagTime\" : null,\n      \"pickupLocation\" : true\n    }\n  }",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "url": "/request-storage/requests/398501a2-5c97-4ba6-9ee7-d1cd6433cb98"
+      },
+      "response": {
+        "status": 204,
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
+    }
+  ]
+}

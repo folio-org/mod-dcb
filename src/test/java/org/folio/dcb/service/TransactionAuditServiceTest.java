@@ -15,7 +15,6 @@ import java.util.Optional;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
 import static org.folio.dcb.utils.EntityUtils.createDcbTransactionByRole;
-import static org.folio.dcb.utils.EntityUtils.createTransactionEntity;
 import static org.folio.dcb.utils.EntityUtils.createTransactionAuditEntity;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -41,11 +40,9 @@ class TransactionAuditServiceTest {
   }
   @Test
   void logTheErrorForNotExistedTransactionAuditTest() {
-    when(transactionMapper.mapToEntity(any(), any())).thenReturn(createTransactionEntity());
     when(transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(any()))
       .thenReturn(Optional.empty());
     transactionAuditService.logErrorIfTransactionAuditNotExists(DCB_TRANSACTION_ID, createDcbTransactionByRole(LENDER), "error_message");
-    Mockito.verify(transactionMapper, times(1)).mapToEntity(any(), any());
     Mockito.verify(transactionAuditRepository, times(1)).save(any());
   }
 
