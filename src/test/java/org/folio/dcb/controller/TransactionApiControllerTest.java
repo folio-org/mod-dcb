@@ -602,11 +602,11 @@ class TransactionApiControllerTest extends BaseIT {
     systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> transactionRepository.save(dcbTransaction));
 
     this.mockMvc.perform(
-        put("/transactions/" + transactionID + "/status")
-          .content(asJsonString(createTransactionStatus(TransactionStatus.StatusEnum.OPEN)))
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
+      put("/transactions/" + transactionID + "/status")
+        .content(asJsonString(createTransactionStatus(TransactionStatus.StatusEnum.OPEN)))
+        .headers(defaultHeaders())
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.status").value("OPEN"));
   }
