@@ -39,6 +39,7 @@ public class EcsRequestTransactionsServiceImpl implements EcsRequestTransactions
   @Override
   public TransactionStatusResponse createEcsRequestTransactions(String ecsRequestTransactionsId,
     DcbTransaction dcbTransaction) {
+
     log.info("createEcsRequestTransactions:: creating new transaction request for role {} ",
       dcbTransaction.getRole());
     checkEcsRequestTransactionExistsAndThrow(ecsRequestTransactionsId);
@@ -60,7 +61,7 @@ public class EcsRequestTransactionsServiceImpl implements EcsRequestTransactions
         .patron(dcbTransaction.getPatron())
         .build();
     } else {
-      throw new IllegalArgumentException("Unable to create ecs transaction as could not find open request");
+      throw new IllegalArgumentException("Unable to create ECS transaction as could not find open request");
     }
   }
 
@@ -74,6 +75,7 @@ public class EcsRequestTransactionsServiceImpl implements EcsRequestTransactions
 
   private void createLenderEcsRequestTransactions(String ecsRequestTransactionsId,
     DcbTransaction dcbTransaction, CirculationRequest circulationRequest) {
+
     dcbTransaction.setItem(DcbItem.builder()
       .id(String.valueOf(circulationRequest.getItemId()))
       .barcode(circulationRequest.getItem().getBarcode())
@@ -91,6 +93,7 @@ public class EcsRequestTransactionsServiceImpl implements EcsRequestTransactions
 
   private void createBorrowerEcsRequestTransactions(String ecsRequestTransactionsId,
     DcbTransaction dcbTransaction, CirculationRequest circulationRequest) {
+
     var itemVirtual = dcbTransaction.getItem();
     if (itemVirtual == null) {
       throw new IllegalArgumentException("Item is required for borrower transaction");
