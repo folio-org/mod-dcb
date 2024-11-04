@@ -37,20 +37,20 @@ class EcsRequestTransactionsApiControllerTest extends BaseIT {
     removeExistedTransactionFromDbIfSoExists();
 
     this.mockMvc.perform(
-        post("/ecs-request-transactions/" + CIRCULATION_REQUEST_ID)
-          .content(asJsonString(createLendingEcsRequestTransactionByRole()))
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
+      post("/ecs-request-transactions/" + CIRCULATION_REQUEST_ID)
+        .content(asJsonString(createLendingEcsRequestTransactionByRole()))
+        .headers(defaultHeaders())
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
       .andExpect(status().isCreated());
 
     //Trying to create another transaction with same transaction id
     this.mockMvc.perform(
-        post("/ecs-request-transactions/" + CIRCULATION_REQUEST_ID)
-          .content(asJsonString(createLendingEcsRequestTransactionByRole()))
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
+      post("/ecs-request-transactions/" + CIRCULATION_REQUEST_ID)
+        .content(asJsonString(createLendingEcsRequestTransactionByRole()))
+        .headers(defaultHeaders())
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
       .andExpectAll(status().is4xxClientError(),
         jsonPath("$.errors[0].code", is("DUPLICATE_ERROR")));
 
@@ -62,8 +62,11 @@ class EcsRequestTransactionsApiControllerTest extends BaseIT {
           .findLatestTransactionAuditEntityByDcbTransactionId(CIRCULATION_REQUEST_ID)
           .orElse(null);
         Assertions.assertNotNull(auditExisting);
-        Assertions.assertNotEquals(TRANSACTION_AUDIT_DUPLICATE_ERROR_ACTION, auditExisting.getAction());
-        Assertions.assertNotEquals(DUPLICATE_ERROR_TRANSACTION_ID, auditExisting.getTransactionId());      }
+        Assertions.assertNotEquals(TRANSACTION_AUDIT_DUPLICATE_ERROR_ACTION,
+          auditExisting.getAction());
+        Assertions.assertNotEquals(DUPLICATE_ERROR_TRANSACTION_ID,
+          auditExisting.getTransactionId());
+      }
     );
   }
 
@@ -72,11 +75,11 @@ class EcsRequestTransactionsApiControllerTest extends BaseIT {
     removeExistedTransactionFromDbIfSoExists();
 
     this.mockMvc.perform(
-        post("/ecs-request-transactions/" + CIRCULATION_REQUEST_ID)
-          .content(asJsonString(createBorrowingEcsRequestTransactionByRole()))
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
+      post("/ecs-request-transactions/" + CIRCULATION_REQUEST_ID)
+        .content(asJsonString(createBorrowingEcsRequestTransactionByRole()))
+        .headers(defaultHeaders())
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
       .andExpect(status().isCreated());
   }
 
@@ -85,17 +88,17 @@ class EcsRequestTransactionsApiControllerTest extends BaseIT {
     DcbTransaction dcbTransaction = createLendingEcsRequestTransactionByRole();
     dcbTransaction.setRequestId(UUID.randomUUID().toString());
     this.mockMvc.perform(
-        post("/ecs-request-transactions/" + CIRCULATION_REQUEST_ID)
-          .content(asJsonString(dcbTransaction))
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
+      post("/ecs-request-transactions/" + CIRCULATION_REQUEST_ID)
+        .content(asJsonString(dcbTransaction))
+        .headers(defaultHeaders())
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
       .andExpectAll(status().is4xxClientError());
   }
 
   private void removeExistedTransactionFromDbIfSoExists() {
     systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> {
-      if (transactionRepository.existsById(CIRCULATION_REQUEST_ID)){
+      if (transactionRepository.existsById(CIRCULATION_REQUEST_ID)) {
         transactionRepository.deleteById(CIRCULATION_REQUEST_ID);
       }
     });
