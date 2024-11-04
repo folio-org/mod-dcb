@@ -48,6 +48,13 @@ public class RequestServiceImpl implements RequestService {
     return circulationClient.createRequest(circulationRequest);
   }
 
+  @Override
+  public void updateCirculationRequest(CirculationRequest circulationRequest) {
+    log.debug("updateCirculationRequest:: updating circulation request with id {}",
+      circulationRequest.getId());
+    circulationClient.updateRequest(circulationRequest.getId(), circulationRequest);
+  }
+
   private CirculationRequest createCirculationRequest(CirculationRequest.RequestTypeEnum type, User user, DcbItem item, String holdingsId, String instanceId, String pickupServicePointId) {
     return CirculationRequest.builder()
       .id(UUID.randomUUID().toString())
