@@ -1,3 +1,6 @@
+## v1.2.1 2024-11-13
+* MODDCB-143 Adding missed interface dependencies in module descriptor
+
 ## v1.2.0 2024-10-30
 
 * MODDCB-98: Implement GET API for transaction updates
