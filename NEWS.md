@@ -1,3 +1,6 @@
+## v1.1.6 2024-11-15
+* MODDCB-145: Issue with spaces in service point name
+
 ## v1.1.5 2024-10-03
 
 * MODDCB-114: Supplier side: Unable to produce service point pickup location in pick lists
