@@ -9,6 +9,7 @@ import org.folio.dcb.domain.dto.HoldShelfExpiryPeriod;
 import org.folio.dcb.domain.dto.ServicePointRequest;
 import org.folio.dcb.service.CalendarService;
 import org.folio.dcb.service.ServicePointService;
+import org.folio.util.StringUtil;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -26,7 +27,7 @@ public class ServicePointServiceImpl implements ServicePointService {
     String servicePointName = getServicePointName(pickupServicePoint.getLibraryCode(),
       pickupServicePoint.getServicePointName());
     var servicePointRequestList = servicePointClient
-      .getServicePointByName(servicePointName).getResult();
+      .getServicePointByName(StringUtil.cqlEncode(servicePointName)).getResult();
     if (servicePointRequestList.isEmpty()) {
       String servicePointId = UUID.randomUUID().toString();
       String servicePointCode = getServicePointCode(pickupServicePoint.getLibraryCode(),

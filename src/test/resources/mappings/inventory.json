@@ -198,7 +198,7 @@
     {
       "request": {
         "method": "GET",
-        "url": "/service-points?query=name==DCB_TestLibraryCode_TestServicePointCode"
+        "url": "/service-points?query=name==%22DCB_TestLibraryCode_TestServicePointCode%22"
       },
       "response": {
         "status": 200,
