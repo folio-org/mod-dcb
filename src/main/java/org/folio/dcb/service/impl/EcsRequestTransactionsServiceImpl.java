@@ -1,7 +1,9 @@
 package org.folio.dcb.service.impl;
 
+import static java.lang.String.format;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWER;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
+import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.PICKUP;
 
 import java.util.UUID;
 
@@ -52,6 +54,10 @@ public class EcsRequestTransactionsServiceImpl implements EcsRequestTransactions
       } else if(dcbTransaction.getRole() == BORROWER) {
         createBorrowerEcsRequestTransactions(ecsRequestTransactionsId, dcbTransaction,
           circulationRequest);
+      } else if(dcbTransaction.getRole() == PICKUP) {
+        // Same method as for the BORROWER role
+        createBorrowerEcsRequestTransactions(ecsRequestTransactionsId, dcbTransaction,
+          circulationRequest);
       } else {
         throw new IllegalArgumentException("Unimplemented role: " + dcbTransaction.getRole());
       }
@@ -68,7 +74,7 @@ public class EcsRequestTransactionsServiceImpl implements EcsRequestTransactions
   private void checkEcsRequestTransactionExistsAndThrow(String dcbTransactionId) {
     if (transactionRepository.existsById(dcbTransactionId)) {
       throw new ResourceAlreadyExistException(
-        String.format("unable to create ECS transaction with ID %s as it already exists",
+        format("unable to create ECS transaction with ID %s as it already exists",
           dcbTransactionId));
     }
   }
@@ -96,7 +102,8 @@ public class EcsRequestTransactionsServiceImpl implements EcsRequestTransactions
 
     var itemVirtual = dcbTransaction.getItem();
     if (itemVirtual == null) {
-      throw new IllegalArgumentException("Item is required for borrower transaction");
+      throw new IllegalArgumentException(format("Item is required for %s transaction",
+        dcbTransaction.getRole()));
     }
     baseLibraryService.checkItemExistsInInventoryAndThrow(itemVirtual.getBarcode());
     CirculationItem item = circulationItemService.checkIfItemExistsAndCreate(itemVirtual, circulationRequest.getPickupServicePointId());
