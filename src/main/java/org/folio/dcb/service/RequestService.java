@@ -6,7 +6,7 @@ import org.folio.dcb.domain.dto.User;
 
 public interface RequestService {
   /**
-   * Create page item request
+   * Create request based on status of the item
    * @param user - userEntity
    * @param dcbItem - dcbItemEntity
    */
