@@ -219,6 +219,9 @@ public class EntityUtils {
       .id(UUID.randomUUID().toString())
       .holdingsRecordId(UUID.randomUUID().toString())
       .barcode("DCB_ITEM")
+      .status(ItemStatus.builder()
+        .name(ItemStatus.NameEnum.AVAILABLE)
+        .build())
       .build();
   }
 
