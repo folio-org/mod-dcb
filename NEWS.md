@@ -1,3 +1,6 @@
+## v1.2.2 2024-11-20
+* MODDCB-145: Issue with spaces in service point name
+
 ## v1.2.1 2024-11-13
 * MODDCB-143 Adding missed interface dependencies in module descriptor
 
