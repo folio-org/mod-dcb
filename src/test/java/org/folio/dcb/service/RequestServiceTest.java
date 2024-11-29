@@ -35,7 +35,7 @@ class RequestServiceTest {
   void createPageItemRequestTest() {
     when(itemService.fetchItemByIdAndBarcode(any(), any())).thenReturn(createInventoryItem());
     when(holdingsService.fetchInventoryHoldingDetailsByHoldingId(any())).thenReturn(createInventoryHolding());
-    requestService.createPageItemRequest(createUser(), createDcbItem(), createDcbPickup().getServicePointId());
+    requestService.createRequestBasedOnItemStatus(createUser(), createDcbItem(), createDcbPickup().getServicePointId());
     verify(itemService).fetchItemByIdAndBarcode(any(), any());
     verify(holdingsService).fetchInventoryHoldingDetailsByHoldingId(any());
     verify(circulationClient).createRequest(any());
