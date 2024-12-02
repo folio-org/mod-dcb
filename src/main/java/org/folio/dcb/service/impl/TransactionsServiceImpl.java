@@ -9,7 +9,6 @@ import org.folio.dcb.domain.dto.TransactionStatusResponseCollection;
 import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.domain.mapper.TransactionMapper;
 import org.folio.dcb.exception.ResourceAlreadyExistException;
-import org.folio.dcb.exception.ResourceAlreadyExistException;
 import org.folio.dcb.exception.StatusException;
 import org.folio.dcb.repository.TransactionAuditRepository;
 import org.folio.dcb.repository.TransactionRepository;
@@ -40,7 +39,6 @@ public class TransactionsServiceImpl implements TransactionsService {
   private final StatusProcessorService statusProcessorService;
   private final TransactionMapper transactionMapper;
   private final TransactionAuditRepository transactionAuditRepository;
-  private final BaseTransactionsService baseTransactionsService;
 
   @Override
   public TransactionStatusResponse createCirculationRequest(String dcbTransactionId, DcbTransaction dcbTransaction) {
