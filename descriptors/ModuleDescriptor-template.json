@@ -256,14 +256,6 @@
       "description": "get list of transaction updated between a given query range"
     },
     {
-      "permissionName": "ecs-request.all",
-      "displayName": "ECS request - all permissions",
-      "description": "All permissions for ECS request module",
-      "subPermissions": [
-        "ecs-request.transactions.post"
-      ]
-    },
-    {
       "permissionName": "dcb.ecs-request.transactions.post",
       "displayName": "creates new ECS request transaction",
       "description": "creates new ECS request transaction"
