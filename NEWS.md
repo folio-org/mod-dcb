@@ -1,3 +1,10 @@
+## v1.2.3 2024-12-02
+* MODDCB-90: Accept existing circulation request ID
+* MODDCB-105: Accept existing circulation request ID (borrowing transaction)
+* MODDCB-111: Allow manual transaction status change from CREATED to OPEN
+* MODDCB-117: Add ecsRequestPhase to the circulation request schema
+* MODDCB-124: Merge esc-tlr feature branch into master
+
 ## v1.2.2 2024-11-20
 * MODDCB-145: Issue with spaces in service point name
 
