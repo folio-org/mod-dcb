@@ -48,9 +48,14 @@ public class UserServiceImpl implements UserService {
     if(Objects.isNull(user)) {
       log.info("fetchOrCreateUser:: Unable to find existing user with barcode {} and id {}. Hence, creating new user",
         patronDetails.getBarcode(), patronDetails.getId());
-      user = createUser(patronDetails);
+      return createUser(patronDetails);
+    } else {
+      var groupId = patronGroupService.fetchPatronGroupIdByName(patronDetails.getGroup());
+      if (!user.getPatronGroup().equals(groupId)) {
+        return updatePatronGroup(user, groupId);
+      }
+      return user;
     }
-    return user;
   }
 
   private User createUser(DcbPatron patronDetails) {
@@ -80,4 +85,11 @@ public class UserServiceImpl implements UserService {
       .personal(Personal.builder().lastName(LAST_NAME).build())
       .build();
   }
+
+  private User updatePatronGroup(User user, String patronGroupId) {
+    log.info("updatePatronGroup:: updating patron group from {} to {} for user with barcode {}",
+      user.getPatronGroup(), patronGroupId, user.getBarcode());
+    return usersClient.updateUser(user.getId(), user.patronGroup(patronGroupId));
+  }
+
 }

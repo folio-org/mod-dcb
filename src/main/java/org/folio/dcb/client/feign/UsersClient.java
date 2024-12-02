@@ -5,7 +5,9 @@ import org.folio.dcb.domain.dto.UserCollection;
 import org.folio.spring.config.FeignClientConfiguration;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -16,4 +18,7 @@ public interface UsersClient {
 
   @GetMapping
   UserCollection fetchUserByBarcodeAndId(@RequestParam("query") String query);
+
+  @PutMapping("/{userId}")
+  User updateUser(@PathVariable("userId") String userId, @RequestBody User user);
 }
