@@ -5,6 +5,8 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.ObjectUtils;
 import org.folio.dcb.domain.dto.CirculationItem;
 import org.folio.dcb.domain.dto.CirculationRequest;
+import org.folio.dcb.domain.dto.DcbItem;
+import org.folio.dcb.domain.dto.DcbPatron;
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
@@ -54,6 +56,7 @@ public class BaseLibraryService {
     }
     checkItemExistsInInventoryAndThrow(itemVirtual.getBarcode());
     CirculationItem item = circulationItemService.checkIfItemExistsAndCreate(itemVirtual, pickupServicePointId);
+    dcbTransaction.getItem().setId(item.getId());
     checkOpenTransactionExistsAndThrow(item.getId());
     CirculationRequest holdRequest = requestService.createHoldItemRequest(user, itemVirtual, pickupServicePointId);
     saveDcbTransaction(dcbTransactionId, dcbTransaction, holdRequest.getId());
@@ -131,6 +134,25 @@ public class BaseLibraryService {
   public void updateTransactionEntity(TransactionEntity transactionEntity, TransactionStatus.StatusEnum transactionStatusEnum) {
     log.debug("updateTransactionEntity:: updating transaction entity from {} to {}", transactionEntity.getStatus(), transactionStatusEnum);
     transactionEntity.setStatus(transactionStatusEnum);
+    transactionRepository.save(transactionEntity);
+  }
+
+  public void updateTransactionDetails(TransactionEntity transactionEntity, DcbItem updatedItem) {
+    DcbPatron dcbPatron = transactionMapper.mapTransactionEntityToDcbPatron(transactionEntity);
+    checkItemExistsInInventoryAndThrow(updatedItem.getBarcode());
+    CirculationItem item = circulationItemService.checkIfItemExistsAndCreate(updatedItem, transactionEntity.getServicePointId());
+    checkOpenTransactionExistsAndThrow(item.getId());
+    cancelTransactionRequest(transactionEntity);
+    CirculationRequest holdRequest = requestService.createHoldItemRequest(userService.fetchUser(dcbPatron), updatedItem, transactionEntity.getServicePointId());
+    updateItemDetailsAndSaveEntity(transactionEntity, item, holdRequest.getId());
+  }
+
+  private void updateItemDetailsAndSaveEntity(TransactionEntity transactionEntity, CirculationItem item, String requestId) {
+    transactionEntity.setItemId(item.getId());
+    transactionEntity.setRequestId(UUID.fromString(requestId));
+    transactionEntity.setItemBarcode(item.getBarcode());
+    transactionEntity.setLendingLibraryCode(item.getLendingLibraryCode());
+    transactionEntity.setStatus(CREATED);
     transactionRepository.save(transactionEntity);
   }
 }

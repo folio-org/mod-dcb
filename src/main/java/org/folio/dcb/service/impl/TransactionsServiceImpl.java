@@ -2,6 +2,7 @@ package org.folio.dcb.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.folio.dcb.domain.dto.DcbItem;
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
@@ -39,6 +40,7 @@ public class TransactionsServiceImpl implements TransactionsService {
   private final StatusProcessorService statusProcessorService;
   private final TransactionMapper transactionMapper;
   private final TransactionAuditRepository transactionAuditRepository;
+  private final BaseLibraryService baseLibraryService;
 
   @Override
   public TransactionStatusResponse createCirculationRequest(String dcbTransactionId, DcbTransaction dcbTransaction) {
@@ -107,6 +109,19 @@ public class TransactionsServiceImpl implements TransactionsService {
       .currentPageSize(pageSize)
       .maximumPageNumber(maxPageNumber)
       .build();
+  }
+
+  @Override
+  public void updateTransactionDetails(String dcbTransactionId, DcbItem dcbItem) {
+    var transactionEntity = getTransactionEntityOrThrow(dcbTransactionId);
+    if (!TransactionStatus.StatusEnum.CREATED.equals(transactionEntity.getStatus())) {
+      throw new StatusException(String.format(
+        "Transaction details should not be updated from %s status, it can be updated only from CREATED status", transactionEntity.getStatus()));
+    }
+    if (DcbTransaction.RoleEnum.LENDER.equals(transactionEntity.getRole())) {
+      throw new IllegalArgumentException("Item details should be updated for lender role");
+    }
+    baseLibraryService.updateTransactionDetails(transactionEntity, dcbItem);
   }
 
   private TransactionStatusResponse generateTransactionStatusResponseFromTransactionEntity(TransactionEntity transactionEntity) {

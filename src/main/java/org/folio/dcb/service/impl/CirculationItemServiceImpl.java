@@ -12,6 +12,7 @@ import org.folio.dcb.service.ItemService;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
+import java.util.UUID;
 
 import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.IN_TRANSIT;
 import static org.folio.dcb.utils.DCBConstants.HOLDING_ID;
@@ -29,18 +30,18 @@ public class CirculationItemServiceImpl implements CirculationItemService {
 
   @Override
   public CirculationItem checkIfItemExistsAndCreate(DcbItem dcbItem, String pickupServicePointId) {
-    var dcbItemId = dcbItem.getId();
-    log.debug("checkIfItemExistsAndCreate:: generate Circulation item by DcbItem with id={} if nit doesn't exist.", dcbItemId);
-    var circulationItem = fetchCirculationItemByIdAndBarcode(dcbItemId, dcbItem.getBarcode());
+    var dcbItemBarcode = dcbItem.getBarcode();
+    log.debug("checkIfItemExistsAndCreate:: generate Circulation item with barcode {} if it doesn't exist.", dcbItemBarcode);
+    var circulationItem = fetchCirculationItemByBarcode(dcbItem.getBarcode());
     if(Objects.isNull(circulationItem)) {
-      log.warn("Circulation item not found by id={}. Creating it.", dcbItemId);
+      log.warn("checkIfItemExistsAndCreate:: Circulation item not found by barcode={}. Creating it.", dcbItemBarcode);
       circulationItem = createCirculationItem(dcbItem, pickupServicePointId);
     }
     return circulationItem;
   }
 
-  private CirculationItem fetchCirculationItemByIdAndBarcode(String id, String barcode) {
-    return circulationItemClient.fetchItemByIdAndBarcode("id==" + id + " and barcode==" + barcode)
+  private CirculationItem fetchCirculationItemByBarcode(String barcode) {
+    return circulationItemClient.fetchItemByIdAndBarcode("barcode==" + barcode)
       .getItems()
       .stream()
       .findFirst()
@@ -59,7 +60,7 @@ public class CirculationItemServiceImpl implements CirculationItemService {
 
     CirculationItem circulationItem =
       CirculationItem.builder()
-        .id(item.getId())
+        .id(UUID.randomUUID().toString())
         .barcode(item.getBarcode())
         .status(ItemStatus.builder()
           .name(IN_TRANSIT)
