@@ -30,7 +30,6 @@ public class PickupLibraryServiceImpl implements LibraryService {
     var patron = dcbTransaction.getPatron();
 
     var user = userService.fetchOrCreateUser(patron);
-    baseLibraryService.checkUserTypeAndThrowIfMismatch(user.getType());
     baseLibraryService.checkItemExistsInInventoryAndThrow(itemVirtual.getBarcode());
     CirculationItem item = circulationItemService.checkIfItemExistsAndCreate(itemVirtual, dcbTransaction.getPickup().getServicePointId());
     baseLibraryService.checkOpenTransactionExistsAndThrow(item.getId());

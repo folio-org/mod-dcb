@@ -20,5 +20,5 @@ public interface UsersClient {
   UserCollection fetchUserByBarcodeAndId(@RequestParam("query") String query);
 
   @PutMapping("/{userId}")
-  User updateUser(@PathVariable("userId") String userId, @RequestBody User user);
+  void updateUser(@PathVariable("userId") String userId, @RequestBody User user);
 }

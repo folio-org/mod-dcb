@@ -2,6 +2,7 @@ package org.folio.dcb.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.ObjectUtils;
 import org.folio.dcb.client.feign.UsersClient;
 import org.folio.dcb.domain.dto.DcbPatron;
 import org.folio.dcb.domain.dto.Personal;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.util.Objects;
 
 import static org.folio.dcb.utils.DCBConstants.DCB_TYPE;
+import static org.folio.dcb.utils.DCBConstants.SHADOW_TYPE;
 
 @Service
 @RequiredArgsConstructor
@@ -50,9 +52,10 @@ public class UserServiceImpl implements UserService {
         patronDetails.getBarcode(), patronDetails.getId());
       return createUser(patronDetails);
     } else {
+      validateDcbUserType(user.getType());
       var groupId = patronGroupService.fetchPatronGroupIdByName(patronDetails.getGroup());
-      if (!user.getPatronGroup().equals(groupId)) {
-        return updatePatronGroup(user, groupId);
+      if (!groupId.equals(user.getPatronGroup())) {
+        return updateUserGroup(user, groupId);
       }
       return user;
     }
@@ -86,10 +89,18 @@ public class UserServiceImpl implements UserService {
       .build();
   }
 
-  private User updatePatronGroup(User user, String patronGroupId) {
+  private User updateUserGroup(User user, String patronGroupId) {
     log.info("updatePatronGroup:: updating patron group from {} to {} for user with barcode {}",
       user.getPatronGroup(), patronGroupId, user.getBarcode());
-    return usersClient.updateUser(user.getId(), user.patronGroup(patronGroupId));
+    user.setPatronGroup(patronGroupId);
+    usersClient.updateUser(user.getId(), user);
+    return user;
+  }
+
+  private void validateDcbUserType(String userType) {
+    if(ObjectUtils.notEqual(userType, DCB_TYPE) && ObjectUtils.notEqual(userType, SHADOW_TYPE)) {
+      throw new IllegalArgumentException(String.format("User with type %s is retrieved. so unable to create transaction", userType));
+    }
   }
 
 }

@@ -75,12 +75,6 @@ public class BaseLibraryService {
     transactionRepository.save(transactionEntity);
   }
 
-  public void checkUserTypeAndThrowIfMismatch(String userType) {
-    if(ObjectUtils.notEqual(userType, DCB_TYPE) && ObjectUtils.notEqual(userType, SHADOW_TYPE)) {
-      throw new IllegalArgumentException(String.format("User with type %s is retrieved. so unable to create transaction", userType));
-    }
-  }
-
   public void updateTransactionStatus(TransactionEntity dcbTransaction, TransactionStatus transactionStatus) {
     log.debug("updateTransactionStatus:: Updating dcbTransaction {} to status {} ", dcbTransaction, transactionStatus);
     var currentStatus = dcbTransaction.getStatus();
