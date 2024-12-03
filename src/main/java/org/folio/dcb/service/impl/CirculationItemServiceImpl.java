@@ -57,10 +57,10 @@ public class CirculationItemServiceImpl implements CirculationItemService {
     //SetupDefaultMaterialTypeIfNotGiven
     String materialType = StringUtils.isBlank(item.getMaterialType()) ? MATERIAL_TYPE_NAME_BOOK : item.getMaterialType();
     var materialTypeId = itemService.fetchItemMaterialTypeIdByMaterialTypeName(materialType);
-
+    var itemId = UUID.randomUUID().toString();
     CirculationItem circulationItem =
       CirculationItem.builder()
-        .id(UUID.randomUUID().toString())
+        .id(itemId)
         .barcode(item.getBarcode())
         .status(ItemStatus.builder()
           .name(IN_TRANSIT)
@@ -73,6 +73,6 @@ public class CirculationItemServiceImpl implements CirculationItemService {
         .lendingLibraryCode(item.getLendingLibraryCode())
         .build();
 
-    return circulationItemClient.createCirculationItem(item.getId(), circulationItem);
+    return circulationItemClient.createCirculationItem(itemId, circulationItem);
   }
 }

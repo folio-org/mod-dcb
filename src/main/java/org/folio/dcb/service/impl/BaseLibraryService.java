@@ -8,6 +8,7 @@ import org.folio.dcb.domain.dto.CirculationRequest;
 import org.folio.dcb.domain.dto.DcbItem;
 import org.folio.dcb.domain.dto.DcbPatron;
 import org.folio.dcb.domain.dto.DcbTransaction;
+import org.folio.dcb.domain.dto.DcbTransactionUpdateItem;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.entity.TransactionEntity;
@@ -137,13 +138,16 @@ public class BaseLibraryService {
     transactionRepository.save(transactionEntity);
   }
 
-  public void updateTransactionDetails(TransactionEntity transactionEntity, DcbItem updatedItem) {
+  public void updateTransactionDetails(TransactionEntity transactionEntity, DcbTransactionUpdateItem updatedItem) {
     DcbPatron dcbPatron = transactionMapper.mapTransactionEntityToDcbPatron(transactionEntity);
-    checkItemExistsInInventoryAndThrow(updatedItem.getBarcode());
-    CirculationItem item = circulationItemService.checkIfItemExistsAndCreate(updatedItem, transactionEntity.getServicePointId());
+    DcbItem dcbItem = transactionMapper.convertTransactionUpdateItemToDcbItem(updatedItem, transactionEntity);
+    checkItemExistsInInventoryAndThrow(dcbItem.getBarcode());
+    CirculationItem item = circulationItemService.checkIfItemExistsAndCreate(dcbItem, transactionEntity.getServicePointId());
+    dcbItem.setId(item.getId());
     checkOpenTransactionExistsAndThrow(item.getId());
     cancelTransactionRequest(transactionEntity);
-    CirculationRequest holdRequest = requestService.createHoldItemRequest(userService.fetchUser(dcbPatron), updatedItem, transactionEntity.getServicePointId());
+    CirculationRequest holdRequest = requestService.createHoldItemRequest(userService.fetchUser(dcbPatron), dcbItem,
+      transactionEntity.getServicePointId());
     updateItemDetailsAndSaveEntity(transactionEntity, item, holdRequest.getId());
   }
 

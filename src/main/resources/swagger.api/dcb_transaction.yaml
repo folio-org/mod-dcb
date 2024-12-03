@@ -24,7 +24,7 @@ paths:
           $ref: '#/components/responses/Conflict'
         '500':
           $ref: '#/components/responses/InternalServerError'
-    patch:
+    put:
       description: Update the details of a transaction
       operationId: updateTransactionDetails
       tags:
@@ -32,7 +32,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/dcbTransactionId'
       requestBody:
-        $ref: "#/components/requestBodies/DCBItem"
+        $ref: "#/components/requestBodies/DCBTransactionUpdate"
       responses:
         '204':
           description: 'Transaction updated successfully'
@@ -126,13 +126,13 @@ components:
         application/json:
           schema:
             $ref: "schemas/dcbTransaction.yaml#/DcbTransaction"
-    DCBItem:
-      description: DCB item object
+    DCBTransactionUpdate:
+      description: DCB transaction update object
       required: true
       content:
         application/json:
           schema:
-            $ref: "schemas/dcbItem.yaml#/DcbItem"
+            $ref: "schemas/DcbTransactionUpdate.yaml#/DcbTransactionUpdate"
   responses:
     TransactionStatus:
       description: Transaction Status object

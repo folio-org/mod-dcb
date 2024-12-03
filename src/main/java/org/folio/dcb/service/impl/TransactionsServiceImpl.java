@@ -2,8 +2,8 @@ package org.folio.dcb.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.folio.dcb.domain.dto.DcbItem;
 import org.folio.dcb.domain.dto.DcbTransaction;
+import org.folio.dcb.domain.dto.DcbTransactionUpdate;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.dto.TransactionStatusResponseCollection;
@@ -112,7 +112,7 @@ public class TransactionsServiceImpl implements TransactionsService {
   }
 
   @Override
-  public void updateTransactionDetails(String dcbTransactionId, DcbItem dcbItem) {
+  public void updateTransactionDetails(String dcbTransactionId, DcbTransactionUpdate dcbTransactionUpdate) {
     var transactionEntity = getTransactionEntityOrThrow(dcbTransactionId);
     if (!TransactionStatus.StatusEnum.CREATED.equals(transactionEntity.getStatus())) {
       throw new StatusException(String.format(
@@ -121,7 +121,7 @@ public class TransactionsServiceImpl implements TransactionsService {
     if (DcbTransaction.RoleEnum.LENDER.equals(transactionEntity.getRole())) {
       throw new IllegalArgumentException("Item details should be updated for lender role");
     }
-    baseLibraryService.updateTransactionDetails(transactionEntity, dcbItem);
+    baseLibraryService.updateTransactionDetails(transactionEntity, dcbTransactionUpdate.getItem());
   }
 
   private TransactionStatusResponse generateTransactionStatusResponseFromTransactionEntity(TransactionEntity transactionEntity) {
