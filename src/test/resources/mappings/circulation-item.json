@@ -3,7 +3,7 @@
     {
       "request": {
         "method": "POST",
-        "url": "/circulation-item/5b95877d-86c0-4cb7-a0cd-7660b348ae5a"
+        "urlPathPattern": "/circulation-item/.*"
       },
       "response": {
         "status": 201,
@@ -55,7 +55,7 @@
     {
       "request": {
         "method": "GET",
-        "url": "/circulation-item?query=id%3D%3D5b95877d-86c0-4cb7-a0cd-7660b348ae5a%20and%20barcode%3D%3DDCB_ITEM"
+        "url": "/circulation-item?query=barcode%3D%3D%22DCB_ITEM%22"
       },
       "response": {
         "status": 200,
@@ -68,7 +68,7 @@
     {
       "request": {
         "method": "GET",
-        "url": "/circulation-item?query=id%3D%3D5b95877d-86c0-4cb7-a0cd-7660b348ae5a%20and%20barcode%3D%3DnewItem"
+        "url": "/circulation-item?query=barcode%3D%3D%22newItem%22"
       },
       "response": {
         "status": 200,

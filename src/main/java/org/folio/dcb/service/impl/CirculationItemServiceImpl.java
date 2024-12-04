@@ -9,6 +9,7 @@ import org.folio.dcb.domain.dto.DcbItem;
 import org.folio.dcb.domain.dto.ItemStatus;
 import org.folio.dcb.service.CirculationItemService;
 import org.folio.dcb.service.ItemService;
+import org.folio.util.StringUtil;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
@@ -41,7 +42,7 @@ public class CirculationItemServiceImpl implements CirculationItemService {
   }
 
   private CirculationItem fetchCirculationItemByBarcode(String barcode) {
-    return circulationItemClient.fetchItemByIdAndBarcode("barcode==" + barcode)
+    return circulationItemClient.fetchItemByIdAndBarcode("barcode==" + StringUtil.cqlEncode(barcode))
       .getItems()
       .stream()
       .findFirst()

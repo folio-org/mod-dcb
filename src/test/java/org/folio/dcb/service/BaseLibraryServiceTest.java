@@ -110,15 +110,18 @@ class BaseLibraryServiceTest {
     var patron = createDcbPatronWithExactPatronId(EXISTED_PATRON_ID);
     var user = createUser();
     user.setType("shadow");
+    var circulationItem = createCirculationItem();
 
     when(userService.fetchUser(any()))
       .thenReturn(user);
     when(requestService.createHoldItemRequest(any(), any(), anyString())).thenReturn(createCirculationRequest());
     when(transactionMapper.mapToEntity(any(), any())).thenReturn(createTransactionEntity());
     when(itemService.fetchItemByBarcode(item.getBarcode())).thenReturn(new ResultList<>());
-    when(circulationItemService.checkIfItemExistsAndCreate(any(), any())).thenReturn(createCirculationItem());
+    when(circulationItemService.checkIfItemExistsAndCreate(any(), any())).thenReturn(circulationItem);
     var response = baseLibraryService.createBorrowingLibraryTransaction(DCB_TRANSACTION_ID, createDcbTransactionByRole(BORROWER), PICKUP_SERVICE_POINT_ID);
     verify(userService).fetchUser(patron);
+    // Circulation item id will be set as dcb item id in the code, hence setting it for assertion
+    item.setId(circulationItem.getId());
     verify(requestService).createHoldItemRequest(user, item, PICKUP_SERVICE_POINT_ID);
     verify(transactionRepository).save(any());
     Assertions.assertEquals(TransactionStatusResponse.StatusEnum.CREATED, response.getStatus());
