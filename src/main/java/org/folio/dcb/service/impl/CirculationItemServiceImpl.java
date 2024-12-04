@@ -42,7 +42,7 @@ public class CirculationItemServiceImpl implements CirculationItemService {
   }
 
   private CirculationItem fetchCirculationItemByBarcode(String barcode) {
-    return circulationItemClient.fetchItemByIdAndBarcode("barcode==" + StringUtil.cqlEncode(barcode))
+    return circulationItemClient.fetchItemByCqlQuery("barcode==" + StringUtil.cqlEncode(barcode))
       .getItems()
       .stream()
       .findFirst()

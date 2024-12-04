@@ -119,7 +119,7 @@ public class TransactionsServiceImpl implements TransactionsService {
         "Transaction details should not be updated from %s status, it can be updated only from CREATED status", transactionEntity.getStatus()));
     }
     if (DcbTransaction.RoleEnum.LENDER.equals(transactionEntity.getRole())) {
-      throw new IllegalArgumentException("Item details should be updated for lender role");
+      throw new IllegalArgumentException("Item details cannot be updated for lender role");
     }
     baseLibraryService.updateTransactionDetails(transactionEntity, dcbTransactionUpdate.getItem());
   }
