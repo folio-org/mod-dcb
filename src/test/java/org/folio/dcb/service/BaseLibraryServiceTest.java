@@ -39,6 +39,7 @@ import static org.folio.dcb.utils.EntityUtils.createUser;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.times;
@@ -188,7 +189,7 @@ class BaseLibraryServiceTest {
     transactionEntity.setStatus(OPEN);
     TransactionStatus transactionStatus = TransactionStatus.builder().status(CANCELLED).build();
     baseLibraryService.updateTransactionStatus(transactionEntity, transactionStatus);
-    verify(circulationService).cancelRequest(any());
+    verify(circulationService).cancelRequest(any(), eq(false));
   }
 
   @Test

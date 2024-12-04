@@ -110,7 +110,7 @@ public class BaseLibraryService {
 
   public void cancelTransactionRequest(TransactionEntity transactionEntity){
     try {
-      circulationService.cancelRequest(transactionEntity);
+      circulationService.cancelRequest(transactionEntity, false);
     } catch (CirculationRequestException e) {
       updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.ERROR);
     }
@@ -145,7 +145,7 @@ public class BaseLibraryService {
     CirculationItem item = circulationItemService.checkIfItemExistsAndCreate(dcbItem, transactionEntity.getServicePointId());
     dcbItem.setId(item.getId());
     checkOpenTransactionExistsAndThrow(item.getId());
-    cancelTransactionRequest(transactionEntity);
+    circulationService.cancelRequest(transactionEntity, true);
     CirculationRequest holdRequest = requestService.createHoldItemRequest(userService.fetchUser(dcbPatron), dcbItem,
       transactionEntity.getServicePointId());
     updateItemDetailsAndSaveEntity(transactionEntity, item, dcbItem.getMaterialType(), holdRequest.getId());

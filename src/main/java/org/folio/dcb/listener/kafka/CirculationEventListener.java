@@ -17,6 +17,7 @@ import java.util.UUID;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWING_PICKUP;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.PICKUP;
+import static org.folio.dcb.utils.DCBConstants.ITEM_UNAVAILABLE_CANCELLATION_MSG;
 import static org.folio.dcb.utils.TransactionHelper.getHeaderValue;
 import static org.folio.dcb.utils.TransactionHelper.parseLoanEvent;
 import static org.folio.dcb.utils.TransactionHelper.parseRequestEvent;
@@ -78,14 +79,15 @@ public class CirculationEventListener {
           systemUserScopedExecutionService.executeAsyncSystemUserScoped(tenantId, () ->
             transactionRepository.findTransactionByRequestIdAndStatusNotInClosed(UUID.fromString(requestId))
               .ifPresent(transactionEntity -> {
-                if (eventData.getType() == EventData.EventType.CANCEL) {
+                if (eventData.getType() == EventData.EventType.CANCEL &&
+                  !ITEM_UNAVAILABLE_CANCELLATION_MSG.equals(eventData.getCancellationAdditionalInformation())) {
                   baseLibraryService.cancelTransactionEntity(transactionEntity);
                 } else if (eventData.getType() == EventData.EventType.IN_TRANSIT && transactionEntity.getRole() == LENDER) {
                   baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.OPEN);
                 } else if (eventData.getType() == EventData.EventType.AWAITING_PICKUP && (transactionEntity.getRole() == BORROWING_PICKUP || transactionEntity.getRole() == PICKUP)) {
                   baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.AWAITING_PICKUP);
                 } else {
-                  log.info("handleRequestEvent:: status for event {} can not be updated", eventData.getType());
+                  log.info("handleRequestEvent:: status for event {} can not be updated", eventData);
                 }
               })
           );

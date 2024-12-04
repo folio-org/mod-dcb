@@ -47,7 +47,7 @@ class CirculationServiceTest {
   @Test
   void cancelRequestTest() {
     when(circulationRequestService.getCancellationRequestIfOpenOrNull(anyString())).thenReturn(createCirculationRequest());
-    circulationService.cancelRequest(createTransactionEntity());
+    circulationService.cancelRequest(createTransactionEntity(), false);
     verify(circulationClient).updateRequest(anyString(), any());
   }
 
@@ -55,7 +55,7 @@ class CirculationServiceTest {
   void shouldThrowExceptionWhenRequestIsNotUpdated() {
     when(circulationRequestService.getCancellationRequestIfOpenOrNull(anyString())).thenReturn(createCirculationRequest());
     when(circulationClient.updateRequest(anyString(), any())).thenThrow(FeignException.BadRequest.class);
-    assertThrows(CirculationRequestException.class, () -> circulationService.cancelRequest(createTransactionEntity()));
+    assertThrows(CirculationRequestException.class, () -> circulationService.cancelRequest(createTransactionEntity(), false));
   }
 
 }

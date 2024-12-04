@@ -17,5 +17,18 @@ public interface CirculationService {
    */
   void checkOutByBarcode(TransactionEntity dcbTransaction);
 
-  void cancelRequest(TransactionEntity dcbTransaction);
+  /**
+   * Cancels a transaction request based on the provided transaction details.
+   * <p>
+   * If {@code isItemUnavailableCancellation} is {@code true}, the cancellation reason
+   * will be updated to indicate item unavailability, and the notification for this
+   * cancellation will be suppressed by setting the {@code suppressNotification} flag
+   * to {@code true}.
+   * </p>
+   *
+   * @param dcbTransaction the transaction entity representing the request to be canceled
+   * @param isItemUnavailableCancellation a flag indicating whether the cancellation is due to item unavailability
+   *                                       (true if the item is unavailable, false otherwise)
+   */
+  void cancelRequest(TransactionEntity dcbTransaction, boolean isItemUnavailableCancellation);
 }
