@@ -113,7 +113,7 @@
           ],
           "pathPattern": "/transactions/{dcbTransactionId}/status",
           "permissionsRequired": [
-            "dcb.transactions.status.get"
+            "dcb.transactions.get"
           ],
           "modulePermissions": []
         },
@@ -123,7 +123,7 @@
           ],
           "pathPattern": "/transactions/{dcbTransactionId}/status",
           "permissionsRequired": [
-            "dcb.transactions.status.put"
+            "dcb.transactions.put"
           ],
           "modulePermissions": [
             "circulation.check-out-by-barcode.post",
@@ -148,7 +148,7 @@
           ],
           "pathPattern": "/transactions/{dcbTransactionId}",
           "permissionsRequired": [
-            "dcb.transactions.put"
+            "dcb.transactions.item.put"
           ],
           "modulePermissions": [
             "inventory-storage.items.item.get",
@@ -256,7 +256,8 @@
         "dcb.transactions.put",
         "dcb.transactions.get",
         "dcb.transactions.collection.get",
-        "dcb.ecs-request.transactions.post"
+        "dcb.ecs-request.transactions.post",
+        "dcb.transactions.item.put"
       ]
     },
     {
@@ -271,8 +272,8 @@
     },
     {
       "permissionName": "dcb.transactions.put",
-      "displayName": "update transaction details",
-      "description": "update transaction details"
+      "displayName": "update transaction status",
+      "description": "update transaction status"
     },
     {
       "permissionName": "dcb.transactions.collection.get",
@@ -283,6 +284,11 @@
       "permissionName": "dcb.ecs-request.transactions.post",
       "displayName": "creates new ECS request transaction",
       "description": "creates new ECS request transaction"
+    },
+    {
+      "permissionName": "dcb.transactions.item.put",
+      "displayName": "update transaction details",
+      "description": "update transaction details"
     }
   ],
   "metadata": {
