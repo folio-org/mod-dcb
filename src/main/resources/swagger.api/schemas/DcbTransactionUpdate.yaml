@@ -6,11 +6,9 @@ DcbTransactionUpdate:
         barcode:
           description: The barcode of the item as specified in the lending library
           type: string
-          required: true
         materialType:
           description: The “hub-normalized” form of the item item type, used in the circulation rules for determining the correct loan policy.
           type: string
-          required: true
         lendingLibraryCode:
           description: The code which identifies the lending library
           type: string

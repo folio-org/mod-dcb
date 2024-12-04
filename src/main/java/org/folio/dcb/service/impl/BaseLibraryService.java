@@ -148,14 +148,16 @@ public class BaseLibraryService {
     cancelTransactionRequest(transactionEntity);
     CirculationRequest holdRequest = requestService.createHoldItemRequest(userService.fetchUser(dcbPatron), dcbItem,
       transactionEntity.getServicePointId());
-    updateItemDetailsAndSaveEntity(transactionEntity, item, holdRequest.getId());
+    updateItemDetailsAndSaveEntity(transactionEntity, item, dcbItem.getMaterialType(), holdRequest.getId());
   }
 
-  private void updateItemDetailsAndSaveEntity(TransactionEntity transactionEntity, CirculationItem item, String requestId) {
+  private void updateItemDetailsAndSaveEntity(TransactionEntity transactionEntity, CirculationItem item,
+                                              String materialType, String requestId) {
     transactionEntity.setItemId(item.getId());
     transactionEntity.setRequestId(UUID.fromString(requestId));
     transactionEntity.setItemBarcode(item.getBarcode());
     transactionEntity.setLendingLibraryCode(item.getLendingLibraryCode());
+    transactionEntity.setMaterialType(materialType);
     transactionEntity.setStatus(CREATED);
     transactionRepository.save(transactionEntity);
   }
