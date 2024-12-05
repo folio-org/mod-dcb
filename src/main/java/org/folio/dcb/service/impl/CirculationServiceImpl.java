@@ -14,8 +14,6 @@ import org.folio.dcb.service.CirculationRequestService;
 import org.springframework.stereotype.Service;
 import java.time.OffsetDateTime;
 
-import static org.folio.dcb.utils.DCBConstants.ITEM_UNAVAILABLE_CANCELLATION_MSG;
-
 @Service
 @Log4j2
 @RequiredArgsConstructor
@@ -49,7 +47,6 @@ public class CirculationServiceImpl implements CirculationService {
     if (request != null){
       try {
         if (isItemUnavailableCancellation) {
-          request.setCancellationAdditionalInformation(ITEM_UNAVAILABLE_CANCELLATION_MSG);
           request.setIsSuppressNotification(true);
         }
         circulationClient.updateRequest(request.getId(), request);

@@ -22,7 +22,6 @@ public class TransactionHelper {
   public static final String LASTNAME = "lastName";
   public static final String DCB_INSTANCE_TITLE = "DCB_INSTANCE";
   public static final String DCB_REQUESTER_LASTNAME = "DcbSystem";
-  public static final String CANCELLATION_ADDITIONAL_INFORMATION = "cancellationAdditionalInformation";
 
   private TransactionHelper(){}
 
@@ -66,8 +65,6 @@ public class TransactionHelper {
           default -> log.info("parseRequestEvent:: Request status {} is not supported", requestStatus);
         }
         eventData.setDcb(checkDcbRequest(kafkaEvent));
-        eventData.setCancellationAdditionalInformation(kafkaEvent.getNewNode().has(CANCELLATION_ADDITIONAL_INFORMATION) ?
-          kafkaEvent.getNewNode().get(CANCELLATION_ADDITIONAL_INFORMATION).asText() : null);
         return eventData;
       }
     return null;

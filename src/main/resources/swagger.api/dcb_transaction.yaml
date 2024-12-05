@@ -132,7 +132,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "schemas/DcbUpdateTransaction.yaml#/DcbUpdateTransaction"
+            $ref: "schemas/dcbUpdateTransaction.yaml#/DcbUpdateTransaction"
   responses:
     TransactionStatus:
       description: Transaction Status object

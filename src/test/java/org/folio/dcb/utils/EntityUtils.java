@@ -126,7 +126,9 @@ public class EntityUtils {
       .builder()
       .item(DcbUpdateItem
         .builder()
-        .barcode("")
+        .barcode(DCB_NEW_BARCODE)
+        .lendingLibraryCode("LEN")
+        .materialType("DVD")
         .build())
       .build();
   }
