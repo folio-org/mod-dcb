@@ -36,8 +36,8 @@ class CirculationRequestEventListenerTest extends BaseIT {
   private static final String CHECK_IN_TRANSIT_EVENT_FOR_DCB_SAMPLE = getMockDataAsString("mockdata/kafka/check_in_transit_dcb.json");
   private static final String CHECK_IN_UNDEFINED_EVENT_SAMPLE = getMockDataAsString("mockdata/kafka/request_undefined.json");
   private static final String REQUEST_CANCEL_EVENT_SAMPLE = getMockDataAsString("mockdata/kafka/cancel_request.json");
-
   private static final String REQUEST_CANCEL_EVENT_FOR_DCB_SAMPLE = getMockDataAsString("mockdata/kafka/cancel_request_dcb.json");
+  private static final String REQUEST_CANCEL_FOR_ITEM_UNAVAILABILITY_SAMPLE = getMockDataAsString("mockdata/kafka/cancel_request_due_to_item_unavailability.json");
 
   @Autowired
   private CirculationEventListener eventListener ;
@@ -102,6 +102,16 @@ class CirculationRequestEventListenerTest extends BaseIT {
     when(transactionRepository.findTransactionByRequestIdAndStatusNotInClosed(any())).thenReturn(Optional.of(transactionEntity));
     eventListener.handleRequestEvent(REQUEST_CANCEL_EVENT_FOR_DCB_SAMPLE, messageHeaders);
     Mockito.verify(transactionRepository).save(any());
+  }
+
+  @Test
+  void handleCancelRequestDueToItemUnavailabilityTest() {
+    var transactionEntity = createTransactionEntity();
+    transactionEntity.setRole(BORROWING_PICKUP);
+    MessageHeaders messageHeaders = getMessageHeaders();
+    when(transactionRepository.findTransactionByRequestIdAndStatusNotInClosed(any())).thenReturn(Optional.of(transactionEntity));
+    eventListener.handleRequestEvent(REQUEST_CANCEL_FOR_ITEM_UNAVAILABILITY_SAMPLE, messageHeaders);
+    Mockito.verify(transactionRepository, never()).save(any());
   }
 
 

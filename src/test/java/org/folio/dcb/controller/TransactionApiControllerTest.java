@@ -983,8 +983,46 @@ class TransactionApiControllerTest extends BaseIT {
       .andExpect(jsonPath("$.maximumPageNumber", is(2)))
       .andExpect(jsonPath("$.transactions[*].status",
         containsInRelativeOrder("ITEM_CHECKED_OUT", "ITEM_CHECKED_IN")));
-
   }
+
+  @Test
+  void createAndUpdateBorrowerTransactionTest() throws Exception {
+    removeExistedTransactionFromDbIfSoExists();
+    removeExistingTransactionsByItemId(ITEM_ID);
+
+    this.mockMvc.perform(
+        post("/transactions/" + DCB_TRANSACTION_ID)
+          .content(asJsonString(createDcbTransactionByRole(BORROWER)))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isCreated())
+      .andExpect(jsonPath("$.status").value("CREATED"))
+      .andExpect(jsonPath("$.item").value(createDcbItem()))
+      .andExpect(jsonPath("$.patron").value(createDcbPatronWithExactPatronId(EXISTED_PATRON_ID)));
+
+    //Trying to create another transaction with same transaction id
+    this.mockMvc.perform(
+        post("/transactions/" + DCB_TRANSACTION_ID)
+          .content(asJsonString(createDcbTransactionByRole(BORROWER)))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpectAll(status().is4xxClientError(),
+        jsonPath("$.errors[0].code", is("DUPLICATE_ERROR")));
+
+    // check for DUPLICATE_ERROR propagated into transactions_audit.
+    systemUserScopedExecutionService.executeAsyncSystemUserScoped(
+      TENANT,
+      () -> {
+        TransactionAuditEntity auditExisting = transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(DCB_TRANSACTION_ID)
+          .orElse(null);
+        Assertions.assertNotNull(auditExisting);
+        Assertions.assertNotEquals(TRANSACTION_AUDIT_DUPLICATE_ERROR_ACTION, auditExisting.getAction());
+        Assertions.assertNotEquals(DUPLICATE_ERROR_TRANSACTION_ID, auditExisting.getTransactionId());      }
+    );
+  }
+
 
   private void removeExistedTransactionFromDbIfSoExists() {
     systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> {
