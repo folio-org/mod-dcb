@@ -11,8 +11,8 @@ DcbUpdateItem:
     lendingLibraryCode:
       description: The code which identifies the lending library
       type: string
-    additionalProperties: false
-    required:
-      - barcode
-      - materialType
-      - lendingLibraryCode
+  additionalProperties: false
+  required:
+    - barcode
+    - materialType
+    - lendingLibraryCode
