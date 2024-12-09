@@ -1,7 +1,9 @@
 package org.folio.dcb.service.impl;
 
+import static java.lang.String.format;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWER;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
+import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.PICKUP;
 
 import java.util.UUID;
 
@@ -49,7 +51,7 @@ public class EcsRequestTransactionsServiceImpl implements EcsRequestTransactions
       RequestStatus.from(circulationRequest.getStatus()))) {
       if (dcbTransaction.getRole() == LENDER) {
         createLenderEcsRequestTransactions(ecsRequestTransactionsId, dcbTransaction, circulationRequest);
-      } else if(dcbTransaction.getRole() == BORROWER) {
+      } else if(dcbTransaction.getRole() == BORROWER || dcbTransaction.getRole() == PICKUP) {
         createBorrowerEcsRequestTransactions(ecsRequestTransactionsId, dcbTransaction,
           circulationRequest);
       } else {
