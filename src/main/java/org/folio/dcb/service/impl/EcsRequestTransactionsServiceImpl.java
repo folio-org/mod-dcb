@@ -51,11 +51,7 @@ public class EcsRequestTransactionsServiceImpl implements EcsRequestTransactions
       RequestStatus.from(circulationRequest.getStatus()))) {
       if (dcbTransaction.getRole() == LENDER) {
         createLenderEcsRequestTransactions(ecsRequestTransactionsId, dcbTransaction, circulationRequest);
-      } else if(dcbTransaction.getRole() == BORROWER) {
-        createBorrowerEcsRequestTransactions(ecsRequestTransactionsId, dcbTransaction,
-          circulationRequest);
-      } else if(dcbTransaction.getRole() == PICKUP) {
-        // Same method as for the BORROWER role
+      } else if(dcbTransaction.getRole() == BORROWER || dcbTransaction.getRole() == PICKUP) {
         createBorrowerEcsRequestTransactions(ecsRequestTransactionsId, dcbTransaction,
           circulationRequest);
       } else {
