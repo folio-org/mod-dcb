@@ -98,8 +98,7 @@ public class EcsRequestTransactionsServiceImpl implements EcsRequestTransactions
 
     var itemVirtual = dcbTransaction.getItem();
     if (itemVirtual == null) {
-      throw new IllegalArgumentException(format("Item is required for %s transaction",
-        dcbTransaction.getRole()));
+      throw new IllegalArgumentException("Item is required for borrower transaction");
     }
     baseLibraryService.checkItemExistsInInventoryAndThrow(itemVirtual.getBarcode());
     CirculationItem item = circulationItemService.checkIfItemExistsAndCreate(itemVirtual, circulationRequest.getPickupServicePointId());
