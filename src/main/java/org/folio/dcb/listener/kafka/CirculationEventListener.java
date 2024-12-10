@@ -17,7 +17,6 @@ import java.util.UUID;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWING_PICKUP;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.PICKUP;
-import static org.folio.dcb.utils.DCBConstants.ITEM_UNAVAILABLE_CANCELLATION_MSG;
 import static org.folio.dcb.utils.TransactionHelper.getHeaderValue;
 import static org.folio.dcb.utils.TransactionHelper.parseLoanEvent;
 import static org.folio.dcb.utils.TransactionHelper.parseRequestEvent;
@@ -79,8 +78,7 @@ public class CirculationEventListener {
           systemUserScopedExecutionService.executeAsyncSystemUserScoped(tenantId, () ->
             transactionRepository.findTransactionByRequestIdAndStatusNotInClosed(UUID.fromString(requestId))
               .ifPresent(transactionEntity -> {
-                if (eventData.getType() == EventData.EventType.CANCEL &&
-                  !ITEM_UNAVAILABLE_CANCELLATION_MSG.equals(eventData.getCancellationAdditionalInformation())) {
+                if (eventData.getType() == EventData.EventType.CANCEL && !eventData.isDcbReRequestCancellation()) {
                   baseLibraryService.cancelTransactionEntity(transactionEntity);
                 } else if (eventData.getType() == EventData.EventType.IN_TRANSIT && transactionEntity.getRole() == LENDER) {
                   baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.OPEN);
