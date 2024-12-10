@@ -58,6 +58,7 @@ public class TransactionHelper {
         && kafkaEvent.getNewNode().has(STATUS)){
         EventData eventData = new EventData();
         eventData.setRequestId(kafkaEvent.getNewNode().get("id").asText());
+        eventData.setDcbReRequestCancellation(getNodeAsBoolean(kafkaEvent, "dcbReRequestCancellation"));
         RequestStatus requestStatus = RequestStatus.from(kafkaEvent.getNewNode().get(STATUS).asText());
         switch (requestStatus) {
           case OPEN_IN_TRANSIT -> eventData.setType(EventData.EventType.IN_TRANSIT);
@@ -72,6 +73,11 @@ public class TransactionHelper {
       }
     return null;
   }
+
+  private static boolean getNodeAsBoolean(KafkaEvent kafkaEvent, String name) {
+    return kafkaEvent.getNewNode().get(name).asBoolean();
+  }
+
   private static boolean checkDcbRequest(KafkaEvent kafkaEvent) {
     return (kafkaEvent.getNewNode().has(INSTANCE) && kafkaEvent.getNewNode().get(INSTANCE).has(TITLE)
       && kafkaEvent.getNewNode().get(INSTANCE).get(TITLE).asText().equals(DCB_INSTANCE_TITLE)) || (kafkaEvent.getNewNode().has(REQUESTER)

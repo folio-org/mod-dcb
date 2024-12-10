@@ -77,7 +77,7 @@ CirculationRequest:
     pickupServicePointId:
       description: The ID of the Service Point where this request can be picked up
       type: string
-    isSuppressNotification:
+    isDcbReRequestCancellation:
       description: Flag to suppress sending cancellation notifications. If true, no notification will be sent when cancelling the request
       type: boolean
     item:
