@@ -47,7 +47,7 @@ class CirculationServiceTest {
   }
 
   @Test
-  void shouldCallCancellationRequestApiWithIsDcbRerequestCancellationTrue() {
+  void shouldUpdateRequestApiWithIsDcbRerequestCancellationTrue() {
     CirculationRequest fetchedRequest = createCirculationRequest();
     fetchedRequest.setIsDcbReRequestCancellation(null);
     CirculationRequest requestToBeCancelled = createCirculationRequest();
