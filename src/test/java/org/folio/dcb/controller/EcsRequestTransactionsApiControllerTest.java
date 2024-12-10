@@ -3,6 +3,7 @@ package org.folio.dcb.controller;
 import static org.folio.dcb.utils.EntityUtils.CIRCULATION_REQUEST_ID;
 import static org.folio.dcb.utils.EntityUtils.createBorrowingEcsRequestTransactionByRole;
 import static org.folio.dcb.utils.EntityUtils.createLendingEcsRequestTransactionByRole;
+import static org.folio.dcb.utils.EntityUtils.createPickupEcsRequestTransactionByRole;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -80,6 +81,19 @@ class EcsRequestTransactionsApiControllerTest extends BaseIT {
         .headers(defaultHeaders())
         .contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isCreated());
+  }
+
+  @Test
+  void createPickupEcsRequestTest() throws Exception {
+    removeExistedTransactionFromDbIfSoExists();
+
+    this.mockMvc.perform(
+        post("/ecs-request-transactions/" + CIRCULATION_REQUEST_ID)
+          .content(asJsonString(createPickupEcsRequestTransactionByRole()))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
       .andExpect(status().isCreated());
   }
 
