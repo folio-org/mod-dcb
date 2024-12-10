@@ -32,7 +32,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/dcbTransactionId'
       requestBody:
-        $ref: "#/components/requestBodies/DCBTransactionUpdate"
+        $ref: "#/components/requestBodies/DcbUpdateTransaction"
       responses:
         '204':
           description: 'Transaction updated successfully'
@@ -126,13 +126,13 @@ components:
         application/json:
           schema:
             $ref: "schemas/dcbTransaction.yaml#/DcbTransaction"
-    DCBTransactionUpdate:
+    DcbUpdateTransaction:
       description: DCB transaction update object
       required: true
       content:
         application/json:
           schema:
-            $ref: "schemas/DcbTransactionUpdate.yaml#/DcbTransactionUpdate"
+            $ref: "schemas/dcbUpdateTransaction.yaml#/DcbUpdateTransaction"
   responses:
     TransactionStatus:
       description: Transaction Status object
