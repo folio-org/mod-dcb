@@ -18,6 +18,7 @@ CirculationRequest:
       enum:
         - Primary
         - Secondary
+        - Intermediate
     requestLevel:
       description: Level of the request - Item or Title
       type: string
