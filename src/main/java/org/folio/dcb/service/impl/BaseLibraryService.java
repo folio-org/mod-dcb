@@ -8,7 +8,7 @@ import org.folio.dcb.domain.dto.CirculationRequest;
 import org.folio.dcb.domain.dto.DcbItem;
 import org.folio.dcb.domain.dto.DcbPatron;
 import org.folio.dcb.domain.dto.DcbTransaction;
-import org.folio.dcb.domain.dto.DcbTransactionUpdateItem;
+import org.folio.dcb.domain.dto.DcbUpdateItem;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.entity.TransactionEntity;
@@ -138,9 +138,9 @@ public class BaseLibraryService {
     transactionRepository.save(transactionEntity);
   }
 
-  public void updateTransactionDetails(TransactionEntity transactionEntity, DcbTransactionUpdateItem updatedItem) {
+  public void updateTransactionDetails(TransactionEntity transactionEntity, DcbUpdateItem dcbUpdateItem) {
     DcbPatron dcbPatron = transactionMapper.mapTransactionEntityToDcbPatron(transactionEntity);
-    DcbItem dcbItem = transactionMapper.convertTransactionUpdateItemToDcbItem(updatedItem, transactionEntity);
+    DcbItem dcbItem = transactionMapper.convertTransactionUpdateItemToDcbItem(dcbUpdateItem, transactionEntity);
     checkItemExistsInInventoryAndThrow(dcbItem.getBarcode());
     CirculationItem item = circulationItemService.checkIfItemExistsAndCreate(dcbItem, transactionEntity.getServicePointId());
     dcbItem.setId(item.getId());

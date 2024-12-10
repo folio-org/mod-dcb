@@ -20,8 +20,7 @@ public interface CirculationService {
   /**
    * Cancels a transaction request based on the provided transaction details.
    * <p>
-   * If {@code isItemUnavailableCancellation} is {@code true}, the cancellation reason
-   * will be updated to indicate item unavailability, and the notification for this
+   * If {@code isItemUnavailableCancellation} is {@code true}, the notification for this
    * cancellation will be suppressed by setting the {@code suppressNotification} flag
    * to {@code true}.
    * </p>

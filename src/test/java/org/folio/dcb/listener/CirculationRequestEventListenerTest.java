@@ -36,7 +36,6 @@ class CirculationRequestEventListenerTest extends BaseIT {
   private static final String CHECK_IN_TRANSIT_EVENT_FOR_DCB_SAMPLE = getMockDataAsString("mockdata/kafka/check_in_transit_dcb.json");
   private static final String CHECK_IN_UNDEFINED_EVENT_SAMPLE = getMockDataAsString("mockdata/kafka/request_undefined.json");
   private static final String REQUEST_CANCEL_EVENT_SAMPLE = getMockDataAsString("mockdata/kafka/cancel_request.json");
-
   private static final String REQUEST_CANCEL_EVENT_FOR_DCB_SAMPLE = getMockDataAsString("mockdata/kafka/cancel_request_dcb.json");
 
   @Autowired
@@ -103,7 +102,6 @@ class CirculationRequestEventListenerTest extends BaseIT {
     eventListener.handleRequestEvent(REQUEST_CANCEL_EVENT_FOR_DCB_SAMPLE, messageHeaders);
     Mockito.verify(transactionRepository).save(any());
   }
-
 
   @Test
   void handleOpenRequestTest() {

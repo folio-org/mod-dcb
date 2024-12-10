@@ -8,7 +8,6 @@ public class EventData {
   private String itemId;
   private String requestId;
   private boolean isDcb;
-  private String cancellationAdditionalInformation;
   private boolean isDcbReRequestCancellation;
 
   public enum EventType {
