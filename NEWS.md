@@ -1,3 +1,6 @@
+## v1.2.4 2024-12-12
+* MODDCB-152: Support for intermediate requests
+
 ## v1.2.3 2024-12-02
 * MODDCB-90: Accept existing circulation request ID
 * MODDCB-105: Accept existing circulation request ID (borrowing transaction)
