@@ -47,7 +47,7 @@ public class CirculationServiceImpl implements CirculationService {
     if (request != null){
       try {
         if (isItemUnavailableCancellation) {
-          request.setIsSuppressNotification(true);
+          request.setIsDcbReRequestCancellation(true);
         }
         circulationClient.updateRequest(request.getId(), request);
       } catch (FeignException e) {

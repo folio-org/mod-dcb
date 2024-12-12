@@ -24,7 +24,8 @@
       "requester": {
         "lastName": "DcbSystem",
         "barcode": "dcbDemo21"
-      }
+      },
+      "dcbReRequestCancellation": false
     }
   }
 }

@@ -78,8 +78,8 @@ CirculationRequest:
     pickupServicePointId:
       description: The ID of the Service Point where this request can be picked up
       type: string
-    isSuppressNotification:
-      description: Flag to suppress sending cancellation notifications. If true, no notification will be sent when cancelling the request
+    isDcbReRequestCancellation:
+      description: Indicates whether the request was cancelled during a DCB transaction update
       type: boolean
     item:
       $ref: CirculationRequest.yaml#/item

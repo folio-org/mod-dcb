@@ -78,7 +78,7 @@ public class CirculationEventListener {
           systemUserScopedExecutionService.executeAsyncSystemUserScoped(tenantId, () ->
             transactionRepository.findTransactionByRequestIdAndStatusNotInClosed(UUID.fromString(requestId))
               .ifPresent(transactionEntity -> {
-                if (eventData.getType() == EventData.EventType.CANCEL) {
+                if (eventData.getType() == EventData.EventType.CANCEL && !eventData.isDcbReRequestCancellation()) {
                   baseLibraryService.cancelTransactionEntity(transactionEntity);
                 } else if (eventData.getType() == EventData.EventType.IN_TRANSIT && transactionEntity.getRole() == LENDER) {
                   baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.OPEN);

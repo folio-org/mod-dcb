@@ -26,5 +26,4 @@ public class DCBConstants {
   public static final String SHADOW_TYPE = "shadow";
   public static final String HOLDING_SOURCE = "folio";
   public static final String DCB_CALENDAR_NAME = "DCB Calendar";
-  public static final String ITEM_UNAVAILABLE_CANCELLATION_MSG = "Request cancelled due to item unavailability";
 }

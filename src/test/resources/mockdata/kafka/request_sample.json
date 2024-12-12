@@ -97,7 +97,8 @@
         },
         "shelvingOrder": "K1 .M44 v.72:no.6-7,10-12 1986:July-Aug.,Oct.-Dec.",
         "pickupServicePointName": "Circ Desk 1"
-      }
+      },
+      "dcbReRequestCancellation": false
     }
   }
 }
