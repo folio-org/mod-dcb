@@ -12,6 +12,7 @@ import java.util.UUID;
 
 import org.folio.dcb.client.feign.CirculationClient;
 import org.folio.dcb.domain.dto.CirculationRequest;
+import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.exception.CirculationRequestException;
 import org.folio.dcb.service.impl.CirculationServiceImpl;
 import org.junit.jupiter.api.Test;
@@ -66,9 +67,12 @@ class CirculationServiceTest {
 
   @Test
   void shouldThrowExceptionWhenRequestIsNotUpdated() {
+    TransactionEntity transactionEntity = createTransactionEntity();
     when(circulationRequestService.getCancellationRequestIfOpenOrNull(anyString())).thenReturn(createCirculationRequest());
     when(circulationClient.updateRequest(anyString(), any())).thenThrow(FeignException.BadRequest.class);
-    assertThrows(CirculationRequestException.class, () -> circulationService.cancelRequest(createTransactionEntity(), false));
+    assertThrows(CirculationRequestException.class, () -> {
+      circulationService.cancelRequest(transactionEntity, false);
+    });
   }
 
 }

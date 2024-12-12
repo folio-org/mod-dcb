@@ -224,7 +224,7 @@
     {
       "request": {
         "method": "GET",
-        "url": "/item-storage/items?query=barcode%3D%3DNEW_BARCODE"
+        "url": "/item-storage/items?query=barcode%3D%3D398501a2-5c97-4ba6-9ee7-d1cd6433cb91"
       },
       "response": {
         "status": 200,
