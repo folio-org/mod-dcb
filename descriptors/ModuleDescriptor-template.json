@@ -141,6 +141,30 @@
             "dcb.transactions.collection.get"
           ],
           "modulePermissions": []
+        },
+        {
+          "methods": [
+            "PUT"
+          ],
+          "pathPattern": "/transactions/{dcbTransactionId}",
+          "permissionsRequired": [
+            "dcb.transactions.item.put"
+          ],
+          "modulePermissions": [
+            "inventory-storage.items.item.get",
+            "inventory-storage.items.collection.get",
+            "inventory-storage.holdings.item.get",
+            "circulation.requests.item.post",
+            "circulation.requests.item.put",
+            "circulation-item.item.post",
+            "circulation-item.collection.get",
+            "circulation-item.item.get",
+            "inventory-storage.material-types.collection.get",
+            "inventory-storage.loan-types.collection.get",
+            "circulation-storage.requests.item.get",
+            "circulation-storage.cancellation-reasons.item.get",
+            "circulation-storage.cancellation-reasons.item.post"
+          ]
         }
       ]
     },
@@ -232,7 +256,8 @@
         "dcb.transactions.put",
         "dcb.transactions.get",
         "dcb.transactions.collection.get",
-        "dcb.ecs-request.transactions.post"
+        "dcb.ecs-request.transactions.post",
+        "dcb.transactions.item.put"
       ]
     },
     {
@@ -247,8 +272,8 @@
     },
     {
       "permissionName": "dcb.transactions.put",
-      "displayName": "update transaction details",
-      "description": "update transaction details"
+      "displayName": "update transaction status",
+      "description": "update transaction status"
     },
     {
       "permissionName": "dcb.transactions.collection.get",
@@ -259,6 +284,11 @@
       "permissionName": "dcb.ecs-request.transactions.post",
       "displayName": "creates new ECS request transaction",
       "description": "creates new ECS request transaction"
+    },
+    {
+      "permissionName": "dcb.transactions.item.put",
+      "displayName": "update transaction details",
+      "description": "update transaction details"
     }
   ],
   "metadata": {
