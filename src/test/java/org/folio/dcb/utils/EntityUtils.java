@@ -104,6 +104,15 @@ public class EntityUtils {
       .build();
   }
 
+  public static DcbTransaction createBorrowingPickupEcsRequestTransactionByRole() {
+    return DcbTransaction.builder()
+      .requestId(REQUEST_ID)
+      .item(createDcbItem())
+      .role(DcbTransaction.RoleEnum.BORROWING_PICKUP)
+      .pickup(createDcbPickup())
+      .build();
+  }
+
   public static org.folio.dcb.domain.dto.ServicePointRequest createServicePointRequest() {
     return org.folio.dcb.domain.dto.ServicePointRequest.builder()
       .id(PICKUP_SERVICE_POINT_ID)
