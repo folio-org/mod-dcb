@@ -3,6 +3,7 @@ package org.folio.dcb.controller;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dcb.domain.dto.DcbTransaction;
+import org.folio.dcb.domain.dto.DcbUpdateTransaction;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponseCollection;
 import org.folio.dcb.rest.resource.TransactionsApi;
@@ -72,6 +73,13 @@ public class TransactionApiController implements TransactionsApi {
       fromDate, toDate, pageNumber, pageSize);
     return ResponseEntity.status(HttpStatus.OK)
       .body(transactionsService.getTransactionStatusList(fromDate, toDate, pageNumber, pageSize));
+  }
+
+  @Override
+  public ResponseEntity<Void> updateTransactionDetails(String dcbTransactionId, DcbUpdateTransaction dcbUpdateTransaction) {
+    transactionsService.updateTransactionDetails(dcbTransactionId, dcbUpdateTransaction);
+    return ResponseEntity.status(HttpStatus.NO_CONTENT)
+      .build();
   }
 
 }

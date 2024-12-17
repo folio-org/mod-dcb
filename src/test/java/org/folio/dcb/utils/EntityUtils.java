@@ -11,6 +11,8 @@ import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.DcbItem;
 import org.folio.dcb.domain.dto.DcbPatron;
 import org.folio.dcb.domain.dto.DcbPickup;
+import org.folio.dcb.domain.dto.DcbUpdateTransaction;
+import org.folio.dcb.domain.dto.DcbUpdateItem;
 import org.folio.dcb.domain.dto.ItemStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.dto.User;
@@ -62,6 +64,7 @@ public class EntityUtils {
   public static String EXISTED_INVENTORY_ITEM_BARCODE = "INVENTORY_ITEM";
   public static String PATRON_TYPE_USER_ID = "18c1741d-e678-4c8e-9fe7-cfaeefab5eea";
   public static String REQUEST_ID = "398501a2-5c97-4ba6-9ee7-d1cd6433cb98";
+  public static final String DCB_NEW_BARCODE = "398501a2-5c97-4ba6-9ee7-d1cd6433cb91";
 
   public static DcbTransaction createDcbTransactionByRole(DcbTransaction.RoleEnum role) {
     return DcbTransaction.builder()
@@ -102,6 +105,15 @@ public class EntityUtils {
       .build();
   }
 
+  public static DcbTransaction createBorrowingPickupEcsRequestTransactionByRole() {
+    return DcbTransaction.builder()
+      .requestId(REQUEST_ID)
+      .item(createDcbItem())
+      .role(DcbTransaction.RoleEnum.BORROWING_PICKUP)
+      .pickup(createDcbPickup())
+      .build();
+  }
+
   public static org.folio.dcb.domain.dto.ServicePointRequest createServicePointRequest() {
     return org.folio.dcb.domain.dto.ServicePointRequest.builder()
       .id(PICKUP_SERVICE_POINT_ID)
@@ -125,6 +137,18 @@ public class EntityUtils {
       .title("ITEM")
       .lendingLibraryCode("KU")
       .materialType("book")
+      .build();
+  }
+
+  public static DcbUpdateTransaction createDcbTransactionUpdate() {
+    return DcbUpdateTransaction
+      .builder()
+      .item(DcbUpdateItem
+        .builder()
+        .barcode(DCB_NEW_BARCODE)
+        .lendingLibraryCode("LEN")
+        .materialType("DVD")
+        .build())
       .build();
   }
 

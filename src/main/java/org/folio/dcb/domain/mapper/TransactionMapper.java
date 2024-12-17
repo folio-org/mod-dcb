@@ -3,6 +3,7 @@ package org.folio.dcb.domain.mapper;
 import org.folio.dcb.domain.dto.DcbItem;
 import org.folio.dcb.domain.dto.DcbPatron;
 import org.folio.dcb.domain.dto.DcbPickup;
+import org.folio.dcb.domain.dto.DcbUpdateItem;
 import org.folio.dcb.domain.dto.TransactionStatusResponseList;
 import org.folio.dcb.domain.entity.TransactionAuditEntity;
 import org.folio.dcb.domain.entity.TransactionEntity;
@@ -88,6 +89,16 @@ public class TransactionMapper {
       .servicePointId(transactionEntity.getServicePointId())
       .servicePointName(transactionEntity.getServicePointName())
       .libraryCode(transactionEntity.getPickupLibraryCode())
+      .build();
+  }
+
+  public DcbItem convertTransactionUpdateItemToDcbItem(DcbUpdateItem dcbUpdateItem, TransactionEntity entity) {
+    return DcbItem
+      .builder()
+      .lendingLibraryCode(dcbUpdateItem.getLendingLibraryCode())
+      .barcode(dcbUpdateItem.getBarcode())
+      .materialType(dcbUpdateItem.getMaterialType())
+      .title(entity.getItemTitle())
       .build();
   }
 
