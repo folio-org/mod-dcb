@@ -38,6 +38,7 @@ class CirculationRequestEventListenerTest extends BaseIT {
   private static final String REQUEST_CANCEL_EVENT_SAMPLE = getMockDataAsString("mockdata/kafka/cancel_request.json");
   private static final String REQUEST_CANCEL_EVENT_FOR_DCB_SAMPLE = getMockDataAsString("mockdata/kafka/cancel_request_dcb.json");
   private static final String CANCELLATION_DCB_REREQUEST_SAMPLE = getMockDataAsString("mockdata/kafka/cancellation_dcb_rerequest.json");
+  private static final String CANCELLATION_DCB_REREQUEST_WITHOUT_SAMPLE = getMockDataAsString("mockdata/kafka/cancellation_dcb_rerequest_without_dcb_rerequest_property.json");
 
   @Autowired
   private CirculationEventListener eventListener ;
@@ -61,6 +62,15 @@ class CirculationRequestEventListenerTest extends BaseIT {
     MessageHeaders messageHeaders = getMessageHeaders();
     when(transactionRepository.findTransactionByRequestIdAndStatusNotInClosed(any())).thenReturn(Optional.of(transactionEntity));
     eventListener.handleRequestEvent(CANCELLATION_DCB_REREQUEST_SAMPLE, messageHeaders);
+    Mockito.verify(transactionRepository, times(0)).save(any());
+  }
+
+  @Test
+  void handleCancelRequestEventWithoutPropertyWhenTransactionDcbUpdates() {
+    var transactionEntity = createTransactionEntity();
+    MessageHeaders messageHeaders = getMessageHeaders();
+    when(transactionRepository.findTransactionByRequestIdAndStatusNotInClosed(any())).thenReturn(Optional.of(transactionEntity));
+    eventListener.handleRequestEvent(CANCELLATION_DCB_REREQUEST_WITHOUT_SAMPLE, messageHeaders);
     Mockito.verify(transactionRepository, times(0)).save(any());
   }
 
