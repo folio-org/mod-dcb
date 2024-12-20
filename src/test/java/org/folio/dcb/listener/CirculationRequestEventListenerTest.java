@@ -71,7 +71,7 @@ class CirculationRequestEventListenerTest extends BaseIT {
     MessageHeaders messageHeaders = getMessageHeaders();
     when(transactionRepository.findTransactionByRequestIdAndStatusNotInClosed(any())).thenReturn(Optional.of(transactionEntity));
     eventListener.handleRequestEvent(CANCELLATION_DCB_REREQUEST_WITHOUT_SAMPLE, messageHeaders);
-    Mockito.verify(transactionRepository, times(0)).save(any());
+    Mockito.verify(transactionRepository, times(1)).save(any());
   }
 
 
