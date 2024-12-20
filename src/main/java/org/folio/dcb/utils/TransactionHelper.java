@@ -7,9 +7,12 @@ import org.springframework.messaging.MessageHeaders;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import static org.folio.dcb.utils.KafkaEvent.ACTION;
 import static org.folio.dcb.utils.KafkaEvent.STATUS;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 @Log4j2
 public class TransactionHelper {
@@ -72,7 +75,8 @@ public class TransactionHelper {
   }
 
   private static boolean getNodeAsBoolean(KafkaEvent kafkaEvent, String name) {
-    return kafkaEvent.getNewNode().get(name).asBoolean();
+    JsonNode booleanNode = kafkaEvent.getNewNode().get(name);
+    return Objects.nonNull(booleanNode) && booleanNode.asBoolean();
   }
 
   private static boolean checkDcbRequest(KafkaEvent kafkaEvent) {
