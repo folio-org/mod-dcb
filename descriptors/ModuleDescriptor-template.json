@@ -268,12 +268,14 @@
     {
       "permissionName": "dcb.transactions.status.get",
       "displayName": "get transaction details",
-      "description": "get transaction details"
+      "description": "get transaction details",
+      "replaces": ["dcb.transactions.get"]
     },
     {
       "permissionName": "dcb.transactions.status.put",
       "displayName": "update transaction status",
-      "description": "update transaction status"
+      "description": "update transaction status",
+      "replaces": ["dcb.transactions.put"]
     },
     {
       "permissionName": "dcb.transactions.collection.get",
