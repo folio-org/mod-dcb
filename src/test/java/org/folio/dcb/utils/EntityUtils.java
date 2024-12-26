@@ -13,6 +13,7 @@ import org.folio.dcb.domain.dto.DcbPatron;
 import org.folio.dcb.domain.dto.DcbPickup;
 import org.folio.dcb.domain.dto.DcbUpdateTransaction;
 import org.folio.dcb.domain.dto.DcbUpdateItem;
+import org.folio.dcb.domain.dto.ItemStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.dto.User;
 import org.folio.dcb.domain.dto.TransactionStatus;
@@ -252,6 +253,10 @@ public class EntityUtils {
       .id(UUID.randomUUID().toString())
       .holdingsRecordId(UUID.randomUUID().toString())
       .barcode("DCB_ITEM")
+      .status(ItemStatus
+        .builder()
+        .name(ItemStatus.NameEnum.AVAILABLE)
+        .build())
       .build();
   }
 
