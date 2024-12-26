@@ -112,6 +112,8 @@ public class BaseLibraryService {
     try {
       circulationService.cancelRequest(transactionEntity, false);
     } catch (CirculationRequestException e) {
+      log.error("cancelTransactionRequest:: error during updating circulation request " +
+        "to cancel status", e);
       updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.ERROR);
     }
   }

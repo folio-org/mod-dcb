@@ -8,6 +8,9 @@ import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.CirculationItemService;
 import org.folio.spring.integration.XOkapiHeaders;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,6 +20,7 @@ import org.springframework.messaging.MessageHeaders;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.*;
 import static org.folio.dcb.utils.EntityUtils.createCirculationItem;
@@ -37,7 +41,12 @@ class CirculationRequestEventListenerTest extends BaseIT {
   private static final String CHECK_IN_UNDEFINED_EVENT_SAMPLE = getMockDataAsString("mockdata/kafka/request_undefined.json");
   private static final String REQUEST_CANCEL_EVENT_SAMPLE = getMockDataAsString("mockdata/kafka/cancel_request.json");
   private static final String REQUEST_CANCEL_EVENT_FOR_DCB_SAMPLE = getMockDataAsString("mockdata/kafka/cancel_request_dcb.json");
-  private static final String CANCELLATION_DCB_REREQUEST_SAMPLE = getMockDataAsString("mockdata/kafka/cancellation_dcb_rerequest.json");
+  private static final String CANCELLATION_DCB_REREQUEST_TRUE_SAMPLE = getMockDataAsString(
+    "mockdata/kafka/cancellation_dcb_rerequest_true.json");
+  private static final String CANCELLATION_DCB_REREQUEST_FALSE_SAMPLE = getMockDataAsString(
+    "mockdata/kafka/cancellation_dcb_rerequest_false.json");
+  private static final String CANCELLATION_DCB_REREQUEST_WITHOUT_SAMPLE = getMockDataAsString(
+    "mockdata/kafka/cancellation_dcb_rerequest_without_dcb_rerequest_property.json");
 
   @Autowired
   private CirculationEventListener eventListener ;
@@ -55,15 +64,24 @@ class CirculationRequestEventListenerTest extends BaseIT {
     Mockito.verify(transactionRepository, times(0)).save(any());
   }
 
-  @Test
-  void handleCancelRequestEventWhenTransactionDcbUpdates() {
+  @ParameterizedTest
+  @MethodSource("pathToExecutionTimes")
+  void handleCancelRequestEventWhenTransactionDcbUpdates(String path, int executionTimes) {
     var transactionEntity = createTransactionEntity();
     MessageHeaders messageHeaders = getMessageHeaders();
-    when(transactionRepository.findTransactionByRequestIdAndStatusNotInClosed(any())).thenReturn(Optional.of(transactionEntity));
-    eventListener.handleRequestEvent(CANCELLATION_DCB_REREQUEST_SAMPLE, messageHeaders);
-    Mockito.verify(transactionRepository, times(0)).save(any());
+    when(transactionRepository.findTransactionByRequestIdAndStatusNotInClosed(any()))
+      .thenReturn(Optional.of(transactionEntity));
+    eventListener.handleRequestEvent(path, messageHeaders);
+    Mockito.verify(transactionRepository, times(executionTimes)).save(any());
   }
 
+  private static Stream<Arguments> pathToExecutionTimes() {
+    return Stream.of(
+      Arguments.of(CANCELLATION_DCB_REREQUEST_FALSE_SAMPLE, 1),
+      Arguments.of(CANCELLATION_DCB_REREQUEST_TRUE_SAMPLE, 0),
+      Arguments.of(CANCELLATION_DCB_REREQUEST_WITHOUT_SAMPLE, 1)
+    );
+  }
 
   @Test
   void handleCheckInEventInPickupForDcbFromOpenToAwaitingPickupTest() {

@@ -7,9 +7,12 @@ import org.springframework.messaging.MessageHeaders;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import static org.folio.dcb.utils.KafkaEvent.ACTION;
 import static org.folio.dcb.utils.KafkaEvent.STATUS;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 @Log4j2
 public class TransactionHelper {
@@ -57,7 +60,8 @@ public class TransactionHelper {
         && kafkaEvent.getNewNode().has(STATUS)){
         EventData eventData = new EventData();
         eventData.setRequestId(kafkaEvent.getNewNode().get("id").asText());
-        eventData.setDcbReRequestCancellation(getNodeAsBoolean(kafkaEvent, "dcbReRequestCancellation"));
+        eventData.setDcbReRequestCancellation(
+          getNodeAsBooleanOrDefault(kafkaEvent, "dcbReRequestCancellation", false));
         RequestStatus requestStatus = RequestStatus.from(kafkaEvent.getNewNode().get(STATUS).asText());
         switch (requestStatus) {
           case OPEN_IN_TRANSIT -> eventData.setType(EventData.EventType.IN_TRANSIT);
@@ -71,8 +75,13 @@ public class TransactionHelper {
     return null;
   }
 
-  private static boolean getNodeAsBoolean(KafkaEvent kafkaEvent, String name) {
-    return kafkaEvent.getNewNode().get(name).asBoolean();
+  private static boolean getNodeAsBooleanOrDefault(KafkaEvent kafkaEvent, String name,
+    boolean defaultValue) {
+
+    JsonNode booleanNode = kafkaEvent.getNewNode().get(name);
+    return Objects.nonNull(booleanNode)
+      ? booleanNode.asBoolean()
+      : defaultValue;
   }
 
   private static boolean checkDcbRequest(KafkaEvent kafkaEvent) {
