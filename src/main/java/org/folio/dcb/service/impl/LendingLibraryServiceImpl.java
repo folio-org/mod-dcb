@@ -47,7 +47,7 @@ public class LendingLibraryServiceImpl implements LibraryService {
     baseLibraryService.checkUserTypeAndThrowIfMismatch(user.getType());
     ServicePointRequest pickupServicePoint = servicePointService.createServicePointIfNotExists(dcbTransaction.getPickup());
     dcbTransaction.getPickup().setServicePointId(pickupServicePoint.getId());
-    CirculationRequest pageRequest = requestService.createPageItemRequest(user, item, pickupServicePoint.getId());
+    CirculationRequest pageRequest = requestService.createRequestBasedOnItemStatus(user, item, pickupServicePoint.getId());
     baseLibraryService.saveDcbTransaction(dcbTransactionId, dcbTransaction, pageRequest.getId());
 
     return TransactionStatusResponse.builder()
