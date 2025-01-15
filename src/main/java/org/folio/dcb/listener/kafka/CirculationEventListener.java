@@ -53,7 +53,11 @@ public class CirculationEventListener {
             } else if (eventData.getType() == EventData.EventType.CHECK_IN) {
               if (transactionEntity.getRole() == LENDER) {
                 baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.CLOSED);
-              } else if (transactionEntity.getRole() == BORROWING_PICKUP || transactionEntity.getRole() == PICKUP) {
+              }
+              if (transactionEntity.getRole() == LENDER) {
+                baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.CLOSED);
+              }
+              else if (transactionEntity.getRole() == BORROWING_PICKUP || transactionEntity.getRole() == PICKUP) {
                 baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.ITEM_CHECKED_IN);
               }
             } else {
@@ -80,9 +84,10 @@ public class CirculationEventListener {
               .ifPresent(transactionEntity -> {
                 if (eventData.getType() == EventData.EventType.CANCEL && !eventData.isDcbReRequestCancellation()) {
                   baseLibraryService.cancelTransactionEntity(transactionEntity);
-                } else if (eventData.getType() == EventData.EventType.IN_TRANSIT && transactionEntity.getRole() == LENDER) {
+                } else if (eventData.getType() == EventData.EventType.IN_TRANSIT && transactionEntity.getRole() == LENDER) { // use the new boolean flag
                   baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.OPEN);
-                } else if (eventData.getType() == EventData.EventType.AWAITING_PICKUP && (transactionEntity.getRole() == BORROWING_PICKUP || transactionEntity.getRole() == PICKUP)) {
+                } else if (eventData.getType() == EventData.EventType.AWAITING_PICKUP && (transactionEntity.getRole() == BORROWING_PICKUP
+                  || transactionEntity.getRole() == PICKUP)) {
                   baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.AWAITING_PICKUP);
                 } else {
                   log.info("handleRequestEvent:: status for event {} can not be updated", eventData);

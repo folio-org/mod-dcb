@@ -55,7 +55,8 @@ public class BaseLibraryService {
     if(Objects.equals(user.getType(), DCB_TYPE)) {
       throw new IllegalArgumentException(String.format("User with type %s is retrieved. so unable to create transaction", user.getType()));
     }
-    checkItemExistsInInventoryAndThrow(itemVirtual.getBarcode());
+    checkItemExistsInInventoryAndThrow(itemVirtual.getBarcode()); // if item exists then its a self-borrower
+    boolean lenderBorrower = true;
     CirculationItem item = circulationItemService.checkIfItemExistsAndCreate(itemVirtual, pickupServicePointId);
     dcbTransaction.getItem().setId(item.getId());
     checkOpenTransactionExistsAndThrow(item.getId());
