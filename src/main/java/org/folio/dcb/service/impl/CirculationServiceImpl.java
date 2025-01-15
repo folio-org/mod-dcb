@@ -41,11 +41,14 @@ public class CirculationServiceImpl implements CirculationService {
   }
 
   @Override
-  public void cancelRequest(TransactionEntity dcbTransaction) {
+  public void cancelRequest(TransactionEntity dcbTransaction, boolean isItemUnavailableCancellation) {
     log.debug("cancelRequest:: cancelling request using request id {} ", dcbTransaction.getRequestId());
     CirculationRequest request = circulationStorageService.getCancellationRequestIfOpenOrNull(dcbTransaction.getRequestId().toString());
     if (request != null){
       try {
+        if (isItemUnavailableCancellation) {
+          request.setIsDcbReRequestCancellation(true);
+        }
         circulationClient.cancelRequest(request.getId(), request);
       } catch (FeignException e) {
         log.warn("cancelRequest:: error cancelling request using request id {} ", dcbTransaction.getRequestId(), e);

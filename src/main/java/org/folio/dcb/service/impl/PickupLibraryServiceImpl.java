@@ -33,6 +33,7 @@ public class PickupLibraryServiceImpl implements LibraryService {
     baseLibraryService.checkUserTypeAndThrowIfMismatch(user.getType());
     baseLibraryService.checkItemExistsInInventoryAndThrow(itemVirtual.getBarcode());
     CirculationItem item = circulationItemService.checkIfItemExistsAndCreate(itemVirtual, dcbTransaction.getPickup().getServicePointId());
+    dcbTransaction.getItem().setId(item.getId());
     baseLibraryService.checkOpenTransactionExistsAndThrow(item.getId());
     CirculationRequest holdRequest = requestService.createHoldItemRequest(user, itemVirtual, dcbTransaction.getPickup().getServicePointId());
     baseLibraryService.saveDcbTransaction(dcbTransactionId, dcbTransaction, holdRequest.getId());

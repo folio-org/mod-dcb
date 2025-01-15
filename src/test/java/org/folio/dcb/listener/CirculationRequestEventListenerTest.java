@@ -35,6 +35,7 @@ class CirculationRequestEventListenerTest extends BaseIT {
   private static final String CHECK_IN_TRANSIT_EVENT_SAMPLE = getMockDataAsString("mockdata/kafka/check_in_transit.json");
   private static final String CHECK_IN_UNDEFINED_EVENT_SAMPLE = getMockDataAsString("mockdata/kafka/request_undefined.json");
   private static final String REQUEST_CANCEL_EVENT_SAMPLE = getMockDataAsString("mockdata/kafka/cancel_request.json");
+  private static final String CANCELLATION_DCB_REREQUEST_SAMPLE = getMockDataAsString("mockdata/kafka/cancellation_dcb_rerequest.json");
 
   @InjectMocks
   private BaseLibraryService baseLibraryService;
@@ -132,6 +133,15 @@ class CirculationRequestEventListenerTest extends BaseIT {
     transactionEntity.setRole(LENDER);
     MessageHeaders messageHeaders = getMessageHeaders();
     assertDoesNotThrow(() -> eventListener.handleRequestEvent(null, messageHeaders));
+  }
+
+  @Test
+  void handleCancelRequestEventWhenTransactionDcbUpdates() {
+    var transactionEntity = createTransactionEntity();
+    MessageHeaders messageHeaders = getMessageHeaders();
+    when(transactionRepository.findTransactionByRequestIdAndStatusNotInClosed(any())).thenReturn(Optional.of(transactionEntity));
+    eventListener.handleRequestEvent(CANCELLATION_DCB_REREQUEST_SAMPLE, messageHeaders);
+    Mockito.verify(transactionRepository, times(0)).save(any());
   }
 
   private MessageHeaders getMessageHeaders() {
