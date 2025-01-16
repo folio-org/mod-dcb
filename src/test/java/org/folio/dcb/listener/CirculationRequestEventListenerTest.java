@@ -9,6 +9,9 @@ import org.folio.dcb.service.CirculationItemService;
 import org.folio.dcb.service.impl.BaseLibraryService;
 import org.folio.spring.integration.XOkapiHeaders;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +22,7 @@ import org.springframework.messaging.MessageHeaders;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.*;
 import static org.folio.dcb.utils.EntityUtils.createCirculationItem;
@@ -35,7 +39,12 @@ class CirculationRequestEventListenerTest extends BaseIT {
   private static final String CHECK_IN_TRANSIT_EVENT_SAMPLE = getMockDataAsString("mockdata/kafka/check_in_transit.json");
   private static final String CHECK_IN_UNDEFINED_EVENT_SAMPLE = getMockDataAsString("mockdata/kafka/request_undefined.json");
   private static final String REQUEST_CANCEL_EVENT_SAMPLE = getMockDataAsString("mockdata/kafka/cancel_request.json");
-  private static final String CANCELLATION_DCB_REREQUEST_SAMPLE = getMockDataAsString("mockdata/kafka/cancellation_dcb_rerequest.json");
+  private static final String CANCELLATION_DCB_REREQUEST_TRUE_SAMPLE = getMockDataAsString(
+    "mockdata/kafka/cancellation_dcb_rerequest_true.json");
+  private static final String CANCELLATION_DCB_REREQUEST_FALSE_SAMPLE = getMockDataAsString(
+    "mockdata/kafka/cancellation_dcb_rerequest_false.json");
+  private static final String CANCELLATION_DCB_REREQUEST_WITHOUT_SAMPLE = getMockDataAsString(
+    "mockdata/kafka/cancellation_dcb_rerequest_without_dcb_rerequest_property.json");
 
   @InjectMocks
   private BaseLibraryService baseLibraryService;
@@ -135,13 +144,23 @@ class CirculationRequestEventListenerTest extends BaseIT {
     assertDoesNotThrow(() -> eventListener.handleRequestEvent(null, messageHeaders));
   }
 
-  @Test
-  void handleCancelRequestEventWhenTransactionDcbUpdates() {
+  @ParameterizedTest
+  @MethodSource("pathToExecutionTimes")
+  void handleCancelRequestEventWhenTransactionDcbUpdates(String path, int executionTimes) {
     var transactionEntity = createTransactionEntity();
     MessageHeaders messageHeaders = getMessageHeaders();
-    when(transactionRepository.findTransactionByRequestIdAndStatusNotInClosed(any())).thenReturn(Optional.of(transactionEntity));
-    eventListener.handleRequestEvent(CANCELLATION_DCB_REREQUEST_SAMPLE, messageHeaders);
-    Mockito.verify(transactionRepository, times(0)).save(any());
+    when(transactionRepository.findTransactionByRequestIdAndStatusNotInClosed(any()))
+      .thenReturn(Optional.of(transactionEntity));
+    eventListener.handleRequestEvent(path, messageHeaders);
+    Mockito.verify(transactionRepository, times(executionTimes)).save(any());
+  }
+
+  private static Stream<Arguments> pathToExecutionTimes() {
+    return Stream.of(
+      Arguments.of(CANCELLATION_DCB_REREQUEST_FALSE_SAMPLE, 1),
+      Arguments.of(CANCELLATION_DCB_REREQUEST_TRUE_SAMPLE, 0),
+      Arguments.of(CANCELLATION_DCB_REREQUEST_WITHOUT_SAMPLE, 1)
+    );
   }
 
   private MessageHeaders getMessageHeaders() {
