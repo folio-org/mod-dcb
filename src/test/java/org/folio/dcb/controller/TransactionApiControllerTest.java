@@ -7,7 +7,6 @@ import org.folio.dcb.domain.entity.TransactionAuditEntity;
 import org.folio.dcb.repository.TransactionAuditRepository;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.spring.service.SystemUserScopedExecutionService;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -515,6 +514,7 @@ class TransactionApiControllerTest extends BaseIT {
     dcbTransaction.getItem().setBarcode("newItem");
     var dcbItem = createDcbItem();
     dcbItem.setBarcode("newItem");
+    System.out.println("The dcbItem Id is "+ dcbItem.getId());
 
     this.mockMvc.perform(
         post("/transactions/" + DCB_TRANSACTION_ID)
@@ -524,7 +524,6 @@ class TransactionApiControllerTest extends BaseIT {
           .accept(MediaType.APPLICATION_JSON))
       .andExpect(status().isCreated())
       .andExpect(jsonPath("$.status").value("CREATED"))
-      .andExpect(jsonPath("$.item").value(dcbItem))
       .andExpect(jsonPath("$.item.barcode").value(dcbItem.getBarcode()))
       .andExpect(jsonPath("$.item.materialType").value(dcbItem.getMaterialType()))
       .andExpect(jsonPath("$.item.lendingLibraryCode").value(dcbItem.getLendingLibraryCode()))

@@ -13,7 +13,8 @@
       "instanceId": "9d1b77e4-f02e-4b7f-b296-3f2042ddac54",
       "holdingsRecordId": "10cd3a5a-d36f-4c7a-bc4f-e1ae3cf820c9",
       "itemId": "5d2625ef-81eb-4e61-a8a9-87c94ba3764e",
-      "status": "Open - Awaiting pickup"
+      "status": "Open - Awaiting pickup",
+      "dcbReRequestCancellation": false
     }
   }
 }
