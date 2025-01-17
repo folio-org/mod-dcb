@@ -111,6 +111,26 @@ paths:
           $ref: '#/components/responses/UnprocessableEntity'
         '500':
           $ref: '#/components/responses/InternalServerError'
+  /ecs-request-transactions/{ecsRequestTransactionId}:
+    description: ECS TLR Transaction endpoint
+    post:
+      description: Create transaction for existing circulation TLR
+      operationId: createEcsRequestTransactions
+      tags:
+        - ecs-tlr-transaction
+      parameters:
+        - $ref: '#/components/parameters/ecsRequestTransactionId'
+      requestBody:
+        $ref: "#/components/requestBodies/DCBTransaction"
+      responses:
+        '201':
+          $ref: '#/components/responses/TransactionStatusResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 components:
   requestBodies:
     TransactionStatusBody:
