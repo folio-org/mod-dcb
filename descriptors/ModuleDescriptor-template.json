@@ -113,7 +113,7 @@
           ],
           "pathPattern": "/transactions/{dcbTransactionId}/status",
           "permissionsRequired": [
-            "dcb.transactions.get"
+            "dcb.transactions.status.get"
           ],
           "modulePermissions": []
         },
@@ -123,7 +123,7 @@
           ],
           "pathPattern": "/transactions/{dcbTransactionId}/status",
           "permissionsRequired": [
-            "dcb.transactions.put"
+            "dcb.transactions.status.put"
           ],
           "modulePermissions": [
             "circulation.check-out-by-barcode.post",
@@ -141,6 +141,30 @@
             "dcb.transactions.collection.get"
           ],
           "modulePermissions": []
+        },
+        {
+          "methods": [
+            "PUT"
+          ],
+          "pathPattern": "/transactions/{dcbTransactionId}",
+          "permissionsRequired": [
+            "dcb.transactions.item.put"
+          ],
+          "modulePermissions": [
+            "inventory-storage.items.item.get",
+            "inventory-storage.items.collection.get",
+            "inventory-storage.holdings.item.get",
+            "circulation.requests.item.post",
+            "circulation.requests.item.put",
+            "circulation-item.item.post",
+            "circulation-item.collection.get",
+            "circulation-item.item.get",
+            "inventory-storage.material-types.collection.get",
+            "inventory-storage.loan-types.collection.get",
+            "circulation-storage.requests.item.get",
+            "circulation-storage.cancellation-reasons.item.get",
+            "circulation-storage.cancellation-reasons.item.post"
+          ]
         }
       ]
     },
@@ -229,10 +253,11 @@
       "description": "All permissions for dcb module",
       "subPermissions": [
         "dcb.transactions.post",
-        "dcb.transactions.put",
-        "dcb.transactions.get",
+        "dcb.transactions.status.put",
+        "dcb.transactions.status.get",
         "dcb.transactions.collection.get",
-        "dcb.ecs-request.transactions.post"
+        "dcb.ecs-request.transactions.post",
+        "dcb.transactions.item.put"
       ]
     },
     {
@@ -241,14 +266,16 @@
       "description": "creates new transaction"
     },
     {
-      "permissionName": "dcb.transactions.get",
+      "permissionName": "dcb.transactions.status.get",
       "displayName": "get transaction details",
-      "description": "get transaction details"
+      "description": "get transaction details",
+      "replaces": ["dcb.transactions.get"]
     },
     {
-      "permissionName": "dcb.transactions.put",
-      "displayName": "update transaction details",
-      "description": "update transaction details"
+      "permissionName": "dcb.transactions.status.put",
+      "displayName": "update transaction status",
+      "description": "update transaction status",
+      "replaces": ["dcb.transactions.put"]
     },
     {
       "permissionName": "dcb.transactions.collection.get",
@@ -259,6 +286,11 @@
       "permissionName": "dcb.ecs-request.transactions.post",
       "displayName": "creates new ECS request transaction",
       "description": "creates new ECS request transaction"
+    },
+    {
+      "permissionName": "dcb.transactions.item.put",
+      "displayName": "update transaction details",
+      "description": "update transaction details"
     }
   ],
   "metadata": {

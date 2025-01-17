@@ -19,4 +19,4 @@ public interface CirculationItemClient {
   CirculationItem retrieveCirculationItemById(@PathVariable("circulationItemId") String circulationItemId);
 
   @GetMapping
-  CirculationItemCollection fetchItemByIdAndBarcode(@RequestParam("query") String query);}
+  CirculationItemCollection fetchItemByCqlQuery(@RequestParam("query") String query);}
