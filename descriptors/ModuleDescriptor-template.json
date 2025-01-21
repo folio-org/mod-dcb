@@ -3,6 +3,10 @@
   "name": "Manage DCB related transactions in folio.",
   "requires": [
     {
+      "id": "request-storage",
+      "version": "6.2"
+    },
+    {
       "id": "circulation",
       "version": "14.4"
     },
