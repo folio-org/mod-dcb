@@ -1,3 +1,6 @@
+## v1.2.6 2025-01-21
+* MODDCB-166: Add missing required interfaces to Module Descriptor
+
 ## v1.2.5 2025-01-17
 * MODDCB-142: [DCB Re-Requests] Update transaction API
 * MODDCB-154: Support DCB Requests on Unavailable Items
