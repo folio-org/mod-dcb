@@ -8,6 +8,8 @@ import org.folio.dcb.domain.dto.InventoryItem;
 import org.folio.dcb.service.ItemService;
 import org.folio.spring.exception.NotFoundException;
 import org.folio.spring.model.ResultList;
+import org.folio.util.PercentCodec;
+import org.folio.util.StringUtil;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -32,13 +34,17 @@ public class ItemServiceImpl implements ItemService {
   @Override
   public ResultList<InventoryItem> fetchItemByBarcode(String itemBarcode) {
     log.debug("fetchItemByBarcode:: fetching item details for barcode {} ", itemBarcode);
-    return inventoryItemStorageClient.fetchItemByQuery("barcode==" + itemBarcode);
+    String query = "barcode==" + StringUtil.cqlEncode(itemBarcode);
+    return inventoryItemStorageClient.fetchItemByQuery(PercentCodec.encode(query).toString());
   }
 
   @Override
   public InventoryItem fetchItemByIdAndBarcode(String id, String barcode) {
     log.debug("fetchItemByBarcode:: fetching item details for id {} , barcode {} ", id, barcode);
-    return inventoryItemStorageClient.fetchItemByQuery("barcode==" + barcode + " and id==" + id)
+    Appendable queryBarcode = StringUtil.appendCqlEncoded(new StringBuilder("barcode=="), barcode);
+    Appendable queryId = StringUtil.appendCqlEncoded(new StringBuilder("id=="), id);
+    CharSequence query = PercentCodec.encode(queryBarcode + " AND " + queryId);
+    return inventoryItemStorageClient.fetchItemByQuery(query.toString())
       .getResult()
       .stream()
       .findFirst()
