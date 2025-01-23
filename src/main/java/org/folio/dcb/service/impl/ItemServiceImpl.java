@@ -34,7 +34,8 @@ public class ItemServiceImpl implements ItemService {
   @Override
   public ResultList<InventoryItem> fetchItemByBarcode(String itemBarcode) {
     log.debug("fetchItemByBarcode:: fetching item details for barcode {} ", itemBarcode);
-    return inventoryItemStorageClient.fetchItemByQuery("barcode==" + StringUtil.urlEncode(itemBarcode));
+    String query = "barcode==" + StringUtil.cqlEncode(itemBarcode);
+    return inventoryItemStorageClient.fetchItemByQuery(PercentCodec.encode(query).toString());
   }
 
   @Override
