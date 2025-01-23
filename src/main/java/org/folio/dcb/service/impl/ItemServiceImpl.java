@@ -39,11 +39,11 @@ public class ItemServiceImpl implements ItemService {
 
   @Override
   public InventoryItem fetchItemByIdAndBarcode(String id, String barcode) {
-    log.debug("fetchItemByBarcode:: fetching item details for id {} , barcode {} ", id, barcode);
-    log.info(">>>>Kapil1: {}", ("barcode==" + StringUtil.urlEncode(barcode) + " and id==" + id));
+    log.debug("fetchItemByBarcode:: qqqqqeeeee\\/' fetching item details for id {} , barcode {} ", id, barcode);
+    log.info(">>>>Kapil1: {}", ("barcode==" + StringUtil.cqlEncode(barcode) + " and id==" + id));
     log.info(">>>>Kapil2: {}",
-            (PercentCodec.encode("barcode==" + StringUtil.urlEncode(barcode) + " and id==" + id).toString()));
-    return inventoryItemStorageClient.fetchItemByQuery(PercentCodec.encode("barcode==" + StringUtil.urlEncode(barcode) + " and id==" + id).toString())
+            (PercentCodec.encode("barcode==" + StringUtil.cqlEncode(barcode) + " and id==" + id).toString()));
+    return inventoryItemStorageClient.fetchItemByQuery(PercentCodec.encode("barcode==" + StringUtil.cqlEncode(barcode) + " and id==" + id).toString())
       .getResult()
       .stream()
       .findFirst()
