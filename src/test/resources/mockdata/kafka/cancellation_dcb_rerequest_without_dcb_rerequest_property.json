@@ -17,8 +17,7 @@
       "cancellationReasonId": "50ed35b2-1397-4e83-a76b-642adf91ca2a",
       "cancelledByUserId": "7187c6f3-41ec-5731-b551-7f0092abb4c6",
       "cancellationAdditionalInformation": "test",
-      "cancelledDate": "2023-11-06T12:18:36.938+00:00",
-      "dcbReRequestCancellation": false
+      "cancelledDate": "2023-11-06T12:18:36.938+00:00"
     }
   }
 }

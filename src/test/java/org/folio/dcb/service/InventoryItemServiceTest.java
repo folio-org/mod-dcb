@@ -4,6 +4,8 @@ import org.folio.dcb.client.feign.InventoryItemStorageClient;
 import org.folio.dcb.service.impl.ItemServiceImpl;
 import org.folio.spring.exception.NotFoundException;
 import org.folio.spring.model.ResultList;
+import org.folio.util.PercentCodec;
+import org.folio.util.StringUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -32,7 +34,10 @@ class InventoryItemServiceTest {
     var itemId = UUID.randomUUID().toString();
     var barcode = "DCB_ITEM";
     var inventoryItem = createInventoryItem();
-    when(inventoryItemStorageClient.fetchItemByQuery("barcode==" + barcode + " and id==" + itemId)).thenReturn(ResultList.of(1, List.of(inventoryItem)));
+    Appendable queryBarcode = StringUtil.appendCqlEncoded(new StringBuilder("barcode=="), barcode);
+    Appendable queryId = StringUtil.appendCqlEncoded(new StringBuilder("id=="), itemId);
+    CharSequence query = PercentCodec.encode(queryBarcode + " AND " + queryId);
+    when(inventoryItemStorageClient.fetchItemByQuery(query.toString())).thenReturn(ResultList.of(1, List.of(inventoryItem)));
 
     var response = itemService.fetchItemByIdAndBarcode(itemId, barcode);
     assertEquals(inventoryItem, response);
@@ -42,7 +47,10 @@ class InventoryItemServiceTest {
   void fetchItemByIdAndInvalidBarcode() {
     var itemId = UUID.randomUUID().toString();
     var barcode = "DCB_ITEM";
-    when(inventoryItemStorageClient.fetchItemByQuery("barcode==" + barcode + " and id==" + itemId)).thenReturn(ResultList.of(0, List.of()));
+    Appendable queryBarcode = StringUtil.appendCqlEncoded(new StringBuilder("barcode=="), barcode);
+    Appendable queryId = StringUtil.appendCqlEncoded(new StringBuilder("id=="), itemId);
+    CharSequence query = PercentCodec.encode(queryBarcode + " AND " + queryId);
+    when(inventoryItemStorageClient.fetchItemByQuery(query.toString())).thenReturn(ResultList.of(0, List.of()));
 
     assertThrows(NotFoundException.class, () -> itemService.fetchItemByIdAndBarcode(itemId, barcode));
   }
@@ -51,7 +59,8 @@ class InventoryItemServiceTest {
   void fetchItemByBarcode() {
     var item = createDcbItem();
     var inventoryItem = createInventoryItem();
-    when(inventoryItemStorageClient.fetchItemByQuery("barcode==" + item.getBarcode())).thenReturn(ResultList.of(1, List.of(inventoryItem)));
+    String query = "barcode==" + StringUtil.cqlEncode(item.getBarcode());
+    when(inventoryItemStorageClient.fetchItemByQuery(PercentCodec.encode(query).toString())).thenReturn(ResultList.of(1, List.of(inventoryItem)));
 
     var response = itemService.fetchItemByBarcode(item.getBarcode());
     assertEquals(1, response.getTotalRecords());

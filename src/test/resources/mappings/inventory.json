@@ -3,7 +3,20 @@
     {
       "request": {
         "method": "GET",
-        "url": "/item-storage/items?query=barcode%3D%3DDCB_ITEM%20and%20id%3D%3D5b95877d-86c0-4cb7-a0cd-7660b348ae5a"
+        "url": "/item-storage/items?query=barcode%3D%3D%22DCB_ITEM%22%20AND%20id%3D%3D%225b95877d-86c0-4cb7-a0cd-7660b348ae5a%22"
+      },
+      "response": {
+        "status": 200,
+        "body": "{\"items\": [{ \"id\":\"5b95877d-86c0-4cb7-a0cd-7660b348ae5a\",\"barcode\":\"DCB_ITEM\",\"holdingsRecordId\": \"fb7b70f1-b898-4924-a991-0e4b6312bb5f\",\"status\": {\n \"name\": \"Available\",\n \"date\": \"2023-09-21T01:49:50.620+00:00\"\n}}],\n\"totalRecords\": 1,\n    \"resultInfo\": {\n        \"totalRecords\": 1,\n        \"facets\": [],\n        \"diagnostics\": []\n    }}",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/item-storage/items?query=barcode%3D%3D%22%21%40%23%24%25%5C%5E%5C%5E%26%26%5C%2A%28%29_%3D%2B%60~%7C%5C%5C%5D%7B%7DDCB_ITEM/%27%27%27%22%20AND%20id%3D%3D%225b95877d-86c0-4cb7-a0cd-7660b348ae5a%22"
       },
       "response": {
         "status": 200,
@@ -29,7 +42,7 @@
     {
       "request": {
         "method": "GET",
-        "url": "/item-storage/items?query=barcode%3D%3DDCB_ITEM"
+        "url": "/item-storage/items?query=barcode%3D%3D%22DCB_ITEM%22"
       },
       "response": {
         "status": 200,
@@ -42,7 +55,7 @@
     {
       "request": {
         "method": "GET",
-        "url": "/item-storage/items?query=barcode%3D%3DnewItem"
+        "url": "/item-storage/items?query=barcode%3D%3D%22newItem%22"
       },
       "response": {
         "status": 200,
@@ -55,7 +68,7 @@
     {
       "request": {
         "method": "GET",
-        "url": "/item-storage/items?query=barcode%3D%3DINVENTORY_ITEM"
+        "url": "/item-storage/items?query=barcode%3D%3D%22INVENTORY_ITEM%22"
       },
       "response": {
         "status": 200,
@@ -216,6 +229,19 @@
       "response": {
         "status": 200,
         "body": "{\n    \"locations\": [\n        {\n            \"id\": \"9d1b77e8-f02e-4b7f-b296-3f2042ddac54\",\n            \"name\": \"DCB\",\n            \"code\": \"000\",\n            \"institutionId\": \"9d1b77e5-f02e-4b7f-b296-3f2042ddac54\",\n            \"campusId\": \"9d1b77e6-f02e-4b7f-b296-3f2042ddac54\",\n            \"libraryId\": \"9d1b77e7-f02e-4b7f-b296-3f2042ddac54\",\n            \"primaryServicePoint\": \"9d1b77e8-f02e-4b7f-b296-3f2042ddac54\",\n            \"servicePointIds\": [\n                \"9d1b77e8-f02e-4b7f-b296-3f2042ddac54\"\n            ],\n            \"servicePoints\": [],\n            \"metadata\": {\n                \"createdDate\": \"2023-10-27T11:14:17.482+00:00\",\n                \"createdByUserId\": \"ec3caecb-d565-530c-937b-65a9c4ab371b\",\n                \"updatedDate\": \"2023-10-27T11:14:17.482+00:00\",\n                \"updatedByUserId\": \"ec3caecb-d565-530c-937b-65a9c4ab371b\"\n            }\n        }\n    ],\n    \"totalRecords\": 1\n}",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/item-storage/items?query=barcode%3D%3D%22398501a2-5c97-4ba6-9ee7-d1cd6433cb91%22"
+      },
+      "response": {
+        "status": 200,
+        "body": "{\n\"items\": [],\n\"totalRecords\": 0,\n \"resultInfo\": {\n \"totalRecords\": 0,\n \"facets\": [],\n  \"diagnostics\": []\n    }\n}",
         "headers": {
           "Content-Type": "application/json"
         }

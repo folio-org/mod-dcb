@@ -6,8 +6,9 @@
         "url": "/circulation/requests"
       },
       "response": {
-        "status": 200,
-        "body": "{\"id\": \"571b0a2c-8883-40b5-a449-d41fe6017083\"}",
+        "status": 201,
+        "body": "{{jsonPath request.body '$'}}",
+        "transformers": ["response-template"],
         "headers": {
           "Content-Type": "application/json"
         }

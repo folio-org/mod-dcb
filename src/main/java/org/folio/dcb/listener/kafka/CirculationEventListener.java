@@ -78,14 +78,14 @@ public class CirculationEventListener {
           systemUserScopedExecutionService.executeAsyncSystemUserScoped(tenantId, () ->
             transactionRepository.findTransactionByRequestIdAndStatusNotInClosed(UUID.fromString(requestId))
               .ifPresent(transactionEntity -> {
-                if (eventData.getType() == EventData.EventType.CANCEL) {
+                if (eventData.getType() == EventData.EventType.CANCEL && !eventData.isDcbReRequestCancellation()) {
                   baseLibraryService.cancelTransactionEntity(transactionEntity);
                 } else if (eventData.getType() == EventData.EventType.IN_TRANSIT && transactionEntity.getRole() == LENDER) {
                   baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.OPEN);
                 } else if (eventData.getType() == EventData.EventType.AWAITING_PICKUP && (transactionEntity.getRole() == BORROWING_PICKUP || transactionEntity.getRole() == PICKUP)) {
                   baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.AWAITING_PICKUP);
                 } else {
-                  log.info("handleRequestEvent:: status for event {} can not be updated", eventData.getType());
+                  log.info("handleRequestEvent:: status for event {} can not be updated", eventData);
                 }
               })
           );
