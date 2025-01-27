@@ -3,23 +3,9 @@ package org.folio.dcb.utils;
 import lombok.SneakyThrows;
 import org.folio.dcb.DcbApplication;
 import org.folio.dcb.client.feign.HoldingsStorageClient;
-import org.folio.dcb.domain.dto.Calendar;
-import org.folio.dcb.domain.dto.CalendarCollection;
-import org.folio.dcb.domain.dto.CirculationItem;
-import org.folio.dcb.domain.dto.CirculationRequest;
-import org.folio.dcb.domain.dto.DcbTransaction;
-import org.folio.dcb.domain.dto.DcbItem;
-import org.folio.dcb.domain.dto.DcbPatron;
-import org.folio.dcb.domain.dto.DcbPickup;
-import org.folio.dcb.domain.dto.TransactionStatusResponse;
-import org.folio.dcb.domain.dto.User;
-import org.folio.dcb.domain.dto.TransactionStatus;
+import org.folio.dcb.domain.dto.*;
 import org.folio.dcb.domain.entity.TransactionAuditEntity;
 import org.folio.dcb.domain.entity.TransactionEntity;
-import org.folio.dcb.domain.dto.InventoryItem;
-import org.folio.dcb.domain.dto.UserGroupCollection;
-import org.folio.dcb.domain.dto.UserGroup;
-import org.folio.dcb.domain.dto.UserCollection;
 import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
 
 import java.io.InputStream;
@@ -60,6 +46,7 @@ public class EntityUtils {
   public static String DCB_TYPE_USER_ID = "910c512c-ebc5-40c6-96a5-a20bfd81e154";
   public static String EXISTED_INVENTORY_ITEM_BARCODE = "INVENTORY_ITEM";
   public static String PATRON_TYPE_USER_ID = "18c1741d-e678-4c8e-9fe7-cfaeefab5eea";
+  public static final String DCB_NEW_BARCODE = "398501a2-5c97-4ba6-9ee7-d1cd6433cb91";
 
   public static DcbTransaction createDcbTransactionByRole(DcbTransaction.RoleEnum role) {
     return DcbTransaction.builder()
@@ -240,5 +227,17 @@ public class EntityUtils {
     calendarCollection.setCalendars(List.of(calendar));
     calendarCollection.setTotalRecords(1);
     return calendarCollection;
+  }
+
+  public static DcbUpdateTransaction createDcbTransactionUpdate() {
+    return DcbUpdateTransaction
+      .builder()
+      .item(DcbUpdateItem
+        .builder()
+        .barcode(DCB_NEW_BARCODE)
+        .lendingLibraryCode("LEN")
+        .materialType("DVD")
+        .build())
+      .build();
   }
 }

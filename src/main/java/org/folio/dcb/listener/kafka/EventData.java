@@ -7,6 +7,7 @@ public class EventData {
   private EventType type;
   private String itemId;
   private String requestId;
+  private boolean isDcbReRequestCancellation;
 
   public enum EventType {
     CHECK_IN, CHECK_OUT, IN_TRANSIT, AWAITING_PICKUP, CANCEL

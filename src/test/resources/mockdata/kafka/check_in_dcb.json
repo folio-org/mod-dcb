@@ -1,0 +1,32 @@
+{
+  "id": "f12368de-a162-48cb-b31a-725f6c5ab999",
+  "type": "UPDATED",
+  "tenant": "diku",
+  "timestamp": 1716796185898,
+  "data": {
+    "new": {
+      "id": "7fda1042-05fc-4aba-a913-5ef435b65526",
+      "requestLevel": "Item",
+      "requestType": "Hold",
+      "requestDate": "2024-05-27T07:30:39.051+00:00",
+      "requesterId": "ee6542c3-f98e-414a-94e4-caad908aeb00",
+      "instanceId": "9d1b77e4-f02e-4b7f-b296-3f2042ddac54",
+      "holdingsRecordId": "10cd3a5a-d36f-4c7a-bc4f-e1ae3cf820c9",
+      "itemId": "f660129e-4520-4dec-a73e-4c0140bb1ba3",
+      "status": "Open - Awaiting pickup",
+      "position": 1,
+      "instance": {
+        "title": "DCB_INSTANCE",
+        "identifiers": []
+      },
+      "item": {
+        "barcode": "181"
+      },
+      "requester": {
+        "lastName": "DcbSystem",
+        "barcode": "user2"
+      },
+      "dcbReRequestCancellation": false
+    }
+  }
+}

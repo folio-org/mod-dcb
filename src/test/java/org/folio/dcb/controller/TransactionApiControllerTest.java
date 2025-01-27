@@ -1,15 +1,16 @@
 package org.folio.dcb.controller;
 
+import com.jayway.jsonpath.JsonPath;
 import org.folio.dcb.domain.dto.DcbItem;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.entity.TransactionAuditEntity;
 import org.folio.dcb.repository.TransactionAuditRepository;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.spring.service.SystemUserScopedExecutionService;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.UUID;
 
@@ -17,20 +18,9 @@ import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWER;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWING_PICKUP;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.PICKUP;
-import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
-import static org.folio.dcb.utils.EntityUtils.DCB_TYPE_USER_ID;
-import static org.folio.dcb.utils.EntityUtils.EXISTED_INVENTORY_ITEM_BARCODE;
-import static org.folio.dcb.utils.EntityUtils.EXISTED_PATRON_ID;
-import static org.folio.dcb.utils.EntityUtils.ITEM_ID;
-import static org.folio.dcb.utils.EntityUtils.NOT_EXISTED_PATRON_ID;
-import static org.folio.dcb.utils.EntityUtils.PATRON_TYPE_USER_ID;
-import static org.folio.dcb.utils.EntityUtils.createDcbItem;
-import static org.folio.dcb.utils.EntityUtils.createDcbPatronWithExactPatronId;
-import static org.folio.dcb.utils.EntityUtils.createDefaultDcbPatron;
-import static org.folio.dcb.utils.EntityUtils.createDcbTransactionByRole;
-import static org.folio.dcb.utils.EntityUtils.createTransactionEntity;
-import static org.folio.dcb.utils.EntityUtils.createTransactionStatus;
+import static org.folio.dcb.utils.EntityUtils.*;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -83,9 +73,9 @@ class TransactionApiControllerTest extends BaseIT {
       () -> {
         TransactionAuditEntity auditExisting = transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(DCB_TRANSACTION_ID)
           .orElse(null);
-        Assertions.assertNotNull(auditExisting);
-        Assertions.assertNotEquals(TRANSACTION_AUDIT_DUPLICATE_ERROR_ACTION, auditExisting.getAction());
-        Assertions.assertNotEquals(DUPLICATE_ERROR_TRANSACTION_ID, auditExisting.getTransactionId());      }
+        assertNotNull(auditExisting);
+        assertNotEquals(TRANSACTION_AUDIT_DUPLICATE_ERROR_ACTION, auditExisting.getAction());
+        assertNotEquals(DUPLICATE_ERROR_TRANSACTION_ID, auditExisting.getTransactionId());      }
     );
   }
 
@@ -158,9 +148,9 @@ class TransactionApiControllerTest extends BaseIT {
       () -> {
         TransactionAuditEntity auditExisting = transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(DCB_TRANSACTION_ID)
           .orElse(null);
-        Assertions.assertNotNull(auditExisting);
-        Assertions.assertNotEquals(TRANSACTION_AUDIT_DUPLICATE_ERROR_ACTION, auditExisting.getAction());
-        Assertions.assertNotEquals(DUPLICATE_ERROR_TRANSACTION_ID, auditExisting.getTransactionId());      }
+        assertNotNull(auditExisting);
+        assertNotEquals(TRANSACTION_AUDIT_DUPLICATE_ERROR_ACTION, auditExisting.getAction());
+        assertNotEquals(DUPLICATE_ERROR_TRANSACTION_ID, auditExisting.getTransactionId());      }
     );
   }
 
@@ -186,8 +176,8 @@ class TransactionApiControllerTest extends BaseIT {
       () -> {
         TransactionAuditEntity auditExisting = transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(trnId)
           .orElse(null);
-        Assertions.assertNotNull(auditExisting);
-        Assertions.assertEquals(TRANSACTION_AUDIT_ERROR_ACTION, auditExisting.getAction());  }
+        assertNotNull(auditExisting);
+        assertEquals(TRANSACTION_AUDIT_ERROR_ACTION, auditExisting.getAction());  }
     );
   }
 
@@ -212,8 +202,8 @@ class TransactionApiControllerTest extends BaseIT {
       () -> {
         TransactionAuditEntity auditExisting = transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(trnId)
           .orElse(null);
-        Assertions.assertNotNull(auditExisting);
-        Assertions.assertEquals(TRANSACTION_AUDIT_ERROR_ACTION, auditExisting.getAction());  }
+        assertNotNull(auditExisting);
+        assertEquals(TRANSACTION_AUDIT_ERROR_ACTION, auditExisting.getAction());  }
     );
   }
 
@@ -451,9 +441,9 @@ class TransactionApiControllerTest extends BaseIT {
       () -> {
         TransactionAuditEntity auditExisting = transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(DCB_TRANSACTION_ID)
           .orElse(null);
-        Assertions.assertNotNull(auditExisting);
-        Assertions.assertNotEquals(TRANSACTION_AUDIT_DUPLICATE_ERROR_ACTION, auditExisting.getAction());
-        Assertions.assertNotEquals(DUPLICATE_ERROR_TRANSACTION_ID, auditExisting.getTransactionId());      }
+        assertNotNull(auditExisting);
+        assertNotEquals(TRANSACTION_AUDIT_DUPLICATE_ERROR_ACTION, auditExisting.getAction());
+        assertNotEquals(DUPLICATE_ERROR_TRANSACTION_ID, auditExisting.getTransactionId());      }
     );
   }
 
@@ -509,9 +499,9 @@ class TransactionApiControllerTest extends BaseIT {
       () -> {
         TransactionAuditEntity auditExisting = transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(DCB_TRANSACTION_ID)
           .orElse(null);
-        Assertions.assertNotNull(auditExisting);
-        Assertions.assertNotEquals(TRANSACTION_AUDIT_DUPLICATE_ERROR_ACTION, auditExisting.getAction());
-        Assertions.assertNotEquals(DUPLICATE_ERROR_TRANSACTION_ID, auditExisting.getTransactionId());      }
+        assertNotNull(auditExisting);
+        assertNotEquals(TRANSACTION_AUDIT_DUPLICATE_ERROR_ACTION, auditExisting.getAction());
+        assertNotEquals(DUPLICATE_ERROR_TRANSACTION_ID, auditExisting.getTransactionId());      }
     );
   }
 
@@ -524,6 +514,7 @@ class TransactionApiControllerTest extends BaseIT {
     dcbTransaction.getItem().setBarcode("newItem");
     var dcbItem = createDcbItem();
     dcbItem.setBarcode("newItem");
+    System.out.println("The dcbItem Id is "+ dcbItem.getId());
 
     this.mockMvc.perform(
         post("/transactions/" + DCB_TRANSACTION_ID)
@@ -533,7 +524,10 @@ class TransactionApiControllerTest extends BaseIT {
           .accept(MediaType.APPLICATION_JSON))
       .andExpect(status().isCreated())
       .andExpect(jsonPath("$.status").value("CREATED"))
-      .andExpect(jsonPath("$.item").value(dcbItem))
+      .andExpect(jsonPath("$.item.barcode").value(dcbItem.getBarcode()))
+      .andExpect(jsonPath("$.item.materialType").value(dcbItem.getMaterialType()))
+      .andExpect(jsonPath("$.item.lendingLibraryCode").value(dcbItem.getLendingLibraryCode()))
+      .andExpect(jsonPath("$.item.title").value(dcbItem.getTitle()))
       .andExpect(jsonPath("$.patron").value(createDcbPatronWithExactPatronId(EXISTED_PATRON_ID)));
 
     //Trying to create another transaction with same transaction id
@@ -847,6 +841,55 @@ class TransactionApiControllerTest extends BaseIT {
           .contentType(MediaType.APPLICATION_JSON)
           .accept(MediaType.APPLICATION_JSON))
       .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void createAndUpdateBorrowerTransactionTest() throws Exception {
+    removeExistedTransactionFromDbIfSoExists();
+    removeExistingTransactionsByItemId(ITEM_ID);
+
+    MvcResult result = this.mockMvc.perform(
+        post("/transactions/" + DCB_TRANSACTION_ID)
+          .content(asJsonString(createDcbTransactionByRole(BORROWER)))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isCreated())
+      .andExpect(jsonPath("$.status").value("CREATED"))
+      .andExpect(jsonPath("$.item").value(createDcbItem()))
+      .andExpect(jsonPath("$.patron").value(createDcbPatronWithExactPatronId(EXISTED_PATRON_ID)))
+      .andReturn(); // Capture the response for assertion
+
+    String responseContent = result.getResponse().getContentAsString();
+    String itemId = JsonPath.parse(responseContent).read("$.item.id", String.class);
+    String itemBarcode = JsonPath.parse(responseContent).read("$.item.barcode", String.class);
+    String lendingLibraryCode = JsonPath.parse(responseContent).read("$.item.lendingLibraryCode", String.class);
+    String materialType = JsonPath.parse(responseContent).read("$.item.materialType", String.class);
+
+    //Trying to update the transaction with same transaction id
+    this.mockMvc.perform(
+        put("/transactions/" + DCB_TRANSACTION_ID)
+          .content(asJsonString(createDcbTransactionUpdate()))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpectAll(status().isNoContent());
+
+    // check whether item related data is updated
+    systemUserScopedExecutionService.executeAsyncSystemUserScoped(
+      TENANT,
+      () -> {
+        var transactionEntity = transactionRepository.findById(DCB_TRANSACTION_ID)
+          .orElse(null);
+        assertNotNull(transactionEntity);
+        assertNotEquals(itemId, transactionEntity.getItemId());
+        assertNotEquals(itemBarcode, transactionEntity.getItemBarcode());
+        assertEquals(DCB_NEW_BARCODE, transactionEntity.getItemBarcode());
+        assertNotEquals(lendingLibraryCode, transactionEntity.getLendingLibraryCode());
+        assertEquals("LEN", transactionEntity.getLendingLibraryCode());
+        assertNotEquals(materialType, transactionEntity.getMaterialType());
+        assertEquals("DVD", transactionEntity.getMaterialType());
+      });
   }
 
   private void removeExistedTransactionFromDbIfSoExists() {

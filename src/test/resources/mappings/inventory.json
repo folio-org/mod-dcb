@@ -220,6 +220,19 @@
           "Content-Type": "application/json"
         }
       }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/item-storage/items?query=barcode%3D%3D398501a2-5c97-4ba6-9ee7-d1cd6433cb91"
+      },
+      "response": {
+        "status": 200,
+        "body": "{\n\"items\": [],\n\"totalRecords\": 0,\n \"resultInfo\": {\n \"totalRecords\": 0,\n \"facets\": [],\n  \"diagnostics\": []\n    }\n}",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
     }
   ]
 }
