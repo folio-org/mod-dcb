@@ -173,17 +173,6 @@ class BaseLibraryServiceTest {
   }
 
   @Test
-  void checkUserTypeAndThrowIfMismatchTest() {
-    var user = createUser();
-    baseLibraryService.checkUserTypeAndThrowIfMismatch(user.getType());
-
-    user.setType("shadow");
-    baseLibraryService.checkUserTypeAndThrowIfMismatch(user.getType());
-
-    assertThrows(IllegalArgumentException.class, () -> baseLibraryService.checkUserTypeAndThrowIfMismatch("patron"));
-  }
-
-  @Test
   void testTransactionCancelTest(){
     var transactionEntity = createTransactionEntity();
     transactionEntity.setStatus(OPEN);

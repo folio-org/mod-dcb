@@ -2,6 +2,7 @@ package org.folio.dcb.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.ObjectUtils;
 import org.folio.dcb.client.feign.UsersClient;
 import org.folio.dcb.domain.dto.DcbPatron;
 import org.folio.dcb.domain.dto.Personal;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.util.Objects;
 
 import static org.folio.dcb.utils.DCBConstants.DCB_TYPE;
+import static org.folio.dcb.utils.DCBConstants.SHADOW_TYPE;
 
 @Service
 @RequiredArgsConstructor
@@ -48,9 +50,15 @@ public class UserServiceImpl implements UserService {
     if(Objects.isNull(user)) {
       log.info("fetchOrCreateUser:: Unable to find existing user with barcode {} and id {}. Hence, creating new user",
         patronDetails.getBarcode(), patronDetails.getId());
-      user = createUser(patronDetails);
+      return createUser(patronDetails);
+    } else {
+      validateDcbUserType(user.getType());
+      var groupId = patronGroupService.fetchPatronGroupIdByName(patronDetails.getGroup());
+      if (!groupId.equals(user.getPatronGroup())) {
+        return updateUserGroup(user, groupId);
+      }
+      return user;
     }
-    return user;
   }
 
   private User createUser(DcbPatron patronDetails) {
@@ -80,4 +88,19 @@ public class UserServiceImpl implements UserService {
       .personal(Personal.builder().lastName(LAST_NAME).build())
       .build();
   }
+
+  private User updateUserGroup(User user, String patronGroupId) {
+    log.info("updatePatronGroup:: updating patron group from {} to {} for user with barcode {}",
+      user.getPatronGroup(), patronGroupId, user.getBarcode());
+    user.setPatronGroup(patronGroupId);
+    usersClient.updateUser(user.getId(), user);
+    return user;
+  }
+
+  private void validateDcbUserType(String userType) {
+    if(ObjectUtils.notEqual(userType, DCB_TYPE) && ObjectUtils.notEqual(userType, SHADOW_TYPE)) {
+      throw new IllegalArgumentException(String.format("User with type %s is retrieved. so unable to create transaction", userType));
+    }
+  }
+
 }
