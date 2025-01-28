@@ -1,3 +1,8 @@
+## v1.1.7 2025-01-28
+* UXPROD-5001: Support DCB re-resolution
+* UXPROD-5054: Support DCB Requests on Unavailable Items
+* UXPROD-5005: Updating a virtual patron’s group via edge API
+
 ## v1.1.6 2024-11-15
 * MODDCB-145: Issue with spaces in service point name
 
