@@ -30,11 +30,32 @@ class UserServiceTest {
   private PatronGroupServiceImpl patronGroupService;
 
   @Test
-  void fetchUserTest() {
-    when(usersClient.fetchUserByBarcodeAndId(any())).thenReturn(createUserCollection());
+  void fetchUserTestWithSameGroup() {
+    var userCollection = createUserCollection();
+    var groupId = UUID.randomUUID().toString();
+    userCollection.getUsers().get(0).setPatronGroup(groupId);
+    when(usersClient.fetchUserByBarcodeAndId(any())).thenReturn(userCollection);
+    when(patronGroupService.fetchPatronGroupIdByName("staff"))
+      .thenReturn(groupId);
     userService.fetchOrCreateUser(createDefaultDcbPatron());
     verify(usersClient).fetchUserByBarcodeAndId(any());
-    verify(patronGroupService, never()).fetchPatronGroupIdByName("staff");
+    verify(patronGroupService).fetchPatronGroupIdByName("staff");
+    verify(usersClient, never()).updateUser(any(), any());
+    verify(usersClient, never()).createUser(any());
+  }
+
+  @Test
+  void fetchUserTestWithDifferentGroup() {
+    var userCollection = createUserCollection();
+    var groupId = UUID.randomUUID().toString();
+    userCollection.getUsers().get(0).setPatronGroup(groupId);
+    when(usersClient.fetchUserByBarcodeAndId(any())).thenReturn(userCollection);
+    when(patronGroupService.fetchPatronGroupIdByName("staff"))
+      .thenReturn(UUID.randomUUID().toString());
+    userService.fetchOrCreateUser(createDefaultDcbPatron());
+    verify(usersClient).fetchUserByBarcodeAndId(any());
+    verify(patronGroupService).fetchPatronGroupIdByName("staff");
+    verify(usersClient).updateUser(any(), any());
     verify(usersClient, never()).createUser(any());
   }
 

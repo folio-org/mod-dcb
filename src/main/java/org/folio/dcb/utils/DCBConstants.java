@@ -1,5 +1,15 @@
 package org.folio.dcb.utils;
 
+import org.folio.dcb.domain.dto.ItemStatus;
+
+import java.util.List;
+
+import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.AWAITING_DELIVERY;
+import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.AWAITING_PICKUP;
+import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.CHECKED_OUT;
+import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.IN_TRANSIT;
+import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.PAGED;
+
 public class DCBConstants {
 
   private DCBConstants() {}
@@ -25,4 +35,5 @@ public class DCBConstants {
   public static final String DCB_TYPE = "dcb";
   public static final String SHADOW_TYPE = "shadow";
   public static final String DCB_CALENDAR_NAME = "DCB Calendar";
+  public static final List<ItemStatus.NameEnum> holdItemStatus = List.of(IN_TRANSIT, CHECKED_OUT, PAGED, AWAITING_PICKUP, AWAITING_DELIVERY);
 }

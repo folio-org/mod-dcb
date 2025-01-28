@@ -59,7 +59,7 @@
       },
       "response": {
         "status": 200,
-        "body": "{\"users\": [{\"username\": \"leopold\",\n            \"id\": \"910c512c-ebc5-40c6-96a5-a20bfd81e154\",\n            \"barcode\": \"DCB_PATRON\",\n            \"active\": true,\n            \"type\": \"dcb\" }], \"totalRecords\": 1, \"resultInfo\": {\"totalRecords\": 1, \"facets\": [],\"diagnostics\": []}}",
+        "body": "{\"users\": [{\"username\": \"leopold\",\n \"patronGroup\":\"3684a786-6671-4268-8ed0-9db82ebca60b\", \"id\": \"910c512c-ebc5-40c6-96a5-a20bfd81e154\",\n \"barcode\": \"DCB_PATRON\",\n \"active\": true,\n \"type\": \"dcb\" }], \"totalRecords\": 1, \"resultInfo\": {\"totalRecords\": 1, \"facets\": [],\"diagnostics\": []}}",
         "headers": {
           "Content-Type": "application/json"
         }

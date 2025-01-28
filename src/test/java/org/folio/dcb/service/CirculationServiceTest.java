@@ -3,7 +3,6 @@ package org.folio.dcb.service;
 import feign.FeignException;
 import org.folio.dcb.client.feign.CirculationClient;
 import org.folio.dcb.domain.dto.CirculationRequest;
-import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.exception.CirculationRequestException;
 import org.folio.dcb.service.impl.CirculationServiceImpl;
 import org.junit.jupiter.api.Test;
