@@ -6,19 +6,18 @@ import org.folio.dcb.domain.dto.IntervalIdEnum;
 
 import jakarta.persistence.AttributeConverter;
 
-public class IntervalIdEnumConverter implements AttributeConverter<String, IntervalIdEnum> {
+public class IntervalIdEnumConverter implements AttributeConverter<IntervalIdEnum, String> {
 
   @Override
-  public IntervalIdEnum convertToDatabaseColumn(String str) {
+  public String convertToDatabaseColumn(IntervalIdEnum intervalIdEnum) {
+    return intervalIdEnum.getValue();
+  }
+
+  @Override
+  public IntervalIdEnum convertToEntityAttribute(String str) {
     return Arrays.stream(IntervalIdEnum.values())
       .filter(value -> value.getValue().equals(str))
       .findFirst()
       .orElse(null);
-
-  }
-
-  @Override
-  public String convertToEntityAttribute(IntervalIdEnum intervalIdEnum) {
-    return intervalIdEnum.getValue();
   }
 }
