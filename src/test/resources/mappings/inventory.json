@@ -119,6 +119,18 @@
     },
     {
       "request": {
+        "method": "PUT",
+        "url": "/service-points/9d1b77e8-f02e-4b7f-b296-3f2042ddac55"
+      },
+      "response": {
+        "status": 204,
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
+    },
+    {
+      "request": {
         "method": "POST",
         "url": "/instance-types"
       },

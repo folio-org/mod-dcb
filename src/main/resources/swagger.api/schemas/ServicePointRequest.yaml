@@ -33,7 +33,4 @@ HoldShelfExpiryPeriod:
       type: integer
     intervalId:
       description: Interval Hold Shelf Expiry Period
-      type: string
-      enum:
-        - Days
-        - Weeks
+      $ref: IntervalIdEnum.yaml#/IntervalIdEnum

@@ -121,7 +121,7 @@ public class EntityUtils {
       .code("DCB_TESTLIBRARYCODE_TESTSERVICEPOINTCODE")
       .discoveryDisplayName("DCB_TestLibraryCode_TestServicePointCode")
       .pickupLocation(true)
-      .holdShelfExpiryPeriod(org.folio.dcb.domain.dto.HoldShelfExpiryPeriod.builder().duration(3).intervalId(org.folio.dcb.domain.dto.HoldShelfExpiryPeriod.IntervalIdEnum.DAYS).build())
+      .holdShelfExpiryPeriod(org.folio.dcb.domain.dto.HoldShelfExpiryPeriod.builder().duration(3).intervalId(org.folio.dcb.domain.dto.IntervalIdEnum.DAYS).build())
       .holdShelfClosedLibraryDateManagement(HOLD_SHELF_CLOSED_LIBRARY_DATE_MANAGEMENT)
       .build();
   }

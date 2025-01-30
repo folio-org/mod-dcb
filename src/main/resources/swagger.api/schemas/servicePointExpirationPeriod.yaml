@@ -1,0 +1,12 @@
+ServicePointExpirationPeriod:
+  type: object
+  properties:
+    id:
+      description: "Unique identifier of a service point expiration period"
+      $ref: "uuid.yaml"
+    duration:
+      description: "duration value of service point expiration period"
+      type: integer
+    interval:
+      description: "period type of service point expiration period"
+      $ref: IntervalIdEnum.yaml#/IntervalIdEnum
