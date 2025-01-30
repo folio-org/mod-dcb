@@ -51,7 +51,9 @@ public class ServicePointServiceImpl implements ServicePointService {
     } else {
       log.info("createServicePointIfNotExists:: servicePoint Exists with name {}, hence reusing it", servicePointName);
       calendarService.associateServicePointIdWithDefaultCalendarIfAbsent(UUID.fromString(servicePointRequestList.get(0).getId()));
-      return servicePointRequestList.get(0);
+      ServicePointRequest servicePointRequest = servicePointRequestList.get(0);
+      servicePointRequest.setHoldShelfExpiryPeriod(getShelfExpiryPeriod());
+      return servicePointRequest;
     }
   }
 
