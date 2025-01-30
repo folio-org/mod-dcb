@@ -4,12 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.DcbUpdateTransaction;
-import org.folio.dcb.domain.dto.IntervalIdEnum;
-import org.folio.dcb.domain.dto.ServicePointExpirationPeriod;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponseCollection;
-import org.folio.dcb.domain.entity.ServicePointExpirationPeriodEntity;
-import org.folio.dcb.repository.ServicePointExpirationPeriodRepository;
 import org.folio.dcb.rest.resource.TransactionsApi;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.service.TransactionAuditService;
@@ -18,7 +14,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import java.time.OffsetDateTime;
-import java.util.Objects;
 
 @RestController
 @Log4j2
@@ -27,23 +22,6 @@ public class TransactionApiController implements TransactionsApi {
 
   private final TransactionsService transactionsService;
   private final TransactionAuditService transactionAuditService;
-  private final ServicePointExpirationPeriodRepository servicePointExpirationPeriodRepository;
-
-  @Override
-  public ResponseEntity<ServicePointExpirationPeriod> getSpPeriod() {
-    ServicePointExpirationPeriodEntity sp = servicePointExpirationPeriodRepository.findAll()
-      .stream()
-      .findFirst()
-      .orElseGet(() -> ServicePointExpirationPeriodEntity.builder().build());
-String id = Objects.isNull(sp.getId()) ? "" : sp.getId().toString();
-Integer duration = Objects.isNull(sp.getDuration()) ? null : sp.getDuration();
-IntervalIdEnum interval = Objects.isNull(sp.getIntervalId()) ? null : sp.getIntervalId();
-    return ResponseEntity.status(HttpStatus.OK).body(ServicePointExpirationPeriod.builder()
-      .id(id)
-      .duration(duration)
-      .interval(interval)
-      .build());
-  }
 
   @Override
   public ResponseEntity<TransactionStatusResponse> getTransactionStatusById(String dcbTransactionId) {

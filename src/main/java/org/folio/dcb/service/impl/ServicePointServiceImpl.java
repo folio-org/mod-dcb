@@ -1,13 +1,18 @@
 package org.folio.dcb.service.impl;
 
+import static org.folio.dcb.utils.DCBConstants.DEFAULT_SERVICE_POINT_PERIOD_DURATION;
+import static org.folio.dcb.utils.DCBConstants.DEFAULT_SERVICE_POINT_PERIOD_INTERVAL;
+
+import java.util.Objects;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dcb.client.feign.InventoryServicePointClient;
 import org.folio.dcb.domain.dto.DcbPickup;
 import org.folio.dcb.domain.dto.HoldShelfExpiryPeriod;
-import org.folio.dcb.domain.dto.IntervalIdEnum;
 import org.folio.dcb.domain.dto.ServicePointRequest;
+import org.folio.dcb.domain.entity.ServicePointExpirationPeriodEntity;
+import org.folio.dcb.repository.ServicePointExpirationPeriodRepository;
 import org.folio.dcb.service.CalendarService;
 import org.folio.dcb.service.ServicePointService;
 import org.folio.util.StringUtil;
@@ -20,6 +25,7 @@ public class ServicePointServiceImpl implements ServicePointService {
 
   private final InventoryServicePointClient servicePointClient;
   private final CalendarService calendarService;
+  private final ServicePointExpirationPeriodRepository servicePointExpirationPeriodRepository;
   public static final String HOLD_SHELF_CLOSED_LIBRARY_DATE_MANAGEMENT = "Keep_the_current_due_date";
 
   @Override
@@ -54,10 +60,33 @@ public class ServicePointServiceImpl implements ServicePointService {
       .code(code)
       .discoveryDisplayName(name)
       .pickupLocation(true)
-      .holdShelfExpiryPeriod(HoldShelfExpiryPeriod.builder().duration(3).intervalId(IntervalIdEnum.DAYS).build())
+      .holdShelfExpiryPeriod(getShelfExpiryPeriod())
       .holdShelfClosedLibraryDateManagement(HOLD_SHELF_CLOSED_LIBRARY_DATE_MANAGEMENT)
       .build();
   }
+
+  private HoldShelfExpiryPeriod getShelfExpiryPeriod() {
+    ServicePointExpirationPeriodEntity period = servicePointExpirationPeriodRepository.findAll()
+      .iterator()
+      .next();
+    return Objects.isNull(period) ? getDefaultPeriod() : getCustomPeriod(period);
+  }
+
+  private HoldShelfExpiryPeriod getCustomPeriod(ServicePointExpirationPeriodEntity period) {
+    return HoldShelfExpiryPeriod.builder()
+      .duration(period.getDuration())
+      .intervalId(period.getIntervalId())
+      .build();
+  }
+
+  private HoldShelfExpiryPeriod getDefaultPeriod() {
+    return HoldShelfExpiryPeriod.builder()
+      .duration(DEFAULT_SERVICE_POINT_PERIOD_DURATION)
+      .intervalId(DEFAULT_SERVICE_POINT_PERIOD_INTERVAL)
+      .build();
+  }
+
+
 
   private String getServicePointName(String libraryCode, String servicePointName){
     return String.format("DCB_%s_%s", libraryCode, servicePointName);

@@ -4,15 +4,6 @@ info:
   description: mod DCB FOLIO API
   version: 1.0.0
 paths:
-  /transactions/a:
-    get:
-      description: get SP period
-      operationId: getSpPeriod
-      tags:
-        - circulation
-      responses:
-        '200':
-          $ref: '#/components/responses/SPPeriod'
   /transactions/{dcbTransactionId}:
     description: DCB Circulation Transaction endpoint
     post:
@@ -143,12 +134,6 @@ components:
           schema:
             $ref: "schemas/dcbUpdateTransaction.yaml#/DcbUpdateTransaction"
   responses:
-    SPPeriod:
-      description: SP Period
-      content:
-        application/json:
-          schema:
-            $ref: "schemas/servicePointExpirationPeriod.yaml#/ServicePointExpirationPeriod"
     TransactionStatus:
       description: Transaction Status object
       content:
