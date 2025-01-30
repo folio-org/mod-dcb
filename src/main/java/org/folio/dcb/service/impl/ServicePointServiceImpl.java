@@ -53,6 +53,7 @@ public class ServicePointServiceImpl implements ServicePointService {
       calendarService.associateServicePointIdWithDefaultCalendarIfAbsent(UUID.fromString(servicePointRequestList.get(0).getId()));
       ServicePointRequest servicePointRequest = servicePointRequestList.get(0);
       servicePointRequest.setHoldShelfExpiryPeriod(getShelfExpiryPeriod());
+      servicePointClient.createServicePoint(servicePointRequest);
       return servicePointRequest;
     }
   }
