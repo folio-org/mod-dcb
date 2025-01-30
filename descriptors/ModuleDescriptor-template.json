@@ -148,16 +148,6 @@
         },
         {
           "methods": [
-            "GET"
-          ],
-          "pathPattern": "/transactions/a",
-          "permissionsRequired": [
-
-          ],
-          "modulePermissions": []
-        },
-        {
-          "methods": [
             "PUT"
           ],
           "pathPattern": "/transactions/{dcbTransactionId}",

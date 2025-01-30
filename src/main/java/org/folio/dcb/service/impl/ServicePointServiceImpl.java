@@ -3,10 +3,13 @@ package org.folio.dcb.service.impl;
 import static org.folio.dcb.utils.DCBConstants.DEFAULT_SERVICE_POINT_PERIOD_DURATION;
 import static org.folio.dcb.utils.DCBConstants.DEFAULT_SERVICE_POINT_PERIOD_INTERVAL;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+
 import org.folio.dcb.client.feign.InventoryServicePointClient;
 import org.folio.dcb.domain.dto.DcbPickup;
 import org.folio.dcb.domain.dto.HoldShelfExpiryPeriod;
@@ -17,6 +20,7 @@ import org.folio.dcb.service.CalendarService;
 import org.folio.dcb.service.ServicePointService;
 import org.folio.util.StringUtil;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 @Service
 @Log4j2
@@ -66,10 +70,8 @@ public class ServicePointServiceImpl implements ServicePointService {
   }
 
   private HoldShelfExpiryPeriod getShelfExpiryPeriod() {
-    ServicePointExpirationPeriodEntity period = servicePointExpirationPeriodRepository.findAll()
-      .iterator()
-      .next();
-    return Objects.isNull(period) ? getDefaultPeriod() : getCustomPeriod(period);
+    List<ServicePointExpirationPeriodEntity> periodList = servicePointExpirationPeriodRepository.findAll();
+    return CollectionUtils.isEmpty(periodList) ? getDefaultPeriod() : getCustomPeriod(periodList.get(0));
   }
 
   private HoldShelfExpiryPeriod getCustomPeriod(ServicePointExpirationPeriodEntity period) {
