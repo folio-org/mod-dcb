@@ -1,6 +1,7 @@
 package org.folio.dcb.service;
 
 import org.folio.dcb.client.feign.InventoryServicePointClient;
+import org.folio.dcb.repository.ServicePointExpirationPeriodRepository;
 import org.folio.dcb.service.impl.ServicePointServiceImpl;
 import org.folio.spring.model.ResultList;
 import org.junit.jupiter.api.Test;
@@ -9,6 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -32,12 +34,16 @@ class ServicePointServiceTest {
   @Mock
   private CalendarService calendarService;
 
+  @Mock
+  private ServicePointExpirationPeriodRepository servicePointExpirationPeriodRepository;
+
   @Test
   void createServicePointIfNotExistsTest(){
     when(inventoryServicePointClient.getServicePointByName(any()))
       .thenReturn(ResultList.of(0, List.of()));
     when(inventoryServicePointClient.createServicePoint(any()))
       .thenReturn(createServicePointRequest());
+    when(servicePointExpirationPeriodRepository.findAll()).thenReturn(Collections.emptyList());
     var response = servicePointService.createServicePointIfNotExists(createDcbPickup());
     verify(inventoryServicePointClient).createServicePoint(any());
     verify(inventoryServicePointClient).getServicePointByName(any());
