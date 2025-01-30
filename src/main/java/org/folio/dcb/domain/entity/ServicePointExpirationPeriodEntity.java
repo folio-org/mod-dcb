@@ -4,15 +4,10 @@ import java.io.Serializable;
 import java.util.UUID;
 
 import org.folio.dcb.domain.converter.IntervalIdEnumConverter;
-import org.folio.dcb.domain.converter.UUIDConverter;
-import org.folio.dcb.domain.dto.HoldShelfExpiryPeriod;
 import org.folio.dcb.domain.dto.IntervalIdEnum;
-import org.folio.dcb.domain.dto.TransactionStatus;
 
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
