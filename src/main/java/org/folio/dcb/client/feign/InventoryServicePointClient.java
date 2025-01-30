@@ -13,8 +13,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 @FeignClient(name = "service-points", configuration = FeignClientConfiguration.class)
 public interface InventoryServicePointClient {
 
-  @PutMapping
-  void updateServicePointById(@PathVariable ("servicepointId") String servicePointId, @RequestBody ServicePointRequest servicePointRequest);
+  @PutMapping("/{servicepointId}")
+  void updateServicePointById(@PathVariable ("servicepointId") String servicePointId,
+    @RequestBody ServicePointRequest servicePointRequest);
   @PostMapping
   ServicePointRequest createServicePoint(@RequestBody ServicePointRequest pickupServicePoint);
   @GetMapping("?query=name=={name}")
