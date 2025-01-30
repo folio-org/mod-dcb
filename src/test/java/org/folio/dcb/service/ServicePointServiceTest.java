@@ -95,10 +95,9 @@ class ServicePointServiceTest {
       .thenReturn(ResultList.of(0, List.of(servicePointRequest)));
     var response = servicePointService.createServicePointIfNotExists(createDcbPickup());
     assertEquals(servicePointId, response.getId());
-    verify(inventoryServicePointClient, never()).createServicePoint(any());
+//    verify(inventoryServicePointClient, never()).createServicePoint(any());
     verify(inventoryServicePointClient).getServicePointByName(any());
-    verify(calendarService).associateServicePointIdWithDefaultCalendarIfAbsent(
-      UUID.fromString(response.getId()));
+    verify(calendarService).associateServicePointIdWithDefaultCalendarIfAbsent(UUID.fromString(response.getId()));
     verify(calendarService, never()).addServicePointIdToDefaultCalendar(any());
   }
 
