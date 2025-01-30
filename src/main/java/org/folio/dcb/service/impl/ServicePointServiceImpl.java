@@ -6,6 +6,7 @@ import lombok.extern.log4j.Log4j2;
 import org.folio.dcb.client.feign.InventoryServicePointClient;
 import org.folio.dcb.domain.dto.DcbPickup;
 import org.folio.dcb.domain.dto.HoldShelfExpiryPeriod;
+import org.folio.dcb.domain.dto.IntervalIdEnum;
 import org.folio.dcb.domain.dto.ServicePointRequest;
 import org.folio.dcb.service.CalendarService;
 import org.folio.dcb.service.ServicePointService;
@@ -53,7 +54,7 @@ public class ServicePointServiceImpl implements ServicePointService {
       .code(code)
       .discoveryDisplayName(name)
       .pickupLocation(true)
-      .holdShelfExpiryPeriod(HoldShelfExpiryPeriod.builder().duration(3).intervalId(HoldShelfExpiryPeriod.IntervalIdEnum.DAYS).build())
+      .holdShelfExpiryPeriod(HoldShelfExpiryPeriod.builder().duration(3).intervalId(IntervalIdEnum.DAYS).build())
       .holdShelfClosedLibraryDateManagement(HOLD_SHELF_CLOSED_LIBRARY_DATE_MANAGEMENT)
       .build();
   }

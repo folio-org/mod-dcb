@@ -13,6 +13,7 @@ import org.folio.dcb.client.feign.LocationUnitClient;
 import org.folio.dcb.client.feign.LocationsClient;
 import org.folio.dcb.domain.dto.Calendar;
 import org.folio.dcb.domain.dto.HoldShelfExpiryPeriod;
+import org.folio.dcb.domain.dto.IntervalIdEnum;
 import org.folio.dcb.domain.dto.NormalHours;
 import org.folio.dcb.domain.dto.ServicePointRequest;
 import org.folio.dcb.listener.kafka.service.KafkaService;
@@ -215,7 +216,7 @@ public class CustomTenantService extends TenantService {
         .code(CODE)
         .discoveryDisplayName(NAME)
         .pickupLocation(true)
-        .holdShelfExpiryPeriod(HoldShelfExpiryPeriod.builder().duration(3).intervalId(HoldShelfExpiryPeriod.IntervalIdEnum.DAYS).build())
+        .holdShelfExpiryPeriod(HoldShelfExpiryPeriod.builder().duration(3).intervalId(IntervalIdEnum.DAYS).build())
         .holdShelfClosedLibraryDateManagement(HOLD_SHELF_CLOSED_LIBRARY_DATE_MANAGEMENT)
         .build();
 
