@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.DcbUpdateTransaction;
+import org.folio.dcb.domain.dto.IntervalIdEnum;
 import org.folio.dcb.domain.dto.ServicePointExpirationPeriod;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponseCollection;
@@ -35,10 +36,12 @@ public class TransactionApiController implements TransactionsApi {
       .findFirst()
       .orElseGet(() -> ServicePointExpirationPeriodEntity.builder().build());
 String id = Objects.isNull(sp.getId()) ? "" : sp.getId().toString();
+Integer duration = Objects.isNull(sp.getDuration()) ? null : sp.getDuration();
+IntervalIdEnum interval = Objects.isNull(sp.getIntervalId()) ? null : sp.getIntervalId();
     return ResponseEntity.status(HttpStatus.OK).body(ServicePointExpirationPeriod.builder()
       .id(id)
-      .duration(sp.getDuration())
-      .interval(sp.getIntervalId())
+      .duration(duration)
+      .interval(interval)
       .build());
   }
 
