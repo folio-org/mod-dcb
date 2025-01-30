@@ -40,15 +40,15 @@ class ServicePointServiceTest {
   @Mock
   private ServicePointExpirationPeriodRepository servicePointExpirationPeriodRepository;
 
-  @Test
-  void test() {
-    when(inventoryServicePointClient.getServicePointByName(any()))
-      .thenReturn(ResultList.of(0, List.of()));
-    when(servicePointExpirationPeriodRepository.findAll()).thenReturn(List.of());
-    doNothing().when(calendarService).addServicePointIdToDefaultCalendar(any(UUID.class));
-    ServicePointRequest servicePointIfNotExists = servicePointService.createServicePointIfNotExists(
-      DcbPickup.builder().build());
-  }
+//  @Test
+//  void test() {
+//    when(inventoryServicePointClient.getServicePointByName(any()))
+//      .thenReturn(ResultList.of(0, List.of()));
+//    when(servicePointExpirationPeriodRepository.findAll()).thenReturn(List.of());
+//    doNothing().when(calendarService).addServicePointIdToDefaultCalendar(any(UUID.class));
+//    ServicePointRequest servicePointIfNotExists = servicePointService.createServicePointIfNotExists(
+//      DcbPickup.builder().build());
+//  }
 
   @Test
   void createServicePointIfNotExistsTest() {
