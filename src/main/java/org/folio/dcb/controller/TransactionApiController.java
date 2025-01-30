@@ -34,9 +34,9 @@ public class TransactionApiController implements TransactionsApi {
       .stream()
       .findFirst()
       .orElseGet(() -> ServicePointExpirationPeriodEntity.builder().build());
-
+String id = Objects.isNull(sp.getId()) ? "" : sp.getId().toString();
     return ResponseEntity.status(HttpStatus.OK).body(ServicePointExpirationPeriod.builder()
-      .id(sp.getId().toString())
+      .id(id)
       .duration(sp.getDuration())
       .interval(sp.getIntervalId())
       .build());
