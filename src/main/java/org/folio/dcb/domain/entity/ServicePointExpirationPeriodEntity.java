@@ -3,10 +3,13 @@ package org.folio.dcb.domain.entity;
 import java.io.Serializable;
 import java.util.UUID;
 
+import org.folio.dcb.domain.converter.IntervalIdEnumConverter;
+import org.folio.dcb.domain.converter.UUIDConverter;
 import org.folio.dcb.domain.dto.HoldShelfExpiryPeriod;
 import org.folio.dcb.domain.dto.IntervalIdEnum;
 import org.folio.dcb.domain.dto.TransactionStatus;
 
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -34,6 +37,6 @@ public class ServicePointExpirationPeriodEntity implements Serializable {
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
   private Integer duration;
-  @Enumerated(EnumType.STRING)
+  @Convert(converter = IntervalIdEnumConverter.class)
   private IntervalIdEnum intervalId;
 }
