@@ -5,6 +5,7 @@ import static org.folio.dcb.utils.EntityUtils.createServicePointRequest;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -95,10 +96,9 @@ class ServicePointServiceTest {
       .thenReturn(ResultList.of(0, List.of(servicePointRequest)));
     var response = servicePointService.createServicePointIfNotExists(createDcbPickup());
     assertEquals(servicePointId, response.getId());
-    verify(inventoryServicePointClient, never()).createServicePoint(any());
+    verify(inventoryServicePointClient, times(1)).updateServicePointById(any(), any());
     verify(inventoryServicePointClient).getServicePointByName(any());
-    verify(calendarService).associateServicePointIdWithDefaultCalendarIfAbsent(
-      UUID.fromString(response.getId()));
+    verify(calendarService).associateServicePointIdWithDefaultCalendarIfAbsent(UUID.fromString(response.getId()));
     verify(calendarService, never()).addServicePointIdToDefaultCalendar(any());
   }
 
