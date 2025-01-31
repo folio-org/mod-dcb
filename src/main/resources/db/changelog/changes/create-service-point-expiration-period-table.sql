@@ -1,4 +1,3 @@
-DROP TABLE IF EXISTS service_point_expiration_period ;
 DROP TYPE IF EXISTS interval_id;
 CREATE TYPE interval_id AS ENUM ('Minutes', 'Hours', 'Days', 'Weeks', 'Months');
 CREATE TABLE IF NOT EXISTS service_point_expiration_period
