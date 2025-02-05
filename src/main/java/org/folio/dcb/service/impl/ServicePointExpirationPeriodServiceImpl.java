@@ -1,7 +1,6 @@
 package org.folio.dcb.service.impl;
 
-import static org.folio.dcb.utils.DCBConstants.DEFAULT_SERVICE_POINT_PERIOD_DURATION;
-import static org.folio.dcb.utils.DCBConstants.DEFAULT_SERVICE_POINT_PERIOD_INTERVAL;
+import static org.folio.dcb.utils.DCBConstants.DEFAULT_PERIOD;
 
 import java.util.List;
 
@@ -20,21 +19,19 @@ import lombok.extern.slf4j.Slf4j;
 public class ServicePointExpirationPeriodServiceImpl
   implements ServicePointExpirationPeriodService {
 
-  public static final HoldShelfExpiryPeriod DEFAULT_PERIOD = HoldShelfExpiryPeriod.builder()
-    .duration(DEFAULT_SERVICE_POINT_PERIOD_DURATION)
-    .intervalId(DEFAULT_SERVICE_POINT_PERIOD_INTERVAL)
-    .build();
   private final ServicePointExpirationPeriodRepository servicePointExpirationPeriodRepository;
 
   @Override
   public HoldShelfExpiryPeriod getShelfExpiryPeriod() {
     List<ServicePointExpirationPeriodEntity> periodList = servicePointExpirationPeriodRepository.findAll();
     if (CollectionUtils.isEmpty(periodList)) {
-      log.info("getShelfExpiryPeriod:: default hold shelf expire period will be set: {}", DEFAULT_PERIOD);
+      log.info("getShelfExpiryPeriod:: default hold shelf expire period will be set: {}",
+        DEFAULT_PERIOD);
       return DEFAULT_PERIOD;
     } else {
       var customPeriod = getCustomPeriod(periodList.get(0));
-      log.info("getShelfExpiryPeriod:: custom hold shelf expire period will be set: {}", customPeriod);
+      log.info("getShelfExpiryPeriod:: custom hold shelf expire period will be set: {}",
+        customPeriod);
       return customPeriod;
     }
   }
