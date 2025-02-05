@@ -21,7 +21,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class ServicePointExpirationPeriodServiceTest {
+class ServicePointExpirationPeriodServiceTest {
   @InjectMocks
   private ServicePointExpirationPeriodServiceImpl servicePointExpirationPeriodService;
   @Mock
