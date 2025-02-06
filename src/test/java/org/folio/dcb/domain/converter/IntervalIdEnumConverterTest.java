@@ -1,6 +1,6 @@
 package org.folio.dcb.domain.converter;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.folio.dcb.domain.dto.IntervalIdEnum;
 import org.junit.jupiter.api.Test;
