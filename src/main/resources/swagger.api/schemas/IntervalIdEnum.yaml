@@ -1,0 +1,8 @@
+IntervalIdEnum:
+  type: string
+  enum:
+    - Minutes
+    - Hours
+    - Days
+    - Weeks
+    - Months

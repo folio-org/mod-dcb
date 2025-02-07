@@ -1,5 +1,7 @@
 package org.folio.dcb.utils;
 
+import org.folio.dcb.domain.dto.HoldShelfExpiryPeriod;
+import org.folio.dcb.domain.dto.IntervalIdEnum;
 import org.folio.dcb.domain.dto.ItemStatus;
 
 import java.util.List;
@@ -37,4 +39,11 @@ public class DCBConstants {
   public static final String HOLDING_SOURCE = "folio";
   public static final String DCB_CALENDAR_NAME = "DCB Calendar";
   public static final List<ItemStatus.NameEnum> holdItemStatus = List.of(IN_TRANSIT, CHECKED_OUT, PAGED, AWAITING_PICKUP, AWAITING_DELIVERY);
+  public static final int DEFAULT_SERVICE_POINT_PERIOD_DURATION = 10;
+  public static final IntervalIdEnum DEFAULT_SERVICE_POINT_PERIOD_INTERVAL = IntervalIdEnum.DAYS;
+  public static final HoldShelfExpiryPeriod DEFAULT_PERIOD = HoldShelfExpiryPeriod.builder()
+    .duration(DEFAULT_SERVICE_POINT_PERIOD_DURATION)
+    .intervalId(DEFAULT_SERVICE_POINT_PERIOD_INTERVAL)
+    .build();
+
 }

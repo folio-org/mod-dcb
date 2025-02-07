@@ -91,6 +91,7 @@
           "modulePermissions": [
             "inventory-storage.service-points.item.post",
             "inventory-storage.service-points.collection.get",
+            "inventory-storage.service-points.item.put",
             "users.collection.get",
             "users.item.post",
             "usergroups.collection.get",
@@ -233,6 +234,7 @@
             "inventory-storage.holdings.item.post",
             "inventory-storage.locations.item.post",
             "inventory-storage.service-points.item.post",
+            "inventory-storage.service-points.item.put",
             "inventory-storage.location-units.libraries.collection.get",
             "inventory-storage.loan-types.collection.get",
             "inventory-storage.loan-types.collection.post",
