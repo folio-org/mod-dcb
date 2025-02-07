@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.folio.dcb.utils.DCBConstants.DCB_CALENDAR_NAME;
+import static org.folio.dcb.utils.DCBConstants.DEFAULT_PERIOD;
 import static org.folio.dcb.utils.EntityUtils.getCalendarCollection;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
@@ -57,6 +58,8 @@ class CustomTenantServiceTest {
   private LoanTypeClient loanTypeClient;
   @Mock
   private CancellationReasonClient cancellationReasonClient;
+  @Mock
+  private ServicePointExpirationPeriodService servicePointExpirationPeriodService;
 
   @Mock
   private CalendarService calendarService;
@@ -73,6 +76,7 @@ class CustomTenantServiceTest {
     when(servicePointClient.getServicePointByName(any())).thenReturn(new ResultList<>());
     when(locationsClient.queryLocationsByName(any())).thenReturn(new ResultList<>());
     when(loanTypeClient.queryLoanTypeByName(any())).thenReturn(new ResultList<>());
+    when(servicePointExpirationPeriodService.getShelfExpiryPeriod()).thenReturn(DEFAULT_PERIOD);
 
     service.createOrUpdateTenant(new TenantAttributes());
     verify(systemUserService).setupSystemUser();
@@ -88,6 +92,7 @@ class CustomTenantServiceTest {
     when(locationsClient.queryLocationsByName(any())).thenReturn(new ResultList<>());
     when(loanTypeClient.queryLoanTypeByName(any())).thenReturn(new ResultList<>());
     when(holdingsStorageClient.findHolding(any())).thenReturn(HoldingsStorageClient.Holding.builder().build());
+    when(servicePointExpirationPeriodService.getShelfExpiryPeriod()).thenReturn(DEFAULT_PERIOD);
     service.createOrUpdateTenant(new TenantAttributes());
     verify(systemUserService).setupSystemUser();
 
@@ -122,6 +127,8 @@ class CustomTenantServiceTest {
     when(loanTypeClient.queryLoanTypeByName(any())).thenReturn(new ResultList<>());
     when(holdingsStorageClient.findHolding(any())).thenReturn(HoldingsStorageClient.Holding.builder().build());
     when(calendarService.findCalendarByName(DCB_CALENDAR_NAME)).thenReturn(null);
+    when(servicePointExpirationPeriodService.getShelfExpiryPeriod()).thenReturn(DEFAULT_PERIOD);
+    when(servicePointExpirationPeriodService.getShelfExpiryPeriod()).thenReturn(DEFAULT_PERIOD);
 
     service.createOrUpdateTenant(new TenantAttributes());
     verify(calendarService).createCalendar(any());
@@ -138,6 +145,7 @@ class CustomTenantServiceTest {
     when(loanTypeClient.queryLoanTypeByName(any())).thenReturn(new ResultList<>());
     when(holdingsStorageClient.findHolding(any())).thenReturn(HoldingsStorageClient.Holding.builder().build());
     when(calendarService.findCalendarByName(DCB_CALENDAR_NAME)).thenReturn(null);
+    when(servicePointExpirationPeriodService.getShelfExpiryPeriod()).thenReturn(DEFAULT_PERIOD);
 
     when(calendarService.findCalendarByName(DCB_CALENDAR_NAME)).thenReturn(getCalendarCollection(DCB_CALENDAR_NAME).getCalendars().get(0));
     service.createOrUpdateTenant(new TenantAttributes());
