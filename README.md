@@ -19,6 +19,7 @@ Version 2.0. See the file "[LICENSE](LICENSE)" for more information.
   - [Issue tracker](#issue-tracker)
   - [API documentation](#api-documentation)
   - [Code analysis](#code-analysis)
+  - [Service point hold shelf period expiration](#service-point-hold-shelf-period-expiration)
   - [Other documentation](#other-documentation)
 
 ## Introduction
@@ -112,6 +113,74 @@ requires and provides, the permissions, and the additional module metadata.
 This module's [API documentation](https://dev.folio.org/reference/api/#mod-dcb).
 
 ### Code analysis
+
+### Service Point Hold Shelf Period Expiration
+
+When creating a **DCB** transaction with the roles **LENDER** or **BORROWING-PICKUP**, 
+the creation of the **DCB** service point and its property **hold shelf expiration period** 
+depends on the values stored in the `service_point_expiration_period` table in the database.
+
+- If the table is empty, the **hold shelf expiration period** will be set to the default value of **10 Days**.
+- If the table contains a value, the stored value will be used instead.
+
+The **F.S.E. team** is responsible for updating the values in this table. 
+To update the values, the following PL/pgSQL script can be executed:
+
+```sql
+DO
+$$
+DECLARE
+    schema_name TEXT;
+    new_duration INTEGER := 3;  -- Duration in weeks
+    new_interval_id interval_id := 'Weeks';  -- Interval type
+    raw_id UUID;
+    sql_query TEXT;
+BEGIN
+    FOR schema_name IN
+        SELECT schemaname
+        FROM pg_tables
+        WHERE tablename = 'service_point_expiration_period'
+    LOOP
+        -- Select a single ID into raw_id dynamically
+        sql_query := format(
+            'SELECT id FROM %I.service_point_expiration_period LIMIT 1',
+            schema_name
+        );
+        EXECUTE sql_query INTO raw_id;
+
+        -- If no record exists, insert one; otherwise, update the existing record
+        IF raw_id IS NULL THEN
+            sql_query := format(
+                'INSERT INTO %I.service_point_expiration_period (id, duration, interval_id) 
+                 VALUES (gen_random_uuid(), %L, %L)', 
+                 schema_name, new_duration, new_interval_id
+            );
+        ELSE
+            sql_query := format(
+                'UPDATE %I.service_point_expiration_period 
+                 SET duration = %L, interval_id = %L
+                 WHERE id = %L', 
+                 schema_name, new_duration, new_interval_id, raw_id
+            );
+        END IF;
+
+        -- Execute the query
+        EXECUTE sql_query;
+    END LOOP;
+END;
+$$
+LANGUAGE plpgsql;
+```
+**Updating Values in the Table**  
+To update the values, simply modify the new_duration and new_interval_id variables in the DECLARE section 
+of the script to reflect the new values.
+
+**Expiration Period Handling**    
+For Existing Service Points
+When creating a new transaction with an existing DCB service point, the hold shelf expiration period 
+will be checked.  
+If the value in the transaction payload differs from the value stored 
+in the database, it will be updated accordingly.
 
 [SonarQube analysis](https://sonarcloud.io/project/overview?id=org.folio:mod-dcb).
 
