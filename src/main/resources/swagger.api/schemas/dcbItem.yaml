@@ -17,3 +17,15 @@ DcbItem:
     lendingLibraryCode:
       description: The code which identifies the lending library
       type: string
+    renewalPolicy:
+      "$ref": "dcbItem.yaml#/renewalPolicy"
+
+renewalPolicy:
+  type: object
+  properties:
+    renewalCount:
+      description: renewalCount of the loan
+      type: integer
+    renewalMaxCount:
+      description: renewalMaxCount of loan as per the loan policy configuration
+      type: integer

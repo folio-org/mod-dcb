@@ -1,0 +1,36 @@
+LoanPolicy:
+  type: object
+  title: LoanPolicy
+  properties:
+    id:
+      description: A globally unique (UUID) identifier for the LoanPolicy
+      type: string
+    name:
+      description: Policy Name
+      type: string
+    renewalsPolicy:
+      "$ref": "LoanPolicy.yaml#/renewalsPolicy"
+renewalsPolicy:
+  type: object
+  properties:
+    unlimited:
+      description: unlimited
+      type: boolean
+    numberAllowed:
+      description: numberAllowed
+      type: integer
+
+LoanPolicyCollection:
+  type: object
+  properties:
+    loanPolicies:
+      type: array
+      description: "LoanPolicy collection"
+      items:
+        $ref: "LoanPolicy.yaml#/LoanPolicy"
+    totalRecords:
+      type: integer
+  additionalProperties: false
+  required:
+    - loanPolicies
+    - totalRecords

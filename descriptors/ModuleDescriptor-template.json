@@ -11,6 +11,10 @@
       "version": "14.4"
     },
     {
+      "id": "loan-policy-storage",
+      "version": "2.3"
+    },
+    {
       "id": "users",
       "version": "16.3"
     },
