@@ -141,7 +141,7 @@ public class TransactionsServiceImpl implements TransactionsService {
     String itemId = "itemId==" + StringUtil.cqlEncode(transactionEntity.getItemId());
     String statusOpen = "status.name==" + StringUtil.cqlEncode("OPEN");
     String isDCB = "isDcb==" + StringUtil.cqlEncode("true");
-    String userId = "itemId==" + StringUtil.cqlEncode(transactionEntity.getPatronId());
+    String userId = "userId==" + StringUtil.cqlEncode(transactionEntity.getPatronId());
     return PercentCodec.encode(itemId + CQL_AND + statusOpen + CQL_AND + isDCB + CQL_AND + userId).toString();
   }
 
