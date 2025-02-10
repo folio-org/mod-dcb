@@ -121,7 +121,8 @@ public class TransactionsServiceImpl implements TransactionsService {
         return Optional.empty();
       }
 
-      Integer loanRenewalCount = Integer.valueOf(loanCollection.getLoans().get(0).getRenewalCount());
+      Integer loanRenewalCount =
+              Integer.valueOf(Optional.ofNullable(loanCollection.getLoans().get(0).getRenewalCount()).orElse("0"));
 
       String loanPolicyIdQuery = "id==" + StringUtil.cqlEncode(loanCollection.getLoans().get(0).getLoanPolicyId());
       LoanPolicyCollection loanPolicyCollection =
