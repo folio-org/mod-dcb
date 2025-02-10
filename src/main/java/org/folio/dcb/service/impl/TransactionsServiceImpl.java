@@ -108,12 +108,16 @@ public class TransactionsServiceImpl implements TransactionsService {
   }
 
   private Optional<LoanRenewalDetails> getLoanRenewalDetails(TransactionEntity transactionEntity) {
+    log.info("Kapil: transactionEntity: status: {}, Role: {}", transactionEntity.getStatus().getValue(),
+            transactionEntity.getRole());
     if (transactionEntity.getStatus() == TransactionStatus.StatusEnum.ITEM_CHECKED_OUT
             && (transactionEntity.getRole() == DcbTransaction.RoleEnum.BORROWING_PICKUP
             || transactionEntity.getRole() == DcbTransaction.RoleEnum.BORROWER)) {
       String loanQuery = buildLoanQuery(transactionEntity);
+      log.info("Kapil: loanQuery:  "+ loanQuery);
       LoanCollection loanCollection = circulationClient.fetchLoanByQuery(loanQuery);
       if (loanCollection.getLoans().isEmpty()) {
+        log.info("Kapil: Inside 1st empty return");
         return Optional.empty();
       }
 
@@ -185,6 +189,7 @@ public class TransactionsServiceImpl implements TransactionsService {
                     .renewalMaxCount(loanDetails.renewalMaxCount())
                     .build())
             .build()).orElse(null);
+    log.info("Kapil: dcbItem: {}", dcbItem);
     return TransactionStatusResponse.builder()
       .status(transactionStatusResponseStatusEnum)
       .item(dcbItem)
