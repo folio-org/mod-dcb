@@ -1,3 +1,26 @@
+## v1.2.6 2025-01-21
+* MODDCB-166: Add missing required interfaces to Module Descriptor
+
+## v1.2.5 2025-01-17
+* MODDCB-142: [DCB Re-Requests] Update transaction API
+* MODDCB-154: Support DCB Requests on Unavailable Items
+
+## v1.2.4 2024-12-12
+* MODDCB-152: Support for intermediate requests
+
+## v1.2.3 2024-12-02
+* MODDCB-90: Accept existing circulation request ID
+* MODDCB-105: Accept existing circulation request ID (borrowing transaction)
+* MODDCB-111: Allow manual transaction status change from CREATED to OPEN
+* MODDCB-117: Add ecsRequestPhase to the circulation request schema
+* MODDCB-124: Merge esc-tlr feature branch into master
+
+## v1.2.2 2024-11-20
+* MODDCB-145: Issue with spaces in service point name
+
+## v1.2.1 2024-11-13
+* MODDCB-143 Adding missed interface dependencies in module descriptor
+
 ## v1.2.0 2024-10-30
 
 * MODDCB-98: Implement GET API for transaction updates
