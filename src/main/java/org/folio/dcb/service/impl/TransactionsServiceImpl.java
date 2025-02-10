@@ -40,6 +40,7 @@ import java.util.Optional;
 public class TransactionsServiceImpl implements TransactionsService {
 
   private static final String CQL_AND = " AND ";
+  private static final int UNLIMITED = -1;
   @Qualifier("lendingLibraryService")
   private final LibraryService lendingLibraryService;
   @Qualifier("borrowingPickupLibraryService")
@@ -108,16 +109,12 @@ public class TransactionsServiceImpl implements TransactionsService {
   }
 
   private Optional<LoanRenewalDetails> getLoanRenewalDetails(TransactionEntity transactionEntity) {
-    log.info("Kapil: transactionEntity: status: {}, Role: {}", transactionEntity.getStatus().getValue(),
-            transactionEntity.getRole());
     if (transactionEntity.getStatus() == TransactionStatus.StatusEnum.ITEM_CHECKED_OUT
             && (transactionEntity.getRole() == DcbTransaction.RoleEnum.BORROWING_PICKUP
             || transactionEntity.getRole() == DcbTransaction.RoleEnum.BORROWER)) {
       String loanQuery = buildLoanQuery(transactionEntity);
-      log.info("Kapil: loanQuery:  "+ loanQuery);
       LoanCollection loanCollection = circulationClient.fetchLoanByQuery(loanQuery);
       if (loanCollection.getLoans().isEmpty()) {
-        log.info("Kapil: Inside 1st empty return");
         return Optional.empty();
       }
 
@@ -129,7 +126,7 @@ public class TransactionsServiceImpl implements TransactionsService {
               circulationLoanPolicyStorageClient.fetchLoanPolicyByQuery(PercentCodec.encode(loanPolicyIdQuery).toString());
 
       Boolean isUnlimited = loanPolicyCollection.getLoanPolicies().get(0).getRenewalsPolicy().getUnlimited();
-      Integer renewalMaxCount = Boolean.TRUE.equals(isUnlimited) ? -1 :
+      Integer renewalMaxCount = Boolean.TRUE.equals(isUnlimited) ? UNLIMITED :
               loanPolicyCollection.getLoanPolicies().get(0).getRenewalsPolicy().getNumberAllowed();
 
       return Optional.of(new LoanRenewalDetails(loanRenewalCount, renewalMaxCount));
@@ -190,7 +187,6 @@ public class TransactionsServiceImpl implements TransactionsService {
                     .renewalMaxCount(loanDetails.renewalMaxCount())
                     .build())
             .build()).orElse(null);
-    log.info("Kapil: dcbItem: {}", dcbItem);
     return TransactionStatusResponse.builder()
       .status(transactionStatusResponseStatusEnum)
       .item(dcbItem)
