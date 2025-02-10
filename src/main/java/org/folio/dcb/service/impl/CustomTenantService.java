@@ -17,6 +17,7 @@ import org.folio.dcb.domain.dto.NormalHours;
 import org.folio.dcb.domain.dto.ServicePointRequest;
 import org.folio.dcb.listener.kafka.service.KafkaService;
 import org.folio.dcb.service.CalendarService;
+import org.folio.dcb.service.ServicePointExpirationPeriodService;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.liquibase.FolioSpringLiquibase;
 import org.folio.spring.service.PrepareSystemUserService;
@@ -71,6 +72,7 @@ public class CustomTenantService extends TenantService {
   private final CancellationReasonClient cancellationReasonClient;
   private final LoanTypeClient loanTypeClient;
   private final CalendarService calendarService;
+  private final ServicePointExpirationPeriodService servicePointExpirationPeriodService;
 
 
   public CustomTenantService(JdbcTemplate jdbcTemplate, FolioExecutionContext context, FolioSpringLiquibase folioSpringLiquibase,
@@ -78,7 +80,8 @@ public class CustomTenantService extends TenantService {
                              InstanceTypeClient instanceTypeClient, HoldingsStorageClient holdingsStorageClient,
                              LocationsClient locationsClient, HoldingSourcesClient holdingSourcesClient,
                              InventoryServicePointClient servicePointClient, LocationUnitClient locationUnitClient,
-                             LoanTypeClient loanTypeClient, CancellationReasonClient cancellationReasonClient, CalendarService calendarService) {
+                             LoanTypeClient loanTypeClient, CancellationReasonClient cancellationReasonClient, CalendarService calendarService,
+                             ServicePointExpirationPeriodService servicePointExpirationPeriodService) {
     super(jdbcTemplate, context, folioSpringLiquibase);
 
     this.systemUserService = systemUserService;
@@ -93,6 +96,7 @@ public class CustomTenantService extends TenantService {
     this.loanTypeClient = loanTypeClient;
     this.cancellationReasonClient = cancellationReasonClient;
     this.calendarService = calendarService;
+    this.servicePointExpirationPeriodService = servicePointExpirationPeriodService;
   }
 
   @Override
@@ -213,7 +217,7 @@ public class CustomTenantService extends TenantService {
         .code(CODE)
         .discoveryDisplayName(NAME)
         .pickupLocation(true)
-        .holdShelfExpiryPeriod(HoldShelfExpiryPeriod.builder().duration(3).intervalId(HoldShelfExpiryPeriod.IntervalIdEnum.DAYS).build())
+        .holdShelfExpiryPeriod(servicePointExpirationPeriodService.getShelfExpiryPeriod())
         .holdShelfClosedLibraryDateManagement(HOLD_SHELF_CLOSED_LIBRARY_DATE_MANAGEMENT)
         .build();
 
