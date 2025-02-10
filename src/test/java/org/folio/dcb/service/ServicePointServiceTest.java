@@ -48,7 +48,6 @@ class ServicePointServiceTest {
       .thenReturn(createServicePointRequest());
     var response = servicePointService.createServicePointIfNotExists(createDcbPickup());
     verify(inventoryServicePointClient).createServicePoint(any());
-    when(servicePointExpirationPeriodService.getShelfExpiryPeriod()).thenReturn(DCBConstants.DEFAULT_PERIOD);
     verify(inventoryServicePointClient).getServicePointByName(any());
     verify(calendarService).addServicePointIdToDefaultCalendar(UUID.fromString(response.getId()));
     verify(calendarService, never()).associateServicePointIdWithDefaultCalendarIfAbsent(any());
