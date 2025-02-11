@@ -23,8 +23,6 @@ import static org.mockito.Mockito.when;
 
 import org.folio.dcb.domain.dto.HoldShelfExpiryPeriod;
 import org.folio.dcb.domain.dto.IntervalIdEnum;
-import org.folio.dcb.service.impl.ServicePointServiceImpl;
-import org.folio.dcb.utils.DCBConstants;
 
 @ExtendWith(MockitoExtension.class)
 class ServicePointServiceTest {
