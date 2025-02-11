@@ -15,7 +15,7 @@ Loan:
       description: renewalCount of the loan
       type: string
     loanPolicyId:
-      description: A unique name belonging to a user. Typically used for login
+      description: A globally unique (UUID) identifier for the loanPolicy
       type: string
     status:
       "$ref": "Loan.yaml#/status"
