@@ -7,7 +7,9 @@ import org.folio.dcb.client.feign.CirculationLoanPolicyStorageClient;
 import org.folio.dcb.domain.dto.DcbItem;
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.DcbUpdateTransaction;
+import org.folio.dcb.domain.dto.Loan;
 import org.folio.dcb.domain.dto.LoanCollection;
+import org.folio.dcb.domain.dto.LoanPolicy;
 import org.folio.dcb.domain.dto.LoanPolicyCollection;
 import org.folio.dcb.domain.dto.RenewalPolicy;
 import org.folio.dcb.domain.dto.TransactionStatus;
@@ -117,17 +119,22 @@ public class TransactionsServiceImpl implements TransactionsService {
       if (loanCollection.getLoans().isEmpty()) {
         return Optional.empty();
       }
-
+      Loan firstLoan = loanCollection.getLoans().get(0);
       Integer loanRenewalCount =
-              Integer.valueOf(Optional.ofNullable(loanCollection.getLoans().get(0).getRenewalCount()).orElse("0"));
+              Integer.valueOf(Optional.ofNullable(firstLoan.getRenewalCount()).orElse("0"));
 
-      String loanPolicyIdQuery = "id==" + StringUtil.cqlEncode(loanCollection.getLoans().get(0).getLoanPolicyId());
+      String loanPolicyIdQuery = "id==" + StringUtil.cqlEncode(firstLoan.getLoanPolicyId());
       LoanPolicyCollection loanPolicyCollection =
               circulationLoanPolicyStorageClient.fetchLoanPolicyByQuery(PercentCodec.encode(loanPolicyIdQuery).toString());
+      LoanPolicy firstLoanPolicy = loanPolicyCollection.getLoanPolicies().get(0);
 
-      Boolean isUnlimited = loanPolicyCollection.getLoanPolicies().get(0).getRenewalsPolicy().getUnlimited();
+      if (Boolean.FALSE.equals(firstLoanPolicy.getRenewable())) {
+        return Optional.of(new LoanRenewalDetails(loanRenewalCount, null));
+      }
+
+      Boolean isUnlimited = firstLoanPolicy.getRenewalsPolicy().getUnlimited();
       Integer renewalMaxCount = Boolean.TRUE.equals(isUnlimited) ? UNLIMITED :
-              loanPolicyCollection.getLoanPolicies().get(0).getRenewalsPolicy().getNumberAllowed();
+              firstLoanPolicy.getRenewalsPolicy().getNumberAllowed();
 
       return Optional.of(new LoanRenewalDetails(loanRenewalCount, renewalMaxCount));
     } else {

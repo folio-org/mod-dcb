@@ -8,6 +8,9 @@ LoanPolicy:
     name:
       description: Policy Name
       type: string
+    renewable:
+      description: renewable
+      type: boolean
     renewalsPolicy:
       "$ref": "LoanPolicy.yaml#/renewalsPolicy"
 renewalsPolicy:
