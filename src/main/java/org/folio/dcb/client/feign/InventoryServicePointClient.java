@@ -7,11 +7,15 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 @FeignClient(name = "service-points", configuration = FeignClientConfiguration.class)
 public interface InventoryServicePointClient {
 
+  @PutMapping("/{servicepointId}")
+  void updateServicePointById(@PathVariable ("servicepointId") String servicePointId,
+                              @RequestBody ServicePointRequest servicePointRequest);
   @PostMapping
   ServicePointRequest createServicePoint(@RequestBody ServicePointRequest pickupServicePoint);
   @GetMapping("?query=name=={name}")
