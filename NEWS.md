@@ -1,3 +1,6 @@
+## v1.1.8 2025-02-12
+* UXPROD-5090: Update DCB service point values for the attribute Hold shelf expiration period
+
 ## v1.1.7 2025-01-28
 * UXPROD-5001: Support DCB re-resolution
 * UXPROD-5054: Support DCB Requests on Unavailable Items
