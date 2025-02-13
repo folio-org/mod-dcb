@@ -111,9 +111,7 @@ public class TransactionsServiceImpl implements TransactionsService {
   }
 
   private Optional<LoanRenewalDetails> getLoanRenewalDetails(TransactionEntity transactionEntity) {
-    if (transactionEntity.getStatus() == TransactionStatus.StatusEnum.ITEM_CHECKED_OUT
-            && (transactionEntity.getRole() == DcbTransaction.RoleEnum.BORROWING_PICKUP
-            || transactionEntity.getRole() == DcbTransaction.RoleEnum.BORROWER)) {
+    if (isTxnItemCheckoutAndRoleIsBorrowerOrBorrowingPickup(transactionEntity)) {
       String loanQuery = buildLoanQuery(transactionEntity);
       LoanCollection loanCollection = circulationClient.fetchLoanByQuery(loanQuery);
       if (loanCollection.getLoans().isEmpty()) {
@@ -141,6 +139,12 @@ public class TransactionsServiceImpl implements TransactionsService {
     } else {
       return Optional.empty();
     }
+  }
+
+  private static boolean isTxnItemCheckoutAndRoleIsBorrowerOrBorrowingPickup(TransactionEntity transactionEntity) {
+    return transactionEntity.getStatus() == TransactionStatus.StatusEnum.ITEM_CHECKED_OUT
+            && (transactionEntity.getRole() == DcbTransaction.RoleEnum.BORROWING_PICKUP
+            || transactionEntity.getRole() == DcbTransaction.RoleEnum.BORROWER);
   }
 
   private static @NotNull String buildLoanQuery(TransactionEntity transactionEntity) {
