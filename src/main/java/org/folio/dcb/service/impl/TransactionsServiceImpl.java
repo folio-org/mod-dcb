@@ -132,8 +132,9 @@ public class TransactionsServiceImpl implements TransactionsService {
       }
 
       Boolean isUnlimited = firstLoanPolicy.getRenewalsPolicy().getUnlimited();
-      Integer renewalMaxCount = Boolean.TRUE.equals(isUnlimited) ? UNLIMITED :
-              firstLoanPolicy.getRenewalsPolicy().getNumberAllowed();
+      Integer renewalMaxCount = Boolean.TRUE.equals(isUnlimited)
+              ? UNLIMITED
+              : firstLoanPolicy.getRenewalsPolicy().getNumberAllowed();
 
       return Optional.of(new LoanRenewalDetails(loanRenewalCount, renewalMaxCount, renewable));
     } else {
