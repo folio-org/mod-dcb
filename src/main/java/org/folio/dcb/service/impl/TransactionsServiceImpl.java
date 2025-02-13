@@ -11,7 +11,7 @@ import org.folio.dcb.domain.dto.Loan;
 import org.folio.dcb.domain.dto.LoanCollection;
 import org.folio.dcb.domain.dto.LoanPolicy;
 import org.folio.dcb.domain.dto.LoanPolicyCollection;
-import org.folio.dcb.domain.dto.RenewalPolicy;
+import org.folio.dcb.domain.dto.RenewalInfo;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.dto.TransactionStatusResponseCollection;
@@ -127,16 +127,17 @@ public class TransactionsServiceImpl implements TransactionsService {
       LoanPolicyCollection loanPolicyCollection =
               circulationLoanPolicyStorageClient.fetchLoanPolicyByQuery(PercentCodec.encode(loanPolicyIdQuery).toString());
       LoanPolicy firstLoanPolicy = loanPolicyCollection.getLoanPolicies().get(0);
+      Boolean renewable = firstLoanPolicy.getRenewable();
 
       if (Boolean.FALSE.equals(firstLoanPolicy.getRenewable())) {
-        return Optional.of(new LoanRenewalDetails(loanRenewalCount, null));
+        return Optional.of(new LoanRenewalDetails(loanRenewalCount, null, renewable));
       }
 
       Boolean isUnlimited = firstLoanPolicy.getRenewalsPolicy().getUnlimited();
       Integer renewalMaxCount = Boolean.TRUE.equals(isUnlimited) ? UNLIMITED :
               firstLoanPolicy.getRenewalsPolicy().getNumberAllowed();
 
-      return Optional.of(new LoanRenewalDetails(loanRenewalCount, renewalMaxCount));
+      return Optional.of(new LoanRenewalDetails(loanRenewalCount, renewalMaxCount, renewable));
     } else {
       return Optional.empty();
     }
@@ -150,7 +151,7 @@ public class TransactionsServiceImpl implements TransactionsService {
     return PercentCodec.encode(itemId + CQL_AND + statusOpen + CQL_AND + isDCB + CQL_AND + userId).toString();
   }
 
-  private record LoanRenewalDetails(Integer loanRenewalCount, Integer renewalMaxCount) {}
+  private record LoanRenewalDetails(Integer loanRenewalCount, Integer renewalMaxCount, Boolean renewable) {}
 
   @Override
   public TransactionStatusResponseCollection getTransactionStatusList(OffsetDateTime fromDate, OffsetDateTime toDate, Integer pageNumber, Integer pageSize) {
@@ -189,9 +190,10 @@ public class TransactionsServiceImpl implements TransactionsService {
     TransactionStatusResponse.StatusEnum transactionStatusResponseStatusEnum = TransactionStatusResponse.StatusEnum.fromValue(transactionStatus.getValue());
     DcbTransaction.RoleEnum transactionRole = transactionEntity.getRole();
     DcbItem dcbItem = loanRenewalDetails.map(loanDetails-> DcbItem.builder()
-            .renewalPolicy(RenewalPolicy.builder()
+            .renewalInfo(RenewalInfo.builder()
                     .renewalCount(loanDetails.loanRenewalCount())
                     .renewalMaxCount(loanDetails.renewalMaxCount())
+                    .renewable(loanDetails.renewable())
                     .build())
             .build()).orElse(null);
     return TransactionStatusResponse.builder()

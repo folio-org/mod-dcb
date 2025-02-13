@@ -490,8 +490,9 @@ class TransactionApiControllerTest extends BaseIT {
                             .headers(defaultHeaders())
                             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.item.renewalPolicy.renewalCount").value(8))
-            .andExpect(jsonPath("$.item.renewalPolicy.renewalMaxCount").value(22));
+            .andExpect(jsonPath("$.item.renewalInfo.renewalCount").value(8))
+            .andExpect(jsonPath("$.item.renewalInfo.renewable").value(true))
+            .andExpect(jsonPath("$.item.renewalInfo.renewalMaxCount").value(22));
   }
 
   @ParameterizedTest
@@ -529,8 +530,9 @@ class TransactionApiControllerTest extends BaseIT {
                             .headers(defaultHeaders())
                             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.item.renewalPolicy.renewalCount").value(8))
-            .andExpect(jsonPath("$.item.renewalPolicy.renewalMaxCount").value(-1));
+            .andExpect(jsonPath("$.item.renewalInfo.renewalCount").value(8))
+            .andExpect(jsonPath("$.item.renewalInfo.renewable").value(true))
+            .andExpect(jsonPath("$.item.renewalInfo.renewalMaxCount").value(-1));
   }
 
   @ParameterizedTest
@@ -557,8 +559,7 @@ class TransactionApiControllerTest extends BaseIT {
     LoanPolicyCollection loanPolicyCollection = LoanPolicyCollection.builder()
             .loanPolicies(List.of(LoanPolicy.builder()
                     .id(randomUUID)
-                    .renewable(false)
-                    .renewalsPolicy(RenewalsPolicy.builder().unlimited(true).build()).build()))
+                    .renewable(false).build()))
             .totalRecords(1)
             .build();
     Mockito.doReturn(loanPolicyCollection).when(circulationLoanPolicyStorageClient).fetchLoanPolicyByQuery(anyString());
@@ -568,8 +569,9 @@ class TransactionApiControllerTest extends BaseIT {
                             .headers(defaultHeaders())
                             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.item.renewalPolicy.renewalCount").value(8))
-            .andExpect(jsonPath("$.item.renewalPolicy.renewalMaxCount").doesNotExist());
+            .andExpect(jsonPath("$.item.renewalInfo.renewalCount").value(8))
+            .andExpect(jsonPath("$.item.renewalInfo.renewable").value(false))
+            .andExpect(jsonPath("$.item.renewalInfo.renewalMaxCount").doesNotExist());
   }
 
   @ParameterizedTest
@@ -611,8 +613,9 @@ class TransactionApiControllerTest extends BaseIT {
                             .headers(defaultHeaders())
                             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.item.renewalPolicy.renewalCount").value(0))
-            .andExpect(jsonPath("$.item.renewalPolicy.renewalMaxCount").value(22));
+            .andExpect(jsonPath("$.item.renewalInfo.renewalCount").value(0))
+            .andExpect(jsonPath("$.item.renewalInfo.renewable").value(true))
+            .andExpect(jsonPath("$.item.renewalInfo.renewalMaxCount").value(22));
   }
 
   @ParameterizedTest
@@ -637,7 +640,25 @@ class TransactionApiControllerTest extends BaseIT {
                             .headers(defaultHeaders())
                             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.item.renewalPolicy").doesNotExist());
+            .andExpect(jsonPath("$.item.renewalInfo").doesNotExist());
+  }
+
+  @Test
+  void getLendingTransactionStatusSuccessTestRenewalCountNegativeTest() throws Exception {
+    var transactionID = UUID.randomUUID().toString();
+    var dcbTransaction = createTransactionEntity();
+    dcbTransaction.setStatus(TransactionStatus.StatusEnum.AWAITING_PICKUP);
+    dcbTransaction.setRole(LENDER);
+    dcbTransaction.setId(transactionID);
+
+    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> transactionRepository.save(dcbTransaction));
+
+    mockMvc.perform(
+                    get("/transactions/" + transactionID + "/status")
+                            .headers(defaultHeaders())
+                            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.item.renewalInfo").doesNotExist());
   }
 
   @Test
