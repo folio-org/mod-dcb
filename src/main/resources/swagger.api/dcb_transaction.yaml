@@ -159,6 +159,10 @@ components:
       $ref: 'schemas/UserGroup.yaml#/UserGroupCollection'
     UserCollection:
       $ref: 'schemas/User.yaml#/UserCollection'
+    LoanCollection:
+      $ref: 'schemas/Loan.yaml#/LoanCollection'
+    LoanPolicyCollection:
+      $ref: 'schemas/LoanPolicy.yaml#/LoanPolicyCollection'
     CirculationRequest:
       $ref: 'schemas/CirculationRequest.yaml#/CirculationRequest'
     CheckInRequest:

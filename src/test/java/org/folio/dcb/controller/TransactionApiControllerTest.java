@@ -1,26 +1,57 @@
 package org.folio.dcb.controller;
 
 import com.jayway.jsonpath.JsonPath;
-import org.folio.dcb.domain.dto.DcbItem;
-import org.folio.dcb.domain.dto.TransactionStatus;
+import org.folio.dcb.client.feign.CirculationClient;
+import org.folio.dcb.client.feign.CirculationLoanPolicyStorageClient;
+import org.folio.dcb.domain.dto.*;
 import org.folio.dcb.domain.entity.TransactionAuditEntity;
 import org.folio.dcb.repository.TransactionAuditRepository;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.spring.service.SystemUserScopedExecutionService;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWER;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWING_PICKUP;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.PICKUP;
-import static org.folio.dcb.utils.EntityUtils.*;
+import static org.folio.dcb.utils.EntityUtils.DCB_NEW_BARCODE;
+import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
+import static org.folio.dcb.utils.EntityUtils.DCB_TYPE_USER_ID;
+import static org.folio.dcb.utils.EntityUtils.EXISTED_INVENTORY_ITEM_BARCODE;
+import static org.folio.dcb.utils.EntityUtils.EXISTED_PATRON_ID;
+import static org.folio.dcb.utils.EntityUtils.ITEM_ID;
+import static org.folio.dcb.utils.EntityUtils.NOT_EXISTED_PATRON_ID;
+import static org.folio.dcb.utils.EntityUtils.PATRON_TYPE_USER_ID;
+import static org.folio.dcb.utils.EntityUtils.createDcbItem;
+import static org.folio.dcb.utils.EntityUtils.createDcbPatronWithExactPatronId;
+import static org.folio.dcb.utils.EntityUtils.createDcbTransactionUpdate;
+import static org.folio.dcb.utils.EntityUtils.createDefaultDcbPatron;
+import static org.folio.dcb.utils.EntityUtils.createDcbTransactionByRole;
+import static org.folio.dcb.utils.EntityUtils.createTransactionEntity;
+import static org.folio.dcb.utils.EntityUtils.createTransactionStatus;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInRelativeOrder;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -40,6 +71,12 @@ class TransactionApiControllerTest extends BaseIT {
 
   @Autowired
   private SystemUserScopedExecutionService systemUserScopedExecutionService;
+  @SpyBean
+  private CirculationClient circulationClient;
+  @SpyBean
+  private CirculationLoanPolicyStorageClient circulationLoanPolicyStorageClient;
+
+  ObjectMapper objectMapper = new ObjectMapper();
 
   @Test
   void createLendingCirculationRequestTest() throws Exception {
@@ -399,6 +436,223 @@ class TransactionApiControllerTest extends BaseIT {
       .andExpect(status().isOk());
   }
 
+  private static Stream<Arguments> transactionRoles() {
+    return Stream.of(
+            Arguments.of(BORROWER),
+            Arguments.of(BORROWING_PICKUP)
+    );
+  }
+
+  @ParameterizedTest
+  @MethodSource("transactionRoles")
+  void getLendingTransactionStatusSuccessTestRenewalCountUnlimitedFalse(DcbTransaction.RoleEnum role) throws Exception {
+    var transactionID = UUID.randomUUID().toString();
+    var dcbTransaction = createTransactionEntity();
+    dcbTransaction.setStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_OUT);
+    dcbTransaction.setRole(role);
+    dcbTransaction.setId(transactionID);
+
+    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> transactionRepository.save(dcbTransaction));
+
+    String randomUUID = UUID.randomUUID().toString();
+
+    LoanCollection loanCollection = LoanCollection.builder()
+            .loans(List.of(Loan.builder()
+                    .id(randomUUID)
+                    .loanPolicyId(randomUUID)
+                    .renewalCount("8")
+                    .status(Status.builder().name("OPEN").build()).build()))
+            .totalRecords(1)
+            .build();
+    Mockito.doReturn(loanCollection).when(circulationClient).fetchLoanByQuery(anyString());
+    LoanPolicyCollection loanPolicyCollection = LoanPolicyCollection.builder()
+            .loanPolicies(List.of(LoanPolicy.builder()
+                    .id(randomUUID)
+                    .renewable(true)
+                    .renewalsPolicy(RenewalsPolicy.builder()
+                            .unlimited(false)
+                            .numberAllowed(22)
+                            .build()).build()))
+            .totalRecords(1)
+            .build();
+    Mockito.doReturn(loanPolicyCollection).when(circulationLoanPolicyStorageClient).fetchLoanPolicyByQuery(anyString());
+
+    mockMvc.perform(
+                    get("/transactions/" + transactionID + "/status")
+                            .headers(defaultHeaders())
+                            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.item.renewalInfo.renewalCount").value(8))
+            .andExpect(jsonPath("$.item.renewalInfo.renewable").value(true))
+            .andExpect(jsonPath("$.item.renewalInfo.renewalMaxCount").value(22));
+  }
+
+  @ParameterizedTest
+  @MethodSource("transactionRoles")
+  void getLendingTransactionStatusSuccessTestRenewalCountUnlimitedTrue(DcbTransaction.RoleEnum role) throws Exception {
+    var transactionID = UUID.randomUUID().toString();
+    var dcbTransaction = createTransactionEntity();
+    dcbTransaction.setStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_OUT);
+    dcbTransaction.setRole(role);
+    dcbTransaction.setId(transactionID);
+
+    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> transactionRepository.save(dcbTransaction));
+
+    String randomUUID = UUID.randomUUID().toString();
+    LoanCollection loanCollection = LoanCollection.builder()
+            .loans(List.of(Loan.builder()
+                    .id(randomUUID)
+                    .loanPolicyId(randomUUID)
+                    .renewalCount("8")
+                    .status(Status.builder().name("OPEN").build()).build()))
+            .totalRecords(1)
+            .build();
+    Mockito.doReturn(loanCollection).when(circulationClient).fetchLoanByQuery(anyString());
+    LoanPolicyCollection loanPolicyCollection = LoanPolicyCollection.builder()
+            .loanPolicies(List.of(LoanPolicy.builder()
+                    .id(randomUUID)
+                    .renewable(true)
+                    .renewalsPolicy(RenewalsPolicy.builder().unlimited(true).build()).build()))
+            .totalRecords(1)
+            .build();
+    Mockito.doReturn(loanPolicyCollection).when(circulationLoanPolicyStorageClient).fetchLoanPolicyByQuery(anyString());
+
+    mockMvc.perform(
+                    get("/transactions/" + transactionID + "/status")
+                            .headers(defaultHeaders())
+                            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.item.renewalInfo.renewalCount").value(8))
+            .andExpect(jsonPath("$.item.renewalInfo.renewable").value(true))
+            .andExpect(jsonPath("$.item.renewalInfo.renewalMaxCount").value(-1));
+  }
+
+  @ParameterizedTest
+  @MethodSource("transactionRoles")
+  void getLendingTransactionStatusSuccessTestRenewalCountFalseRenewableLoanPolicy(DcbTransaction.RoleEnum role) throws Exception {
+    var transactionID = UUID.randomUUID().toString();
+    var dcbTransaction = createTransactionEntity();
+    dcbTransaction.setStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_OUT);
+    dcbTransaction.setRole(role);
+    dcbTransaction.setId(transactionID);
+
+    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> transactionRepository.save(dcbTransaction));
+
+    String randomUUID = UUID.randomUUID().toString();
+    LoanCollection loanCollection = LoanCollection.builder()
+            .loans(List.of(Loan.builder()
+                    .id(randomUUID)
+                    .loanPolicyId(randomUUID)
+                    .renewalCount("8")
+                    .status(Status.builder().name("OPEN").build()).build()))
+            .totalRecords(1)
+            .build();
+    Mockito.doReturn(loanCollection).when(circulationClient).fetchLoanByQuery(anyString());
+    LoanPolicyCollection loanPolicyCollection = LoanPolicyCollection.builder()
+            .loanPolicies(List.of(LoanPolicy.builder()
+                    .id(randomUUID)
+                    .renewable(false).build()))
+            .totalRecords(1)
+            .build();
+    Mockito.doReturn(loanPolicyCollection).when(circulationLoanPolicyStorageClient).fetchLoanPolicyByQuery(anyString());
+
+    mockMvc.perform(
+                    get("/transactions/" + transactionID + "/status")
+                            .headers(defaultHeaders())
+                            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.item.renewalInfo.renewalCount").value(8))
+            .andExpect(jsonPath("$.item.renewalInfo.renewable").value(false))
+            .andExpect(jsonPath("$.item.renewalInfo.renewalMaxCount").doesNotExist());
+  }
+
+  @ParameterizedTest
+  @MethodSource("transactionRoles")
+  void getLendingTransactionStatusSuccessTestRenewalCountZeroWhenNullRenewalCountInLoan(DcbTransaction.RoleEnum role) throws Exception {
+    var transactionID = UUID.randomUUID().toString();
+    var dcbTransaction = createTransactionEntity();
+    dcbTransaction.setStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_OUT);
+    dcbTransaction.setRole(role);
+    dcbTransaction.setId(transactionID);
+
+    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> transactionRepository.save(dcbTransaction));
+
+    String randomUUID = UUID.randomUUID().toString();
+
+    LoanCollection loanCollection = LoanCollection.builder()
+            .loans(List.of(Loan.builder()
+                    .id(randomUUID)
+                    .loanPolicyId(randomUUID)
+                    .renewalCount(null)
+                    .status(Status.builder().name("OPEN").build()).build()))
+            .totalRecords(1)
+            .build();
+    Mockito.doReturn(loanCollection).when(circulationClient).fetchLoanByQuery(anyString());
+    LoanPolicyCollection loanPolicyCollection = LoanPolicyCollection.builder()
+            .loanPolicies(List.of(LoanPolicy.builder()
+                    .id(randomUUID)
+                    .renewable(true)
+                    .renewalsPolicy(RenewalsPolicy.builder()
+                            .unlimited(false)
+                            .numberAllowed(22)
+                            .build()).build()))
+            .totalRecords(1)
+            .build();
+    Mockito.doReturn(loanPolicyCollection).when(circulationLoanPolicyStorageClient).fetchLoanPolicyByQuery(anyString());
+
+    mockMvc.perform(
+                    get("/transactions/" + transactionID + "/status")
+                            .headers(defaultHeaders())
+                            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.item.renewalInfo.renewalCount").value(0))
+            .andExpect(jsonPath("$.item.renewalInfo.renewable").value(true))
+            .andExpect(jsonPath("$.item.renewalInfo.renewalMaxCount").value(22));
+  }
+
+  @ParameterizedTest
+  @MethodSource("transactionRoles")
+  void getLendingTransactionStatusSuccessTestRenewalCountLoanNotExist(DcbTransaction.RoleEnum role) throws Exception {
+    var transactionID = UUID.randomUUID().toString();
+    var dcbTransaction = createTransactionEntity();
+    dcbTransaction.setStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_OUT);
+    dcbTransaction.setRole(role);
+    dcbTransaction.setId(transactionID);
+
+    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> transactionRepository.save(dcbTransaction));
+
+    LoanCollection loanCollection = LoanCollection.builder()
+            .loans(Collections.emptyList())
+            .totalRecords(0)
+            .build();
+    Mockito.doReturn(loanCollection).when(circulationClient).fetchLoanByQuery(anyString());
+
+    mockMvc.perform(
+                    get("/transactions/" + transactionID + "/status")
+                            .headers(defaultHeaders())
+                            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.item.renewalInfo").doesNotExist());
+  }
+
+  @Test
+  void getLendingTransactionStatusSuccessTestRenewalCountNegativeTest() throws Exception {
+    var transactionID = UUID.randomUUID().toString();
+    var dcbTransaction = createTransactionEntity();
+    dcbTransaction.setStatus(TransactionStatus.StatusEnum.AWAITING_PICKUP);
+    dcbTransaction.setRole(LENDER);
+    dcbTransaction.setId(transactionID);
+
+    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> transactionRepository.save(dcbTransaction));
+
+    mockMvc.perform(
+                    get("/transactions/" + transactionID + "/status")
+                            .headers(defaultHeaders())
+                            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.item.renewalInfo").doesNotExist());
+  }
+
   @Test
   void getTransactionStatusNotFoundTest() throws Exception {
     var id = UUID.randomUUID().toString();
@@ -514,7 +768,6 @@ class TransactionApiControllerTest extends BaseIT {
     dcbTransaction.getItem().setBarcode("newItem");
     var dcbItem = createDcbItem();
     dcbItem.setBarcode("newItem");
-    System.out.println("The dcbItem Id is "+ dcbItem.getId());
 
     this.mockMvc.perform(
         post("/transactions/" + DCB_TRANSACTION_ID)
@@ -579,6 +832,26 @@ class TransactionApiControllerTest extends BaseIT {
           .accept(MediaType.APPLICATION_JSON))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.status").value("CLOSED"));
+  }
+
+  @Test
+  void lenderTransactionStatusUpdateFromCreatedToOpen() throws Exception {
+    var transactionID = UUID.randomUUID().toString();
+    var dcbTransaction = createTransactionEntity();
+    dcbTransaction.setStatus(TransactionStatus.StatusEnum.CREATED);
+    dcbTransaction.setRole(LENDER);
+    dcbTransaction.setId(transactionID);
+
+    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> transactionRepository.save(dcbTransaction));
+
+    this.mockMvc.perform(
+      put("/transactions/" + transactionID + "/status")
+        .content(asJsonString(createTransactionStatus(TransactionStatus.StatusEnum.OPEN)))
+        .headers(defaultHeaders())
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.status").value("OPEN"));
   }
 
   @Test
@@ -844,6 +1117,118 @@ class TransactionApiControllerTest extends BaseIT {
   }
 
   @Test
+  void getTransactionStatusUpdateListTest() throws Exception {
+    var startDate1 = OffsetDateTime.now(ZoneOffset.UTC);
+    var dcbTransaction = createDcbTransactionByRole(BORROWER);
+    removeExistedTransactionFromDbIfSoExists();
+    removeExistingTransactionsByItemId(dcbTransaction.getItem().getId());
+
+    // Creating new transaction
+    this.mockMvc.perform(
+        post("/transactions/" + DCB_TRANSACTION_ID)
+          .content(asJsonString(dcbTransaction))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isCreated());
+
+    // Update transaction from CREATED to OPEN
+    this.mockMvc.perform(
+        put("/transactions/" + DCB_TRANSACTION_ID + "/status")
+          .content(asJsonString(createTransactionStatus(TransactionStatus.StatusEnum.OPEN)))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.status").value("OPEN"));
+
+    var endDate1 = OffsetDateTime.now(ZoneOffset.UTC);
+
+    // There is one update happened(CREATED -> OPEN), so we will get one record
+    this.mockMvc.perform(
+        get("/transactions/status")
+          .headers(defaultHeaders())
+          .param("fromDate", String.valueOf(startDate1))
+          .param("toDate", String.valueOf(endDate1))
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().is(200))
+      .andExpect(jsonPath("$.totalRecords", is(1)))
+      .andExpect(jsonPath("$.currentPageNumber", is(0)))
+      .andExpect(jsonPath("$.currentPageSize", is(1000)))
+      .andExpect(jsonPath("$.maximumPageNumber", is(0)))
+      .andExpect(jsonPath("$.transactions[*].status",
+        containsInRelativeOrder("OPEN")))
+      .andExpect(jsonPath("$.transactions[*].id",
+        contains(DCB_TRANSACTION_ID)));
+
+    var startDate2 = OffsetDateTime.now(ZoneOffset.UTC);
+
+    // Update transaction from OPEN to CLOSED
+    this.mockMvc.perform(
+        put("/transactions/" + DCB_TRANSACTION_ID + "/status")
+          .content(asJsonString(createTransactionStatus(TransactionStatus.StatusEnum.CLOSED)))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.status").value("CLOSED"));
+
+    var endDate2 = OffsetDateTime.now(ZoneOffset.UTC);
+
+    // There are 4 update happened(OPEN -> AWAITING_PICKUP, AWAITING_PICKUP -> ITEM_CHECKED_OUT
+    // ITEM_CHECKED_OUT -> ITEM_CHECKED_IN, ITEM_CHECKED_IN -> CLOSED), so we will get 4 record
+    this.mockMvc.perform(
+        get("/transactions/status")
+          .headers(defaultHeaders())
+          .param("fromDate", String.valueOf(startDate2))
+          .param("toDate", String.valueOf(endDate2))
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().is(200))
+      .andExpect(jsonPath("$.totalRecords", is(4)))
+      .andExpect(jsonPath("$.currentPageNumber", is(0)))
+      .andExpect(jsonPath("$.currentPageSize", is(1000)))
+      .andExpect(jsonPath("$.maximumPageNumber", is(0)))
+      .andExpect(jsonPath("$.transactions[*].status",
+        containsInRelativeOrder("AWAITING_PICKUP", "ITEM_CHECKED_OUT", "ITEM_CHECKED_IN", "CLOSED")));
+
+    // Now try to get all the records from startDate1 to endDate2 without pageSize(default pageSize)
+    this.mockMvc.perform(
+        get("/transactions/status")
+          .headers(defaultHeaders())
+          .param("fromDate", String.valueOf(startDate1))
+          .param("toDate", String.valueOf(endDate2))
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().is(200))
+      .andExpect(jsonPath("$.totalRecords", is(5)))
+      .andExpect(jsonPath("$.currentPageNumber", is(0)))
+      .andExpect(jsonPath("$.currentPageSize", is(1000)))
+      .andExpect(jsonPath("$.maximumPageNumber", is(0)))
+      .andExpect(jsonPath("$.transactions[*].status",
+        containsInRelativeOrder("OPEN", "AWAITING_PICKUP", "ITEM_CHECKED_OUT", "ITEM_CHECKED_IN", "CLOSED")));
+
+    // Now try to get the records based on pagination from startDate1 to endDate2.
+    this.mockMvc.perform(
+        get("/transactions/status")
+          .headers(defaultHeaders())
+          .param("fromDate", String.valueOf(startDate1))
+          .param("toDate", String.valueOf(endDate2))
+          .param("pageNumber", String.valueOf(1))
+          .param("pageSize",String.valueOf(2))
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().is(200))
+      .andExpect(jsonPath("$.totalRecords", is(5)))
+      .andExpect(jsonPath("$.currentPageNumber", is(1)))
+      .andExpect(jsonPath("$.currentPageSize", is(2)))
+      .andExpect(jsonPath("$.maximumPageNumber", is(2)))
+      .andExpect(jsonPath("$.transactions[*].status",
+        containsInRelativeOrder("ITEM_CHECKED_OUT", "ITEM_CHECKED_IN")));
+  }
+
+  @Test
   void createAndUpdateBorrowerTransactionTest() throws Exception {
     removeExistedTransactionFromDbIfSoExists();
     removeExistingTransactionsByItemId(ITEM_ID);
@@ -892,6 +1277,7 @@ class TransactionApiControllerTest extends BaseIT {
       });
   }
 
+
   private void removeExistedTransactionFromDbIfSoExists() {
     systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> {
       if (transactionRepository.existsById(DCB_TRANSACTION_ID)){
@@ -905,5 +1291,25 @@ class TransactionApiControllerTest extends BaseIT {
         transactionRepository.findTransactionsByItemIdAndStatusNotInClosed(UUID.fromString(itemId))
           .forEach(transactionEntity -> transactionRepository.deleteById(transactionEntity.getId()))
     );
+  }
+
+  @Test
+  void createLendingCirculationRequestTestWithSpecialCharBarcode() throws Exception {
+    removeExistedTransactionFromDbIfSoExists();
+    removeExistingTransactionsByItemId(ITEM_ID);
+    String specialCharBarCode = "!@#$%^^&&*()_=+`~|\\]{}DCB_ITEM/'''";
+    DcbTransaction dcbTransaction = createDcbTransactionByRole(LENDER);
+    dcbTransaction.getItem().barcode(specialCharBarCode);
+    DcbItem expectedDCBItem = createDcbItem().barcode(specialCharBarCode);
+    this.mockMvc.perform(
+                    post("/transactions/" + DCB_TRANSACTION_ID)
+                            .content(asJsonString(dcbTransaction))
+                            .headers(defaultHeaders())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.status").value("CREATED"))
+            .andExpect(jsonPath("$.item").value(expectedDCBItem))
+            .andExpect(jsonPath("$.patron").value(createDefaultDcbPatron()));
   }
 }
