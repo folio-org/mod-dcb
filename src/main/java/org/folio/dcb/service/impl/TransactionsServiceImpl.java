@@ -2,8 +2,16 @@ package org.folio.dcb.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.folio.dcb.client.feign.CirculationClient;
+import org.folio.dcb.client.feign.CirculationLoanPolicyStorageClient;
+import org.folio.dcb.domain.dto.DcbItem;
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.DcbUpdateTransaction;
+import org.folio.dcb.domain.dto.Loan;
+import org.folio.dcb.domain.dto.LoanCollection;
+import org.folio.dcb.domain.dto.LoanPolicy;
+import org.folio.dcb.domain.dto.LoanPolicyCollection;
+import org.folio.dcb.domain.dto.RenewalInfo;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.dto.TransactionStatusResponseCollection;
@@ -17,17 +25,24 @@ import org.folio.dcb.service.LibraryService;
 import org.folio.dcb.service.StatusProcessorService;
 import org.folio.dcb.service.TransactionsService;
 import org.folio.spring.exception.NotFoundException;
+import org.folio.util.PercentCodec;
+import org.folio.util.StringUtil;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+
 import java.time.OffsetDateTime;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 @Log4j2
 public class TransactionsServiceImpl implements TransactionsService {
 
+  private static final String CQL_AND = " AND ";
+  private static final int UNLIMITED = -1;
   @Qualifier("lendingLibraryService")
   private final LibraryService lendingLibraryService;
   @Qualifier("borrowingPickupLibraryService")
@@ -41,6 +56,8 @@ public class TransactionsServiceImpl implements TransactionsService {
   private final TransactionMapper transactionMapper;
   private final TransactionAuditRepository transactionAuditRepository;
   private final BaseLibraryService baseLibraryService;
+  private final CirculationClient circulationClient;
+  private final CirculationLoanPolicyStorageClient circulationLoanPolicyStorageClient;
 
   @Override
   public TransactionStatusResponse createCirculationRequest(String dcbTransactionId, DcbTransaction dcbTransaction) {
@@ -89,8 +106,57 @@ public class TransactionsServiceImpl implements TransactionsService {
     log.debug("getTransactionStatusById:: id {} ", dcbTransactionId);
     TransactionEntity transactionEntity = getTransactionEntityOrThrow(dcbTransactionId);
 
-    return generateTransactionStatusResponseFromTransactionEntity(transactionEntity);
+    Optional<LoanRenewalDetails> loanRenewalDetails = getLoanRenewalDetails(transactionEntity);
+    return generateTransactionStatusResponseFromTransactionEntity(transactionEntity, loanRenewalDetails);
   }
+
+  private Optional<LoanRenewalDetails> getLoanRenewalDetails(TransactionEntity transactionEntity) {
+    if (isTxnItemCheckoutAndRoleIsBorrowerOrBorrowingPickup(transactionEntity)) {
+      String loanQuery = buildLoanQuery(transactionEntity);
+      LoanCollection loanCollection = circulationClient.fetchLoanByQuery(loanQuery);
+      if (loanCollection.getLoans().isEmpty()) {
+        return Optional.empty();
+      }
+      Loan firstLoan = loanCollection.getLoans().get(0);
+      Integer loanRenewalCount =
+              Integer.valueOf(Optional.ofNullable(firstLoan.getRenewalCount()).orElse("0"));
+
+      String loanPolicyIdQuery = "id==" + StringUtil.cqlEncode(firstLoan.getLoanPolicyId());
+      LoanPolicyCollection loanPolicyCollection =
+              circulationLoanPolicyStorageClient.fetchLoanPolicyByQuery(PercentCodec.encode(loanPolicyIdQuery).toString());
+      LoanPolicy firstLoanPolicy = loanPolicyCollection.getLoanPolicies().get(0);
+      Boolean renewable = firstLoanPolicy.getRenewable();
+
+      if (Boolean.FALSE.equals(firstLoanPolicy.getRenewable())) {
+        return Optional.of(new LoanRenewalDetails(loanRenewalCount, null, renewable));
+      }
+
+      Boolean isUnlimited = firstLoanPolicy.getRenewalsPolicy().getUnlimited();
+      Integer renewalMaxCount = Boolean.TRUE.equals(isUnlimited)
+              ? UNLIMITED
+              : firstLoanPolicy.getRenewalsPolicy().getNumberAllowed();
+
+      return Optional.of(new LoanRenewalDetails(loanRenewalCount, renewalMaxCount, renewable));
+    } else {
+      return Optional.empty();
+    }
+  }
+
+  private static boolean isTxnItemCheckoutAndRoleIsBorrowerOrBorrowingPickup(TransactionEntity transactionEntity) {
+    return transactionEntity.getStatus() == TransactionStatus.StatusEnum.ITEM_CHECKED_OUT
+            && (transactionEntity.getRole() == DcbTransaction.RoleEnum.BORROWING_PICKUP
+            || transactionEntity.getRole() == DcbTransaction.RoleEnum.BORROWER);
+  }
+
+  private static @NotNull String buildLoanQuery(TransactionEntity transactionEntity) {
+    String itemId = "itemId==" + StringUtil.cqlEncode(transactionEntity.getItemId());
+    String statusOpen = "status.name==" + StringUtil.cqlEncode("OPEN");
+    String isDCB = "isDcb==" + StringUtil.cqlEncode("true");
+    String userId = "userId==" + StringUtil.cqlEncode(transactionEntity.getPatronId());
+    return PercentCodec.encode(itemId + CQL_AND + statusOpen + CQL_AND + isDCB + CQL_AND + userId).toString();
+  }
+
+  private record LoanRenewalDetails(Integer loanRenewalCount, Integer renewalMaxCount, Boolean renewable) {}
 
   @Override
   public TransactionStatusResponseCollection getTransactionStatusList(OffsetDateTime fromDate, OffsetDateTime toDate, Integer pageNumber, Integer pageSize) {
@@ -124,13 +190,20 @@ public class TransactionsServiceImpl implements TransactionsService {
     baseLibraryService.updateTransactionDetails(transactionEntity, dcbUpdateTransaction.getItem());
   }
 
-  private TransactionStatusResponse generateTransactionStatusResponseFromTransactionEntity(TransactionEntity transactionEntity) {
+  private TransactionStatusResponse generateTransactionStatusResponseFromTransactionEntity(TransactionEntity transactionEntity, Optional<LoanRenewalDetails> loanRenewalDetails) {
     TransactionStatus.StatusEnum transactionStatus = transactionEntity.getStatus();
     TransactionStatusResponse.StatusEnum transactionStatusResponseStatusEnum = TransactionStatusResponse.StatusEnum.fromValue(transactionStatus.getValue());
     DcbTransaction.RoleEnum transactionRole = transactionEntity.getRole();
-
+    DcbItem dcbItem = loanRenewalDetails.map(loanDetails-> DcbItem.builder()
+            .renewalInfo(RenewalInfo.builder()
+                    .renewalCount(loanDetails.loanRenewalCount())
+                    .renewalMaxCount(loanDetails.renewalMaxCount())
+                    .renewable(loanDetails.renewable())
+                    .build())
+            .build()).orElse(null);
     return TransactionStatusResponse.builder()
       .status(transactionStatusResponseStatusEnum)
+      .item(dcbItem)
       .role((TransactionStatusResponse.RoleEnum.fromValue(transactionRole.getValue())))
       .build();
   }
