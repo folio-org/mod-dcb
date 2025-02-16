@@ -111,6 +111,23 @@ paths:
           $ref: '#/components/responses/Conflict'
         '500':
           $ref: '#/components/responses/InternalServerError'
+  /transactions/{dcbTransactionId}/renew:
+    parameters:
+      - $ref: '#/components/parameters/dcbTransactionId'
+    put:
+      description: Increment the renew loan count and returned transaction status with renewal details
+      operationId: renewItemLoanByTransactionId
+      tags:
+        - circulation
+      responses:
+        '200':
+          $ref: '#/components/responses/TransactionStatusResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 components:
   requestBodies:
     TransactionStatusBody:
@@ -237,6 +254,10 @@ components:
         maximum: 2147483647
       required: false
   schemas:
+    RenewByIdRequest:
+      $ref: 'schemas/RenewByIdRequest.yaml#/RenewByIdRequest'
+    RenewByIdResponse:
+      $ref: 'schemas/RenewByIdResponse.yaml#/RenewByIdResponse'
     InventoryItem:
       $ref: 'schemas/InventoryItem.yaml#/InventoryItem'
     InventoryHolding:

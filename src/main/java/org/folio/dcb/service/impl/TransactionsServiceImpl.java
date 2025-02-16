@@ -1,5 +1,10 @@
 package org.folio.dcb.service.impl;
 
+import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_OUT;
+import static org.folio.dcb.utils.TransactionDetailsUtil.rolesNotEqual;
+import static org.folio.dcb.utils.TransactionDetailsUtil.statusesNotEqual;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dcb.client.feign.CirculationClient;
@@ -11,6 +16,8 @@ import org.folio.dcb.domain.dto.Loan;
 import org.folio.dcb.domain.dto.LoanCollection;
 import org.folio.dcb.domain.dto.LoanPolicy;
 import org.folio.dcb.domain.dto.LoanPolicyCollection;
+import org.folio.dcb.domain.dto.RenewByIdRequest;
+import org.folio.dcb.domain.dto.RenewByIdResponse;
 import org.folio.dcb.domain.dto.RenewalInfo;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
@@ -34,6 +41,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -143,7 +151,7 @@ public class TransactionsServiceImpl implements TransactionsService {
   }
 
   private static boolean isTxnItemCheckoutAndRoleIsBorrowerOrBorrowingPickup(TransactionEntity transactionEntity) {
-    return transactionEntity.getStatus() == TransactionStatus.StatusEnum.ITEM_CHECKED_OUT
+    return transactionEntity.getStatus() == ITEM_CHECKED_OUT
             && (transactionEntity.getRole() == DcbTransaction.RoleEnum.BORROWING_PICKUP
             || transactionEntity.getRole() == DcbTransaction.RoleEnum.BORROWER);
   }
@@ -178,13 +186,60 @@ public class TransactionsServiceImpl implements TransactionsService {
   }
 
   @Override
+  public TransactionStatusResponse renewLoanByTransactionId(String dcbTransactionId) {
+    var transaction = getTransactionEntityOrThrow(dcbTransactionId);
+    log.info("ANTON::Transaction {}", transaction);
+    validateTransactionForRenewal(transaction);
+    var itemId = transaction.getItemId();
+    var patronId = transaction.getPatronId();
+    var renewalResponse = circulationClient.renewById(buildRenewRequest(itemId, patronId));
+    log.info("ANTON::RENEWAL RESPONSE {}", renewalResponse);
+    validateRenewalResponse(dcbTransactionId, renewalResponse, itemId);
+    var loanPolicy = circulationLoanPolicyStorageClient.fetchLoanPolicyById(renewalResponse.getLoanPolicyId());
+    log.info("ANTON::LOAN POLICY {}", loanPolicy);
+    var loanRenewalDetails = Optional.of(new LoanRenewalDetails(
+      renewalResponse.getRenewalCount(), loanPolicy.getRenewalsPolicy().getNumberAllowed(),
+      loanPolicy.getRenewable()));
+    return generateTransactionStatusResponseFromTransactionEntity(transaction, loanRenewalDetails);
+  }
+
+  private static void validateRenewalResponse(String dcbTransactionId, RenewByIdResponse response,
+    String itemId) {
+    if(Objects.isNull(response)) {
+      throw new NotFoundException(String.format("Renew failed. Transaction id:%s, Item id: %s",
+        dcbTransactionId, itemId));
+    }
+  }
+
+  private static RenewByIdRequest buildRenewRequest(String itemId, String patronId) {
+    return RenewByIdRequest.builder()
+      .itemId(itemId)
+      .userId(patronId)
+      .build();
+  }
+
+  private static void validateTransactionForRenewal(TransactionEntity transaction) {
+    TransactionStatus.StatusEnum status = transaction.getStatus();
+    DcbTransaction.RoleEnum role = transaction.getRole();
+    if (statusesNotEqual(ITEM_CHECKED_OUT, status)) {
+      throw new StatusException(String.format(
+        "Loan couldn't be renewed with transaction status %s, it could be renewed only with ITEM_CHECKED_OUT status",
+        status));
+    }
+    if (rolesNotEqual(LENDER, role)) {
+      throw new IllegalArgumentException(
+        String.format("Loan couldn't be renewed with role %s, it could be renewed only with role LENDER", role));
+    }
+  }
+
+  @Override
   public void updateTransactionDetails(String dcbTransactionId, DcbUpdateTransaction dcbUpdateTransaction) {
     var transactionEntity = getTransactionEntityOrThrow(dcbTransactionId);
     if (!TransactionStatus.StatusEnum.CREATED.equals(transactionEntity.getStatus())) {
       throw new StatusException(String.format(
         "Transaction details should not be updated from %s status, it can be updated only from CREATED status", transactionEntity.getStatus()));
     }
-    if (DcbTransaction.RoleEnum.LENDER.equals(transactionEntity.getRole())) {
+    if (LENDER.equals(transactionEntity.getRole())) {
       throw new IllegalArgumentException("Item details cannot be updated for lender role");
     }
     baseLibraryService.updateTransactionDetails(transactionEntity, dcbUpdateTransaction.getItem());
