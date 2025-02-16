@@ -118,6 +118,16 @@
         },
         {
           "methods": [
+            "PUT"
+          ],
+          "pathPattern": "/transactions/{dcbTransactionId}/renew",
+          "permissionsRequired": [
+            "dcb.transactions.renew.put"
+          ],
+          "modulePermissions": []
+        },
+        {
+          "methods": [
             "GET"
           ],
           "pathPattern": "/transactions/{dcbTransactionId}/status",
@@ -274,6 +284,11 @@
       "permissionName": "dcb.transactions.post",
       "displayName": "creates new transaction",
       "description": "creates new transaction"
+    },
+    {
+      "permissionName": "dcb.transactions.renew.put",
+      "displayName": "renew loan by transaction id",
+      "description": "renew loan by transaction id"
     },
     {
       "permissionName": "dcb.transactions.status.get",
