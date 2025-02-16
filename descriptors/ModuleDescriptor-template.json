@@ -124,7 +124,9 @@
           "permissionsRequired": [
             "dcb.transactions.renew.put"
           ],
-          "modulePermissions": []
+          "modulePermissions": [
+            "circulation.renew-by-id.post"
+          ]
         },
         {
           "methods": [

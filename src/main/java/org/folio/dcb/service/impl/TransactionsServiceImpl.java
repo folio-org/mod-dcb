@@ -197,9 +197,8 @@ public class TransactionsServiceImpl implements TransactionsService {
     validateRenewalResponse(dcbTransactionId, renewalResponse, itemId);
     var loanPolicy = circulationLoanPolicyStorageClient.fetchLoanPolicyById(renewalResponse.getLoanPolicyId());
     log.info("ANTON::LOAN POLICY {}", loanPolicy);
-    var loanRenewalDetails = Optional.of(new LoanRenewalDetails(
-      renewalResponse.getRenewalCount(), loanPolicy.getRenewalsPolicy().getNumberAllowed(),
-      loanPolicy.getRenewable()));
+    var loanRenewalDetails = Optional.of(new LoanRenewalDetails(renewalResponse.getRenewalCount(),
+      loanPolicy.getRenewalsPolicy().getNumberAllowed(), loanPolicy.getRenewable()));
     return generateTransactionStatusResponseFromTransactionEntity(transaction, loanRenewalDetails);
   }
 
