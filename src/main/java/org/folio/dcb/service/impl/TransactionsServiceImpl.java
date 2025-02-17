@@ -198,17 +198,16 @@ public class TransactionsServiceImpl implements TransactionsService {
     var loanPolicy = circulationLoanPolicyStorageClient.fetchLoanPolicyById(
       renewalResponse.getLoanPolicyId());
     log.info("renewLoanByTransactionId:: Loan policy response {}", loanPolicy);
-    validateLoanPolicy(renewalResponse, loanPolicy);
+    validateLoanPolicy(renewalResponse.getLoanPolicyId(), loanPolicy);
     var loanRenewalDetails = Optional.of(new LoanRenewalDetails(renewalResponse.getRenewalCount(),
       loanPolicy.getRenewalsPolicy().getNumberAllowed(), loanPolicy.getRenewable()));
     return generateTransactionStatusResponseFromTransactionEntity(transaction, loanRenewalDetails);
   }
 
-  private void validateLoanPolicy(RenewByIdResponse renewalResponse, LoanPolicy loanPolicy) {
+  private void validateLoanPolicy(String loanPolicyId, LoanPolicy loanPolicy) {
     if (Objects.isNull(loanPolicy)) {
       log.debug("validateLoanPolicy:: Loan policy is null");
-      throw new NotFoundException(String.format("Loan policy not found for loan id: %s",
-        renewalResponse.getLoanPolicyId()));
+      throw new NotFoundException(String.format("Loan policy not found for loan id: %s", loanPolicyId));
     }
   }
 
