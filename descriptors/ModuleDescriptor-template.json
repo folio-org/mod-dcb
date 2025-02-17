@@ -125,7 +125,8 @@
             "dcb.transactions.renew.put"
           ],
           "modulePermissions": [
-            "circulation.renew-by-id.post"
+            "circulation.renew-by-id.post",
+            "circulation-storage.loan-policies.item.get"
           ]
         },
         {
