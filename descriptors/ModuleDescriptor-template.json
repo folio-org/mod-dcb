@@ -280,7 +280,8 @@
         "dcb.transactions.status.get",
         "dcb.transactions.collection.get",
         "dcb.ecs-request.transactions.post",
-        "dcb.transactions.item.put"
+        "dcb.transactions.item.put",
+        "dcb.transactions.renew.put"
       ]
     },
     {
