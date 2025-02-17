@@ -4,6 +4,8 @@ import org.folio.dcb.domain.dto.CheckInRequest;
 import org.folio.dcb.domain.dto.CheckOutRequest;
 import org.folio.dcb.domain.dto.CirculationRequest;
 import org.folio.dcb.domain.dto.LoanCollection;
+import org.folio.dcb.domain.dto.RenewByIdRequest;
+import org.folio.dcb.domain.dto.RenewByIdResponse;
 import org.folio.spring.config.FeignClientConfiguration;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,4 +32,7 @@ public interface CirculationClient {
 
   @GetMapping("/loans")
   LoanCollection fetchLoanByQuery(@RequestParam("query") String query);
+
+  @PostMapping("/renew-by-id")
+  RenewByIdResponse renewById(@RequestBody RenewByIdRequest renewByIdRequest);
 }
