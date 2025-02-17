@@ -187,24 +187,35 @@ public class TransactionsServiceImpl implements TransactionsService {
 
   @Override
   public TransactionStatusResponse renewLoanByTransactionId(String dcbTransactionId) {
+    log.info("renewLoanByTransactionId:: getting transaction by id {} ", dcbTransactionId);
     var transaction = getTransactionEntityOrThrow(dcbTransactionId);
-    log.info("ANTON::Transaction {}", transaction);
     validateTransactionForRenewal(transaction);
     var itemId = transaction.getItemId();
     var patronId = transaction.getPatronId();
     var renewalResponse = circulationClient.renewById(buildRenewRequest(itemId, patronId));
-    log.info("ANTON::RENEWAL RESPONSE {}", renewalResponse);
+    log.debug("renewLoanByTransactionId:: Renew response {}", renewalResponse);
     validateRenewalResponse(dcbTransactionId, renewalResponse, itemId);
-    var loanPolicy = circulationLoanPolicyStorageClient.fetchLoanPolicyById(renewalResponse.getLoanPolicyId());
-    log.info("ANTON::LOAN POLICY {}", loanPolicy);
+    var loanPolicy = circulationLoanPolicyStorageClient.fetchLoanPolicyById(
+      renewalResponse.getLoanPolicyId());
+    log.info("renewLoanByTransactionId:: Loan policy response {}", loanPolicy);
+    validateLoanPolicy(renewalResponse, loanPolicy);
     var loanRenewalDetails = Optional.of(new LoanRenewalDetails(renewalResponse.getRenewalCount(),
       loanPolicy.getRenewalsPolicy().getNumberAllowed(), loanPolicy.getRenewable()));
     return generateTransactionStatusResponseFromTransactionEntity(transaction, loanRenewalDetails);
   }
 
+  private void validateLoanPolicy(RenewByIdResponse renewalResponse, LoanPolicy loanPolicy) {
+    if (Objects.isNull(loanPolicy)) {
+      log.debug("validateLoanPolicy:: Loan policy is null");
+      throw new NotFoundException(String.format("Loan policy not found for loan id: %s",
+        renewalResponse.getLoanPolicyId()));
+    }
+  }
+
   private static void validateRenewalResponse(String dcbTransactionId, RenewByIdResponse response,
     String itemId) {
     if(Objects.isNull(response)) {
+      log.debug("validateRenewalResponse:: renewal response is null");
       throw new NotFoundException(String.format("Renew failed. Transaction id:%s, Item id: %s",
         dcbTransactionId, itemId));
     }
@@ -221,13 +232,16 @@ public class TransactionsServiceImpl implements TransactionsService {
     TransactionStatus.StatusEnum status = transaction.getStatus();
     DcbTransaction.RoleEnum role = transaction.getRole();
     if (statusesNotEqual(ITEM_CHECKED_OUT, status)) {
+      log.debug("validateTransactionForRenewal:: Transaction status is {}", status);
       throw new StatusException(String.format(
-        "Loan couldn't be renewed with transaction status %s, it could be renewed only with ITEM_CHECKED_OUT status",
-        status));
+        "Loan couldn't be renewed with transaction status %s, it could be renewed only with " +
+          "ITEM_CHECKED_OUT status", status));
     }
     if (rolesNotEqual(LENDER, role)) {
+      log.debug("validateTransactionForRenewal:: Transaction role is {}", role);
       throw new IllegalArgumentException(
-        String.format("Loan couldn't be renewed with role %s, it could be renewed only with role LENDER", role));
+        String.format("Loan couldn't be renewed with role %s, it could be renewed only with role" +
+          " LENDER", role));
     }
   }
 
