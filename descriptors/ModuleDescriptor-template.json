@@ -125,8 +125,7 @@
             "dcb.transactions.renew.put"
           ],
           "modulePermissions": [
-            "circulation.renew-by-id.post",
-            "circulation.renew-loan.all"
+            "circulation.renew-by-id.post"
           ]
         },
         {
@@ -259,8 +258,7 @@
             "circulation-storage.cancellation-reasons.item.get",
             "circulation-storage.cancellation-reasons.item.post",
             "calendar.endpoint.calendars.get",
-            "calendar.endpoint.calendars.post",
-            "circulation.renew-by-id.post"
+            "calendar.endpoint.calendars.post"
           ]
         },
         {
