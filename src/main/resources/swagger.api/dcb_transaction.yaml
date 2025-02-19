@@ -73,6 +73,24 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
+  /transactions/status:
+    parameters:
+      - $ref: '#/components/parameters/fromDate'
+      - $ref: '#/components/parameters/toDate'
+      - $ref: '#/components/parameters/pageNumber'
+      - $ref: '#/components/parameters/pageSize'
+    get:
+      description: Get a list of updated transactions between from date and to date with optional filtering and pagination
+      operationId: getTransactionStatusList
+      tags:
+        - circulation
+      responses:
+        '200':
+          $ref: '#/components/responses/TransactionStatusResponseCollection'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /ecs-request-transactions/{ecsRequestTransactionId}:
     description: ECS TLR Transaction endpoint
     post:
@@ -93,22 +111,21 @@ paths:
           $ref: '#/components/responses/Conflict'
         '500':
           $ref: '#/components/responses/InternalServerError'
-  /transactions/status:
+  /transactions/{dcbTransactionId}/renew:
     parameters:
-      - $ref: '#/components/parameters/fromDate'
-      - $ref: '#/components/parameters/toDate'
-      - $ref: '#/components/parameters/pageNumber'
-      - $ref: '#/components/parameters/pageSize'
-    get:
-      description: Get a list of updated transactions between from date and to date with optional filtering and pagination
-      operationId: getTransactionStatusList
+      - $ref: '#/components/parameters/dcbTransactionId'
+    put:
+      description: Increment the renew loan count and returned transaction status with renewal details
+      operationId: renewItemLoanByTransactionId
       tags:
         - circulation
       responses:
         '200':
-          $ref: '#/components/responses/TransactionStatusResponseCollection'
-        '422':
-          $ref: '#/components/responses/UnprocessableEntity'
+          $ref: '#/components/responses/TransactionStatusResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '500':
           $ref: '#/components/responses/InternalServerError'
 components:
@@ -237,6 +254,10 @@ components:
         maximum: 2147483647
       required: false
   schemas:
+    RenewByIdRequest:
+      $ref: 'schemas/RenewByIdRequest.yaml#/RenewByIdRequest'
+    RenewByIdResponse:
+      $ref: 'schemas/RenewByIdResponse.yaml#/RenewByIdResponse'
     InventoryItem:
       $ref: 'schemas/InventoryItem.yaml#/InventoryItem'
     InventoryHolding:

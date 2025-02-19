@@ -1,1303 +1,303 @@
-package org.folio.dcb.controller;
-
-import com.jayway.jsonpath.JsonPath;
-import org.folio.dcb.client.feign.CirculationClient;
-import org.folio.dcb.client.feign.CirculationLoanPolicyStorageClient;
-import org.folio.dcb.domain.dto.DcbItem;
-import org.folio.dcb.domain.dto.DcbTransaction;
-import org.folio.dcb.domain.dto.Loan;
-import org.folio.dcb.domain.dto.LoanCollection;
-import org.folio.dcb.domain.dto.LoanPolicy;
-import org.folio.dcb.domain.dto.LoanPolicyCollection;
-import org.folio.dcb.domain.dto.RenewalsPolicy;
-import org.folio.dcb.domain.dto.Status;
-import org.folio.dcb.domain.dto.TransactionStatus;
-import org.folio.dcb.domain.entity.TransactionAuditEntity;
-import org.folio.dcb.repository.TransactionAuditRepository;
-import org.folio.dcb.repository.TransactionRepository;
-import org.folio.spring.service.SystemUserScopedExecutionService;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MvcResult;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Stream;
+package org.folio.dcb.service;
 
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWER;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWING_PICKUP;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
-import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.PICKUP;
-import static org.folio.dcb.utils.EntityUtils.DCB_NEW_BARCODE;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.AWAITING_PICKUP;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CLOSED;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_IN;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_OUT;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
-import static org.folio.dcb.utils.EntityUtils.DCB_TYPE_USER_ID;
-import static org.folio.dcb.utils.EntityUtils.EXISTED_INVENTORY_ITEM_BARCODE;
-import static org.folio.dcb.utils.EntityUtils.EXISTED_PATRON_ID;
-import static org.folio.dcb.utils.EntityUtils.ITEM_ID;
-import static org.folio.dcb.utils.EntityUtils.NOT_EXISTED_PATRON_ID;
-import static org.folio.dcb.utils.EntityUtils.PATRON_TYPE_USER_ID;
-import static org.folio.dcb.utils.EntityUtils.createDcbItem;
-import static org.folio.dcb.utils.EntityUtils.createDcbPatronWithExactPatronId;
 import static org.folio.dcb.utils.EntityUtils.createDcbTransactionByRole;
-import static org.folio.dcb.utils.EntityUtils.createDcbTransactionUpdate;
-import static org.folio.dcb.utils.EntityUtils.createDefaultDcbPatron;
 import static org.folio.dcb.utils.EntityUtils.createTransactionEntity;
-import static org.folio.dcb.utils.EntityUtils.createTransactionStatus;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInRelativeOrder;
-import static org.hamcrest.Matchers.is;
+import static org.folio.dcb.utils.EntityUtils.createTransactionResponse;
+import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-class TransactionApiControllerTest extends BaseIT {
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Stream;
 
-  private static final String TRANSACTION_AUDIT_ERROR_ACTION = "ERROR";
-  private static final String TRANSACTION_AUDIT_DUPLICATE_ERROR_ACTION = "DUPLICATE_ERROR";
-  private static final String DUPLICATE_ERROR_TRANSACTION_ID = "-1";
+import org.folio.dcb.client.feign.CirculationClient;
+import org.folio.dcb.client.feign.CirculationLoanPolicyStorageClient;
+import org.folio.dcb.domain.dto.DcbTransaction.RoleEnum;
+import org.folio.dcb.domain.dto.LoanPolicy;
+import org.folio.dcb.domain.dto.RenewByIdRequest;
+import org.folio.dcb.domain.dto.RenewByIdResponse;
+import org.folio.dcb.domain.dto.RenewalsPolicy;
+import org.folio.dcb.domain.dto.TransactionStatus;
+import org.folio.dcb.domain.dto.TransactionStatus.StatusEnum;
+import org.folio.dcb.domain.dto.TransactionStatusResponse;
+import org.folio.dcb.domain.dto.TransactionStatusResponseList;
+import org.folio.dcb.domain.entity.TransactionAuditEntity;
+import org.folio.dcb.domain.entity.TransactionEntity;
+import org.folio.dcb.domain.mapper.TransactionMapper;
+import org.folio.dcb.exception.ResourceAlreadyExistException;
+import org.folio.dcb.exception.StatusException;
+import org.folio.dcb.repository.TransactionAuditRepository;
+import org.folio.dcb.repository.TransactionRepository;
+import org.folio.dcb.service.impl.LendingLibraryServiceImpl;
+import org.folio.dcb.service.impl.TransactionsServiceImpl;
+import org.folio.spring.exception.NotFoundException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
 
-  @Autowired
+@ExtendWith(MockitoExtension.class)
+class TransactionServiceTest {
+
+  @InjectMocks
+  private TransactionsServiceImpl transactionsService;
+  @Mock(name = "lendingLibraryService")
+  private LendingLibraryServiceImpl lendingLibraryService;
+  @Mock
   private TransactionRepository transactionRepository;
-  @Autowired
+  @Mock
+  private StatusProcessorService statusProcessorService;
+  @Mock
   private TransactionAuditRepository transactionAuditRepository;
-
-  @Autowired
-  private SystemUserScopedExecutionService systemUserScopedExecutionService;
-  @SpyBean
+  @Mock
+  private TransactionMapper transactionMapper;
+  @Mock
   private CirculationClient circulationClient;
-  @SpyBean
+  @Mock
   private CirculationLoanPolicyStorageClient circulationLoanPolicyStorageClient;
 
-  ObjectMapper objectMapper = new ObjectMapper();
-
   @Test
-  void createLendingCirculationRequestTest() throws Exception {
-    removeExistedTransactionFromDbIfSoExists();
-    removeExistingTransactionsByItemId(ITEM_ID);
+  void renewLoanByTransactionIdTest() {
+    when(transactionRepository.findById(anyString())).thenReturn(Optional.ofNullable(
+      buildTransactionToRenew(ITEM_CHECKED_OUT, LENDER)));
+    when(circulationClient.renewById(any())).thenReturn(buildTestRenewBleResponse());
+    when(circulationLoanPolicyStorageClient.fetchLoanPolicyById(anyString())).thenReturn(
+      buildTestLoanPolicy());
+    when(circulationClient.renewById(any())).thenReturn(buildTestRenewBleResponse());
+    when(circulationLoanPolicyStorageClient.fetchLoanPolicyById(anyString())).thenReturn(
+      buildTestLoanPolicy());
 
-    this.mockMvc.perform(
-        post("/transactions/" + DCB_TRANSACTION_ID)
-          .content(asJsonString(createDcbTransactionByRole(LENDER)))
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
-      .andExpect(status().isCreated())
-      .andExpect(jsonPath("$.status").value("CREATED"))
-      .andExpect(jsonPath("$.item").value(createDcbItem()))
-      .andExpect(jsonPath("$.patron").value(createDefaultDcbPatron()));
-
-    //Trying to create another transaction with same transaction id
-    this.mockMvc.perform(
-        post("/transactions/" + DCB_TRANSACTION_ID)
-          .content(asJsonString(createDcbTransactionByRole(LENDER)))
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
-      .andExpectAll(status().is4xxClientError(),
-        jsonPath("$.errors[0].code", is("DUPLICATE_ERROR")));
-
-    // check for DUPLICATE_ERROR propagated into transactions_audit.
-    systemUserScopedExecutionService.executeAsyncSystemUserScoped(
-      TENANT,
-      () -> {
-        TransactionAuditEntity auditExisting = transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(DCB_TRANSACTION_ID)
-          .orElse(null);
-        assertNotNull(auditExisting);
-        assertNotEquals(TRANSACTION_AUDIT_DUPLICATE_ERROR_ACTION, auditExisting.getAction());
-        assertNotEquals(DUPLICATE_ERROR_TRANSACTION_ID, auditExisting.getTransactionId());      }
-    );
+    transactionsService.renewLoanByTransactionId(DCB_TRANSACTION_ID);
+    verify(circulationClient, times(1)).renewById(any());
+    verify(circulationLoanPolicyStorageClient, times(1)).fetchLoanPolicyById(any());
   }
 
   @Test
-  void createLendingCirculationRequestWithValidIdAndInvalidBarcode() throws Exception {
-    removeExistedTransactionFromDbIfSoExists();
-    var dcbTransaction = createDcbTransactionByRole(LENDER);
-    dcbTransaction.getItem().setBarcode("DCB_ITEM1");
-
-    this.mockMvc.perform(
-        post("/transactions/" + DCB_TRANSACTION_ID)
-          .content(asJsonString(dcbTransaction))
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
-      .andExpectAll(status().is4xxClientError(),
-        jsonPath("$.errors[0].code", is("NOT_FOUND_ERROR")));
-
+  void renewLoanByTransactionIdShouldThrowNotFoundExceptionWhenRenewResponseNull() {
+    when(circulationClient.renewById(any(RenewByIdRequest.class))).thenReturn(null);
+    when(transactionRepository.findById(anyString())).thenReturn(Optional.of(
+      buildTransactionToRenew(ITEM_CHECKED_OUT, LENDER)));
+    assertThrows(NotFoundException.class, () -> transactionsService.renewLoanByTransactionId(
+      DCB_TRANSACTION_ID));
   }
 
   @Test
-  void createCirculationRequestWithInvalidUUID() throws Exception {
-    removeExistedTransactionFromDbIfSoExists();
-    var dcbTransaction = createDcbTransactionByRole(LENDER);
-    //Setting a non UUID for itemId
-    dcbTransaction.getItem().setId("1234");
-
-    this.mockMvc.perform(
-        post("/transactions/" + DCB_TRANSACTION_ID)
-          .content(asJsonString(dcbTransaction))
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
-      .andExpectAll(status().is4xxClientError(),
-        jsonPath("$.errors[0].code", is("VALIDATION_ERROR")));
+  void renewLoanByTransactionIdShouldThrowNotFoundExceptionWhenLoanPolicyResponseNull() {
+    when(transactionRepository.findById(anyString())).thenReturn(Optional.ofNullable(
+      buildTransactionToRenew(ITEM_CHECKED_OUT, LENDER)));
+    when(circulationClient.renewById(any())).thenReturn(buildTestRenewBleResponse());
+    when(circulationLoanPolicyStorageClient.fetchLoanPolicyById(anyString())).thenReturn(null);
+    assertThrows(NotFoundException.class, () -> transactionsService.renewLoanByTransactionId(
+      DCB_TRANSACTION_ID));
   }
 
-  @Test
-  void createBorrowingPickupCirculationRequestTest() throws Exception {
-    removeExistedTransactionFromDbIfSoExists();
-    removeExistingTransactionsByItemId(ITEM_ID);
-
-    DcbItem expected = createDcbItem();
-//    expected.setPickupLocation("3a40852d-49fd-4df2-a1f9-6e2641a6e91f"); // temporary stub
-
-    this.mockMvc.perform(
-        post("/transactions/" + DCB_TRANSACTION_ID)
-          .content(asJsonString(createDcbTransactionByRole(BORROWING_PICKUP)))
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
-      .andExpect(status().isCreated())
-      .andExpect(jsonPath("$.status").value("CREATED"))
-      .andExpect(jsonPath("$.item").value(expected))
-      .andExpect(jsonPath("$.patron").value(createDcbPatronWithExactPatronId(EXISTED_PATRON_ID)));
-
-    //Trying to create another transaction with same transaction id
-    this.mockMvc.perform(
-        post("/transactions/" + DCB_TRANSACTION_ID)
-          .content(asJsonString(createDcbTransactionByRole(BORROWING_PICKUP)))
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
-      .andExpectAll(status().is4xxClientError(),
-        jsonPath("$.errors[0].code", is("DUPLICATE_ERROR")));
-
-    // check for DUPLICATE_ERROR propagated into transactions_audit.
-    systemUserScopedExecutionService.executeAsyncSystemUserScoped(
-      TENANT,
-      () -> {
-        TransactionAuditEntity auditExisting = transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(DCB_TRANSACTION_ID)
-          .orElse(null);
-        assertNotNull(auditExisting);
-        assertNotEquals(TRANSACTION_AUDIT_DUPLICATE_ERROR_ACTION, auditExisting.getAction());
-        assertNotEquals(DUPLICATE_ERROR_TRANSACTION_ID, auditExisting.getTransactionId());      }
-    );
+  @ParameterizedTest
+  @MethodSource
+  void renewLoanByTransactionIdShouldThrowExceptionTest(TransactionEntity transaction,
+                                                        Class<Throwable> exception) {
+    when(transactionRepository.findById(anyString())).thenReturn(Optional.of(transaction));
+    assertThrows(exception, () -> transactionsService.renewLoanByTransactionId(DCB_TRANSACTION_ID));
   }
 
-  @Test
-  void createLendingCirculationRequestWithInvalidItemId() throws Exception {
-    var dcbTransaction = createDcbTransactionByRole(LENDER);
-    dcbTransaction.getItem().setId("5b95877d-86c0-4cb7-a0cd-7660b348ae5b");
-
-    String trnId = UUID.randomUUID().toString();
-
-    this.mockMvc.perform(
-        post("/transactions/" + trnId)
-          .content(asJsonString(dcbTransaction))
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
-      .andExpectAll(status().is4xxClientError(),
-        jsonPath("$.errors[0].code", is("NOT_FOUND_ERROR")));
-
-    // check for transactions_audit error content.
-    systemUserScopedExecutionService.executeAsyncSystemUserScoped(
-      TENANT,
-      () -> {
-        TransactionAuditEntity auditExisting = transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(trnId)
-          .orElse(null);
-        assertNotNull(auditExisting);
-        assertEquals(TRANSACTION_AUDIT_ERROR_ACTION, auditExisting.getAction());  }
-    );
-  }
-
-  @Test
-  void createBorrowingPickupCirculationRequestWithInvalidDefaultNotExistedPatronId() throws Exception {
-    var dcbTransaction = createDcbTransactionByRole(BORROWING_PICKUP);
-    dcbTransaction.getPatron().setId(NOT_EXISTED_PATRON_ID);
-
-    String trnId = UUID.randomUUID().toString();
-    this.mockMvc.perform(
-        post("/transactions/" + trnId)
-          .content(asJsonString(dcbTransaction))
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
-      .andExpectAll(status().is4xxClientError(),
-        jsonPath("$.errors[0].code", is("NOT_FOUND_ERROR")));
-
-    // check for transactions_audit error content.
-    systemUserScopedExecutionService.executeAsyncSystemUserScoped(
-      TENANT,
-      () -> {
-        TransactionAuditEntity auditExisting = transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(trnId)
-          .orElse(null);
-        assertNotNull(auditExisting);
-        assertEquals(TRANSACTION_AUDIT_ERROR_ACTION, auditExisting.getAction());  }
-    );
-  }
-
-    /**
-     * The test at the put endpoint invocation stage initiates stage verification from OPEN to AWAITING_PICKUP
-     * */
-  @Test
-  void transactionStatusUpdateFromOpenToAwaitingTest() throws Exception {
-
-    var transactionID = UUID.randomUUID().toString();
-    var dcbTransaction = createTransactionEntity();
-    dcbTransaction.setStatus(TransactionStatus.StatusEnum.OPEN);
-    dcbTransaction.setRole(LENDER);
-    dcbTransaction.setId(transactionID);
-
-    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> transactionRepository.save(dcbTransaction));
-
-    this.mockMvc.perform(
-        put("/transactions/" + transactionID + "/status")
-          .content(asJsonString(createTransactionStatus(TransactionStatus.StatusEnum.AWAITING_PICKUP)))
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
-      .andExpect(status().isOk())
-      .andExpect(jsonPath("$.status").value("AWAITING_PICKUP"));
-  }
-
-  @Test
-  void transactionStatusUpdateFromOpenToCheckedInTest() throws Exception {
-
-    var transactionID = UUID.randomUUID().toString();
-    var dcbTransaction = createTransactionEntity();
-    dcbTransaction.setStatus(TransactionStatus.StatusEnum.OPEN);
-    dcbTransaction.setRole(LENDER);
-    dcbTransaction.setId(transactionID);
-
-    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> transactionRepository.save(dcbTransaction));
-
-    this.mockMvc.perform(
-        put("/transactions/" + transactionID + "/status")
-          .content(asJsonString(createTransactionStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_IN)))
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
-      .andExpect(status().isOk())
-      .andExpect(jsonPath("$.status").value("ITEM_CHECKED_IN"));
-  }
-
-  @Test
-  void transactionStatusCancelledFromClosedTest() throws Exception {
-
-    var transactionID = UUID.randomUUID().toString();
-    var dcbTransaction = createTransactionEntity();
-    dcbTransaction.setStatus(TransactionStatus.StatusEnum.OPEN);
-    dcbTransaction.setRole(BORROWER);
-    dcbTransaction.setId(transactionID);
-
-    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> transactionRepository.save(dcbTransaction));
-
-    this.mockMvc.perform(
-        put("/transactions/" + transactionID + "/status")
-          .content(asJsonString(createTransactionStatus(TransactionStatus.StatusEnum.CLOSED)))
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
-      .andExpect(status().isOk())
-      .andExpect(jsonPath("$.status").value("CLOSED"));
-
-    // Trying to Cancel the closed transaction
-    this.mockMvc.perform(
-        put("/transactions/" + transactionID + "/status")
-          .content(asJsonString(createTransactionStatus(TransactionStatus.StatusEnum.CANCELLED)))
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
-      .andExpectAll(status().is4xxClientError(),
-        jsonPath("$.errors[0].code", is("VALIDATION_ERROR")));
-  }
-
-  @Test
-  void transactionStatusUpdateFromCreatedToOpenForPickupLibTest() throws Exception {
-
-    var transactionID = UUID.randomUUID().toString();
-    var dcbTransaction = createTransactionEntity();
-    dcbTransaction.setStatus(TransactionStatus.StatusEnum.CREATED);
-    dcbTransaction.setRole(PICKUP);
-    dcbTransaction.setId(transactionID);
-
-    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> transactionRepository.save(dcbTransaction));
-
-    this.mockMvc.perform(
-        put("/transactions/" + transactionID + "/status")
-          .content(asJsonString(createTransactionStatus(TransactionStatus.StatusEnum.OPEN)))
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
-      .andExpect(status().isOk())
-      .andExpect(jsonPath("$.status").value("OPEN"));
-  }
-
-  /**
-   * The test at the put endpoint invocation stage initiates stage verification from AWAITING_PICKUP to CHECKED_OUT
-   * */
-  @Test
-  void transactionStatusUpdateFromAwaitingToCheckedOutTest() throws Exception {
-
-    var transactionID = UUID.randomUUID().toString();
-    var dcbTransaction = createTransactionEntity();
-    dcbTransaction.setStatus(TransactionStatus.StatusEnum.AWAITING_PICKUP);
-    dcbTransaction.setRole(LENDER);
-    dcbTransaction.setId(transactionID);
-
-    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> transactionRepository.save(dcbTransaction));
-
-    this.mockMvc.perform(
-        put("/transactions/" + transactionID + "/status")
-          .content(asJsonString(createTransactionStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_OUT)))
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
-      .andExpect(status().isOk())
-      .andExpect(jsonPath("$.status").value("ITEM_CHECKED_OUT"));
-  }
-
-  /**
-   * The test at the put endpoint invocation stage initiates stage verification from CHECKED_OUT to CHECKED_IN
-   * */
-  @Test
-  void transactionStatusUpdateFromCheckOutToCheckInTest() throws Exception {
-
-    var transactionID = UUID.randomUUID().toString();
-    var dcbTransaction = createTransactionEntity();
-    dcbTransaction.setStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_OUT);
-    dcbTransaction.setRole(LENDER);
-    dcbTransaction.setId(transactionID);
-
-    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> transactionRepository.save(dcbTransaction));
-
-    this.mockMvc.perform(
-        put("/transactions/" + transactionID + "/status")
-          .content(asJsonString(createTransactionStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_IN)))
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
-      .andExpect(status().isOk())
-      .andExpect(jsonPath("$.status").value("ITEM_CHECKED_IN"));
-  }
-  @Test
-  void transactionStatusUpdateFromCheckedInToClosedTest() throws Exception {
-
-    var transactionID = UUID.randomUUID().toString();
-    var dcbTransaction = createTransactionEntity();
-    dcbTransaction.setStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_IN);
-    dcbTransaction.setRole(BORROWING_PICKUP);
-    dcbTransaction.setId(transactionID);
-
-    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> transactionRepository.save(dcbTransaction));
-
-    this.mockMvc.perform(
-        put("/transactions/" + transactionID + "/status")
-          .content(asJsonString(createTransactionStatus(TransactionStatus.StatusEnum.CLOSED)))
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
-      .andExpect(status().isOk())
-      .andExpect(jsonPath("$.status").value("CLOSED"));
-  }
-
-
-  /**
-   * Initiates the data generation via the post endpoint invocation stage
-   * then get stage verifies, the data exists.
-   * For LENDER role
-   * */
-  @Test
-  void getLendingTransactionStatusSuccessTest() throws Exception {
-    var id = UUID.randomUUID().toString();
-    this.mockMvc.perform(
-        post("/transactions/" + id)
-          .content(asJsonString(createDcbTransactionByRole(LENDER)))
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
-      .andExpect(status().isCreated())
-      .andExpect(jsonPath("$.status").value("CREATED"))
-      .andExpect(jsonPath("$.item").value(createDcbItem()))
-      .andExpect(jsonPath("$.patron").value(createDefaultDcbPatron()));
-
-    mockMvc.perform(
-        get("/transactions/"+id+"/status")
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON))
-      .andExpect(status().isOk());
-  }
-
-  private static Stream<Arguments> transactionRoles() {
+  private static Stream<Arguments> renewLoanByTransactionIdShouldThrowExceptionTest() {
     return Stream.of(
-            Arguments.of(BORROWER),
-            Arguments.of(BORROWING_PICKUP)
+      Arguments.of(buildTransactionToRenew(ITEM_CHECKED_IN, LENDER), StatusException.class),
+      Arguments.of(buildTransactionToRenew(OPEN, LENDER), StatusException.class),
+      Arguments.of(buildTransactionToRenew(CLOSED, LENDER), StatusException.class),
+      Arguments.of(buildTransactionToRenew(AWAITING_PICKUP, LENDER), StatusException.class),
+      Arguments.of(buildTransactionToRenew(AWAITING_PICKUP, LENDER), StatusException.class),
+      Arguments.of(buildTransactionToRenew(ITEM_CHECKED_OUT, BORROWER),
+        IllegalArgumentException.class),
+      Arguments.of(buildTransactionToRenew(ITEM_CHECKED_OUT, BORROWING_PICKUP),
+        IllegalArgumentException.class)
     );
   }
 
-  @ParameterizedTest
-  @MethodSource("transactionRoles")
-  void getLendingTransactionStatusSuccessTestRenewalCountUnlimitedFalse(DcbTransaction.RoleEnum role) throws Exception {
-    var transactionID = UUID.randomUUID().toString();
-    var dcbTransaction = createTransactionEntity();
-    dcbTransaction.setStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_OUT);
-    dcbTransaction.setRole(role);
-    dcbTransaction.setId(transactionID);
-
-    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> transactionRepository.save(dcbTransaction));
-
-    String randomUUID = UUID.randomUUID().toString();
-
-    LoanCollection loanCollection = LoanCollection.builder()
-            .loans(List.of(Loan.builder()
-                    .id(randomUUID)
-                    .loanPolicyId(randomUUID)
-                    .renewalCount("8")
-                    .status(Status.builder().name("OPEN").build()).build()))
-            .totalRecords(1)
-            .build();
-    Mockito.doReturn(loanCollection).when(circulationClient).fetchLoanByQuery(anyString());
-    LoanPolicyCollection loanPolicyCollection = LoanPolicyCollection.builder()
-            .loanPolicies(List.of(LoanPolicy.builder()
-                    .id(randomUUID)
-                    .renewable(true)
-                    .renewalsPolicy(RenewalsPolicy.builder()
-                            .unlimited(false)
-                            .numberAllowed(22)
-                            .build()).build()))
-            .totalRecords(1)
-            .build();
-    Mockito.doReturn(loanPolicyCollection).when(circulationLoanPolicyStorageClient).fetchLoanPolicyByQuery(anyString());
-
-    mockMvc.perform(
-                    get("/transactions/" + transactionID + "/status")
-                            .headers(defaultHeaders())
-                            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.item.renewalInfo.renewalCount").value(8))
-            .andExpect(jsonPath("$.item.renewalInfo.renewable").value(true))
-            .andExpect(jsonPath("$.item.renewalInfo.renewalMaxCount").value(22));
+  private static TransactionEntity buildTransactionToRenew(StatusEnum status, RoleEnum role) {
+    return TransactionEntity.builder()
+      .id(DCB_TRANSACTION_ID)
+      .status(status)
+      .role(role)
+      .build();
   }
 
-  @ParameterizedTest
-  @MethodSource("transactionRoles")
-  void getLendingTransactionStatusSuccessTestRenewalCountUnlimitedTrue(DcbTransaction.RoleEnum role) throws Exception {
-    var transactionID = UUID.randomUUID().toString();
-    var dcbTransaction = createTransactionEntity();
-    dcbTransaction.setStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_OUT);
-    dcbTransaction.setRole(role);
-    dcbTransaction.setId(transactionID);
-
-    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> transactionRepository.save(dcbTransaction));
-
-    String randomUUID = UUID.randomUUID().toString();
-    LoanCollection loanCollection = LoanCollection.builder()
-            .loans(List.of(Loan.builder()
-                    .id(randomUUID)
-                    .loanPolicyId(randomUUID)
-                    .renewalCount("8")
-                    .status(Status.builder().name("OPEN").build()).build()))
-            .totalRecords(1)
-            .build();
-    Mockito.doReturn(loanCollection).when(circulationClient).fetchLoanByQuery(anyString());
-    LoanPolicyCollection loanPolicyCollection = LoanPolicyCollection.builder()
-            .loanPolicies(List.of(LoanPolicy.builder()
-                    .id(randomUUID)
-                    .renewable(true)
-                    .renewalsPolicy(RenewalsPolicy.builder().unlimited(true).build()).build()))
-            .totalRecords(1)
-            .build();
-    Mockito.doReturn(loanPolicyCollection).when(circulationLoanPolicyStorageClient).fetchLoanPolicyByQuery(anyString());
-
-    mockMvc.perform(
-                    get("/transactions/" + transactionID + "/status")
-                            .headers(defaultHeaders())
-                            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.item.renewalInfo.renewalCount").value(8))
-            .andExpect(jsonPath("$.item.renewalInfo.renewable").value(true))
-            .andExpect(jsonPath("$.item.renewalInfo.renewalMaxCount").value(-1));
+  private static LoanPolicy buildTestLoanPolicy() {
+    return new LoanPolicy()
+      .renewalsPolicy(
+        new RenewalsPolicy()
+          .numberAllowed(10)
+      );
   }
 
-  @ParameterizedTest
-  @MethodSource("transactionRoles")
-  void getLendingTransactionStatusSuccessTestRenewalCountFalseRenewableLoanPolicy(DcbTransaction.RoleEnum role) throws Exception {
-    var transactionID = UUID.randomUUID().toString();
-    var dcbTransaction = createTransactionEntity();
-    dcbTransaction.setStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_OUT);
-    dcbTransaction.setRole(role);
-    dcbTransaction.setId(transactionID);
-
-    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> transactionRepository.save(dcbTransaction));
-
-    String randomUUID = UUID.randomUUID().toString();
-    LoanCollection loanCollection = LoanCollection.builder()
-            .loans(List.of(Loan.builder()
-                    .id(randomUUID)
-                    .loanPolicyId(randomUUID)
-                    .renewalCount("8")
-                    .status(Status.builder().name("OPEN").build()).build()))
-            .totalRecords(1)
-            .build();
-    Mockito.doReturn(loanCollection).when(circulationClient).fetchLoanByQuery(anyString());
-    LoanPolicyCollection loanPolicyCollection = LoanPolicyCollection.builder()
-            .loanPolicies(List.of(LoanPolicy.builder()
-                    .id(randomUUID)
-                    .renewable(false).build()))
-            .totalRecords(1)
-            .build();
-    Mockito.doReturn(loanPolicyCollection).when(circulationLoanPolicyStorageClient).fetchLoanPolicyByQuery(anyString());
-
-    mockMvc.perform(
-                    get("/transactions/" + transactionID + "/status")
-                            .headers(defaultHeaders())
-                            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.item.renewalInfo.renewalCount").value(8))
-            .andExpect(jsonPath("$.item.renewalInfo.renewable").value(false))
-            .andExpect(jsonPath("$.item.renewalInfo.renewalMaxCount").doesNotExist());
-  }
-
-  @ParameterizedTest
-  @MethodSource("transactionRoles")
-  void getLendingTransactionStatusSuccessTestRenewalCountZeroWhenNullRenewalCountInLoan(DcbTransaction.RoleEnum role) throws Exception {
-    var transactionID = UUID.randomUUID().toString();
-    var dcbTransaction = createTransactionEntity();
-    dcbTransaction.setStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_OUT);
-    dcbTransaction.setRole(role);
-    dcbTransaction.setId(transactionID);
-
-    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> transactionRepository.save(dcbTransaction));
-
-    String randomUUID = UUID.randomUUID().toString();
-
-    LoanCollection loanCollection = LoanCollection.builder()
-            .loans(List.of(Loan.builder()
-                    .id(randomUUID)
-                    .loanPolicyId(randomUUID)
-                    .renewalCount(null)
-                    .status(Status.builder().name("OPEN").build()).build()))
-            .totalRecords(1)
-            .build();
-    Mockito.doReturn(loanCollection).when(circulationClient).fetchLoanByQuery(anyString());
-    LoanPolicyCollection loanPolicyCollection = LoanPolicyCollection.builder()
-            .loanPolicies(List.of(LoanPolicy.builder()
-                    .id(randomUUID)
-                    .renewable(true)
-                    .renewalsPolicy(RenewalsPolicy.builder()
-                            .unlimited(false)
-                            .numberAllowed(22)
-                            .build()).build()))
-            .totalRecords(1)
-            .build();
-    Mockito.doReturn(loanPolicyCollection).when(circulationLoanPolicyStorageClient).fetchLoanPolicyByQuery(anyString());
-
-    mockMvc.perform(
-                    get("/transactions/" + transactionID + "/status")
-                            .headers(defaultHeaders())
-                            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.item.renewalInfo.renewalCount").value(0))
-            .andExpect(jsonPath("$.item.renewalInfo.renewable").value(true))
-            .andExpect(jsonPath("$.item.renewalInfo.renewalMaxCount").value(22));
-  }
-
-  @ParameterizedTest
-  @MethodSource("transactionRoles")
-  void getLendingTransactionStatusSuccessTestRenewalCountLoanNotExist(DcbTransaction.RoleEnum role) throws Exception {
-    var transactionID = UUID.randomUUID().toString();
-    var dcbTransaction = createTransactionEntity();
-    dcbTransaction.setStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_OUT);
-    dcbTransaction.setRole(role);
-    dcbTransaction.setId(transactionID);
-
-    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> transactionRepository.save(dcbTransaction));
-
-    LoanCollection loanCollection = LoanCollection.builder()
-            .loans(Collections.emptyList())
-            .totalRecords(0)
-            .build();
-    Mockito.doReturn(loanCollection).when(circulationClient).fetchLoanByQuery(anyString());
-
-    mockMvc.perform(
-                    get("/transactions/" + transactionID + "/status")
-                            .headers(defaultHeaders())
-                            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.item.renewalInfo").doesNotExist());
+  private static RenewByIdResponse buildTestRenewBleResponse() {
+    return new RenewByIdResponse()
+      .loanPolicyId("123")
+      .renewalCount(2);
   }
 
   @Test
-  void getLendingTransactionStatusSuccessTestRenewalCountNegativeTest() throws Exception {
-    var transactionID = UUID.randomUUID().toString();
-    var dcbTransaction = createTransactionEntity();
-    dcbTransaction.setStatus(TransactionStatus.StatusEnum.AWAITING_PICKUP);
-    dcbTransaction.setRole(LENDER);
-    dcbTransaction.setId(transactionID);
-
-    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> transactionRepository.save(dcbTransaction));
-
-    mockMvc.perform(
-                    get("/transactions/" + transactionID + "/status")
-                            .headers(defaultHeaders())
-                            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.item.renewalInfo").doesNotExist());
+  void createLendingCirculationRequestTest() {
+    when(lendingLibraryService.createCirculation(any(), any()))
+      .thenReturn(createTransactionResponse());
+    transactionsService.createCirculationRequest(DCB_TRANSACTION_ID,
+      createDcbTransactionByRole(LENDER));
+    verify(lendingLibraryService).createCirculation(DCB_TRANSACTION_ID,
+      createDcbTransactionByRole(LENDER));
   }
 
   @Test
-  void getTransactionStatusNotFoundTest() throws Exception {
-    var id = UUID.randomUUID().toString();
-    mockMvc.perform(
-        get("/transactions/"+id+"/status")
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON))
-      .andExpect(status().isNotFound());
+  void shouldReturnAnyTransactionStatusById() {
+    var transactionIdUnique = UUID.randomUUID().toString();
+    when(transactionRepository.findById(transactionIdUnique))
+      .thenReturn(Optional.ofNullable(TransactionEntity.builder()
+        .status(StatusEnum.CREATED)
+        .role(LENDER)
+        .build()));
+
+    var trnInstance = transactionsService.getTransactionStatusById(transactionIdUnique);
+    assertNotNull(trnInstance);
+    assertEquals(TransactionStatusResponse.StatusEnum.CREATED, trnInstance.getStatus());
   }
 
   @Test
-  void createTransactionForPickupLibrary() throws Exception {
-    removeExistedTransactionFromDbIfSoExists();
-    removeExistingTransactionsByItemId(ITEM_ID);
+  void getTransactionStatusByIdNotFoundExceptionTest() {
+    var transactionIdUnique = UUID.randomUUID().toString();
+    when(transactionRepository.findById(transactionIdUnique))
+      .thenReturn(Optional.empty());
 
-    this.mockMvc.perform(
-        post("/transactions/" + DCB_TRANSACTION_ID)
-          .content(asJsonString(createDcbTransactionByRole(PICKUP)))
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
-      .andExpect(status().isCreated())
-      .andExpect(jsonPath("$.status").value("CREATED"))
-      .andExpect(jsonPath("$.item").value(createDcbItem()))
-      .andExpect(jsonPath("$.patron").value(createDefaultDcbPatron()));
-
-    //Trying to create another transaction with same transaction id
-    this.mockMvc.perform(
-        post("/transactions/" + DCB_TRANSACTION_ID)
-          .content(asJsonString(createDcbTransactionByRole(LENDER)))
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
-      .andExpectAll(status().is4xxClientError(),
-        jsonPath("$.errors[0].code", is("DUPLICATE_ERROR")));
-
-    // check for DUPLICATE_ERROR propagated into transactions_audit.
-    systemUserScopedExecutionService.executeAsyncSystemUserScoped(
-      TENANT,
-      () -> {
-        TransactionAuditEntity auditExisting = transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(DCB_TRANSACTION_ID)
-          .orElse(null);
-        assertNotNull(auditExisting);
-        assertNotEquals(TRANSACTION_AUDIT_DUPLICATE_ERROR_ACTION, auditExisting.getAction());
-        assertNotEquals(DUPLICATE_ERROR_TRANSACTION_ID, auditExisting.getTransactionId());      }
+    Throwable exception = assertThrows(
+      NotFoundException.class,
+      () -> transactionsService.getTransactionStatusById(transactionIdUnique)
     );
+
+    Assertions.assertEquals(
+      String.format("DCB Transaction was not found by id= %s ", transactionIdUnique),
+      exception.getMessage());
+  }
+
+  /**
+   * For any kind of role: LENDER/BORROWER/PICKUP/BORROWING_PICKUP
+   */
+  @Test
+  void createTransactionWithExistingTransactionIdTest() {
+    var dcbTransaction = createDcbTransactionByRole(LENDER);
+    when(transactionRepository.existsById(DCB_TRANSACTION_ID)).thenReturn(true);
+    Assertions.assertThrows(ResourceAlreadyExistException.class, () ->
+      transactionsService.createCirculationRequest(DCB_TRANSACTION_ID, dcbTransaction));
   }
 
   @Test
-  void transactionStatusUpdateFromOpenToAwaitingPickup() throws Exception {
-    var transactionID = UUID.randomUUID().toString();
-    var dcbTransaction = createTransactionEntity();
-    dcbTransaction.setStatus(TransactionStatus.StatusEnum.OPEN);
-    dcbTransaction.setRole(BORROWER);
-    dcbTransaction.setId(transactionID);
+  void updateTransactionEntityLenderTest() {
+    var dcbTransactionEntity = createTransactionEntity();
+    dcbTransactionEntity.setStatus(StatusEnum.OPEN);
+    dcbTransactionEntity.setRole(LENDER);
 
-    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> transactionRepository.save(dcbTransaction));
+    when(transactionRepository.findById(DCB_TRANSACTION_ID)).thenReturn(
+      Optional.of(dcbTransactionEntity));
+    when(statusProcessorService.lendingChainProcessor(StatusEnum.OPEN, ITEM_CHECKED_OUT))
+      .thenReturn(List.of(StatusEnum.AWAITING_PICKUP, ITEM_CHECKED_OUT));
+    doNothing().when(lendingLibraryService)
+      .updateTransactionStatus(dcbTransactionEntity, TransactionStatus.builder().status(
+        StatusEnum.AWAITING_PICKUP).build());
+    doNothing().when(lendingLibraryService)
+      .updateTransactionStatus(dcbTransactionEntity, TransactionStatus.builder().status(
+        ITEM_CHECKED_OUT).build());
 
-    this.mockMvc.perform(
-        put("/transactions/" + transactionID + "/status")
-          .content(asJsonString(createTransactionStatus(TransactionStatus.StatusEnum.AWAITING_PICKUP)))
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
-      .andExpect(status().isOk())
-      .andExpect(jsonPath("$.status").value("AWAITING_PICKUP"));
+    transactionsService.updateTransactionStatus(DCB_TRANSACTION_ID,
+      TransactionStatus.builder().status(
+        ITEM_CHECKED_OUT).build());
+
+    verify(statusProcessorService).lendingChainProcessor(StatusEnum.OPEN, ITEM_CHECKED_OUT);
   }
 
   @Test
-  void createBorrowerCirculationRequestTest() throws Exception {
-    removeExistedTransactionFromDbIfSoExists();
-    removeExistingTransactionsByItemId(ITEM_ID);
+  void updateTransactionEntityErrorTest() {
+    var dcbTransactionEntity = createTransactionEntity();
+    dcbTransactionEntity.setStatus(StatusEnum.OPEN);
+    when(transactionRepository.findById(DCB_TRANSACTION_ID)).thenReturn(
+      Optional.of(dcbTransactionEntity));
+    var openTransactionStatus = TransactionStatus.builder().status(StatusEnum.OPEN).build();
 
-    this.mockMvc.perform(
-        post("/transactions/" + DCB_TRANSACTION_ID)
-          .content(asJsonString(createDcbTransactionByRole(BORROWER)))
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
-      .andExpect(status().isCreated())
-      .andExpect(jsonPath("$.status").value("CREATED"))
-      .andExpect(jsonPath("$.item").value(createDcbItem()))
-      .andExpect(jsonPath("$.patron").value(createDcbPatronWithExactPatronId(EXISTED_PATRON_ID)));
+    Assertions.assertThrows(StatusException.class,
+      () -> transactionsService.updateTransactionStatus(DCB_TRANSACTION_ID, openTransactionStatus));
 
-    //Trying to create another transaction with same transaction id
-    this.mockMvc.perform(
-        post("/transactions/" + DCB_TRANSACTION_ID)
-          .content(asJsonString(createDcbTransactionByRole(BORROWER)))
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
-      .andExpectAll(status().is4xxClientError(),
-        jsonPath("$.errors[0].code", is("DUPLICATE_ERROR")));
+    dcbTransactionEntity.setStatus(StatusEnum.ITEM_CHECKED_IN);
+    var cancelledTransactionStatus = TransactionStatus.builder()
+      .status(StatusEnum.CANCELLED)
+      .build();
+    Assertions.assertThrows(StatusException.class,
+      () -> transactionsService.updateTransactionStatus(DCB_TRANSACTION_ID,
+        cancelledTransactionStatus));
 
-    // check for DUPLICATE_ERROR propagated into transactions_audit.
-    systemUserScopedExecutionService.executeAsyncSystemUserScoped(
-      TENANT,
-      () -> {
-        TransactionAuditEntity auditExisting = transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(DCB_TRANSACTION_ID)
-          .orElse(null);
-        assertNotNull(auditExisting);
-        assertNotEquals(TRANSACTION_AUDIT_DUPLICATE_ERROR_ACTION, auditExisting.getAction());
-        assertNotEquals(DUPLICATE_ERROR_TRANSACTION_ID, auditExisting.getTransactionId());      }
-    );
+    dcbTransactionEntity.setStatus(ITEM_CHECKED_OUT);
+    Assertions.assertThrows(StatusException.class,
+      () -> transactionsService.updateTransactionStatus(DCB_TRANSACTION_ID,
+        cancelledTransactionStatus));
   }
 
   @Test
-  void createBorrowerCirculationRequestWithoutExistingItemTest() throws Exception {
-    removeExistedTransactionFromDbIfSoExists();
-    removeExistingTransactionsByItemId(ITEM_ID);
+  void getTransactionStatusListTest() {
+    var startDate = OffsetDateTime.now().minusDays(1L);
+    var endDate = OffsetDateTime.now();
+    Page<TransactionAuditEntity> pageMock = mock(Page.class);
+    when(transactionAuditRepository.findUpdatedTransactionsByDateRange(any(), any(), any()))
+      .thenReturn(pageMock);
+    when(pageMock.getTotalElements()).thenReturn(10L);
+    when(transactionMapper.mapToDto(pageMock))
+      .thenReturn(List.of(TransactionStatusResponseList
+        .builder()
+        .id(DCB_TRANSACTION_ID)
+        .status(TransactionStatusResponseList.StatusEnum.ITEM_CHECKED_OUT)
+        .role(TransactionStatusResponseList.RoleEnum.LENDER)
+        .build()));
+    var response = transactionsService.getTransactionStatusList(startDate, endDate, 0, 3);
+    assertEquals(0, response.getCurrentPageNumber());
+    assertEquals(3, response.getCurrentPageSize());
+    assertEquals(3, response.getMaximumPageNumber());
+    assertEquals(10, response.getTotalRecords());
 
-    var dcbTransaction = createDcbTransactionByRole(BORROWER);
-    dcbTransaction.getItem().setBarcode("newItem");
-    var dcbItem = createDcbItem();
-    dcbItem.setBarcode("newItem");
+    response = transactionsService.getTransactionStatusList(startDate, endDate, 0, 5);
+    assertEquals(0, response.getCurrentPageNumber());
+    assertEquals(5, response.getCurrentPageSize());
+    assertEquals(1, response.getMaximumPageNumber());
+    assertEquals(10, response.getTotalRecords());
 
-    this.mockMvc.perform(
-        post("/transactions/" + DCB_TRANSACTION_ID)
-          .content(asJsonString(dcbTransaction))
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
-      .andExpect(status().isCreated())
-      .andExpect(jsonPath("$.status").value("CREATED"))
-      .andExpect(jsonPath("$.item.barcode").value(dcbItem.getBarcode()))
-      .andExpect(jsonPath("$.item.materialType").value(dcbItem.getMaterialType()))
-      .andExpect(jsonPath("$.item.lendingLibraryCode").value(dcbItem.getLendingLibraryCode()))
-      .andExpect(jsonPath("$.item.title").value(dcbItem.getTitle()))
-      .andExpect(jsonPath("$.patron").value(createDcbPatronWithExactPatronId(EXISTED_PATRON_ID)));
+    response = transactionsService.getTransactionStatusList(startDate, endDate, 4, 2);
+    assertEquals(4, response.getCurrentPageNumber());
+    assertEquals(2, response.getCurrentPageSize());
+    assertEquals(4, response.getMaximumPageNumber());
+    assertEquals(10, response.getTotalRecords());
 
-    //Trying to create another transaction with same transaction id
-    this.mockMvc.perform(
-        post("/transactions/" + DCB_TRANSACTION_ID)
-          .content(asJsonString(createDcbTransactionByRole(BORROWER)))
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
-      .andExpectAll(status().is4xxClientError(),
-        jsonPath("$.errors[0].code", is("DUPLICATE_ERROR")));
+    response = transactionsService.getTransactionStatusList(startDate, endDate, 10, 10);
+    assertEquals(10, response.getCurrentPageNumber());
+    assertEquals(10, response.getCurrentPageSize());
+    assertEquals(0, response.getMaximumPageNumber());
+    assertEquals(10, response.getTotalRecords());
   }
 
-  @Test
-  void transactionStatusUpdateFromAwaitingPickupToItemCheckedOut() throws Exception {
-    var transactionID = UUID.randomUUID().toString();
-    var dcbTransaction = createTransactionEntity();
-    dcbTransaction.setStatus(TransactionStatus.StatusEnum.AWAITING_PICKUP);
-    dcbTransaction.setRole(BORROWER);
-    dcbTransaction.setId(transactionID);
-
-    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> transactionRepository.save(dcbTransaction));
-
-    this.mockMvc.perform(
-        put("/transactions/" + transactionID + "/status")
-          .content(asJsonString(createTransactionStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_OUT)))
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
-      .andExpect(status().isOk())
-      .andExpect(jsonPath("$.status").value("ITEM_CHECKED_OUT"));
-  }
-
-  @Test
-  void transactionStatusUpdateFromCreatedToItemClosed() throws Exception {
-    var transactionID = UUID.randomUUID().toString();
-    var dcbTransaction = createTransactionEntity();
-    dcbTransaction.setStatus(TransactionStatus.StatusEnum.CREATED);
-    dcbTransaction.setRole(BORROWER);
-    dcbTransaction.setId(transactionID);
-
-    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> transactionRepository.save(dcbTransaction));
-
-    this.mockMvc.perform(
-        put("/transactions/" + transactionID + "/status")
-          .content(asJsonString(createTransactionStatus(TransactionStatus.StatusEnum.CLOSED)))
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
-      .andExpect(status().isOk())
-      .andExpect(jsonPath("$.status").value("CLOSED"));
-  }
-
-  @Test
-  void lenderTransactionStatusUpdateFromCreatedToOpen() throws Exception {
-    var transactionID = UUID.randomUUID().toString();
-    var dcbTransaction = createTransactionEntity();
-    dcbTransaction.setStatus(TransactionStatus.StatusEnum.CREATED);
-    dcbTransaction.setRole(LENDER);
-    dcbTransaction.setId(transactionID);
-
-    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> transactionRepository.save(dcbTransaction));
-
-    this.mockMvc.perform(
-      put("/transactions/" + transactionID + "/status")
-        .content(asJsonString(createTransactionStatus(TransactionStatus.StatusEnum.OPEN)))
-        .headers(defaultHeaders())
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON))
-      .andExpect(status().isOk())
-      .andExpect(jsonPath("$.status").value("OPEN"));
-  }
-
-  @Test
-  void transactionStatusUpdateFromItemCheckedOutToItemCheckedIn() throws Exception {
-    var transactionID = UUID.randomUUID().toString();
-    var dcbTransaction = createTransactionEntity();
-    dcbTransaction.setStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_OUT);
-    dcbTransaction.setRole(BORROWER);
-    dcbTransaction.setId(transactionID);
-
-    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> transactionRepository.save(dcbTransaction));
-
-    this.mockMvc.perform(
-        put("/transactions/" + transactionID + "/status")
-          .content(asJsonString(createTransactionStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_IN)))
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
-      .andExpect(status().isOk())
-      .andExpect(jsonPath("$.status").value("ITEM_CHECKED_IN"));
-  }
-
-  @Test
-  void transactionStatusUpdateFromCreatedToCancelledAsLenderTest() throws Exception {
-    var transactionID = UUID.randomUUID().toString();
-    var dcbTransaction = createTransactionEntity();
-    dcbTransaction.setStatus(TransactionStatus.StatusEnum.CREATED);
-    dcbTransaction.setRole(LENDER);
-    dcbTransaction.setId(transactionID);
-
-    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> transactionRepository.save(dcbTransaction));
-
-    mockMvc.perform(
-        put("/transactions/" + transactionID + "/status")
-          .content(asJsonString(createTransactionStatus(TransactionStatus.StatusEnum.CANCELLED)))
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
-      .andExpect(status().isOk())
-      .andExpect(jsonPath("$.status").value("CANCELLED"));
-  }
-
-  @Test
-  void transactionStatusUpdateFromCheckedInToCancelledAsLenderTest() throws Exception {
-    var transactionID = UUID.randomUUID().toString();
-    var dcbTransaction = createTransactionEntity();
-    dcbTransaction.setStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_IN);
-    dcbTransaction.setRole(LENDER);
-    dcbTransaction.setId(transactionID);
-
-    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> transactionRepository.save(dcbTransaction));
-
-    mockMvc.perform(
-        put("/transactions/" + transactionID + "/status")
-          .content(asJsonString(createTransactionStatus(TransactionStatus.StatusEnum.CANCELLED)))
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
-      .andExpect(status().isBadRequest());
-  }
-
-  @Test
-  void createLendingTransactionWithDifferentUserType() throws Exception {
-    removeExistedTransactionFromDbIfSoExists();
-    removeExistingTransactionsByItemId(ITEM_ID);
-
-    var transaction = createDcbTransactionByRole(LENDER);
-    transaction.getPatron().setId(PATRON_TYPE_USER_ID);
-    this.mockMvc.perform(
-        post("/transactions/" + DCB_TRANSACTION_ID)
-          .content(asJsonString(transaction))
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
-      .andExpect(status().isBadRequest());
-
-    transaction = createDcbTransactionByRole(LENDER);
-    transaction.getPatron().setId(DCB_TYPE_USER_ID);
-    this.mockMvc.perform(
-        post("/transactions/" + DCB_TRANSACTION_ID)
-          .content(asJsonString(transaction))
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
-      .andExpect(status().isCreated());
-
-  }
-
-  @Test
-  void createBorrowingTransactionWithDifferentUserType() throws Exception {
-    removeExistedTransactionFromDbIfSoExists();
-    removeExistingTransactionsByItemId(ITEM_ID);
-
-    var transaction = createDcbTransactionByRole(BORROWER);
-    transaction.getPatron().setId(DCB_TYPE_USER_ID);
-
-    this.mockMvc.perform(
-        post("/transactions/" + DCB_TRANSACTION_ID)
-          .content(asJsonString(transaction))
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
-      .andExpect(status().isBadRequest());
-
-    transaction = createDcbTransactionByRole(BORROWER);
-    transaction.getPatron().setId(PATRON_TYPE_USER_ID);
-
-    this.mockMvc.perform(
-        post("/transactions/" + DCB_TRANSACTION_ID)
-          .content(asJsonString(transaction))
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
-      .andExpect(status().isCreated());
-
-  }
-
-  @Test
-  void createBorrowingPickupTransactionWithDifferentUserType() throws Exception {
-    removeExistedTransactionFromDbIfSoExists();
-    removeExistingTransactionsByItemId(ITEM_ID);
-
-    var transaction = createDcbTransactionByRole(BORROWING_PICKUP);
-    transaction.getPatron().setId(DCB_TYPE_USER_ID);
-
-    this.mockMvc.perform(
-        post("/transactions/" + DCB_TRANSACTION_ID)
-          .content(asJsonString(transaction))
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
-      .andExpect(status().isBadRequest());
-
-    transaction = createDcbTransactionByRole(BORROWING_PICKUP);
-    transaction.getPatron().setId(PATRON_TYPE_USER_ID);
-
-    this.mockMvc.perform(
-        post("/transactions/" + DCB_TRANSACTION_ID)
-          .content(asJsonString(transaction))
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
-      .andExpect(status().isCreated());
-
-  }
-
-  @Test
-  void createPickupTransactionWithDifferentUserType() throws Exception {
-    removeExistedTransactionFromDbIfSoExists();
-    removeExistingTransactionsByItemId(ITEM_ID);
-
-    var transaction = createDcbTransactionByRole(PICKUP);
-    transaction.getPatron().setId(PATRON_TYPE_USER_ID);
-
-    this.mockMvc.perform(
-        post("/transactions/" + DCB_TRANSACTION_ID)
-          .content(asJsonString(transaction))
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
-      .andExpect(status().isBadRequest());
-
-    transaction = createDcbTransactionByRole(PICKUP);
-    transaction.getPatron().setId(DCB_TYPE_USER_ID);
-
-    this.mockMvc.perform(
-        post("/transactions/" + DCB_TRANSACTION_ID)
-          .content(asJsonString(transaction))
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
-      .andExpect(status().isCreated());
-
-  }
-
-  @Test
-  void transactionCreationErrorIfInventoryItemExists() throws Exception {
-    removeExistedTransactionFromDbIfSoExists();
-    removeExistingTransactionsByItemId(ITEM_ID);
-
-    var transaction = createDcbTransactionByRole(PICKUP);
-    transaction.getItem().setBarcode(EXISTED_INVENTORY_ITEM_BARCODE);
-
-    this.mockMvc.perform(
-        post("/transactions/" + DCB_TRANSACTION_ID)
-          .content(asJsonString(transaction))
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
-      .andExpect(status().isConflict());
-
-    transaction = createDcbTransactionByRole(BORROWING_PICKUP);
-    transaction.getItem().setBarcode(EXISTED_INVENTORY_ITEM_BARCODE);
-
-    this.mockMvc.perform(
-        post("/transactions/" + DCB_TRANSACTION_ID)
-          .content(asJsonString(transaction))
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
-      .andExpect(status().isConflict());
-
-    transaction = createDcbTransactionByRole(BORROWER);
-    transaction.getItem().setBarcode(EXISTED_INVENTORY_ITEM_BARCODE);
-
-    this.mockMvc.perform(
-        post("/transactions/" + DCB_TRANSACTION_ID)
-          .content(asJsonString(transaction))
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
-      .andExpect(status().isConflict());
-
-    transaction = createDcbTransactionByRole(BORROWING_PICKUP);
-    transaction.getItem().setBarcode("DCB_ITEM");
-
-    this.mockMvc.perform(
-        post("/transactions/" + DCB_TRANSACTION_ID)
-          .content(asJsonString(transaction))
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
-      .andExpect(status().isCreated());
-
-  }
-
-  @Test
-  void transactionStatusUpdateFromCheckedInToCancelledAsBorrowerPickupTest() throws Exception {
-    var transactionID = UUID.randomUUID().toString();
-    var dcbTransaction = createTransactionEntity();
-    dcbTransaction.setStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_IN);
-    dcbTransaction.setRole(BORROWING_PICKUP);
-    dcbTransaction.setId(transactionID);
-
-    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> transactionRepository.save(dcbTransaction));
-
-    mockMvc.perform(
-        put("/transactions/" + transactionID + "/status")
-          .content(asJsonString(createTransactionStatus(TransactionStatus.StatusEnum.CANCELLED)))
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
-      .andExpect(status().isBadRequest());
-  }
-
-  @Test
-  void transactionStatusUpdateFromCheckedInToCancelledAsPickupTest() throws Exception {
-    var transactionID = UUID.randomUUID().toString();
-    var dcbTransaction = createTransactionEntity();
-    dcbTransaction.setStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_IN);
-    dcbTransaction.setRole(PICKUP);
-    dcbTransaction.setId(transactionID);
-
-    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> transactionRepository.save(dcbTransaction));
-
-    mockMvc.perform(
-        put("/transactions/" + transactionID + "/status")
-          .content(asJsonString(createTransactionStatus(TransactionStatus.StatusEnum.CANCELLED)))
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
-      .andExpect(status().isBadRequest());
-  }
-
-  @Test
-  void getTransactionStatusUpdateListTest() throws Exception {
-    var startDate1 = OffsetDateTime.now(ZoneOffset.UTC);
-    var dcbTransaction = createDcbTransactionByRole(BORROWER);
-    removeExistedTransactionFromDbIfSoExists();
-    removeExistingTransactionsByItemId(dcbTransaction.getItem().getId());
-
-    // Creating new transaction
-    this.mockMvc.perform(
-        post("/transactions/" + DCB_TRANSACTION_ID)
-          .content(asJsonString(dcbTransaction))
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
-      .andExpect(status().isCreated());
-
-    // Update transaction from CREATED to OPEN
-    this.mockMvc.perform(
-        put("/transactions/" + DCB_TRANSACTION_ID + "/status")
-          .content(asJsonString(createTransactionStatus(TransactionStatus.StatusEnum.OPEN)))
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
-      .andExpect(status().isOk())
-      .andExpect(jsonPath("$.status").value("OPEN"));
-
-    var endDate1 = OffsetDateTime.now(ZoneOffset.UTC);
-
-    // There is one update happened(CREATED -> OPEN), so we will get one record
-    this.mockMvc.perform(
-        get("/transactions/status")
-          .headers(defaultHeaders())
-          .param("fromDate", String.valueOf(startDate1))
-          .param("toDate", String.valueOf(endDate1))
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
-      .andExpect(status().is(200))
-      .andExpect(jsonPath("$.totalRecords", is(1)))
-      .andExpect(jsonPath("$.currentPageNumber", is(0)))
-      .andExpect(jsonPath("$.currentPageSize", is(1000)))
-      .andExpect(jsonPath("$.maximumPageNumber", is(0)))
-      .andExpect(jsonPath("$.transactions[*].status",
-        containsInRelativeOrder("OPEN")))
-      .andExpect(jsonPath("$.transactions[*].id",
-        contains(DCB_TRANSACTION_ID)));
-
-    var startDate2 = OffsetDateTime.now(ZoneOffset.UTC);
-
-    // Update transaction from OPEN to CLOSED
-    this.mockMvc.perform(
-        put("/transactions/" + DCB_TRANSACTION_ID + "/status")
-          .content(asJsonString(createTransactionStatus(TransactionStatus.StatusEnum.CLOSED)))
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
-      .andExpect(status().isOk())
-      .andExpect(jsonPath("$.status").value("CLOSED"));
-
-    var endDate2 = OffsetDateTime.now(ZoneOffset.UTC);
-
-    // There are 4 update happened(OPEN -> AWAITING_PICKUP, AWAITING_PICKUP -> ITEM_CHECKED_OUT
-    // ITEM_CHECKED_OUT -> ITEM_CHECKED_IN, ITEM_CHECKED_IN -> CLOSED), so we will get 4 record
-    this.mockMvc.perform(
-        get("/transactions/status")
-          .headers(defaultHeaders())
-          .param("fromDate", String.valueOf(startDate2))
-          .param("toDate", String.valueOf(endDate2))
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
-      .andExpect(status().is(200))
-      .andExpect(jsonPath("$.totalRecords", is(4)))
-      .andExpect(jsonPath("$.currentPageNumber", is(0)))
-      .andExpect(jsonPath("$.currentPageSize", is(1000)))
-      .andExpect(jsonPath("$.maximumPageNumber", is(0)))
-      .andExpect(jsonPath("$.transactions[*].status",
-        containsInRelativeOrder("AWAITING_PICKUP", "ITEM_CHECKED_OUT", "ITEM_CHECKED_IN", "CLOSED")));
-
-    // Now try to get all the records from startDate1 to endDate2 without pageSize(default pageSize)
-    this.mockMvc.perform(
-        get("/transactions/status")
-          .headers(defaultHeaders())
-          .param("fromDate", String.valueOf(startDate1))
-          .param("toDate", String.valueOf(endDate2))
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
-      .andExpect(status().is(200))
-      .andExpect(jsonPath("$.totalRecords", is(5)))
-      .andExpect(jsonPath("$.currentPageNumber", is(0)))
-      .andExpect(jsonPath("$.currentPageSize", is(1000)))
-      .andExpect(jsonPath("$.maximumPageNumber", is(0)))
-      .andExpect(jsonPath("$.transactions[*].status",
-        containsInRelativeOrder("OPEN", "AWAITING_PICKUP", "ITEM_CHECKED_OUT", "ITEM_CHECKED_IN", "CLOSED")));
-
-    // Now try to get the records based on pagination from startDate1 to endDate2.
-    this.mockMvc.perform(
-        get("/transactions/status")
-          .headers(defaultHeaders())
-          .param("fromDate", String.valueOf(startDate1))
-          .param("toDate", String.valueOf(endDate2))
-          .param("pageNumber", String.valueOf(1))
-          .param("pageSize",String.valueOf(2))
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
-      .andExpect(status().is(200))
-      .andExpect(jsonPath("$.totalRecords", is(5)))
-      .andExpect(jsonPath("$.currentPageNumber", is(1)))
-      .andExpect(jsonPath("$.currentPageSize", is(2)))
-      .andExpect(jsonPath("$.maximumPageNumber", is(2)))
-      .andExpect(jsonPath("$.transactions[*].status",
-        containsInRelativeOrder("ITEM_CHECKED_OUT", "ITEM_CHECKED_IN")));
-  }
-
-  @Test
-  void createAndUpdateBorrowerTransactionTest() throws Exception {
-    removeExistedTransactionFromDbIfSoExists();
-    removeExistingTransactionsByItemId(ITEM_ID);
-
-    MvcResult result = this.mockMvc.perform(
-        post("/transactions/" + DCB_TRANSACTION_ID)
-          .content(asJsonString(createDcbTransactionByRole(BORROWER)))
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
-      .andExpect(status().isCreated())
-      .andExpect(jsonPath("$.status").value("CREATED"))
-      .andExpect(jsonPath("$.item").value(createDcbItem()))
-      .andExpect(jsonPath("$.patron").value(createDcbPatronWithExactPatronId(EXISTED_PATRON_ID)))
-      .andReturn(); // Capture the response for assertion
-
-    String responseContent = result.getResponse().getContentAsString();
-    String itemId = JsonPath.parse(responseContent).read("$.item.id", String.class);
-    String itemBarcode = JsonPath.parse(responseContent).read("$.item.barcode", String.class);
-    String lendingLibraryCode = JsonPath.parse(responseContent).read("$.item.lendingLibraryCode", String.class);
-    String materialType = JsonPath.parse(responseContent).read("$.item.materialType", String.class);
-
-    //Trying to update the transaction with same transaction id
-    this.mockMvc.perform(
-        put("/transactions/" + DCB_TRANSACTION_ID)
-          .content(asJsonString(createDcbTransactionUpdate()))
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
-      .andExpectAll(status().isNoContent());
-
-    // check whether item related data is updated
-    systemUserScopedExecutionService.executeAsyncSystemUserScoped(
-      TENANT,
-      () -> {
-        var transactionEntity = transactionRepository.findById(DCB_TRANSACTION_ID)
-          .orElse(null);
-        assertNotNull(transactionEntity);
-        assertNotEquals(itemId, transactionEntity.getItemId());
-        assertNotEquals(itemBarcode, transactionEntity.getItemBarcode());
-        assertEquals(DCB_NEW_BARCODE, transactionEntity.getItemBarcode());
-        assertNotEquals(lendingLibraryCode, transactionEntity.getLendingLibraryCode());
-        assertEquals("LEN", transactionEntity.getLendingLibraryCode());
-        assertNotEquals(materialType, transactionEntity.getMaterialType());
-        assertEquals("DVD", transactionEntity.getMaterialType());
-      });
-  }
-
-
-  private void removeExistedTransactionFromDbIfSoExists() {
-    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> {
-      if (transactionRepository.existsById(DCB_TRANSACTION_ID)){
-        transactionRepository.deleteById(DCB_TRANSACTION_ID);
-      }
-    });
-  }
-
-  private void removeExistingTransactionsByItemId(String itemId) {
-    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () ->
-        transactionRepository.findTransactionsByItemIdAndStatusNotInClosed(UUID.fromString(itemId))
-          .forEach(transactionEntity -> transactionRepository.deleteById(transactionEntity.getId()))
-    );
-  }
 }
