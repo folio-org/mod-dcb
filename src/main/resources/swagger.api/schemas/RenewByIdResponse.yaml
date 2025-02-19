@@ -1,0 +1,131 @@
+RenewByIdResponse:
+  type: object
+  title: Loan
+  description: Links the item with the patron and applies certain conditions based on policies
+  properties:
+    id:
+      description: Unique ID (generated UUID) of the loan
+      type: string
+      $ref: "uuid.yaml"
+    userId:
+      description: ID of the patron the item was lent to. Required for open loans, not required for closed loans (for anonymization).
+      type: string
+      $ref: "uuid.yaml"
+    borrower:
+      description: Additional information about the borrower of the item, taken from the user referred to by the userId
+      readonly: true
+      type: object
+      properties:
+        firstName:
+          description: first name of the borrower (read only, defined by the server)
+          type: string
+          readonly: true
+        lastName:
+          description: last name of the borrower (read only, defined by the server)
+          type: string
+          readonly: true
+        middleName:
+          description: middle name of the borrower (read only, defined by the server)
+          type: string
+          readonly: true
+        barcode:
+          description: barcode used to identify the borrower (read only, defined by the server)
+          type: string
+          readonly: true
+        preferredFirstName:
+          description: preferred first name of the borrower (read only, defined by the server)
+          type: string
+          readonly: true
+        patronGroup:
+          description: current patron group of the borrower (read only, defined by the server)
+          type: string
+          readonly: true
+      additionalProperties: false
+    proxyUserId:
+      description: ID of the user representing a proxy for the patron
+      type: string
+      $ref: "uuid.yaml"
+    itemId:
+      description: ID of the item lent to the patron
+      type: string
+      $ref: "uuid.yaml"
+    loanPolicyId:
+      description: ID of last policy used in relation to this loan
+      type: string
+      $ref: "uuid.yaml"
+    loanPolicy:
+      description: Additional information about the loan policy of the item, taken from the loan loanPolicyId
+      readonly: true
+      type: object
+      properties:
+        name:
+          readonly: true
+          description: Name of last policy used in relation to this loan (read only, defined by the server)
+          type: string
+    overdueFinePolicyId:
+      description: ID of last overdue fine policy used in relation to this loan
+      type: string
+      $ref: "uuid.yaml"
+    overdueFinePolicy:
+      description: Additional information about the overdue fine policy of the item, taken from the loan overdueFinePolicyId
+      readonly: true
+      type: object
+      properties:
+        name:
+          readonly: true
+          description: Name of last overdue fine policy used in relation to this loan (read only, defined by the server)
+          type: string
+    lostItemPolicyId:
+      description: ID of last lost item policy used in relation to this loan
+      type: string
+      $ref: "uuid.yaml"
+    lostItemPolicy:
+      description: Additional information about the lost item policy of the item, taken from the loan lostItemPolicyId
+      readonly: true
+      type: object
+      properties:
+        name:
+          readonly: true
+          description: Name of last lost item policy used in relation to this loan (read only, defined by the server)
+          type: string
+    itemEffectiveLocationIdAtCheckOut:
+      description: The effective location, at the time of checkout, of the item loaned to the patron.
+      type: string
+      $ref: "uuid.yaml"
+    status:
+      description: Overall status of the loan
+      type: object
+      properties:
+        name:
+          description: Name of the status (currently can be any value, values commonly used are Open and Closed)
+          type: string
+    loanDate:
+      description: Date and time when the loan began
+      type: string
+      format: date-time
+    dueDate:
+      description: Date and time when the item is due to be returned
+      type: string
+      format: date-time
+    returnDate:
+      description: Date and time when the item was returned
+      type: string
+      format: date-time
+    systemReturnDate:
+      description: Date and time when return was processed
+      type: string
+      format: date-time
+    action:
+      description: Last action performed on a loan (currently can be any value, values commonly used are checkedout and checkedin)
+      type: string
+    actionComment:
+      description: Last action performed on a loan comments
+      type: string
+    renewalCount:
+      description: Count of how many times a loan has been renewed (incremented by the client)
+      type: integer
+      minimum: 0
+    dueDateChangedByRecall:
+      description: Is due date changed by recall request
+      type: boolean
+      readonly: true
