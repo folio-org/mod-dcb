@@ -78,7 +78,7 @@ public class CustomTenantService extends TenantService {
 
 
   public CustomTenantService(JdbcTemplate jdbcTemplate, FolioExecutionContext context, FolioSpringLiquibase folioSpringLiquibase,
-                             @Qualifier("prepareSystemUserService") PrepareSystemUserService systemUserService, KafkaService kafkaService, InstanceClient inventoryClient,
+                             PrepareSystemUserService systemUserService, KafkaService kafkaService, InstanceClient inventoryClient,
                              InstanceTypeClient instanceTypeClient, HoldingsStorageClient holdingsStorageClient,
                              LocationsClient locationsClient, HoldingSourcesClient holdingSourcesClient,
                              InventoryServicePointClient servicePointClient, LocationUnitClient locationUnitClient,
