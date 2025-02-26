@@ -22,6 +22,7 @@ import org.folio.spring.liquibase.FolioSpringLiquibase;
 import org.folio.spring.service.PrepareSystemUserService;
 import org.folio.spring.service.TenantService;
 import org.folio.tenant.domain.dto.TenantAttributes;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -77,7 +78,7 @@ public class CustomTenantService extends TenantService {
 
 
   public CustomTenantService(JdbcTemplate jdbcTemplate, FolioExecutionContext context, FolioSpringLiquibase folioSpringLiquibase,
-                             PrepareSystemUserService systemUserService, KafkaService kafkaService, InstanceClient inventoryClient,
+                             @Qualifier("prepareSystemUserService") PrepareSystemUserService systemUserService, KafkaService kafkaService, InstanceClient inventoryClient,
                              InstanceTypeClient instanceTypeClient, HoldingsStorageClient holdingsStorageClient,
                              LocationsClient locationsClient, HoldingSourcesClient holdingSourcesClient,
                              InventoryServicePointClient servicePointClient, LocationUnitClient locationUnitClient,
