@@ -16,7 +16,7 @@
     {
       "request": {
         "method": "GET",
-        "url": "/users?query=username%3D%3Ddcb-system-user"
+        "url": "/users?query=username%3D%3D%22dcb-system-user%22"
       },
       "response": {
         "status": 200,

@@ -71,8 +71,8 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MvcResult;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -93,9 +93,9 @@ class TransactionApiControllerTest extends BaseIT {
 
   @Autowired
   private SystemUserScopedExecutionService systemUserScopedExecutionService;
-  @SpyBean
+  @MockitoSpyBean
   private CirculationClient circulationClient;
-  @SpyBean
+  @MockitoSpyBean
   private CirculationLoanPolicyStorageClient circulationLoanPolicyStorageClient;
 
   @Test
