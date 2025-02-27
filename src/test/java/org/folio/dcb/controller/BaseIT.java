@@ -70,8 +70,8 @@ public class BaseIT {
 
   @BeforeEach
   void setUp() {
-    setUpTenant(mockMvc);
     folioEnvironment.setOkapiUrl(getOkapiUrl());
+    setUpTenant(mockMvc);
   }
 
   public static String getOkapiUrl() {
