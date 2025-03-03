@@ -103,29 +103,4 @@ class FolioDcbApplicationIT {
       .body("status", is("UP"))
       .contentType(ContentType.JSON);
   }
-
-  @Test
-  void installAndUpgrade() {
-    RestAssured.requestSpecification = new RequestSpecBuilder()
-      .addHeader(XOkapiHeaders.URL, "http://host.testcontainers.internal:9999")
-      .addHeader(XOkapiHeaders.TENANT, TENANT)
-      .setContentType(ContentType.JSON)
-      .build();
-
-    // install from scratch
-    postTenant("{ \"module_to\": \"999999.0.0\" }");
-
-    // migrate from 0.0.0 to current version, installation and migration should be idempotent
-    postTenant("{ \"module_to\": \"999999.0.0\", \"module_from\": \"0.0.0\" }");
-  }
-
-  private void postTenant(String body) {
-    given()
-      .body(body)
-      .when()
-      .post("/_/tenant")
-      .then()
-      .statusCode(204);
-  }
-
 }

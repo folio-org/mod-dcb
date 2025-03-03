@@ -86,7 +86,7 @@ management:
   ###################################################
   health:
     defaults:
-      enabled: false
+      access: read-only
     readinessstate:
-      enabled: true
+      access: unrestricted
 debug: false
