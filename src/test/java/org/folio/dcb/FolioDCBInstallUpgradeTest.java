@@ -1,18 +1,12 @@
 package org.folio.dcb;
 
-import io.restassured.RestAssured;
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.http.ContentType;
 import org.folio.dcb.controller.BaseIT;
-import org.folio.spring.integration.XOkapiHeaders;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
-
-import static io.restassured.RestAssured.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class FolioDCBInstallUpgradeTest extends BaseIT {
+class FolioDCBInstallUpgradeTest extends BaseIT {
 
   @Test
   void installAndUpgrade() throws Exception {

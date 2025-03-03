@@ -1,7 +1,6 @@
 package org.folio.dcb;
 
 
-import static io.restassured.RestAssured.given;
 import static io.restassured.RestAssured.when;
 import static org.folio.dcb.controller.BaseIT.POSTGRES_IMAGE_NAME;
 import static org.hamcrest.Matchers.is;
@@ -9,10 +8,8 @@ import static org.hamcrest.Matchers.is;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import io.restassured.RestAssured;
-import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
 import java.nio.file.Path;
-import org.folio.spring.integration.XOkapiHeaders;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
