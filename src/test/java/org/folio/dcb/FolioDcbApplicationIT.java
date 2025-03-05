@@ -2,7 +2,6 @@ package org.folio.dcb;
 
 
 import static io.restassured.RestAssured.when;
-import static org.folio.dcb.controller.BaseIT.POSTGRES_IMAGE_NAME;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
