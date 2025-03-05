@@ -4,17 +4,22 @@ package org.folio.dcb;
 import static io.restassured.RestAssured.when;
 import static org.folio.dcb.controller.BaseIT.POSTGRES_IMAGE_NAME;
 import static org.hamcrest.Matchers.is;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.nio.file.Path;
+
+import org.folio.dcb.controller.BaseIT;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.MediaType;
 import org.testcontainers.Testcontainers;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.KafkaContainer;
@@ -28,7 +33,7 @@ import org.testcontainers.utility.DockerImageName;
 @org.testcontainers.junit.jupiter.Testcontainers
 @WireMockTest(httpPort = 9999)
 
-class FolioDcbApplicationIT {
+class FolioDcbApplicationIT extends BaseIT {
 
   private static final Logger LOG = LoggerFactory.getLogger(FolioDcbApplicationIT.class);
   /** Container logging, requires log4j-slf4j2-impl in test scope */
@@ -100,4 +105,24 @@ class FolioDcbApplicationIT {
       .body("status", is("UP"))
       .contentType(ContentType.JSON);
   }
+
+  @Test
+  void installAndUpgrade() throws Exception {
+
+    // install from scratch
+    postTenant("{ \"module_to\": \"999999.0.0\" }");
+
+    // migrate from 0.0.0 to current version, installation and migration should be idempotent
+    postTenant("{ \"module_to\": \"999999.0.0\", \"module_from\": \"0.0.0\" }");
+  }
+
+  private void postTenant(String body) throws Exception {
+    mockMvc.perform(post("/_/tenant")
+        .content(body)
+        .headers(defaultHeaders())
+        .contentType(MediaType.APPLICATION_JSON))
+      .andExpect(status().isNoContent());
+  }
+
+
 }
