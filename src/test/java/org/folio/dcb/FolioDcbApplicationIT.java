@@ -9,10 +9,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import io.restassured.RestAssured;
+import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
 import java.nio.file.Path;
 
 import org.folio.dcb.controller.BaseIT;
+import org.folio.spring.integration.XOkapiHeaders;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -107,6 +109,12 @@ class FolioDcbApplicationIT extends BaseIT {
 
   @Test
   void installAndUpgrade() throws Exception {
+
+    RestAssured.requestSpecification = new RequestSpecBuilder()
+      .addHeader(XOkapiHeaders.URL, "http://host.testcontainers.internal:9999")
+      .addHeader(XOkapiHeaders.TENANT, TENANT)
+      .setContentType(ContentType.JSON)
+      .build();
 
     // install from scratch
     postTenant("{ \"module_to\": \"999999.0.0\" }");
