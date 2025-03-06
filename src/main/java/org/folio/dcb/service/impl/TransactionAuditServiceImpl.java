@@ -54,7 +54,7 @@ public class TransactionAuditServiceImpl implements TransactionAuditService {
 
   private TransactionAuditEntity generateTrnAuditEntityFromTheFoundOneWithError(TransactionAuditEntity existed, String errorMsg) {
     TransactionAuditEntity auditError = new TransactionAuditEntity();
-    auditError.setId(UUID.randomUUID());
+    auditError.setId(null);
     auditError.setTransactionId(existed.getTransactionId());
     auditError.setAction(ERROR_ACTION);
     auditError.setBefore(existed.getAfter());
@@ -68,7 +68,7 @@ public class TransactionAuditServiceImpl implements TransactionAuditService {
     String errorMessage = String.format("dcbTransactionId = %s; dcb transaction content = %s; error message = %s.", dcbTransactionId, trnE.toString(), errorMsg);
 
     TransactionAuditEntity auditError = new TransactionAuditEntity();
-    auditError.setId(UUID.randomUUID());
+    auditError.setId(null);
     auditError.setTransactionId(dcbTransactionId);
     auditError.setAction(ERROR_ACTION);
     auditError.setBefore(null);

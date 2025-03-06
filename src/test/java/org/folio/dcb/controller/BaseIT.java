@@ -11,6 +11,7 @@ import org.folio.tenant.domain.dto.TenantAttributes;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -54,16 +55,23 @@ public class BaseIT {
     .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
     .configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
 
+  @Autowired
+  private FolioEnvironment folioEnvironment;
+
   static {
     postgreDBContainer.start();
   }
 
   @BeforeAll
-  static void beforeAll(@Autowired MockMvc mockMvc, @Autowired FolioEnvironment folioEnvironment) {
+  static void beforeAll() {
     wireMockServer = new WireMockServer(WIRE_MOCK_PORT);
     wireMockServer.start();
-    setUpTenant(mockMvc);
+  }
+
+  @BeforeEach
+  void setUp() {
     folioEnvironment.setOkapiUrl(getOkapiUrl());
+    setUpTenant(mockMvc);
   }
 
   public static String getOkapiUrl() {

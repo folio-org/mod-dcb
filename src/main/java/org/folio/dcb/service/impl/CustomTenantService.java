@@ -61,7 +61,7 @@ import static org.folio.dcb.utils.DCBConstants.DCB_LOAN_TYPE_NAME;
 @Lazy
 public class CustomTenantService extends TenantService {
 
-  private final PrepareSystemUserService systemUserService;
+  private final PrepareSystemUserService prepareSystemUserService;
   private final KafkaService kafkaService;
   private final InstanceClient inventoryClient;
   private final InstanceTypeClient instanceTypeClient;
@@ -77,7 +77,7 @@ public class CustomTenantService extends TenantService {
 
 
   public CustomTenantService(JdbcTemplate jdbcTemplate, FolioExecutionContext context, FolioSpringLiquibase folioSpringLiquibase,
-                             PrepareSystemUserService systemUserService, KafkaService kafkaService, InstanceClient inventoryClient,
+                             PrepareSystemUserService prepareSystemUserService, KafkaService kafkaService, InstanceClient inventoryClient,
                              InstanceTypeClient instanceTypeClient, HoldingsStorageClient holdingsStorageClient,
                              LocationsClient locationsClient, HoldingSourcesClient holdingSourcesClient,
                              InventoryServicePointClient servicePointClient, LocationUnitClient locationUnitClient,
@@ -85,7 +85,7 @@ public class CustomTenantService extends TenantService {
                              ServicePointExpirationPeriodService servicePointExpirationPeriodService) {
     super(jdbcTemplate, context, folioSpringLiquibase);
 
-    this.systemUserService = systemUserService;
+    this.prepareSystemUserService = prepareSystemUserService;
     this.kafkaService = kafkaService;
     this.inventoryClient = inventoryClient;
     this.instanceTypeClient = instanceTypeClient;
@@ -103,7 +103,7 @@ public class CustomTenantService extends TenantService {
   @Override
   protected void afterTenantUpdate(TenantAttributes tenantAttributes) {
     log.debug("afterTenantUpdate:: parameters tenantAttributes: {}", tenantAttributes);
-    systemUserService.setupSystemUser();
+    prepareSystemUserService.setupSystemUser();
     kafkaService.restartEventListeners();
     createInstanceType();
     createInstance();

@@ -14,8 +14,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.messaging.MessageHeaders;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -51,10 +51,10 @@ class CirculationRequestEventListenerTest extends BaseIT {
   @Autowired
   private CirculationEventListener eventListener ;
 
-  @MockBean
+  @MockitoBean
   private TransactionRepository transactionRepository;
 
-  @MockBean
+  @MockitoBean
   private CirculationItemService circulationItemService;
 
   @Test
