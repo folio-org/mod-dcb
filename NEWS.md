@@ -1,3 +1,8 @@
+## v1.2.7 2025-03-11
+* MODDCB-156: UXPROD-5005 Updating a virtual patron’s group via edge API
+* MODDCB-151: UXPROD-5090 Update DCB service point values for the attribute Hold shelf expiration period
+
+
 ## v1.2.6 2025-01-21
 * MODDCB-166: Add missing required interfaces to Module Descriptor
 
