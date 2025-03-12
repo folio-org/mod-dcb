@@ -1,3 +1,15 @@
+## v1.3.0 2025-03-XX
+
+* MODDCB-124: Feature toggle
+* MODDCB-143: Missing interface dependencies in module descriptor
+* MODDCB-145: Issue with spaces in service point name
+* MODDCB-152: Support for intermediate requests
+* UXPROD-5001: DCB re-request
+* UXPROD-5054: Support DCB request on unavailable item
+* MODDCB-159: Url encoding fix for barcode
+* UXPROD-5090: Update DCB service point values for the attribute Hold shelf expiration period
+* UXPROD-5116: Support DCB virtual item renewal in FOLIO
+
 ## v1.2.0 2024-10-30
 
 * MODDCB-98: Implement GET API for transaction updates
