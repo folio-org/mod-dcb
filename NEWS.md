@@ -1,4 +1,4 @@
-## v1.3.0 2025-03-XX
+## v1.3.0 2025-03-13
 
 * MODDCB-124: Feature toggle
 * MODDCB-143: Missing interface dependencies in module descriptor
