@@ -10,7 +10,7 @@
   <groupId>org.folio</groupId>
   <artifactId>mod-dcb</artifactId>
   <name>mod-dcb</name>
-  <version>2.0.0-SNAPSHOT</version>
+  <version>1.4.0-SNAPSHOT</version>
   <description>Manage DCB related transactions in folio</description>
   <packaging>jar</packaging>
 
@@ -25,17 +25,17 @@
     <java.version>21</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <rest-assured.version>5.1.1</rest-assured.version>
-    <mvn-failsafe.version>3.2.1</mvn-failsafe.version>
-    <folio-util.version>35.3.0</folio-util.version>
+    <rest-assured.version>5.5.1</rest-assured.version>
+    <mvn-failsafe.version>3.5.2</mvn-failsafe.version>
+    <folio-util.version>35.4.0</folio-util.version>
     <argLine />
 
     <!-- runtime dependencies -->
     <folio-spring-support.version>9.0.0</folio-spring-support.version>
-    <openapi-generator.version>7.9.0</openapi-generator.version>
-    <mapstruct.version>1.6.2</mapstruct.version>
-    <kafkaclients.version>3.6.0</kafkaclients.version>
-    <maven-surefire-plugin.version>3.5.1</maven-surefire-plugin.version>
+    <openapi-generator.version>7.12.0</openapi-generator.version>
+    <mapstruct.version>1.6.3</mapstruct.version>
+    <kafkaclients.version>3.9.0</kafkaclients.version>
+    <maven-surefire-plugin.version>3.5.2</maven-surefire-plugin.version>
     <maven-release-plugin.version>3.1.1</maven-release-plugin.version>
     <maven-enforcer-plugin.version>3.5.0</maven-enforcer-plugin.version>
 
