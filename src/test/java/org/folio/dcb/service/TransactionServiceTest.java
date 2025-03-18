@@ -119,7 +119,7 @@ class TransactionServiceTest {
   @ParameterizedTest
   @MethodSource
   void renewLoanByTransactionIdShouldThrowExceptionTest(TransactionEntity transaction,
-    Class<Throwable> exception) {
+                                                        Class<Throwable> exception) {
     when(transactionRepository.findById(anyString())).thenReturn(Optional.of(transaction));
     assertThrows(exception, () -> transactionsService.renewLoanByTransactionId(DCB_TRANSACTION_ID));
   }
