@@ -11,6 +11,10 @@
       "version": "14.4"
     },
     {
+      "id": "loan-policy-storage",
+      "version": "2.3"
+    },
+    {
       "id": "users",
       "version": "16.3"
     },
@@ -78,7 +82,7 @@
   "provides": [
     {
       "id": "transactions",
-      "version": "1.0",
+      "version": "1.1",
       "handlers": [
         {
           "methods": [
@@ -110,6 +114,19 @@
             "circulation-storage.cancellation-reasons.item.post",
             "calendar.endpoint.calendars.get",
             "calendar.endpoint.calendars.calendarId.put"
+          ]
+        },
+        {
+          "methods": [
+            "PUT"
+          ],
+          "pathPattern": "/transactions/{dcbTransactionId}/renew",
+          "permissionsRequired": [
+            "dcb.transactions.renew.put"
+          ],
+          "modulePermissions": [
+            "circulation.renew-by-id.post",
+            "circulation-storage.loan-policies.item.get"
           ]
         },
         {
@@ -263,13 +280,19 @@
         "dcb.transactions.status.get",
         "dcb.transactions.collection.get",
         "dcb.ecs-request.transactions.post",
-        "dcb.transactions.item.put"
+        "dcb.transactions.item.put",
+        "dcb.transactions.renew.put"
       ]
     },
     {
       "permissionName": "dcb.transactions.post",
       "displayName": "creates new transaction",
       "description": "creates new transaction"
+    },
+    {
+      "permissionName": "dcb.transactions.renew.put",
+      "displayName": "renew loan by transaction id",
+      "description": "renew loan by transaction id"
     },
     {
       "permissionName": "dcb.transactions.status.get",

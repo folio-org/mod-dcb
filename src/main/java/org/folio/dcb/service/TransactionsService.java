@@ -19,5 +19,5 @@ public interface TransactionsService {
   TransactionStatusResponse getTransactionStatusById(String dcbTransactionId);
   TransactionStatusResponseCollection getTransactionStatusList(OffsetDateTime fromDate, OffsetDateTime toDate, Integer pageNumber, Integer pageSize);
   void updateTransactionDetails(String dcbTransactionId, DcbUpdateTransaction dcbUpdateTransaction);
-
+  TransactionStatusResponse renewLoanByTransactionId(String dcbTransactionId);
   }
