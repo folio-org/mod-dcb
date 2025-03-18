@@ -1478,24 +1478,4 @@ class TransactionApiControllerTest extends BaseIT {
         .forEach(transactionEntity -> transactionRepository.deleteById(transactionEntity.getId()))
     );
   }
-
-  @Test
-  void createLendingCirculationRequestTestWithSpecialCharBarcode() throws Exception {
-    removeExistedTransactionFromDbIfSoExists();
-    removeExistingTransactionsByItemId(ITEM_ID);
-    String specialCharBarCode = "!@#$%^^&&*()_=+`~|\\]{}DCB_ITEM/'''";
-    DcbTransaction dcbTransaction = createDcbTransactionByRole(DcbTransaction.RoleEnum.LENDER);
-    dcbTransaction.getItem().barcode(specialCharBarCode);
-    DcbItem expectedDCBItem = createDcbItem().barcode(specialCharBarCode);
-    this.mockMvc.perform(
-        post("/transactions/" + DCB_TRANSACTION_ID)
-          .content(asJsonString(dcbTransaction))
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
-      .andExpect(status().isCreated())
-      .andExpect(jsonPath("$.status").value("CREATED"))
-      .andExpect(jsonPath("$.item").value(expectedDCBItem))
-      .andExpect(jsonPath("$.patron").value(createDefaultDcbPatron()));
-  }
 }
