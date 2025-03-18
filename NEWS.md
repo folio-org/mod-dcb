@@ -1,3 +1,7 @@
+## v1.2.8 2025-03-18
+* MODDCB-174: UXPROD-5116 Support DCB virtual item renewal in FOLIO (PUT /transaction/{dcbTransactionId}/renew)
+* MODDCB-173: UXPROD-5116 Support DCB virtual item renewal in FOLIO (GET /transaction/{dcbTransactionId}/renew)
+
 ## v1.2.7 2025-03-11
 * MODDCB-156: UXPROD-5005 Updating a virtual patron’s group via edge API
 * MODDCB-151: UXPROD-5090 Update DCB service point values for the attribute Hold shelf expiration period
