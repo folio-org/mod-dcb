@@ -140,6 +140,8 @@ class TransactionServiceTest {
   private static TransactionEntity buildTransactionToRenew(StatusEnum status, RoleEnum role) {
     return TransactionEntity.builder()
       .id(DCB_TRANSACTION_ID)
+      .itemId(UUID.randomUUID().toString())
+      .patronId(UUID.randomUUID().toString())
       .status(status)
       .role(role)
       .build();

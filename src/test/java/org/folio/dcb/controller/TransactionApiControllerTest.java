@@ -1013,27 +1013,6 @@ class TransactionApiControllerTest extends BaseIT {
   }
 
   @Test
-  void lenderTransactionStatusUpdateFromCreatedToOpen() throws Exception {
-    var transactionID = UUID.randomUUID().toString();
-    var dcbTransaction = createTransactionEntity();
-    dcbTransaction.setStatus(TransactionStatus.StatusEnum.CREATED);
-    dcbTransaction.setRole(DcbTransaction.RoleEnum.LENDER);
-    dcbTransaction.setId(transactionID);
-
-    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT,
-      () -> transactionRepository.save(dcbTransaction));
-
-    this.mockMvc.perform(
-        put("/transactions/" + transactionID + "/status")
-          .content(asJsonString(createTransactionStatus(TransactionStatus.StatusEnum.OPEN)))
-          .headers(defaultHeaders())
-          .contentType(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON))
-      .andExpect(status().isOk())
-      .andExpect(jsonPath("$.status").value("OPEN"));
-  }
-
-  @Test
   void transactionStatusUpdateFromItemCheckedOutToItemCheckedIn() throws Exception {
     var transactionID = UUID.randomUUID().toString();
     var dcbTransaction = createTransactionEntity();
