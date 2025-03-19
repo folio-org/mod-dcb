@@ -1,0 +1,42 @@
+Loan:
+  type: object
+  title: Loan
+  properties:
+    id:
+      description: A globally unique (UUID) identifier for the Loan
+      type: string
+    userId:
+      description: A globally unique (UUID) identifier for the user
+      type: string
+    itemId:
+      description: A globally unique (UUID) identifier for the item
+      type: string
+    renewalCount:
+      description: renewalCount of the loan
+      type: string
+    loanPolicyId:
+      description: A globally unique (UUID) identifier for the loanPolicy
+      type: string
+    status:
+      "$ref": "Loan.yaml#/status"
+status:
+  type: object
+  properties:
+    name:
+      description: loan status
+      type: string
+
+LoanCollection:
+  type: object
+  properties:
+    loans:
+      type: array
+      description: "Loan collection"
+      items:
+        $ref: "Loan.yaml#/Loan"
+    totalRecords:
+      type: integer
+  additionalProperties: false
+  required:
+    - loans
+    - totalRecords

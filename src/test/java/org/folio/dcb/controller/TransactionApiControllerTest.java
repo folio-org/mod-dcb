@@ -1,8 +1,7 @@
 package org.folio.dcb.controller;
 
 import com.jayway.jsonpath.JsonPath;
-import org.folio.dcb.domain.dto.DcbItem;
-import org.folio.dcb.domain.dto.TransactionStatus;
+import org.folio.dcb.domain.dto.*;
 import org.folio.dcb.domain.entity.TransactionAuditEntity;
 import org.folio.dcb.repository.TransactionAuditRepository;
 import org.folio.dcb.repository.TransactionRepository;
@@ -26,6 +25,20 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.folio.dcb.utils.EntityUtils.createDcbTransactionByRole;
+import static org.mockito.ArgumentMatchers.anyString;
+import org.folio.dcb.client.feign.CirculationClient;
+import org.folio.dcb.client.feign.CirculationLoanPolicyStorageClient;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.Mockito;
+import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Stream;
+
 
 class TransactionApiControllerTest extends BaseIT {
 
@@ -40,6 +53,12 @@ class TransactionApiControllerTest extends BaseIT {
 
   @Autowired
   private SystemUserScopedExecutionService systemUserScopedExecutionService;
+  @SpyBean
+  private CirculationClient circulationClient;
+  @SpyBean
+  private CirculationLoanPolicyStorageClient circulationLoanPolicyStorageClient;
+
+  ObjectMapper objectMapper = new ObjectMapper();
 
   @Test
   void createLendingCirculationRequestTest() throws Exception {
@@ -905,5 +924,222 @@ class TransactionApiControllerTest extends BaseIT {
         transactionRepository.findTransactionsByItemIdAndStatusNotInClosed(UUID.fromString(itemId))
           .forEach(transactionEntity -> transactionRepository.deleteById(transactionEntity.getId()))
     );
+  }
+
+  private static Stream<Arguments> transactionRoles() {
+    return Stream.of(
+      Arguments.of(BORROWER),
+      Arguments.of(BORROWING_PICKUP)
+    );
+  }
+
+  @ParameterizedTest
+  @MethodSource("transactionRoles")
+  void getLendingTransactionStatusSuccessTestRenewalCountUnlimitedFalse(DcbTransaction.RoleEnum role) throws Exception {
+    var transactionID = UUID.randomUUID().toString();
+    var dcbTransaction = createTransactionEntity();
+    dcbTransaction.setStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_OUT);
+    dcbTransaction.setRole(role);
+    dcbTransaction.setId(transactionID);
+
+    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> transactionRepository.save(dcbTransaction));
+
+    String randomUUID = UUID.randomUUID().toString();
+
+    LoanCollection loanCollection = LoanCollection.builder()
+      .loans(List.of(Loan.builder()
+        .id(randomUUID)
+        .loanPolicyId(randomUUID)
+        .renewalCount("8")
+        .status(Status.builder().name("OPEN").build()).build()))
+      .totalRecords(1)
+      .build();
+    Mockito.doReturn(loanCollection).when(circulationClient).fetchLoanByQuery(anyString());
+    LoanPolicyCollection loanPolicyCollection = LoanPolicyCollection.builder()
+      .loanPolicies(List.of(LoanPolicy.builder()
+        .id(randomUUID)
+        .renewable(true)
+        .renewalsPolicy(RenewalsPolicy.builder()
+          .unlimited(false)
+          .numberAllowed(22)
+          .build()).build()))
+      .totalRecords(1)
+      .build();
+    Mockito.doReturn(loanPolicyCollection).when(circulationLoanPolicyStorageClient).fetchLoanPolicyByQuery(anyString());
+
+    mockMvc.perform(
+        get("/transactions/" + transactionID + "/status")
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.item.renewalInfo.renewalCount").value(8))
+      .andExpect(jsonPath("$.item.renewalInfo.renewable").value(true))
+      .andExpect(jsonPath("$.item.renewalInfo.renewalMaxCount").value(22));
+  }
+
+  @ParameterizedTest
+  @MethodSource("transactionRoles")
+  void getLendingTransactionStatusSuccessTestRenewalCountUnlimitedTrue(DcbTransaction.RoleEnum role) throws Exception {
+    var transactionID = UUID.randomUUID().toString();
+    var dcbTransaction = createTransactionEntity();
+    dcbTransaction.setStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_OUT);
+    dcbTransaction.setRole(role);
+    dcbTransaction.setId(transactionID);
+
+    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> transactionRepository.save(dcbTransaction));
+
+    String randomUUID = UUID.randomUUID().toString();
+    LoanCollection loanCollection = LoanCollection.builder()
+      .loans(List.of(Loan.builder()
+        .id(randomUUID)
+        .loanPolicyId(randomUUID)
+        .renewalCount("8")
+        .status(Status.builder().name("OPEN").build()).build()))
+      .totalRecords(1)
+      .build();
+    Mockito.doReturn(loanCollection).when(circulationClient).fetchLoanByQuery(anyString());
+    LoanPolicyCollection loanPolicyCollection = LoanPolicyCollection.builder()
+      .loanPolicies(List.of(LoanPolicy.builder()
+        .id(randomUUID)
+        .renewable(true)
+        .renewalsPolicy(RenewalsPolicy.builder().unlimited(true).build()).build()))
+      .totalRecords(1)
+      .build();
+    Mockito.doReturn(loanPolicyCollection).when(circulationLoanPolicyStorageClient).fetchLoanPolicyByQuery(anyString());
+
+    mockMvc.perform(
+        get("/transactions/" + transactionID + "/status")
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.item.renewalInfo.renewalCount").value(8))
+      .andExpect(jsonPath("$.item.renewalInfo.renewable").value(true))
+      .andExpect(jsonPath("$.item.renewalInfo.renewalMaxCount").value(-1));
+  }
+
+  @ParameterizedTest
+  @MethodSource("transactionRoles")
+  void getLendingTransactionStatusSuccessTestRenewalCountFalseRenewableLoanPolicy(DcbTransaction.RoleEnum role) throws Exception {
+    var transactionID = UUID.randomUUID().toString();
+    var dcbTransaction = createTransactionEntity();
+    dcbTransaction.setStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_OUT);
+    dcbTransaction.setRole(role);
+    dcbTransaction.setId(transactionID);
+
+    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> transactionRepository.save(dcbTransaction));
+
+    String randomUUID = UUID.randomUUID().toString();
+    LoanCollection loanCollection = LoanCollection.builder()
+      .loans(List.of(Loan.builder()
+        .id(randomUUID)
+        .loanPolicyId(randomUUID)
+        .renewalCount("8")
+        .status(Status.builder().name("OPEN").build()).build()))
+      .totalRecords(1)
+      .build();
+    Mockito.doReturn(loanCollection).when(circulationClient).fetchLoanByQuery(anyString());
+    LoanPolicyCollection loanPolicyCollection = LoanPolicyCollection.builder()
+      .loanPolicies(List.of(LoanPolicy.builder()
+        .id(randomUUID)
+        .renewable(false).build()))
+      .totalRecords(1)
+      .build();
+    Mockito.doReturn(loanPolicyCollection).when(circulationLoanPolicyStorageClient).fetchLoanPolicyByQuery(anyString());
+
+    mockMvc.perform(
+        get("/transactions/" + transactionID + "/status")
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.item.renewalInfo.renewalCount").value(8))
+      .andExpect(jsonPath("$.item.renewalInfo.renewable").value(false))
+      .andExpect(jsonPath("$.item.renewalInfo.renewalMaxCount").doesNotExist());
+  }
+
+  @ParameterizedTest
+  @MethodSource("transactionRoles")
+  void getLendingTransactionStatusSuccessTestRenewalCountZeroWhenNullRenewalCountInLoan(DcbTransaction.RoleEnum role) throws Exception {
+    var transactionID = UUID.randomUUID().toString();
+    var dcbTransaction = createTransactionEntity();
+    dcbTransaction.setStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_OUT);
+    dcbTransaction.setRole(role);
+    dcbTransaction.setId(transactionID);
+
+    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> transactionRepository.save(dcbTransaction));
+
+    String randomUUID = UUID.randomUUID().toString();
+
+    LoanCollection loanCollection = LoanCollection.builder()
+      .loans(List.of(Loan.builder()
+        .id(randomUUID)
+        .loanPolicyId(randomUUID)
+        .renewalCount(null)
+        .status(Status.builder().name("OPEN").build()).build()))
+      .totalRecords(1)
+      .build();
+    Mockito.doReturn(loanCollection).when(circulationClient).fetchLoanByQuery(anyString());
+    LoanPolicyCollection loanPolicyCollection = LoanPolicyCollection.builder()
+      .loanPolicies(List.of(LoanPolicy.builder()
+        .id(randomUUID)
+        .renewable(true)
+        .renewalsPolicy(RenewalsPolicy.builder()
+          .unlimited(false)
+          .numberAllowed(22)
+          .build()).build()))
+      .totalRecords(1)
+      .build();
+    Mockito.doReturn(loanPolicyCollection).when(circulationLoanPolicyStorageClient).fetchLoanPolicyByQuery(anyString());
+
+    mockMvc.perform(
+        get("/transactions/" + transactionID + "/status")
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.item.renewalInfo.renewalCount").value(0))
+      .andExpect(jsonPath("$.item.renewalInfo.renewable").value(true))
+      .andExpect(jsonPath("$.item.renewalInfo.renewalMaxCount").value(22));
+  }
+
+  @ParameterizedTest
+  @MethodSource("transactionRoles")
+  void getLendingTransactionStatusSuccessTestRenewalCountLoanNotExist(DcbTransaction.RoleEnum role) throws Exception {
+    var transactionID = UUID.randomUUID().toString();
+    var dcbTransaction = createTransactionEntity();
+    dcbTransaction.setStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_OUT);
+    dcbTransaction.setRole(role);
+    dcbTransaction.setId(transactionID);
+
+    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> transactionRepository.save(dcbTransaction));
+
+    LoanCollection loanCollection = LoanCollection.builder()
+      .loans(Collections.emptyList())
+      .totalRecords(0)
+      .build();
+    Mockito.doReturn(loanCollection).when(circulationClient).fetchLoanByQuery(anyString());
+
+    mockMvc.perform(
+        get("/transactions/" + transactionID + "/status")
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.item.renewalInfo").doesNotExist());
+  }
+
+  @Test
+  void getLendingTransactionStatusSuccessTestRenewalCountNegativeTest() throws Exception {
+    var transactionID = UUID.randomUUID().toString();
+    var dcbTransaction = createTransactionEntity();
+    dcbTransaction.setStatus(TransactionStatus.StatusEnum.AWAITING_PICKUP);
+    dcbTransaction.setRole(LENDER);
+    dcbTransaction.setId(transactionID);
+
+    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () -> transactionRepository.save(dcbTransaction));
+
+    mockMvc.perform(
+        get("/transactions/" + transactionID + "/status")
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.item.renewalInfo").doesNotExist());
   }
 }
