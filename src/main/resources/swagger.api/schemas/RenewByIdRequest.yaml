@@ -1,0 +1,16 @@
+RenewByIdRequest:
+  type: object
+  description: Request to renew an existing loan, found by the IDs of item and user
+  properties:
+    itemId:
+      description: ID of the item to be renewed
+      type: string
+      $ref: "./uuid.yaml"
+    userId:
+      description: ID of the user (representing the patron) the item has been loaned to
+      type: string
+      $ref: "./uuid.yaml"
+  required:
+    - itemId
+    - userId
+  additionalProperties: false

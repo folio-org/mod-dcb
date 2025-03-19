@@ -138,6 +138,19 @@
         },
         {
           "methods": [
+            "PUT"
+          ],
+          "pathPattern": "/transactions/{dcbTransactionId}/renew",
+          "permissionsRequired": [
+            "dcb.transactions.renew.put"
+          ],
+          "modulePermissions": [
+            "circulation.renew-by-id.post",
+            "circulation-storage.loan-policies.item.get"
+          ]
+        },
+        {
+          "methods": [
             "GET"
           ],
           "pathPattern": "/transactions/{dcbTransactionId}/status",
@@ -223,7 +236,8 @@
         "dcb.transactions.post",
         "dcb.transactions.put",
         "dcb.transactions.get",
-        "dcb.transactions.item.put"
+        "dcb.transactions.item.put",
+        "dcb.transactions.renew.put"
       ]
     },
     {
@@ -245,6 +259,11 @@
       "permissionName": "dcb.transactions.item.put",
       "displayName": "update transaction details",
       "description": "update transaction details"
+    },
+    {
+      "permissionName": "dcb.transactions.renew.put",
+      "displayName": "renew loan by transaction id",
+      "description": "renew loan by transaction id"
     }
   ],
   "launchDescriptor": {

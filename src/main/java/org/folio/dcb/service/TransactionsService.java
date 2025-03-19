@@ -16,4 +16,5 @@ public interface TransactionsService {
   TransactionStatusResponse updateTransactionStatus(String dcbTransactionId, TransactionStatus transactionStatus);
   TransactionStatusResponse getTransactionStatusById(String dcbTransactionId);
   void updateTransactionDetails(String dcbTransactionId, DcbUpdateTransaction dcbUpdateTransaction);
+  TransactionStatusResponse renewLoanByTransactionId(String dcbTransactionId);
   }

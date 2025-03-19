@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.folio.dcb.domain.dto.LoanCollection;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.folio.dcb.domain.dto.RenewByIdRequest;
+import org.folio.dcb.domain.dto.RenewByIdResponse;
 
 @FeignClient(name = "circulation", configuration = FeignClientConfiguration.class)
 public interface CirculationClient {
@@ -29,4 +31,7 @@ public interface CirculationClient {
 
   @GetMapping("/loans")
   LoanCollection fetchLoanByQuery(@RequestParam("query") String query);
+
+  @PostMapping("/renew-by-id")
+  RenewByIdResponse renewById(@RequestBody RenewByIdRequest renewByIdRequest);
 }

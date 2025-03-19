@@ -20,6 +20,13 @@ public class TransactionApiController implements TransactionsApi {
 
   private final TransactionsService transactionsService;
   private final TransactionAuditService transactionAuditService;
+
+  @Override
+  public ResponseEntity<TransactionStatusResponse> renewItemLoanByTransactionId(String dcbTransactionId) {
+    return ResponseEntity.status(HttpStatus.OK)
+      .body(transactionsService.renewLoanByTransactionId(dcbTransactionId));
+  }
+
   @Override
   public ResponseEntity<TransactionStatusResponse> getTransactionStatusById(String dcbTransactionId) {
     log.info("getTransactionStatus:: by id {} ", dcbTransactionId);
