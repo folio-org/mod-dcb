@@ -73,6 +73,23 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
+  /transactions/{dcbTransactionId}/renew:
+    parameters:
+      - $ref: '#/components/parameters/dcbTransactionId'
+    put:
+      description: Increment the renew loan count and returned transaction status with renewal details
+      operationId: renewItemLoanByTransactionId
+      tags:
+        - circulation
+      responses:
+        '200':
+          $ref: '#/components/responses/TransactionStatusResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 components:
   requestBodies:
     TransactionStatusBody:
@@ -151,6 +168,10 @@ components:
         type: string
       required: true
   schemas:
+    RenewByIdRequest:
+      $ref: 'schemas/RenewByIdRequest.yaml#/RenewByIdRequest'
+    RenewByIdResponse:
+      $ref: 'schemas/RenewByIdResponse.yaml#/RenewByIdResponse'
     InventoryItem:
       $ref: 'schemas/InventoryItem.yaml#/InventoryItem'
     InventoryHolding:
@@ -159,6 +180,10 @@ components:
       $ref: 'schemas/UserGroup.yaml#/UserGroupCollection'
     UserCollection:
       $ref: 'schemas/User.yaml#/UserCollection'
+    LoanCollection:
+      $ref: 'schemas/Loan.yaml#/LoanCollection'
+    LoanPolicyCollection:
+      $ref: 'schemas/LoanPolicy.yaml#/LoanPolicyCollection'
     CirculationRequest:
       $ref: 'schemas/CirculationRequest.yaml#/CirculationRequest'
     CheckInRequest:
