@@ -1,3 +1,6 @@
+## v1.1.9 2025-03-21
+* UXPROD-5116: Support DCB virtual item renewal in FOLIO
+
 ## v1.1.8 2025-02-12
 * UXPROD-5090: Update DCB service point values for the attribute Hold shelf expiration period
 
