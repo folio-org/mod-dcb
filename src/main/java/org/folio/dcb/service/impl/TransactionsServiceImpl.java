@@ -251,9 +251,9 @@ public class TransactionsServiceImpl implements TransactionsService {
       throw new StatusException(String.format(
         "Transaction details should not be updated from %s status, it can be updated only from CREATED status", transactionEntity.getStatus()));
     }
-    if (LENDER.equals(transactionEntity.getRole())) {
-      throw new IllegalArgumentException("Item details cannot be updated for lender role");
-    }
+//    if (LENDER.equals(transactionEntity.getRole())) {
+//      throw new IllegalArgumentException("Item details cannot be updated for lender role");
+//    }
     baseLibraryService.updateTransactionDetails(transactionEntity, dcbUpdateTransaction.getItem());
   }
 
