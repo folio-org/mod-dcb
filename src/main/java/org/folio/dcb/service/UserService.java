@@ -9,7 +9,7 @@ public interface UserService {
    * @param dcbPatron - dcbPatronEntity
    * @return user
    */
-  User fetchOrCreateUser(DcbPatron dcbPatron);
+  User fetchOrCreateUser(DcbPatron dcbPatron, Boolean selfBorrowing);
 
   /**
    * Retrieving User.

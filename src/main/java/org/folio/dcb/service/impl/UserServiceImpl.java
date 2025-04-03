@@ -2,6 +2,8 @@ package org.folio.dcb.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.folio.dcb.client.feign.UsersClient;
 import org.folio.dcb.domain.dto.DcbPatron;
@@ -43,21 +45,37 @@ public class UserServiceImpl implements UserService {
     return user;
   }
 
-  public User fetchOrCreateUser(DcbPatron patronDetails) {
+  public User fetchOrCreateUser(DcbPatron patronDetails, Boolean selfBorrowing) {
     log.debug("createOrFetchUser:: Trying to create or find user for userId {}, userBarcode {}",
       patronDetails.getId(), patronDetails.getBarcode());
     var user = fetchUserByBarcodeAndId(patronDetails.getBarcode(), patronDetails.getId());
     if(Objects.isNull(user)) {
+      throwAnErrorIfSelfBorrowing(patronDetails, selfBorrowing);
       log.info("fetchOrCreateUser:: Unable to find existing user with barcode {} and id {}. Hence, creating new user",
         patronDetails.getBarcode(), patronDetails.getId());
       return createUser(patronDetails);
     } else {
-      validateDcbUserType(user.getType());
+      validateDcbUserTypeIfNotSelfBorrowing(selfBorrowing, user);
       var groupId = patronGroupService.fetchPatronGroupIdByName(patronDetails.getGroup());
       if (!groupId.equals(user.getPatronGroup())) {
         return updateUserGroup(user, groupId);
       }
       return user;
+    }
+  }
+
+  private void validateDcbUserTypeIfNotSelfBorrowing(Boolean selfBorrowing, User user) {
+    if (BooleanUtils.isFalse(selfBorrowing)) {
+      validateDcbUserType(user.getType());
+    }
+  }
+
+  private static void throwAnErrorIfSelfBorrowing(DcbPatron patronDetails, Boolean selfBorrowing) {
+    if (BooleanUtils.isTrue(selfBorrowing)) {
+      log.error("throwAnErrorIfSelfBorrowing:: user hadn't been found. " +
+        "user {}", patronDetails);
+      throw new NotFoundException(String.format("throwAnErrorIfSelfBorrowing:: user hadn't been found. " +
+        "user %s", patronDetails));
     }
   }
 
