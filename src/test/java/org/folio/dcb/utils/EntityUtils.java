@@ -74,6 +74,7 @@ public class EntityUtils {
         default -> createDefaultDcbPatron();
         }
       )
+      .selfBorrowing(Boolean.FALSE)
       .role(role)
       .pickup(createDcbPickup())
       .build();
@@ -120,7 +121,7 @@ public class EntityUtils {
       .name("DCB_TestLibraryCode_TestServicePointCode")
       .code("DCB_TESTLIBRARYCODE_TESTSERVICEPOINTCODE")
       .discoveryDisplayName("DCB_TestLibraryCode_TestServicePointCode")
-      .pickupLocation(true)
+      .pickupLocation(Boolean.TRUE)
       .holdShelfExpiryPeriod(org.folio.dcb.domain.dto.HoldShelfExpiryPeriod.builder().duration(3).intervalId(org.folio.dcb.domain.dto.IntervalIdEnum.DAYS).build())
       .holdShelfClosedLibraryDateManagement(HOLD_SHELF_CLOSED_LIBRARY_DATE_MANAGEMENT)
       .build();
@@ -193,7 +194,7 @@ public class EntityUtils {
 
   public static User createUser() {
     return User.builder()
-      .active(true)
+      .active(Boolean.TRUE)
       .patronGroup("staff")
       .id(NOT_EXISTED_PATRON_ID)
       .type(DCB_USER_TYPE)

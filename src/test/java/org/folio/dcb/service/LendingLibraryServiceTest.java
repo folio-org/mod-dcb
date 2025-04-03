@@ -33,6 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -66,14 +67,14 @@ class LendingLibraryServiceTest {
     var servicePoint = createServicePointRequest();
     servicePoint.setId(UUID.randomUUID().toString());
 
-    when(userService.fetchOrCreateUser(any(), false))
+    when(userService.fetchOrCreateUser(any(), eq(Boolean.FALSE)))
       .thenReturn(user);
     when(servicePointService.createServicePointIfNotExists(dcbPickup)).thenReturn(servicePoint);
     when(requestService.createRequestBasedOnItemStatus(any(), any(), anyString())).thenReturn(createCirculationRequest());
     doNothing().when(baseLibraryService).saveDcbTransaction(any(), any(), any());
 
     var response = lendingLibraryService.createCirculation(DCB_TRANSACTION_ID, dcbTransaction);
-    verify(userService).fetchOrCreateUser(patron, false);
+    verify(userService).fetchOrCreateUser(patron, Boolean.FALSE);
     verify(requestService).createRequestBasedOnItemStatus(user, item, dcbTransaction.getPickup().getServicePointId());
     verify(baseLibraryService).saveDcbTransaction(DCB_TRANSACTION_ID, dcbTransaction, CIRCULATION_REQUEST_ID);
     Assertions.assertEquals(TransactionStatusResponse.StatusEnum.CREATED, response.getStatus());

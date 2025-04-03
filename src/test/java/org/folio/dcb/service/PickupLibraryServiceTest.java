@@ -21,6 +21,7 @@ import static org.folio.dcb.utils.EntityUtils.createUser;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -49,14 +50,14 @@ class PickupLibraryServiceTest {
     var circulationItem = createCirculationItem();
     circulationItem.setId(item.getId());
 
-    when(userService.fetchOrCreateUser(any(), false))
+    when(userService.fetchOrCreateUser(any(), eq(Boolean.FALSE)))
       .thenReturn(user);
     when(requestService.createHoldItemRequest(any(), any(), anyString())).thenReturn(createCirculationRequest());
     when(circulationItemService.checkIfItemExistsAndCreate(any(), any())).thenReturn(circulationItem);
     doNothing().when(baseLibraryService).saveDcbTransaction(any(), any(), any());
 
     var response = pickupLibraryService.createCirculation(DCB_TRANSACTION_ID, createDcbTransactionByRole(PICKUP));
-    verify(userService).fetchOrCreateUser(patron, false);
+    verify(userService).fetchOrCreateUser(patron, Boolean.FALSE);
     verify(circulationItemService).checkIfItemExistsAndCreate(item, PICKUP_SERVICE_POINT_ID);
     verify(requestService).createHoldItemRequest(user, item, PICKUP_SERVICE_POINT_ID);
 

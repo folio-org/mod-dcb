@@ -98,7 +98,7 @@ public class UserServiceImpl implements UserService {
 
   private User createVirtualUser(DcbPatron patron, String groupId) {
     return User.builder()
-      .active(true)
+      .active(Boolean.TRUE)
       .barcode(patron.getBarcode())
       .patronGroup(groupId)
       .id(patron.getId())

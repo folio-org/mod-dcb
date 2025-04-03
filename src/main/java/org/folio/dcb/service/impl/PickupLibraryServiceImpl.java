@@ -31,10 +31,12 @@ public class PickupLibraryServiceImpl implements LibraryService {
     var selfBorrowing = dcbTransaction.getSelfBorrowing();
 
     var user = userService.fetchOrCreateUser(patron, selfBorrowing);
-    baseLibraryService.checkItemExistsInInventoryAndThrow(itemVirtual.getBarcode());
-    CirculationItem item = circulationItemService.checkIfItemExistsAndCreate(itemVirtual, dcbTransaction.getPickup().getServicePointId());
-    dcbTransaction.getItem().setId(item.getId());
-    baseLibraryService.checkOpenTransactionExistsAndThrow(item.getId());
+    if(!selfBorrowing) {
+      baseLibraryService.checkItemExistsInInventoryAndThrow(itemVirtual.getBarcode());
+      CirculationItem item = circulationItemService.checkIfItemExistsAndCreate(itemVirtual, dcbTransaction.getPickup().getServicePointId());
+      dcbTransaction.getItem().setId(item.getId());
+      baseLibraryService.checkOpenTransactionExistsAndThrow(item.getId());
+    }
     CirculationRequest holdRequest = requestService.createHoldItemRequest(user, itemVirtual, dcbTransaction.getPickup().getServicePointId());
     baseLibraryService.saveDcbTransaction(dcbTransactionId, dcbTransaction, holdRequest.getId());
 
