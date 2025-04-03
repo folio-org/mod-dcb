@@ -22,6 +22,7 @@ import org.folio.dcb.service.CirculationRequestService;
 import org.folio.dcb.service.EcsRequestTransactionsService;
 import org.folio.dcb.service.RequestService;
 import org.folio.dcb.utils.RequestStatus;
+import org.folio.spring.exception.NotFoundException;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
@@ -68,6 +69,29 @@ public class EcsRequestTransactionsServiceImpl implements EcsRequestTransactions
     } else {
       throw new IllegalArgumentException("Unable to create ECS transaction as could not find open request");
     }
+  }
+
+  @Override
+  public TransactionStatusResponse updateEcsRequestTransactions(String ecsRequestTransactionsId, DcbTransaction dcbTransaction) {
+    log.info("updateEcsRequestTransactions:: updating transaction {} for role {} ",
+      ecsRequestTransactionsId, dcbTransaction.getRole());
+    var transactionResult = transactionRepository.findById(ecsRequestTransactionsId);
+    if (transactionResult.isEmpty()) {
+      throw new NotFoundException("Transaction with id " + ecsRequestTransactionsId + " not found");
+    }
+    var item = dcbTransaction.getItem();
+    var barcode = item == null ? null : dcbTransaction.getItem().getBarcode();
+    var transaction = transactionResult.get();
+    transaction.setItemBarcode(barcode);
+    transactionRepository.save(transaction);
+    log.info("updateEcsRequestTransactions:: updated transaction {} with barcode {}",
+      ecsRequestTransactionsId, barcode);
+
+    return TransactionStatusResponse.builder()
+      .status(TransactionStatusResponse.StatusEnum.fromValue(transaction.getStatus().getValue()))
+      .item(dcbTransaction.getItem())
+      .patron(dcbTransaction.getPatron())
+      .build();
   }
 
   private void checkEcsRequestTransactionExistsAndThrow(String dcbTransactionId) {
