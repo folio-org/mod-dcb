@@ -42,8 +42,9 @@ public class LendingLibraryServiceImpl implements LibraryService {
 
     var item = dcbTransaction.getItem();
     var patron = dcbTransaction.getPatron();
+    var selfBorrowing = dcbTransaction.getSelfBorrowing();
 
-    var user = userService.fetchOrCreateUser(patron);
+    var user = userService.fetchOrCreateUser(patron, selfBorrowing);
     ServicePointRequest pickupServicePoint = servicePointService.createServicePointIfNotExists(dcbTransaction.getPickup());
     dcbTransaction.getPickup().setServicePointId(pickupServicePoint.getId());
     CirculationRequest pageRequest = requestService.createRequestBasedOnItemStatus(user, item, pickupServicePoint.getId());

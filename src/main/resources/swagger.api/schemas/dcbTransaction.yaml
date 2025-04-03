@@ -1,6 +1,8 @@
 DcbTransaction:
   type: object
   properties:
+    selfBorrowing:
+      type: boolean
     item:
       $ref: 'dcbItem.yaml#/DcbItem'
     patron:
