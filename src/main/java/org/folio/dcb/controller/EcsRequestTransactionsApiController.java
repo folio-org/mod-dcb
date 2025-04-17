@@ -45,7 +45,7 @@ public class EcsRequestTransactionsApiController implements EcsRequestTransactio
       ecsRequestTransactionId);
     TransactionStatusResponse transactionStatusResponse;
     try {
-      transactionStatusResponse = ecsRequestTransactionsService.updateEcsRequestTransactions(
+      transactionStatusResponse = ecsRequestTransactionsService.updateEcsRequestTransaction(
         ecsRequestTransactionId, dcbTransaction);
     } catch (Exception ex) {
       transactionAuditService.logErrorIfTransactionAuditNotExists(ecsRequestTransactionId,

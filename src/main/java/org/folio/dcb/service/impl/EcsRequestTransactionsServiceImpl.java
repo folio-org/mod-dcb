@@ -72,9 +72,8 @@ public class EcsRequestTransactionsServiceImpl implements EcsRequestTransactions
   }
 
   @Override
-  public TransactionStatusResponse updateEcsRequestTransactions(String ecsRequestTransactionsId, DcbTransaction dcbTransaction) {
-    log.info("updateEcsRequestTransactions:: updating transaction {} for role {} ",
-      ecsRequestTransactionsId, dcbTransaction.getRole());
+  public TransactionStatusResponse updateEcsRequestTransaction(String ecsRequestTransactionsId, DcbTransaction dcbTransaction) {
+    log.info("updateEcsRequestTransactions:: updating transaction {}", ecsRequestTransactionsId);
     var transactionResult = transactionRepository.findById(ecsRequestTransactionsId);
     if (transactionResult.isEmpty()) {
       throw new NotFoundException("Transaction with id " + ecsRequestTransactionsId + " not found");
