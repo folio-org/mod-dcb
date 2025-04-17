@@ -217,11 +217,11 @@
         },
         {
           "methods": [
-            "PUT"
+            "PATCH"
           ],
           "pathPattern": "/ecs-request-transactions/{ecsRequestTransactionId}",
           "permissionsRequired": [
-            "dcb.ecs-request.transactions.put"
+            "dcb.ecs-request.transactions.patch"
           ],
           "modulePermissions": []
         }
