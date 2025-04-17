@@ -5,15 +5,21 @@ import static org.folio.dcb.utils.EntityUtils.createBorrowingEcsRequestTransacti
 import static org.folio.dcb.utils.EntityUtils.createBorrowingPickupEcsRequestTransactionByRole;
 import static org.folio.dcb.utils.EntityUtils.createLendingEcsRequestTransactionByRole;
 import static org.folio.dcb.utils.EntityUtils.createPickupEcsRequestTransactionByRole;
+import static org.folio.dcb.utils.EntityUtils.createTransactionEntity;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.UUID;
 
+import org.folio.dcb.domain.dto.DcbItem;
 import org.folio.dcb.domain.dto.DcbTransaction;
+import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.entity.TransactionAuditEntity;
+import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.repository.TransactionAuditRepository;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.spring.service.SystemUserScopedExecutionService;
@@ -122,6 +128,52 @@ class EcsRequestTransactionsApiControllerTest extends BaseIT {
         .contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON))
       .andExpectAll(status().is4xxClientError());
+  }
+
+  @Test
+  void updateTransactionWithItemBarcode() throws Exception {
+    String realItemBarcode = "real_item_barcode";
+    String transactionId = UUID.randomUUID().toString();
+    String itemId = UUID.randomUUID().toString();
+    TransactionEntity transaction = createTransactionEntity();
+    transaction.setId(transactionId);
+    transaction.setStatus(TransactionStatus.StatusEnum.OPEN);
+    transaction.setItemId(itemId);
+    transaction.setItemBarcode(itemId); // itemId used as barcode intentionally
+
+    systemUserScopedExecutionService.executeSystemUserScoped(TENANT,
+      () -> transactionRepository.save(transaction));
+
+    DcbTransaction requestBody = new DcbTransaction()
+      .item(new DcbItem().barcode(realItemBarcode));
+
+    mockMvc.perform(
+      patch("/ecs-request-transactions/" + transactionId)
+        .content(asJsonString(requestBody))
+        .headers(defaultHeaders())
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isOk());
+
+    String updatedTransactionItemBarcode = systemUserScopedExecutionService.executeSystemUserScoped(
+        TENANT, () -> transactionRepository.findById(transactionId))
+      .orElseThrow()
+      .getItemBarcode();
+    assertEquals(realItemBarcode, updatedTransactionItemBarcode);
+  }
+
+  @Test
+  void updateOfNonExistentTransactionFails() throws Exception {
+    DcbTransaction requestBody = new DcbTransaction()
+      .item(new DcbItem().barcode("item_barcode"));
+
+    mockMvc.perform(
+        patch("/ecs-request-transactions/" + UUID.randomUUID())
+          .content(asJsonString(requestBody))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isNotFound());
   }
 
   private void removeExistedTransactionFromDbIfSoExists() {
