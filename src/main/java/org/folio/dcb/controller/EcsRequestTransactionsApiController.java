@@ -52,6 +52,6 @@ public class EcsRequestTransactionsApiController implements EcsRequestTransactio
         dcbTransaction, ex.getMessage());
       throw ex;
     }
-    return ResponseEntity.status(HttpStatus.CREATED).body(transactionStatusResponse);
+    return ResponseEntity.status(HttpStatus.OK).body(transactionStatusResponse);
   }
 }
