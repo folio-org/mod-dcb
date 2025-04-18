@@ -214,6 +214,16 @@
             "inventory-storage.material-types.collection.get",
             "inventory-storage.loan-types.collection.get"
           ]
+        },
+        {
+          "methods": [
+            "PATCH"
+          ],
+          "pathPattern": "/ecs-request-transactions/{ecsRequestTransactionId}",
+          "permissionsRequired": [
+            "dcb.ecs-request.transactions.patch"
+          ],
+          "modulePermissions": []
         }
       ]
     },

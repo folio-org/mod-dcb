@@ -36,4 +36,22 @@ public class EcsRequestTransactionsApiController implements EcsRequestTransactio
     }
     return ResponseEntity.status(HttpStatus.CREATED).body(transactionStatusResponse);
   }
+
+  @Override
+  public ResponseEntity<TransactionStatusResponse> updateEcsRequestTransaction(
+    String ecsRequestTransactionId, DcbTransaction dcbTransaction) {
+
+    log.info("updateEcsRequestTransaction:: update ECS request transaction {}",
+      ecsRequestTransactionId);
+    TransactionStatusResponse transactionStatusResponse;
+    try {
+      transactionStatusResponse = ecsRequestTransactionsService.updateEcsRequestTransaction(
+        ecsRequestTransactionId, dcbTransaction);
+    } catch (Exception ex) {
+      transactionAuditService.logErrorIfTransactionAuditNotExists(ecsRequestTransactionId,
+        dcbTransaction, ex.getMessage());
+      throw ex;
+    }
+    return ResponseEntity.status(HttpStatus.OK).body(transactionStatusResponse);
+  }
 }
