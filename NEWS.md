@@ -1,3 +1,6 @@
+## v1.2.9 2025-04-18
+* MODDCB-188: Support items without barcodes - new API to enable transaction patching
+
 ## v1.2.8 2025-03-18
 * MODDCB-174: UXPROD-5116 Support DCB virtual item renewal in FOLIO (PUT /transaction/{dcbTransactionId}/renew)
 * MODDCB-173: UXPROD-5116 Support DCB virtual item renewal in FOLIO (GET /transaction/{dcbTransactionId}/renew)
