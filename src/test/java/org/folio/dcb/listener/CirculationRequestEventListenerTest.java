@@ -20,6 +20,7 @@ import org.springframework.messaging.MessageHeaders;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.*;
@@ -36,6 +37,7 @@ class CirculationRequestEventListenerTest extends BaseIT {
   private static final String REQUEST_EVENT_SAMPLE_NON_DCB = getMockDataAsString("mockdata/kafka/request_sample.json");
 
   private static final String CHECK_IN_EVENT_SAMPLE_FOR_DCB = getMockDataAsString("mockdata/kafka/check_in_dcb.json");
+  private static final String CHECK_IN_DELIVERY_EVENT_SAMPLE = getMockDataAsString("mockdata/kafka/check_in_awaiting_delivery.json");
   private static final String CHECK_IN_TRANSIT_EVENT_SAMPLE = getMockDataAsString("mockdata/kafka/check_in_transit.json");
   private static final String CHECK_IN_TRANSIT_EVENT_FOR_DCB_SAMPLE = getMockDataAsString("mockdata/kafka/check_in_transit_dcb.json");
   private static final String CHECK_IN_UNDEFINED_EVENT_SAMPLE = getMockDataAsString("mockdata/kafka/request_undefined.json");
@@ -96,8 +98,25 @@ class CirculationRequestEventListenerTest extends BaseIT {
     when(circulationItemService.fetchItemById(anyString())).thenReturn(circulationItem);
     eventListener.handleRequestEvent(CHECK_IN_EVENT_SAMPLE_FOR_DCB, messageHeaders);
     Mockito.verify(transactionRepository).save(any());
-
   }
+
+  @Test
+  void handleCheckInEventDeliveryForDcbFromOpenToAwaitingPickupTest() {
+    var transactionEntity = createTransactionEntity();
+    transactionEntity.setItemId(UUID.randomUUID().toString());
+    transactionEntity.setStatus(TransactionStatus.StatusEnum.OPEN);
+    transactionEntity.setRole(PICKUP);
+    var circulationItem = createCirculationItem();
+    circulationItem.setStatus(org.folio.dcb.domain.dto.ItemStatus.builder()
+      .name(org.folio.dcb.domain.dto.ItemStatus.NameEnum.AWAITING_PICKUP).build());
+    MessageHeaders messageHeaders = getMessageHeaders();
+    when(transactionRepository.findTransactionByRequestIdAndStatusNotInClosed(any()))
+      .thenReturn(Optional.of(transactionEntity));
+    when(circulationItemService.fetchItemById(anyString())).thenReturn(circulationItem);
+    eventListener.handleRequestEvent(CHECK_IN_DELIVERY_EVENT_SAMPLE, messageHeaders);
+    Mockito.verify(transactionRepository).save(any());
+  }
+
   @Test
   void handleCheckInEventInBorrowingFromOpenToAwaitingPickup() {
     var transactionEntity = createTransactionEntity();
