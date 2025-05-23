@@ -2,6 +2,8 @@ package org.folio.dcb.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.folio.dcb.domain.dto.CirculationItem;
 import org.folio.dcb.domain.dto.CirculationRequest;
@@ -52,13 +54,17 @@ public class BaseLibraryService {
     var patron = dcbTransaction.getPatron();
 
     var user = userService.fetchUser(patron); //user is needed, but shouldn't be generated. it should be fetched.
-    if(Objects.equals(user.getType(), DCB_TYPE)) {
+    if(Objects.equals(user.getType(), DCB_TYPE) && BooleanUtils.isFalse(dcbTransaction.getSelfBorrowing())) {
       throw new IllegalArgumentException(String.format("User with type %s is retrieved. so unable to create transaction", user.getType()));
     }
-    checkItemExistsInInventoryAndThrow(itemVirtual.getBarcode());
+    if(BooleanUtils.isFalse(dcbTransaction.getSelfBorrowing())) {
+      checkItemExistsInInventoryAndThrow(itemVirtual.getBarcode());
+    }
     CirculationItem item = circulationItemService.checkIfItemExistsAndCreate(itemVirtual, pickupServicePointId);
-    dcbTransaction.getItem().setId(item.getId());
-    checkOpenTransactionExistsAndThrow(item.getId());
+    if(BooleanUtils.isFalse(dcbTransaction.getSelfBorrowing())) {
+      dcbTransaction.getItem().setId(item.getId());
+      checkOpenTransactionExistsAndThrow(item.getId());
+    }
     CirculationRequest holdRequest = requestService.createHoldItemRequest(user, itemVirtual, pickupServicePointId);
     saveDcbTransaction(dcbTransactionId, dcbTransaction, holdRequest.getId());
 

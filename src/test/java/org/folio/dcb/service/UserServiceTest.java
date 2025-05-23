@@ -37,7 +37,7 @@ class UserServiceTest {
     when(usersClient.fetchUserByBarcodeAndId(any())).thenReturn(userCollection);
     when(patronGroupService.fetchPatronGroupIdByName("staff"))
       .thenReturn(groupId);
-    userService.fetchOrCreateUser(createDefaultDcbPatron());
+    userService.fetchOrCreateUser(createDefaultDcbPatron(), false);
     verify(usersClient).fetchUserByBarcodeAndId(any());
     verify(patronGroupService).fetchPatronGroupIdByName("staff");
     verify(usersClient, never()).updateUser(any(), any());
@@ -52,7 +52,7 @@ class UserServiceTest {
     when(usersClient.fetchUserByBarcodeAndId(any())).thenReturn(userCollection);
     when(patronGroupService.fetchPatronGroupIdByName("staff"))
       .thenReturn(UUID.randomUUID().toString());
-    userService.fetchOrCreateUser(createDefaultDcbPatron());
+    userService.fetchOrCreateUser(createDefaultDcbPatron(), false);
     verify(usersClient).fetchUserByBarcodeAndId(any());
     verify(patronGroupService).fetchPatronGroupIdByName("staff");
     verify(usersClient).updateUser(any(), any());
@@ -65,7 +65,7 @@ class UserServiceTest {
     userCollection.setUsers(List.of());
     when(usersClient.fetchUserByBarcodeAndId(any())).thenReturn(userCollection);
     when(patronGroupService.fetchPatronGroupIdByName(any())).thenReturn(UUID.randomUUID().toString());
-    userService.fetchOrCreateUser(createDefaultDcbPatron());
+    userService.fetchOrCreateUser(createDefaultDcbPatron(), false);
     verify(usersClient).fetchUserByBarcodeAndId(any());
     verify(patronGroupService).fetchPatronGroupIdByName("staff");
     verify(usersClient).createUser(any());
