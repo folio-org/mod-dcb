@@ -5,9 +5,9 @@
                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 
     <!-- Create service point expiration period  table -->
-    <changeSet id="createTableServicePointExpirationPeriod" author="hruschevAntony">
+    <changeSet id="createPgcryptoExtensionIfNotExist" author="kapil-verma">
         <sqlFile dbms="postgresql"
-                 path="create-service-point-expiration-period-table.sql"
+                 path="create-pgcrypto-extension.sql"
                  relativeToChangelogFile="true"
                  splitStatements="false"/>
     </changeSet>
