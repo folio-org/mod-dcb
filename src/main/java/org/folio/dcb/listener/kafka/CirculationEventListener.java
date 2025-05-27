@@ -72,7 +72,7 @@ public class CirculationEventListener {
         String itemId = eventData.getItemId();
         systemUserScopedExecutionService.executeAsyncSystemUserScoped(tenantId, () ->{
                     log.info("handleLoanEvent:: itemId: {}", itemId);
-                transactionRepository.findTransactionByItemIdAndStatusNotInClosed(UUID.fromString(itemId))
+                transactionRepository.findSingleTransactionsByItemIdAndStatusNotInClosed(UUID.fromString(itemId))
                         .ifPresent(transactionEntity -> {
                             log.info("handleLoanEvent:: transactionEntity: {}", transactionEntity);
                             if (eventData.getType() == EventData.EventType.CHECK_OUT) {
@@ -82,7 +82,7 @@ public class CirculationEventListener {
                                     log.info("handleLoanEvent:: updating transaction {} to ITEM_CHECKED_OUT status for BORROWING_PICKUP role with selfBorrowing=True", transactionEntity.getId());
                                     baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.ITEM_CHECKED_OUT);
                                 }
-                            } else if (eventData.getType() == EventData.EventType.CHECK_IN && isBorrowingPickupWithSelfBorrowingTrueAndClosedLLoanStatus(transactionEntity, eventData)) {
+                            } else if (eventData.getType() == EventData.EventType.CHECK_IN && isBorrowingPickupWithSelfBorrowingTrueAndClosedLoanStatus(transactionEntity, eventData)) {
                                     log.info("handleLoanEvent:: updating transaction {} to CLOSED status for BORROWING_PICKUP role with selfBorrowing=True and loan status is CLOSED", transactionEntity.getId());
                                     baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.CLOSED);
                                 }
@@ -93,7 +93,7 @@ public class CirculationEventListener {
     }
   }
 
-    private static boolean isBorrowingPickupWithSelfBorrowingTrueAndClosedLLoanStatus(TransactionEntity transactionEntity, EventData eventData) {
+    private static boolean isBorrowingPickupWithSelfBorrowingTrueAndClosedLoanStatus(TransactionEntity transactionEntity, EventData eventData) {
         return transactionEntity.getRole() == BORROWING_PICKUP && BooleanUtils.isTrue(transactionEntity.getSelfBorrowing())
                 && CLOSED_LOAN_STATUS.equals(eventData.getLoanStatus());
     }
