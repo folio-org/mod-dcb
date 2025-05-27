@@ -24,7 +24,7 @@ Version 2.0. See the file "[LICENSE](LICENSE)" for more information.
 
 ## Introduction
 
-APIs for managing dcb transactions in folio.
+APIs for managing dcb (direct consortial borrowing) transactions in folio.
 
 ## API information
 
