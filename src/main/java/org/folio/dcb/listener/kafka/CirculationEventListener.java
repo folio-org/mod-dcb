@@ -2,6 +2,7 @@ package org.folio.dcb.listener.kafka;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.BooleanUtils;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.impl.BaseLibraryService;
@@ -17,6 +18,7 @@ import java.util.UUID;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWING_PICKUP;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.PICKUP;
+import static org.folio.dcb.utils.DCBConstants.CLOSED_LOAN_STATUS;
 import static org.folio.dcb.utils.TransactionHelper.getHeaderValue;
 import static org.folio.dcb.utils.TransactionHelper.parseLoanEvent;
 import static org.folio.dcb.utils.TransactionHelper.parseRequestEvent;
@@ -53,8 +55,18 @@ public class CirculationEventListener {
             } else if (eventData.getType() == EventData.EventType.CHECK_IN) {
               if (transactionEntity.getRole() == LENDER) {
                 baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.CLOSED);
-              } else if (transactionEntity.getRole() == BORROWING_PICKUP || transactionEntity.getRole() == PICKUP) {
+              } else if (transactionEntity.getRole() == PICKUP) {
                 baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.ITEM_CHECKED_IN);
+              } else if (transactionEntity.getRole() == BORROWING_PICKUP) {
+                  if(BooleanUtils.isNotTrue(transactionEntity.getSelfBorrowing())) {
+                      //when role=BORROWING_PICKUP without selfBorrowing=True,
+                      baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.ITEM_CHECKED_IN);
+                  } else if(BooleanUtils.isTrue(transactionEntity.getSelfBorrowing()) && CLOSED_LOAN_STATUS.equals(eventData.getLoanStatus())) {
+                      //when role=BORROWING_PICKUP with selfBorrowing=True and loan status is CLOSED,
+                      baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.CLOSED);
+                  } else {
+                      log.info("handleLoanEvent:: status for event {} can not be updated.", eventData.getType());
+                  }
               }
             } else {
               log.info("handleLoanEvent:: status for event {} can not be updated", eventData.getType());

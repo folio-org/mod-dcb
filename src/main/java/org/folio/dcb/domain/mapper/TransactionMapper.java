@@ -40,6 +40,7 @@ public class TransactionMapper {
       .patronGroup(patron.getGroup())
 
       .role(dcbTransaction.getRole())
+      .selfBorrowing(dcbTransaction.getSelfBorrowing())
       .build();
   }
 
