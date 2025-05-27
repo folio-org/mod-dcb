@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.BooleanUtils;
 import org.folio.dcb.domain.dto.TransactionStatus;
+import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.impl.BaseLibraryService;
 import org.folio.spring.integration.XOkapiHeaders;
@@ -55,28 +56,46 @@ public class CirculationEventListener {
             } else if (eventData.getType() == EventData.EventType.CHECK_IN) {
               if (transactionEntity.getRole() == LENDER) {
                 baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.CLOSED);
-              } else if (transactionEntity.getRole() == PICKUP) {
+              } else if (transactionEntity.getRole() == BORROWING_PICKUP || transactionEntity.getRole() == PICKUP) {
                 baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.ITEM_CHECKED_IN);
-              } else if (transactionEntity.getRole() == BORROWING_PICKUP) {
-                  if(BooleanUtils.isNotTrue(transactionEntity.getSelfBorrowing())) {
-                      //when role=BORROWING_PICKUP without selfBorrowing=True,
-                      baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.ITEM_CHECKED_IN);
-                  } else if(BooleanUtils.isTrue(transactionEntity.getSelfBorrowing()) && CLOSED_LOAN_STATUS.equals(eventData.getLoanStatus())) {
-                      //when role=BORROWING_PICKUP with selfBorrowing=True and loan status is CLOSED,
-                      baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.CLOSED);
-                  } else {
-                      log.info("handleLoanEvent:: status for event {} can not be updated.", eventData.getType());
-                  }
               }
             } else {
               log.info("handleLoanEvent:: status for event {} can not be updated", eventData.getType());
             }
           })
       );
+    } else if(Objects.nonNull(eventData)) {
+        log.debug("non dcb flow for a loan event");
+        String itemId = eventData.getItemId();
+        systemUserScopedExecutionService.executeAsyncSystemUserScoped(tenantId, () ->
+                transactionRepository.findTransactionByItemIdAndStatusNotInClosed(UUID.fromString(itemId))
+                        .ifPresent(transactionEntity -> {
+                            if (eventData.getType() == EventData.EventType.CHECK_OUT) {
+                                // When Loan OPEN
+                                if (isBorrowingPickupWithSelfBorrowingTrue(transactionEntity)) {
+                                    log.info("handleLoanEvent:: updating transaction {} to ITEM_CHECKED_OUT status for BORROWING_PICKUP role with selfBorrowing=True", transactionEntity.getId());
+                                    baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.ITEM_CHECKED_OUT);
+                                }
+                            } else if (eventData.getType() == EventData.EventType.CHECK_IN && isBorrowingPickupWithSelfBorrowingTrueAndClosedLLoanStatus(transactionEntity, eventData)) {
+                                    log.info("handleLoanEvent:: updating transaction {} to CLOSED status for BORROWING_PICKUP role with selfBorrowing=True and loan status is CLOSED", transactionEntity.getId());
+                                    baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.CLOSED);
+                                }
+
+                        })
+        );
     }
   }
 
-  @KafkaListener(
+    private static boolean isBorrowingPickupWithSelfBorrowingTrueAndClosedLLoanStatus(TransactionEntity transactionEntity, EventData eventData) {
+        return transactionEntity.getRole() == BORROWING_PICKUP && BooleanUtils.isTrue(transactionEntity.getSelfBorrowing())
+                && CLOSED_LOAN_STATUS.equals(eventData.getLoanStatus());
+    }
+
+    private static boolean isBorrowingPickupWithSelfBorrowingTrue(TransactionEntity transactionEntity) {
+        return transactionEntity.getRole() == BORROWING_PICKUP && BooleanUtils.isTrue(transactionEntity.getSelfBorrowing());
+    }
+
+    @KafkaListener(
     id = REQUEST_LISTENER_ID,
     topicPattern = "#{folioKafkaProperties.listener['request'].topicPattern}",
     concurrency = "#{folioKafkaProperties.listener['request'].concurrency}")
