@@ -70,7 +70,8 @@ public class CirculationEventListener {
         log.info("eventData: {}", eventData.toString());
         log.info("non dcb flow for a loan event");
         String itemId = eventData.getItemId();
-        systemUserScopedExecutionService.executeAsyncSystemUserScoped(tenantId, () ->
+        systemUserScopedExecutionService.executeAsyncSystemUserScoped(tenantId, () ->{
+                    log.info("handleLoanEvent:: itemId: {}", itemId);
                 transactionRepository.findTransactionByItemIdAndStatusNotInClosed(UUID.fromString(itemId))
                         .ifPresent(transactionEntity -> {
                             log.info("handleLoanEvent:: transactionEntity: {}", transactionEntity);
@@ -86,7 +87,8 @@ public class CirculationEventListener {
                                     baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.CLOSED);
                                 }
 
-                        })
+                        });
+    }
         );
     }
   }
