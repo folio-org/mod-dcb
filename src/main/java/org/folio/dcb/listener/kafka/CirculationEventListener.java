@@ -73,7 +73,9 @@ public class CirculationEventListener {
         systemUserScopedExecutionService.executeAsyncSystemUserScoped(tenantId, () ->
                 transactionRepository.findTransactionByItemIdAndStatusNotInClosed(UUID.fromString(itemId))
                         .ifPresent(transactionEntity -> {
+                            log.info("handleLoanEvent:: transactionEntity: {}", transactionEntity);
                             if (eventData.getType() == EventData.EventType.CHECK_OUT) {
+                                log.info("handleLoanEvent:: updating transaction {} to OPEN status for BORROWING_PICKUP role with selfBorrowing=True", transactionEntity.getId());
                                 // When Loan OPEN
                                 if (isBorrowingPickupWithSelfBorrowingTrue(transactionEntity)) {
                                     log.info("handleLoanEvent:: updating transaction {} to ITEM_CHECKED_OUT status for BORROWING_PICKUP role with selfBorrowing=True", transactionEntity.getId());
