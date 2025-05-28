@@ -40,6 +40,8 @@ import static org.folio.dcb.service.impl.ServicePointServiceImpl.HOLD_SHELF_CLOS
 public class EntityUtils {
 
   public static String ITEM_ID = "5b95877d-86c0-4cb7-a0cd-7660b348ae5a";
+  public static final String ITEM_ID_STATUS_NOT_AVAILABLE = "60f57427-b071-42b2-97ba-145bbcf1d32b";
+  public static final String NOT_EXISTED_ITEM_ID = "de18d1cd-8312-449c-8db6-c2491467ab76";
 
   /**
    * NOT_EXISTED_PATRON_ID - means
@@ -65,6 +67,8 @@ public class EntityUtils {
   public static String PATRON_TYPE_USER_ID = "18c1741d-e678-4c8e-9fe7-cfaeefab5eea";
   public static String REQUEST_ID = "398501a2-5c97-4ba6-9ee7-d1cd6433cb98";
   public static final String DCB_NEW_BARCODE = "398501a2-5c97-4ba6-9ee7-d1cd6433cb91";
+  public static final String HOLDING_RECORD_ID = "fcee331d-2b50-49de-9395-a76a6ff4e385";
+  public static final String INSTANCE_ID = "a9350401-f2f2-4804-9701-ca813c70e322";
 
   public static DcbTransaction createDcbTransactionByRole(DcbTransaction.RoleEnum role) {
     return DcbTransaction.builder()
@@ -77,6 +81,20 @@ public class EntityUtils {
       .role(role)
       .pickup(createDcbPickup())
       .build();
+  }
+
+  public static DcbTransaction createDcbTransactionByRoleAndSelfBorrowing(DcbTransaction.RoleEnum role, Boolean selfBorrowing) {
+    return DcbTransaction.builder()
+            .item(createDcbItem())
+            .patron(switch (role){
+                      case BORROWING_PICKUP, BORROWER -> createDcbPatronWithExactPatronId(EXISTED_PATRON_ID);
+                      default -> createDefaultDcbPatron();
+                    }
+            )
+            .role(role)
+            .selfBorrowing(selfBorrowing)
+            .pickup(createDcbPickup())
+            .build();
   }
 
   public static DcbTransaction createLendingEcsRequestTransactionByRole() {
@@ -258,6 +276,19 @@ public class EntityUtils {
         .name(ItemStatus.NameEnum.AVAILABLE)
         .build())
       .build();
+  }
+
+  public static InventoryItem createInventoryItem(String itemId, String holdingsRecordId, String barcode,
+                                                  ItemStatus.NameEnum itemStatus) {
+    return InventoryItem.builder()
+            .id(itemId)
+            .holdingsRecordId(holdingsRecordId)
+            .barcode(barcode)
+            .status(ItemStatus
+                    .builder()
+                    .name(itemStatus)
+                    .build())
+            .build();
   }
 
   public static UserGroupCollection createUserGroupCollection() {
