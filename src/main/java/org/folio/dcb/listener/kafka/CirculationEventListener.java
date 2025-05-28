@@ -28,6 +28,8 @@ import static org.folio.dcb.utils.TransactionHelper.parseRequestEvent;
 @Component
 @RequiredArgsConstructor
 public class CirculationEventListener {
+    private static final String LOAN_EVENT_STATUS_UPDATE_MESSAGE = "handleLoanEvent:: status for event {} can not be updated";
+
     public static final String CHECK_IN_LISTENER_ID = "mod-dcb-check-in-listener-id";
     public static final String CHECK_OUT_LOAN_LISTENER_ID = "mod-dcb-loan-listener-id";
     public static final String REQUEST_LISTENER_ID = "mod-dcb-request-listener-id";
@@ -71,7 +73,7 @@ public class CirculationEventListener {
             baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.ITEM_CHECKED_IN);
           }
         } else {
-          log.info("handleLoanEvent:: status for event {} can not be updated", eventData.getType());
+          log.info(LOAN_EVENT_STATUS_UPDATE_MESSAGE, eventData.getType());
         }
     }
 
@@ -89,9 +91,13 @@ public class CirculationEventListener {
         if (eventData.getType() == EventData.EventType.CHECK_OUT) {
             if (isBorrowingPickupWithSelfBorrowingTrue(transactionEntity)) {
                 baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.ITEM_CHECKED_OUT);
+            } else {
+                log.info(LOAN_EVENT_STATUS_UPDATE_MESSAGE, eventData.getType());
             }
         } else if (eventData.getType() == EventData.EventType.CHECK_IN && isBorrowingPickupWithSelfBorrowingTrueAndClosedLoanStatus(transactionEntity, eventData)) {
             baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.CLOSED);
+        } else {
+            log.info(LOAN_EVENT_STATUS_UPDATE_MESSAGE, eventData.getType());
         }
     }
 
