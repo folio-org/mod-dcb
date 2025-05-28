@@ -1,3 +1,6 @@
+## v1.2.10 2025-05-28
+* MODDCB-197: Support for `Open - Awaiting delivery` request status
+
 ## v1.2.9 2025-04-18
 * MODDCB-188: Support items without barcodes - new API to enable transaction patching
 
