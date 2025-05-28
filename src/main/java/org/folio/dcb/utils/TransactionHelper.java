@@ -65,7 +65,8 @@ public class TransactionHelper {
         RequestStatus requestStatus = RequestStatus.from(kafkaEvent.getNewNode().get(STATUS).asText());
         switch (requestStatus) {
           case OPEN_IN_TRANSIT -> eventData.setType(EventData.EventType.IN_TRANSIT);
-          case OPEN_AWAITING_PICKUP -> eventData.setType(EventData.EventType.AWAITING_PICKUP);
+          case OPEN_AWAITING_PICKUP, OPEN_AWAITING_DELIVERY ->
+            eventData.setType(EventData.EventType.AWAITING_PICKUP);
           case CLOSED_CANCELLED -> eventData.setType(EventData.EventType.CANCEL);
           default -> log.info("parseRequestEvent:: Request status {} is not supported", requestStatus);
         }
