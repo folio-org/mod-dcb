@@ -43,10 +43,8 @@ public class CirculationEventListener {
   public void handleLoanEvent(String data, MessageHeaders messageHeaders) {
     String tenantId = getHeaderValue(messageHeaders, XOkapiHeaders.TENANT, null).get(0);
     var eventData = parseLoanEvent(data);
-
     if (Objects.nonNull(eventData) && eventData.isDcb()) {
-      log.info("eventData: {}", eventData.toString());
-      log.info("dcb flow for a loan event");
+      log.debug("dcb flow for a loan event");
       String itemId = eventData.getItemId();
       systemUserScopedExecutionService.executeAsyncSystemUserScoped(tenantId, () ->
         transactionRepository.findTransactionByItemIdAndStatusNotInClosed(UUID.fromString(itemId))
@@ -67,28 +65,20 @@ public class CirculationEventListener {
           })
       );
     } else if(Objects.nonNull(eventData)) {
-        log.info("eventData: {}", eventData.toString());
-        log.info("non dcb flow for a loan event");
+        log.debug("non dcb flow for a loan event");
         String itemId = eventData.getItemId();
-        systemUserScopedExecutionService.executeAsyncSystemUserScoped(tenantId, () ->{
-                    log.info("handleLoanEvent:: itemId: {}", itemId);
+        systemUserScopedExecutionService.executeAsyncSystemUserScoped(tenantId, () ->
                 transactionRepository.findSingleTransactionsByItemIdAndStatusNotInClosed(UUID.fromString(itemId))
-                        .ifPresent(transactionEntity -> {
-                            log.info("handleLoanEvent:: transactionEntity: {}", transactionEntity);
-                            if (eventData.getType() == EventData.EventType.CHECK_OUT) {
-                                log.info("handleLoanEvent:: updating transaction {} to OPEN status for BORROWING_PICKUP role with selfBorrowing=True", transactionEntity.getId());
-                                // When Loan OPEN
-                                if (isBorrowingPickupWithSelfBorrowingTrue(transactionEntity)) {
-                                    log.info("handleLoanEvent:: updating transaction {} to ITEM_CHECKED_OUT status for BORROWING_PICKUP role with selfBorrowing=True", transactionEntity.getId());
-                                    baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.ITEM_CHECKED_OUT);
-                                }
-                            } else if (eventData.getType() == EventData.EventType.CHECK_IN && isBorrowingPickupWithSelfBorrowingTrueAndClosedLoanStatus(transactionEntity, eventData)) {
-                                    log.info("handleLoanEvent:: updating transaction {} to CLOSED status for BORROWING_PICKUP role with selfBorrowing=True and loan status is CLOSED", transactionEntity.getId());
-                                    baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.CLOSED);
-                                }
-
-                        });
-    }
+                .ifPresent(transactionEntity -> {
+                    log.info("handleLoanEvent:: transactionEntity: {}", transactionEntity);
+                    if (eventData.getType() == EventData.EventType.CHECK_OUT) {
+                        if (isBorrowingPickupWithSelfBorrowingTrue(transactionEntity)) {
+                            baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.ITEM_CHECKED_OUT);
+                        }
+                    } else if (eventData.getType() == EventData.EventType.CHECK_IN && isBorrowingPickupWithSelfBorrowingTrueAndClosedLoanStatus(transactionEntity, eventData)) {
+                            baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.CLOSED);
+                        }
+                })
         );
     }
   }
@@ -110,7 +100,6 @@ public class CirculationEventListener {
     String tenantId = getHeaderValue(messageHeaders, XOkapiHeaders.TENANT, null).get(0);
     var eventData = parseRequestEvent(data);
     if (Objects.nonNull(eventData)) {
-        log.info("eventData: {}", eventData.toString());
         log.debug("dcb flow for a request event");
         String requestId = eventData.getRequestId();
         if (Objects.nonNull(requestId)) {
