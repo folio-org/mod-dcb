@@ -1,3 +1,8 @@
+## v1.3.1 2025-05-29
+
+* MODDCB-197: Support for `Open - Awaiting delivery` request status
+* MODDCB-188: Support items without barcode
+
 ## v1.3.0 2025-03-13
 
 * MODDCB-124: Feature toggle
