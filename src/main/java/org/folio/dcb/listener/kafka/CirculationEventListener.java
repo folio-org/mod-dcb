@@ -31,7 +31,7 @@ public class CirculationEventListener {
   public static final String CHECK_IN_LISTENER_ID = "mod-dcb-check-in-listener-id";
   public static final String CHECK_OUT_LOAN_LISTENER_ID = "mod-dcb-loan-listener-id";
   public static final String REQUEST_LISTENER_ID = "mod-dcb-request-listener-id";
-  private static final String LOAN_EVENT_STATUS_UPDATE_MESSAGE = "handleLoanEvent:: status for event {} can not be updated";
+  private static final String LOAN_EVENT_STATUS_UPDATE_MESSAGE = "{}:: status for event {} can not be updated";
   private final TransactionRepository transactionRepository;
   private final SystemUserScopedExecutionService systemUserScopedExecutionService;
   private final BaseLibraryService baseLibraryService;
@@ -71,7 +71,7 @@ public class CirculationEventListener {
         baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.ITEM_CHECKED_IN);
       }
     } else {
-      log.info(LOAN_EVENT_STATUS_UPDATE_MESSAGE, eventData.getType());
+      log.info(LOAN_EVENT_STATUS_UPDATE_MESSAGE, "processDcbTransactionEntity",  eventData.getType());
     }
   }
 
@@ -85,28 +85,23 @@ public class CirculationEventListener {
   }
 
   private void processNonDcbTransactionEntity(EventData eventData, TransactionEntity transactionEntity) {
-    log.info("handleLoanEvent:: transactionEntity: {}", transactionEntity);
-    if (eventData.getType() == EventData.EventType.CHECK_OUT) {
-      if (isBorrowingPickupWithSelfBorrowingTrue(transactionEntity)) {
-        baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.ITEM_CHECKED_OUT);
-      } else {
-        log.info(LOAN_EVENT_STATUS_UPDATE_MESSAGE, eventData.getType());
-      }
+    if (eventData.getType() == EventData.EventType.CHECK_OUT && isSelfBorrowingPickup(transactionEntity)) {
+      baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.ITEM_CHECKED_OUT);
     } else if (eventData.getType() == EventData.EventType.CHECK_IN &&
-               isBorrowingPickupWithSelfBorrowingTrueAndClosedLoanStatus(transactionEntity, eventData)) {
+               isSelfBorrowingPickupAndClosedLoan(transactionEntity, eventData)) {
       baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.CLOSED);
     } else {
-      log.info(LOAN_EVENT_STATUS_UPDATE_MESSAGE, eventData.getType());
+      log.info(LOAN_EVENT_STATUS_UPDATE_MESSAGE, "processNonDcbTransactionEntity", eventData.getType());
     }
   }
 
-  private static boolean isBorrowingPickupWithSelfBorrowingTrueAndClosedLoanStatus(TransactionEntity transactionEntity,
+  private static boolean isSelfBorrowingPickupAndClosedLoan(TransactionEntity transactionEntity,
     EventData eventData) {
     return transactionEntity.getRole() == BORROWING_PICKUP && BooleanUtils.isTrue(transactionEntity.getSelfBorrowing())
            && CLOSED_LOAN_STATUS.equals(eventData.getLoanStatus());
   }
 
-  private static boolean isBorrowingPickupWithSelfBorrowingTrue(TransactionEntity transactionEntity) {
+  private static boolean isSelfBorrowingPickup(TransactionEntity transactionEntity) {
     return transactionEntity.getRole() == BORROWING_PICKUP && BooleanUtils.isTrue(transactionEntity.getSelfBorrowing());
   }
 
