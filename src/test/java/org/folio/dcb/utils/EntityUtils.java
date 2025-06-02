@@ -279,16 +279,16 @@ public class EntityUtils {
   }
 
   public static InventoryItem createInventoryItem(String itemId, String holdingsRecordId, String barcode,
-                                                  ItemStatus.NameEnum itemStatus) {
+    ItemStatus.NameEnum itemStatus) {
     return InventoryItem.builder()
-            .id(itemId)
-            .holdingsRecordId(holdingsRecordId)
-            .barcode(barcode)
-            .status(ItemStatus
-                    .builder()
-                    .name(itemStatus)
-                    .build())
-            .build();
+      .id(itemId)
+      .holdingsRecordId(holdingsRecordId)
+      .barcode(barcode)
+      .status(ItemStatus
+        .builder()
+        .name(itemStatus)
+        .build())
+      .build();
   }
 
   public static UserGroupCollection createUserGroupCollection() {

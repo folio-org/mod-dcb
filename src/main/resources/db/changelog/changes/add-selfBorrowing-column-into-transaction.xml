@@ -4,8 +4,11 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 
-  <!-- Add requestId column -->
-  <changeSet id="addSelfBorrowingColumn" author="magzhanArtykov">
+  <!-- Add self_borrowing column -->
+  <changeSet id="addSelfBorrowingColumn" author="Kapil Verma1">
+    <preConditions>
+      <tableExists tableName="transactions"/>
+    </preConditions>
     <addColumn tableName="transactions">
       <column name="self_borrowing" type="boolean">
         <constraints nullable="true"/>

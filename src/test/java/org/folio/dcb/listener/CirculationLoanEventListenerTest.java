@@ -9,6 +9,7 @@ import org.folio.dcb.service.impl.BaseLibraryService;
 import org.folio.dcb.service.impl.BorrowingPickupLibraryServiceImpl;
 import org.folio.spring.client.AuthnClient;
 import org.folio.spring.integration.XOkapiHeaders;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -31,6 +32,7 @@ import static org.folio.dcb.utils.EntityUtils.getMockDataAsString;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -170,55 +172,40 @@ class CirculationLoanEventListenerTest extends BaseIT {
     assertDoesNotThrow(() -> eventListener.handleLoanEvent(null, messageHeaders));
   }
 
-
   @Test
   void handleCheckOutEventInBorrowingPickupSelfBorrowingTrueCheckout_positive() {
-    var transactionEntity = createTransactionEntity();
-    transactionEntity.setItemId("8db107f5-12aa-479f-9c07-39e7c9cf2e4d");
-    transactionEntity.setStatus(TransactionStatus.StatusEnum.CREATED);
-    transactionEntity.setRole(BORROWING_PICKUP);
-    transactionEntity.setSelfBorrowing(Boolean.TRUE);
+    var transactionEntity = getBorrowingPickupWithSelfBorrowingTransactionEntity(Boolean.TRUE);
     MessageHeaders messageHeaders = getMessageHeaders();
     when(transactionRepository.findSingleTransactionsByItemIdAndStatusNotInClosed(any())).thenReturn(Optional.of(transactionEntity));
     eventListener.handleLoanEvent(CHECK_OUT_EVENT_SAMPLE, messageHeaders);
-    verify(transactionRepository, times(1)).save(any());
+    verify(transactionRepository).save(any());
 
-    verify(baseLibraryService, times(1)).updateTransactionEntity(transactionEntityArgumentCaptor.capture(),
+    verify(baseLibraryService).updateTransactionEntity(transactionEntityArgumentCaptor.capture(),
             statusEnumArgumentCaptor.capture());
     TransactionEntity transactionEntityArgumentCaptorValue = transactionEntityArgumentCaptor.getValue();
     assertEquals(BORROWING_PICKUP, transactionEntityArgumentCaptorValue.getRole());
     assertEquals(Boolean.TRUE, transactionEntityArgumentCaptorValue.getSelfBorrowing());
     assertEquals(TransactionStatus.StatusEnum.ITEM_CHECKED_OUT, statusEnumArgumentCaptor.getValue());
-
   }
 
   @Test
   void handleCheckOutEventInBorrowingPickupSelfBorrowingFalseCheckout_negative() {
-    var transactionEntity = createTransactionEntity();
-    transactionEntity.setItemId("8db107f5-12aa-479f-9c07-39e7c9cf2e4d");
-    transactionEntity.setStatus(TransactionStatus.StatusEnum.CREATED);
-    transactionEntity.setRole(BORROWING_PICKUP);
-    transactionEntity.setSelfBorrowing(Boolean.FALSE);
+    var transactionEntity = getBorrowingPickupWithSelfBorrowingTransactionEntity(Boolean.FALSE);
     MessageHeaders messageHeaders = getMessageHeaders();
     when(transactionRepository.findSingleTransactionsByItemIdAndStatusNotInClosed(any())).thenReturn(Optional.of(transactionEntity));
     eventListener.handleLoanEvent(CHECK_OUT_EVENT_SAMPLE, messageHeaders);
-    verify(transactionRepository, times(0)).save(any());
+    verify(transactionRepository, never()).save(any());
   }
-
 
   @Test
   void handleCheckOutEventInBorrowingPickupSelfBorrowingTrueCheckin_positive() {
-    var transactionEntity = createTransactionEntity();
-    transactionEntity.setItemId("8db107f5-12aa-479f-9c07-39e7c9cf2e4d");
-    transactionEntity.setStatus(TransactionStatus.StatusEnum.CREATED);
-    transactionEntity.setRole(BORROWING_PICKUP);
-    transactionEntity.setSelfBorrowing(Boolean.TRUE);
+    var transactionEntity = getBorrowingPickupWithSelfBorrowingTransactionEntity(Boolean.TRUE);
     MessageHeaders messageHeaders = getMessageHeaders();
     when(transactionRepository.findSingleTransactionsByItemIdAndStatusNotInClosed(any())).thenReturn(Optional.of(transactionEntity));
     eventListener.handleLoanEvent(CHECK_IN_DCB_FALSE_LOAN_EVENT_SAMPLE, messageHeaders);
-    verify(transactionRepository, times(1)).save(any());
+    verify(transactionRepository).save(any());
 
-    verify(baseLibraryService, times(1)).updateTransactionEntity(transactionEntityArgumentCaptor.capture(),
+    verify(baseLibraryService).updateTransactionEntity(transactionEntityArgumentCaptor.capture(),
             statusEnumArgumentCaptor.capture());
     TransactionEntity transactionEntityArgumentCaptorValue = transactionEntityArgumentCaptor.getValue();
     assertEquals(BORROWING_PICKUP, transactionEntityArgumentCaptorValue.getRole());
@@ -228,15 +215,19 @@ class CirculationLoanEventListenerTest extends BaseIT {
 
   @Test
   void handleCheckOutEventInBorrowingPickupSelfBorrowingTrueCheckin_negative() {
-    var transactionEntity = createTransactionEntity();
-    transactionEntity.setItemId("8db107f5-12aa-479f-9c07-39e7c9cf2e4d");
-    transactionEntity.setStatus(TransactionStatus.StatusEnum.CREATED);
-    transactionEntity.setRole(BORROWING_PICKUP);
-    transactionEntity.setSelfBorrowing(Boolean.FALSE);
+    var transactionEntity = getBorrowingPickupWithSelfBorrowingTransactionEntity(Boolean.FALSE);
     MessageHeaders messageHeaders = getMessageHeaders();
     when(transactionRepository.findSingleTransactionsByItemIdAndStatusNotInClosed(any())).thenReturn(Optional.of(transactionEntity));
     eventListener.handleLoanEvent(CHECK_IN_DCB_FALSE_LOAN_EVENT_SAMPLE, messageHeaders);
-    verify(transactionRepository, times(0)).save(any());
+    verify(transactionRepository, never()).save(any());
+  }
+
+  private static @NotNull TransactionEntity getBorrowingPickupWithSelfBorrowingTransactionEntity(Boolean selfBorrowing) {
+    var transactionEntity = createTransactionEntity();
+    transactionEntity.setStatus(TransactionStatus.StatusEnum.CREATED);
+    transactionEntity.setRole(BORROWING_PICKUP);
+    transactionEntity.setSelfBorrowing(selfBorrowing);
+    return transactionEntity;
   }
 
   private MessageHeaders getMessageHeaders() {
