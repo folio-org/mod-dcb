@@ -1,3 +1,6 @@
+## 2.0.0-SNAPSHOT 2025-XX-XX
+* MODDCB-196: Allow patrons to request items from own library via DCB
+
 ## v1.3.0 2025-03-13
 
 * MODDCB-124: Feature toggle

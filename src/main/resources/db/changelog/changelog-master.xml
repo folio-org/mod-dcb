@@ -11,5 +11,6 @@
   <include file="changes/alter-date-datatype.xml" relativeToChangelogFile="true"/>
   <include file="changes/create-service-point-expiration-period-table.xml" relativeToChangelogFile="true"/>
   <include file="changes/create-pgcrypto-extension.xml" relativeToChangelogFile="true"/>
+  <include file="changes/add-selfBorrowing-column-into-transaction.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

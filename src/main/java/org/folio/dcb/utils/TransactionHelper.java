@@ -11,6 +11,7 @@ import java.util.Objects;
 
 import static org.folio.dcb.utils.KafkaEvent.ACTION;
 import static org.folio.dcb.utils.KafkaEvent.STATUS;
+import static org.folio.dcb.utils.KafkaEvent.STATUS_NAME;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -49,6 +50,10 @@ public class TransactionHelper {
           }
         }
         eventData.setDcb(!kafkaEvent.getNewNode().has(IS_DCB) || kafkaEvent.getNewNode().get(IS_DCB).asBoolean());
+
+        if (kafkaEvent.getNewNode().has(STATUS) && kafkaEvent.getNewNode().get(STATUS).has(STATUS_NAME)) {
+          eventData.setLoanStatus(kafkaEvent.getNewNode().get(STATUS).get(STATUS_NAME).asText());
+        }
         return eventData;
       }
     return null;
@@ -67,7 +72,7 @@ public class TransactionHelper {
           case OPEN_IN_TRANSIT -> eventData.setType(EventData.EventType.IN_TRANSIT);
           case OPEN_AWAITING_PICKUP, OPEN_AWAITING_DELIVERY ->
             eventData.setType(EventData.EventType.AWAITING_PICKUP);
-          case CLOSED_CANCELLED -> eventData.setType(EventData.EventType.CANCEL);
+          case CLOSED_CANCELLED, CLOSED_UNFILLED, CLOSED_PICKUP_EXPIRED -> eventData.setType(EventData.EventType.CANCEL);
           default -> log.info("parseRequestEvent:: Request status {} is not supported", requestStatus);
         }
         eventData.setDcb(checkDcbRequest(kafkaEvent));
