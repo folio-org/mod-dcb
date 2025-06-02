@@ -32,15 +32,19 @@ import static org.folio.dcb.utils.EntityUtils.createCirculationRequest;
 import static org.folio.dcb.utils.EntityUtils.createDcbItem;
 import static org.folio.dcb.utils.EntityUtils.createDcbPatronWithExactPatronId;
 import static org.folio.dcb.utils.EntityUtils.createDcbTransactionByRole;
+import static org.folio.dcb.utils.EntityUtils.createDcbTransactionByRoleAndSelfBorrowing;
 import static org.folio.dcb.utils.EntityUtils.createInventoryItem;
+import static org.folio.dcb.utils.EntityUtils.createServicePointRequest;
 import static org.folio.dcb.utils.EntityUtils.createTransactionEntity;
 import static org.folio.dcb.utils.EntityUtils.createTransactionStatus;
 import static org.folio.dcb.utils.EntityUtils.createUser;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.timeout;
@@ -126,6 +130,30 @@ class BaseLibraryServiceTest {
     verify(requestService).createHoldItemRequest(user, item, PICKUP_SERVICE_POINT_ID);
     verify(transactionRepository).save(any());
     Assertions.assertEquals(TransactionStatusResponse.StatusEnum.CREATED, response.getStatus());
+  }
+
+  @Test
+  void createBorrowingPickupWithSelfBorrowingTransactionTest() {
+    var item = createDcbItem();
+    var patron = createDcbPatronWithExactPatronId(EXISTED_PATRON_ID);
+    var user = createUser();
+    user.setType("staff");
+    var dcbTransaction = createDcbTransactionByRoleAndSelfBorrowing(BORROWING_PICKUP, Boolean.TRUE);
+    var servicePoint = createServicePointRequest();
+
+
+    when(userService.fetchUser(any())).thenReturn(user);
+    when(transactionMapper.mapToEntity(any(), any())).thenReturn(createTransactionEntity());
+    when(requestService.createRequestBasedOnItemStatus(any(), any(), anyString())).thenReturn(createCirculationRequest());
+
+    var response = baseLibraryService.createBorrowingLibraryTransaction(DCB_TRANSACTION_ID, dcbTransaction, PICKUP_SERVICE_POINT_ID);
+    verify(userService).fetchUser(patron);
+    verify(circulationItemService, never()).checkIfItemExistsAndCreate(any(), any());
+    verify(requestService).createRequestBasedOnItemStatus(user, item, dcbTransaction.getPickup().getServicePointId());
+    verify(transactionRepository).save(any());
+
+    Assertions.assertEquals(TransactionStatusResponse.StatusEnum.CREATED, response.getStatus());
+    assertEquals(servicePoint.getId(), dcbTransaction.getPickup().getServicePointId());
   }
 
   @Test

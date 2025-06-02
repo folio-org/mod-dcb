@@ -15,6 +15,7 @@ public class KafkaEvent {
   private static final ObjectMapper objectMapper = new ObjectMapper();
   public static final String ACTION = "action";
   public static final String STATUS = "status";
+  public static final String STATUS_NAME = "name";
 
   public KafkaEvent(String eventPayload) {
     try {
