@@ -9,14 +9,20 @@ import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
 import static org.folio.dcb.utils.EntityUtils.DCB_TYPE_USER_ID;
 import static org.folio.dcb.utils.EntityUtils.EXISTED_INVENTORY_ITEM_BARCODE;
 import static org.folio.dcb.utils.EntityUtils.EXISTED_PATRON_ID;
+import static org.folio.dcb.utils.EntityUtils.HOLDING_RECORD_ID;
+import static org.folio.dcb.utils.EntityUtils.INSTANCE_ID;
 import static org.folio.dcb.utils.EntityUtils.ITEM_ID;
+import static org.folio.dcb.utils.EntityUtils.ITEM_ID_STATUS_NOT_AVAILABLE;
+import static org.folio.dcb.utils.EntityUtils.NOT_EXISTED_ITEM_ID;
 import static org.folio.dcb.utils.EntityUtils.NOT_EXISTED_PATRON_ID;
 import static org.folio.dcb.utils.EntityUtils.PATRON_TYPE_USER_ID;
 import static org.folio.dcb.utils.EntityUtils.createDcbItem;
 import static org.folio.dcb.utils.EntityUtils.createDcbPatronWithExactPatronId;
 import static org.folio.dcb.utils.EntityUtils.createDcbTransactionByRole;
+import static org.folio.dcb.utils.EntityUtils.createDcbTransactionByRoleAndSelfBorrowing;
 import static org.folio.dcb.utils.EntityUtils.createDcbTransactionUpdate;
 import static org.folio.dcb.utils.EntityUtils.createDefaultDcbPatron;
+import static org.folio.dcb.utils.EntityUtils.createInventoryItem;
 import static org.folio.dcb.utils.EntityUtils.createTransactionEntity;
 import static org.folio.dcb.utils.EntityUtils.createTransactionStatus;
 import static org.hamcrest.Matchers.contains;
@@ -25,8 +31,11 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -42,8 +51,13 @@ import java.util.stream.Stream;
 
 import org.folio.dcb.client.feign.CirculationClient;
 import org.folio.dcb.client.feign.CirculationLoanPolicyStorageClient;
+import org.folio.dcb.client.feign.HoldingsStorageClient;
+import org.folio.dcb.client.feign.InventoryItemStorageClient;
+import org.folio.dcb.domain.dto.CirculationRequest;
 import org.folio.dcb.domain.dto.DcbItem;
 import org.folio.dcb.domain.dto.DcbTransaction;
+import org.folio.dcb.domain.dto.InventoryItem;
+import org.folio.dcb.domain.dto.ItemStatus;
 import org.folio.dcb.domain.dto.Loan;
 import org.folio.dcb.domain.dto.LoanCollection;
 import org.folio.dcb.domain.dto.LoanPolicy;
@@ -64,11 +78,14 @@ import org.folio.dcb.domain.entity.TransactionAuditEntity;
 import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.repository.TransactionAuditRepository;
 import org.folio.dcb.repository.TransactionRepository;
+import org.folio.dcb.service.RequestService;
+import org.folio.spring.model.ResultList;
 import org.folio.spring.service.SystemUserScopedExecutionService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
@@ -86,6 +103,8 @@ class TransactionApiControllerTest extends BaseIT {
   private static final String TRANSACTION_AUDIT_DUPLICATE_ERROR_ACTION = "DUPLICATE_ERROR";
   private static final String DUPLICATE_ERROR_TRANSACTION_ID = "-1";
 
+  private final ArgumentCaptor<CirculationRequest> captor = ArgumentCaptor.forClass(CirculationRequest.class);
+
   @Autowired
   private TransactionRepository transactionRepository;
   @Autowired
@@ -97,6 +116,12 @@ class TransactionApiControllerTest extends BaseIT {
   private CirculationClient circulationClient;
   @SpyBean
   private CirculationLoanPolicyStorageClient circulationLoanPolicyStorageClient;
+  @SpyBean
+  private InventoryItemStorageClient inventoryItemStorageClient;
+  @SpyBean
+  private HoldingsStorageClient holdingsStorageClient;
+  @SpyBean
+  private RequestService requestService;
 
   @Test
   void createLendingCirculationRequestTest() throws Exception {
@@ -1476,6 +1501,182 @@ class TransactionApiControllerTest extends BaseIT {
     systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT, () ->
       transactionRepository.findTransactionsByItemIdAndStatusNotInClosed(UUID.fromString(itemId))
         .forEach(transactionEntity -> transactionRepository.deleteById(transactionEntity.getId()))
+    );
+  }
+
+  @Test
+  void createBorrowingPickupSelfBorrowingPageRequestCirculationRequestTest() throws Exception {
+    removeExistedTransactionFromDbIfSoExists();
+    removeExistingTransactionsByItemId(ITEM_ID);
+
+    DcbItem expected = createDcbItem();
+    InventoryItem inventoryItem = createInventoryItem(ITEM_ID, HOLDING_RECORD_ID, "DCB_ITEM", ItemStatus.NameEnum.AVAILABLE);
+
+    Mockito.doReturn(ResultList.asSinglePage(inventoryItem)).when(inventoryItemStorageClient).fetchItemByQuery(anyString());
+    HoldingsStorageClient.Holding holding =
+      HoldingsStorageClient.Holding.builder().id(HOLDING_RECORD_ID).instanceId(INSTANCE_ID).build();
+    Mockito.doReturn(holding).when(holdingsStorageClient).findHolding(HOLDING_RECORD_ID);
+
+    this.mockMvc.perform(
+        post("/transactions/" + DCB_TRANSACTION_ID)
+          .content(asJsonString(createDcbTransactionByRoleAndSelfBorrowing(BORROWING_PICKUP,
+            Boolean.TRUE)))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isCreated())
+      .andExpect(jsonPath("$.status").value("CREATED"))
+      .andExpect(jsonPath("$.item").value(expected))
+      .andExpect(jsonPath("$.patron").value(createDcbPatronWithExactPatronId(EXISTED_PATRON_ID)));
+
+    verify(requestService, times(1)).createRequestBasedOnItemStatus(any(), any(), any());
+
+    verify(circulationClient).createRequest(captor.capture());
+    CirculationRequest capturedRequest = captor.getValue();
+    assertEquals(HOLDING_RECORD_ID, capturedRequest.getHoldingsRecordId().toString());
+    assertEquals(CirculationRequest.RequestTypeEnum.PAGE, capturedRequest.getRequestType());
+
+    //Trying to create another transaction with same transaction id
+    this.mockMvc.perform(
+        post("/transactions/" + DCB_TRANSACTION_ID)
+          .content(asJsonString(createDcbTransactionByRoleAndSelfBorrowing(BORROWING_PICKUP,
+            Boolean.TRUE)))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpectAll(status().is4xxClientError(),
+        jsonPath("$.errors[0].code", is("DUPLICATE_ERROR")));
+
+    // check for DUPLICATE_ERROR propagated into transactions_audit.
+    systemUserScopedExecutionService.executeAsyncSystemUserScoped(
+      TENANT,
+      () -> {
+        TransactionAuditEntity auditExisting =
+          transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(
+              DCB_TRANSACTION_ID)
+            .orElse(null);
+        assertNotNull(auditExisting);
+        assertNotEquals(TRANSACTION_AUDIT_DUPLICATE_ERROR_ACTION, auditExisting.getAction());
+        assertNotEquals(DUPLICATE_ERROR_TRANSACTION_ID, auditExisting.getTransactionId());
+      }
+    );
+  }
+
+  @Test
+  void createBorrowingPickupSelfBorrowingHoldRequestCirculationRequestTest() throws Exception {
+    removeExistedTransactionFromDbIfSoExists();
+    removeExistingTransactionsByItemId(ITEM_ID);
+
+    DcbItem expected = createDcbItem();
+    InventoryItem inventoryItem =
+      createInventoryItem(ITEM_ID_STATUS_NOT_AVAILABLE, HOLDING_RECORD_ID, "DCB_ITEM", ItemStatus.NameEnum.CHECKED_OUT);
+    Mockito.doReturn(ResultList.asSinglePage(inventoryItem)).when(inventoryItemStorageClient).fetchItemByQuery(anyString());
+    HoldingsStorageClient.Holding holding =
+      HoldingsStorageClient.Holding.builder().id(HOLDING_RECORD_ID).instanceId(INSTANCE_ID).build();
+    Mockito.doReturn(holding).when(holdingsStorageClient).findHolding(HOLDING_RECORD_ID);
+
+    this.mockMvc.perform(
+        post("/transactions/" + DCB_TRANSACTION_ID)
+          .content(asJsonString(createDcbTransactionByRoleAndSelfBorrowing(BORROWING_PICKUP,
+            Boolean.TRUE)))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isCreated())
+      .andExpect(jsonPath("$.status").value("CREATED"))
+      .andExpect(jsonPath("$.item").value(expected))
+      .andExpect(jsonPath("$.patron").value(createDcbPatronWithExactPatronId(EXISTED_PATRON_ID)));
+
+    verify(requestService, times(1)).createRequestBasedOnItemStatus(any(), any(), any());
+
+    verify(circulationClient).createRequest(captor.capture());
+    CirculationRequest capturedRequest = captor.getValue();
+    assertEquals(HOLDING_RECORD_ID, capturedRequest.getHoldingsRecordId().toString());
+    assertEquals(CirculationRequest.RequestTypeEnum.HOLD, capturedRequest.getRequestType());
+
+    //Trying to create another transaction with same transaction id
+    this.mockMvc.perform(
+        post("/transactions/" + DCB_TRANSACTION_ID)
+          .content(asJsonString(createDcbTransactionByRoleAndSelfBorrowing(BORROWING_PICKUP,
+            Boolean.TRUE)))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpectAll(status().is4xxClientError(),
+        jsonPath("$.errors[0].code", is("DUPLICATE_ERROR")));
+
+    // check for DUPLICATE_ERROR propagated into transactions_audit.
+    systemUserScopedExecutionService.executeAsyncSystemUserScoped(
+      TENANT,
+      () -> {
+        TransactionAuditEntity auditExisting =
+          transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(
+              DCB_TRANSACTION_ID)
+            .orElse(null);
+        assertNotNull(auditExisting);
+        assertNotEquals(TRANSACTION_AUDIT_DUPLICATE_ERROR_ACTION, auditExisting.getAction());
+        assertNotEquals(DUPLICATE_ERROR_TRANSACTION_ID, auditExisting.getTransactionId());
+      }
+    );
+  }
+
+  @Test
+  void createBorrowingPickupSelfBorrowingCirculationRequestWithInvalidDefaultNotExistedPatronId()
+    throws Exception {
+    var dcbTransaction = createDcbTransactionByRoleAndSelfBorrowing(BORROWING_PICKUP, Boolean.TRUE);
+    dcbTransaction.getPatron().setId(NOT_EXISTED_PATRON_ID);
+
+    String trnId = UUID.randomUUID().toString();
+    this.mockMvc.perform(
+        post("/transactions/" + trnId)
+          .content(asJsonString(dcbTransaction))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpectAll(status().is4xxClientError(),
+        jsonPath("$.errors[0].code", is("NOT_FOUND_ERROR")));
+
+    // check for transactions_audit error content.
+    systemUserScopedExecutionService.executeAsyncSystemUserScoped(
+      TENANT,
+      () -> {
+        TransactionAuditEntity auditExisting =
+          transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(
+              trnId)
+            .orElse(null);
+        assertNotNull(auditExisting);
+        assertEquals(TRANSACTION_AUDIT_ERROR_ACTION, auditExisting.getAction());
+      }
+    );
+  }
+
+  @Test
+  void createBorrowingPickupSelfBorrowingCirculationRequestWithInvalidDefaultNotExistedItemId()
+    throws Exception {
+    var dcbTransaction = createDcbTransactionByRoleAndSelfBorrowing(BORROWING_PICKUP, Boolean.TRUE);
+    dcbTransaction.getItem().setId(NOT_EXISTED_ITEM_ID);
+
+    String trnId = UUID.randomUUID().toString();
+    this.mockMvc.perform(
+        post("/transactions/" + trnId)
+          .content(asJsonString(dcbTransaction))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpectAll(status().is4xxClientError(),
+        jsonPath("$.errors[0].code", is("NOT_FOUND_ERROR")));
+
+    // check for transactions_audit error content.
+    systemUserScopedExecutionService.executeAsyncSystemUserScoped(
+      TENANT,
+      () -> {
+        TransactionAuditEntity auditExisting =
+          transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(
+              trnId)
+            .orElse(null);
+        assertNotNull(auditExisting);
+        assertEquals(TRANSACTION_AUDIT_ERROR_ACTION, auditExisting.getAction());
+      }
     );
   }
 }
