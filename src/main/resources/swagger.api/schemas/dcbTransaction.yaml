@@ -10,6 +10,9 @@ DcbTransaction:
     requestId:
       description: ID of the existing circulation TLR
       type: string
+    selfBorrowing:
+      description: selfBorrowing flag for BORROWING_PICKUP role to allow patrons to request items from own library via DCB
+      type: boolean
     role:
       type: string
       enum:

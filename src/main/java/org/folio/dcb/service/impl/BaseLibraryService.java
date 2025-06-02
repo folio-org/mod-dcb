@@ -2,7 +2,7 @@ package org.folio.dcb.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.folio.dcb.domain.dto.CirculationItem;
 import org.folio.dcb.domain.dto.CirculationRequest;
 import org.folio.dcb.domain.dto.DcbItem;
@@ -24,6 +24,7 @@ import org.folio.dcb.service.UserService;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CANCELLED;
@@ -32,7 +33,6 @@ import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_IN;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
 import static org.folio.dcb.utils.DCBConstants.DCB_TYPE;
-import static org.folio.dcb.utils.DCBConstants.SHADOW_TYPE;
 
 @Service
 @RequiredArgsConstructor
@@ -48,23 +48,38 @@ public class BaseLibraryService {
   private final ItemService itemService;
 
   public TransactionStatusResponse createBorrowingLibraryTransaction(String dcbTransactionId, DcbTransaction dcbTransaction, String pickupServicePointId) {
-    var itemVirtual = dcbTransaction.getItem();
+    // Item is real when if self`s borrowing is true, otherwise virtual.
+    var itemVirtualOrReal = dcbTransaction.getItem();
     var patron = dcbTransaction.getPatron();
+    Boolean selfBorrowing = Optional.ofNullable(dcbTransaction.getSelfBorrowing()).orElse(false);
 
     var user = userService.fetchUser(patron); //user is needed, but shouldn't be generated. it should be fetched.
-    if(Objects.equals(user.getType(), DCB_TYPE)) {
-      throw new IllegalArgumentException(String.format("User with type %s is retrieved. so unable to create transaction", user.getType()));
+    if (Objects.equals(user.getType(), DCB_TYPE)) {
+      throw new IllegalArgumentException(String.format("User with type %s is retrieved. so unable to create " +
+              "transaction", user.getType()));
     }
-    checkItemExistsInInventoryAndThrow(itemVirtual.getBarcode());
-    CirculationItem item = circulationItemService.checkIfItemExistsAndCreate(itemVirtual, pickupServicePointId);
-    dcbTransaction.getItem().setId(item.getId());
-    checkOpenTransactionExistsAndThrow(item.getId());
-    CirculationRequest holdRequest = requestService.createHoldItemRequest(user, itemVirtual, pickupServicePointId);
-    saveDcbTransaction(dcbTransactionId, dcbTransaction, holdRequest.getId());
+
+    if (BooleanUtils.isFalse(selfBorrowing)) {
+      // check existence of virtual item only if selfBorrowing is false, item will be real if selfBorrowing is true.
+      checkItemExistsInInventoryAndThrow(itemVirtualOrReal.getBarcode());
+      CirculationItem item = circulationItemService.checkIfItemExistsAndCreate(itemVirtualOrReal, pickupServicePointId);
+      dcbTransaction.getItem().setId(item.getId());
+    }
+    checkOpenTransactionExistsAndThrow(dcbTransaction.getItem().getId());
+
+    if (BooleanUtils.isFalse(selfBorrowing)) {
+      CirculationRequest holdRequest = requestService.createHoldItemRequest(user, itemVirtualOrReal,
+              pickupServicePointId);
+      saveDcbTransaction(dcbTransactionId, dcbTransaction, holdRequest.getId());
+    } else {
+      CirculationRequest pageRequest = requestService.createRequestBasedOnItemStatus(user, itemVirtualOrReal,
+              pickupServicePointId);
+      saveDcbTransaction(dcbTransactionId, dcbTransaction, pageRequest.getId());
+    }
 
     return TransactionStatusResponse.builder()
       .status(TransactionStatusResponse.StatusEnum.CREATED)
-      .item(itemVirtual)
+      .item(itemVirtualOrReal)
       .patron(patron)
       .build();
   }
