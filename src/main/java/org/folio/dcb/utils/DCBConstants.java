@@ -45,5 +45,7 @@ public class DCBConstants {
     .duration(DEFAULT_SERVICE_POINT_PERIOD_DURATION)
     .intervalId(DEFAULT_SERVICE_POINT_PERIOD_INTERVAL)
     .build();
+  public static final String OPEN_LOAN_STATUS = "Open";
+  public static final String CLOSED_LOAN_STATUS = "Closed";
 
 }
