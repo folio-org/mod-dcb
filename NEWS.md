@@ -1,3 +1,6 @@
+## v1.3.2 2025-06-18
+* MODDCB-196: Allow patrons to request items from own library via DCB
+
 ## v1.3.1 2025-05-29
 
 * MODDCB-197: Support for `Open - Awaiting delivery` request status
