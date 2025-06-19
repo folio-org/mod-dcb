@@ -19,12 +19,16 @@ public class PatronGroupServiceImpl implements PatronGroupService {
   public String fetchPatronGroupIdByName(String groupName) {
     log.debug("fetchPatronGroupIdByName:: Fetching patron group details with groupName {} ",
       groupName);
-    return groupClient.fetchGroupByName("group==" + groupName)
+    return groupClient.fetchGroupByName(queryByGroupName(groupName))
       .getUsergroups()
       .stream()
       .filter(group -> group.getGroup().equals(groupName))
       .findFirst()
       .map(UserGroup::getId)
       .orElseThrow(() -> new NotFoundException(String.format("Patron group not found with name %s ", groupName)));
+  }
+
+  private String queryByGroupName(String groupName) {
+    return "group==\"" + groupName + "\"";
   }
 }

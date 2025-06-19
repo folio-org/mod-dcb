@@ -29,8 +29,8 @@ class PatronGroupServiceTest {
     var userGroupCollection = createUserGroupCollection();
     when(groupClient.fetchGroupByName(any())).thenReturn(userGroupCollection);
     var response = patronGroupService.fetchPatronGroupIdByName("staff");
-    verify(groupClient).fetchGroupByName("group==staff");
-    assertEquals(userGroupCollection.getUsergroups().get(0).getId(), response);
+    verify(groupClient).fetchGroupByName("group==\"staff\"");
+    assertEquals(userGroupCollection.getUsergroups().getFirst().getId(), response);
   }
 
   @Test

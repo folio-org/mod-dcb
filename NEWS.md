@@ -1,5 +1,6 @@
 ## 2.0.0-SNAPSHOT 2025-XX-XX
 * MODDCB-196: Allow patrons to request items from own library via DCB
+* MODDCB-208: Fix cql query for querying patron group by name [MODDCB-208](https://folio-org.atlassian.net/browse/MODDCB-208)
 
 ## v1.3.0 2025-03-13
 
