@@ -1,5 +1,6 @@
 ## 2.0.0-SNAPSHOT 2025-XX-XX
 * MODDCB-196: Allow patrons to request items from own library via DCB
+* MODDCB-208: Bump Spring Boot from 3.4.4 to 3.5.0 and update other dependencies
 
 ## v1.3.0 2025-03-13
 
