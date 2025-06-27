@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.5.0</version>
+    <version>3.5.3</version>
     <relativePath /> <!-- lookup parent from repository -->
   </parent>
   <groupId>org.folio</groupId>
@@ -26,17 +26,17 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <rest-assured.version>5.5.1</rest-assured.version>
-    <mvn-failsafe.version>3.5.2</mvn-failsafe.version>
+    <mvn-failsafe.version>3.5.3</mvn-failsafe.version>
     <folio-util.version>35.4.0</folio-util.version>
     <argLine />
 
     <!-- runtime dependencies -->
     <folio-spring-support.version>10.0.0-SNAPSHOT</folio-spring-support.version>
-    <openapi-generator.version>7.12.0</openapi-generator.version>
+    <openapi-generator.version>7.14.0</openapi-generator.version>
     <mapstruct.version>1.6.3</mapstruct.version>
     <lombok.mapstruct-binding.version>0.2.0</lombok.mapstruct-binding.version>
-    <kafkaclients.version>3.9.0</kafkaclients.version>
-    <maven-surefire-plugin.version>3.5.2</maven-surefire-plugin.version>
+    <kafkaclients.version>4.0.0</kafkaclients.version>
+    <maven-surefire-plugin.version>3.5.3</maven-surefire-plugin.version>
     <maven-release-plugin.version>3.1.1</maven-release-plugin.version>
     <maven-enforcer-plugin.version>3.5.0</maven-enforcer-plugin.version>
 
