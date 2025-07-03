@@ -17,6 +17,9 @@ DcbItem:
     lendingLibraryCode:
       description: The code which identifies the lending library
       type: string
+    locationCode:
+      description: The location code of the item, representing the library agency code used for determining loan policy flexibility.
+      type: string
     renewalInfo:
       "$ref": "dcbItem.yaml#/renewalInfo"
     holdCount:
