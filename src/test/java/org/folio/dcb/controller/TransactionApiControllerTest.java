@@ -31,6 +31,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
@@ -84,6 +85,7 @@ import org.folio.spring.service.SystemUserScopedExecutionService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -1698,5 +1700,65 @@ class TransactionApiControllerTest extends BaseIT {
         assertEquals(TRANSACTION_AUDIT_ERROR_ACTION, auditExisting.getAction());
       }
     );
+  }
+
+  @ParameterizedTest
+  @EnumSource(DcbTransaction.RoleEnum.class)
+  void testDcbItemLocationCode(DcbTransaction.RoleEnum role) throws Exception {
+    removeExistedTransactionFromDbIfSoExists();
+    removeExistingTransactionsByItemId(ITEM_ID);
+
+    // Test with location code
+    var dcbTransactionWithLocation = createDcbTransactionByRole(role);
+    dcbTransactionWithLocation.getItem().setLocationCode("TEST_ITEM_LOCATION_CODE");
+
+    this.mockMvc.perform(
+        post("/transactions/" + DCB_TRANSACTION_ID)
+          .content(asJsonString(dcbTransactionWithLocation))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isCreated())
+      .andExpect(jsonPath("$.status").value("CREATED"))
+      .andExpect(jsonPath("$.item").value(dcbTransactionWithLocation.getItem()))
+      .andExpect(jsonPath("$.item.locationCode").value(dcbTransactionWithLocation.getItem().getLocationCode()));
+
+    // Check whether LocationCode is saved in DB
+    systemUserScopedExecutionService.executeAsyncSystemUserScoped(
+      TENANT,
+      () -> {
+        var transactionEntity = transactionRepository.findById(DCB_TRANSACTION_ID)
+          .orElse(null);
+        assertNotNull(transactionEntity);
+        assertEquals("TEST_ITEM_LOCATION_CODE", transactionEntity.getItemLocationCode());
+      });
+
+    // Test without location code
+    removeExistedTransactionFromDbIfSoExists();
+    removeExistingTransactionsByItemId(ITEM_ID);
+
+    var dcbTransactionWithoutLocation = createDcbTransactionByRole(role);
+    dcbTransactionWithoutLocation.getItem().setLocationCode(null);
+
+    this.mockMvc.perform(
+        post("/transactions/" + DCB_TRANSACTION_ID)
+          .content(asJsonString(dcbTransactionWithoutLocation))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isCreated())
+      .andExpect(jsonPath("$.status").value("CREATED"))
+      .andExpect(jsonPath("$.item").value(dcbTransactionWithoutLocation.getItem()))
+      .andExpect(jsonPath("$.item.locationCode").doesNotExist());
+
+    // Check whether LocationCode is not saved in DB
+    systemUserScopedExecutionService.executeAsyncSystemUserScoped(
+      TENANT,
+      () -> {
+        var transactionEntity = transactionRepository.findById(DCB_TRANSACTION_ID)
+          .orElse(null);
+        assertNotNull(transactionEntity);
+        assertNull(transactionEntity.getItemLocationCode());
+      });
   }
 }
