@@ -13,5 +13,6 @@
   <include file="changes/create-pgcrypto-extension.xml" relativeToChangelogFile="true"/>
   <include file="changes/add-selfBorrowing-column-into-transaction.xml" relativeToChangelogFile="true"/>
   <include file="changes/add-expired-transaction-status.xml" relativeToChangelogFile="true"/>
+  <include file="changes/add-itemLocationCode-column-into-transaction.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>
