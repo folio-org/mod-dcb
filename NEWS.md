@@ -3,6 +3,7 @@
 * MODDCB-208: Fix cql query for querying patron group by name [MODDCB-208](https://folio-org.atlassian.net/browse/MODDCB-208)
 * MODDCB-208: Bump Spring Boot from 3.4.3 to 3.5.0 and update other dependencies
 * MODDCB-206: Populate locationCode for DCB Transaction API
+* MODDCB-216: Item Storage API version update from 10.1 to 11.0 [MODDCB-216](https://folio-org.atlassian.net/browse/MODDCB-216)
 
 ## v1.3.0 2025-03-13
 
