@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 import java.util.Objects;
 import java.util.UUID;
 
-import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.IN_TRANSIT;
+import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.PAGED;
 import static org.folio.dcb.utils.DCBConstants.LOAN_TYPE_ID;
 import static org.folio.dcb.utils.DCBConstants.MATERIAL_TYPE_NAME_BOOK;
 
@@ -66,7 +66,7 @@ public class CirculationItemServiceImpl implements CirculationItemService {
         .id(itemId)
         .barcode(item.getBarcode())
         .status(ItemStatus.builder()
-          .name(IN_TRANSIT)
+          .name(PAGED)
           .build())
         .holdingsRecordId(dcbHolding.getId())
         .instanceTitle(item.getTitle())
