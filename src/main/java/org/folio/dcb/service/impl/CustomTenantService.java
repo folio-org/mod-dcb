@@ -102,7 +102,7 @@ public class CustomTenantService extends TenantService {
 
   @Override
   protected void afterTenantUpdate(TenantAttributes tenantAttributes) {
-    log.debug("afterTenantUpdate:: parameters tenantAttributes: {}", tenantAttributes);
+    log.info("afterTenantUpdate:: parameters tenantAttributes: {}", tenantAttributes);
     prepareSystemUserService.setupSystemUser();
     kafkaService.restartEventListeners();
     createInstanceType();
@@ -248,9 +248,16 @@ public class CustomTenantService extends TenantService {
 
   private void createHolding() {
     try {
-      holdingsStorageClient.findHolding(HOLDING_ID);
+      log.info("get holding with id: {}", HOLDING_ID);
+      var holding = holdingsStorageClient.findHolding(HOLDING_ID);
+      if (holding == null) {
+        log.info("createHolding:: holding with id: {} not found", HOLDING_ID);
+        throw new FeignException.NotFound("Holding not found", null, null, context.getAllHeaders());
+      }
+      log.info("obtained holding with id: {}, instanceId: {}, permanentLocationId: {}, sourceId: {}",
+        holding.getId(), holding.getInstanceId(), holding.getPermanentLocationId(), holding.getSourceId());
     } catch (FeignException.NotFound ex) {
-      log.debug("createHolding:: creating holding");
+      log.info("createHolding:: creating holding with id: {}", HOLDING_ID);
       var holdingResourceList = holdingSourcesClient.querySourceByName(SOURCE);
       String holdingResourceId;
       if (holdingResourceList.getTotalRecords() == 0) {
@@ -260,6 +267,7 @@ public class CustomTenantService extends TenantService {
         log.info("createHolding:: holdingResource record already exists");
         holdingResourceId = holdingResourceList.getResult().get(0).getId();
       }
+
       HoldingsStorageClient.Holding holding = HoldingsStorageClient.Holding.builder()
         .id(HOLDING_ID)
         .instanceId(INSTANCE_ID)
@@ -268,7 +276,7 @@ public class CustomTenantService extends TenantService {
         .build();
 
       holdingsStorageClient.createHolding(holding);
-      log.info("createHolding:: holding created");
+      log.info("createHolding:: holding created: {}", holding.getId());
     }
   }
 
