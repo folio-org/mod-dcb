@@ -3,7 +3,6 @@ package org.folio.dcb.service.impl;
 import static org.folio.dcb.domain.dto.CirculationRequest.RequestTypeEnum.PAGE;
 import static org.folio.dcb.domain.dto.CirculationRequest.RequestTypeEnum.HOLD;
 import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.AVAILABLE;
-import static org.folio.dcb.utils.DCBConstants.HOLDING_ID;
 import static org.folio.dcb.utils.DCBConstants.INSTANCE_ID;
 import static org.folio.dcb.utils.DCBConstants.holdItemStatus;
 
@@ -59,7 +58,8 @@ public class RequestServiceImpl implements RequestService {
   public CirculationRequest createHoldItemRequest(User user, DcbItem item, String pickupServicePointId) {
     log.debug("createHoldItemRequest:: creating a new hold request for userBarcode {} , itemBarcode {}",
       user.getBarcode(), item.getBarcode());
-    var circulationRequest = createCirculationRequest(HOLD, user, item, HOLDING_ID, INSTANCE_ID, pickupServicePointId);
+    var dcbHolding = holdingsService.fetchDcbHoldingOrCreateIfMissing();
+    var circulationRequest = createCirculationRequest(HOLD, user, item, dcbHolding.getId(), INSTANCE_ID, pickupServicePointId);
     return circulationClient.createRequest(circulationRequest);
   }
 

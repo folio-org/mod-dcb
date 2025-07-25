@@ -242,9 +242,7 @@ public class CustomTenantService extends TenantService {
   }
 
   private void createHolding() {
-    var holding = holdingsService.fetchDcbHoldingOrCreateIfMissing();
-    log.info("DCB holding, id: {}, instanceId: {}, permanentLocationId: {}",
-      holding.getId(), holding.getInstanceId(), holding.getPermanentLocationId());
+    holdingsService.fetchDcbHoldingOrCreateIfMissing();
   }
 
   private void createCancellationReason(){

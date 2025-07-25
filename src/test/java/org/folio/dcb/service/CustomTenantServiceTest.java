@@ -2,7 +2,6 @@ package org.folio.dcb.service;
 
 import feign.FeignException;
 import org.folio.dcb.client.feign.CancellationReasonClient;
-import org.folio.dcb.client.feign.HoldingSourcesClient;
 import org.folio.dcb.client.feign.HoldingsStorageClient;
 import org.folio.dcb.client.feign.InstanceTypeClient;
 import org.folio.dcb.client.feign.InstanceClient;
@@ -21,15 +20,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
-import java.util.UUID;
-
 import static org.folio.dcb.utils.DCBConstants.DCB_CALENDAR_NAME;
 import static org.folio.dcb.utils.DCBConstants.DEFAULT_PERIOD;
 import static org.folio.dcb.utils.EntityUtils.getCalendarCollection;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -45,11 +40,7 @@ class CustomTenantServiceTest {
   @Mock
   private InstanceTypeClient instanceTypeClient;
   @Mock
-  private HoldingsStorageClient holdingsStorageClient;
-  @Mock
   private LocationsClient locationsClient;
-  @Mock
-  private HoldingSourcesClient holdingSourcesClient;
   @Mock
   private InventoryServicePointClient servicePointClient;
   @Mock
@@ -60,6 +51,8 @@ class CustomTenantServiceTest {
   private CancellationReasonClient cancellationReasonClient;
   @Mock
   private ServicePointExpirationPeriodService servicePointExpirationPeriodService;
+  @Mock
+  private HoldingsService holdingsService;
 
   @Mock
   private CalendarService calendarService;
@@ -91,29 +84,13 @@ class CustomTenantServiceTest {
     when(servicePointClient.getServicePointByName(any())).thenReturn(new ResultList<>());
     when(locationsClient.queryLocationsByName(any())).thenReturn(new ResultList<>());
     when(loanTypeClient.queryLoanTypeByName(any())).thenReturn(new ResultList<>());
-    when(holdingsStorageClient.findHolding(any())).thenReturn(HoldingsStorageClient.Holding.builder().build());
+    when(holdingsService.fetchDcbHoldingOrCreateIfMissing()).thenReturn(HoldingsStorageClient.Holding.builder().build());
     when(servicePointExpirationPeriodService.getShelfExpiryPeriod()).thenReturn(DEFAULT_PERIOD);
+
     service.createOrUpdateTenant(new TenantAttributes());
+
     verify(systemUserService).setupSystemUser();
-
-    when(holdingsStorageClient.findHolding(any())).thenThrow(FeignException.NotFound.class);
-    when(holdingSourcesClient.querySourceByName("FOLIO"))
-      .thenReturn(ResultList.of(1, List.of(createHoldingRecordSource())));
-
-    service.createOrUpdateTenant(new TenantAttributes());
-    verify(systemUserService, times(2)).setupSystemUser();
-    verify(holdingSourcesClient, never()).createHoldingsRecordSource(any());
-    verify(holdingsStorageClient).createHolding(any());
-
-    when(holdingSourcesClient.querySourceByName("FOLIO"))
-      .thenReturn(ResultList.of(0, List.of()));
-    when(holdingSourcesClient.createHoldingsRecordSource(any()))
-      .thenReturn(createHoldingRecordSource());
-
-    service.createOrUpdateTenant(new TenantAttributes());
-    verify(systemUserService, times(3)).setupSystemUser();
-    verify(holdingSourcesClient).createHoldingsRecordSource(any());
-    verify(holdingsStorageClient, times(2)).createHolding(any());
+    verify(holdingsService).fetchDcbHoldingOrCreateIfMissing();
   }
 
   @Test
@@ -125,7 +102,7 @@ class CustomTenantServiceTest {
     when(servicePointClient.getServicePointByName(any())).thenReturn(new ResultList<>());
     when(locationsClient.queryLocationsByName(any())).thenReturn(new ResultList<>());
     when(loanTypeClient.queryLoanTypeByName(any())).thenReturn(new ResultList<>());
-    when(holdingsStorageClient.findHolding(any())).thenReturn(HoldingsStorageClient.Holding.builder().build());
+    when(holdingsService.fetchDcbHoldingOrCreateIfMissing()).thenReturn(HoldingsStorageClient.Holding.builder().build());
     when(calendarService.findCalendarByName(DCB_CALENDAR_NAME)).thenReturn(null);
     when(servicePointExpirationPeriodService.getShelfExpiryPeriod()).thenReturn(DEFAULT_PERIOD);
     when(servicePointExpirationPeriodService.getShelfExpiryPeriod()).thenReturn(DEFAULT_PERIOD);
@@ -143,19 +120,12 @@ class CustomTenantServiceTest {
     when(servicePointClient.getServicePointByName(any())).thenReturn(new ResultList<>());
     when(locationsClient.queryLocationsByName(any())).thenReturn(new ResultList<>());
     when(loanTypeClient.queryLoanTypeByName(any())).thenReturn(new ResultList<>());
-    when(holdingsStorageClient.findHolding(any())).thenReturn(HoldingsStorageClient.Holding.builder().build());
+    when(holdingsService.fetchDcbHoldingOrCreateIfMissing()).thenReturn(HoldingsStorageClient.Holding.builder().build());
     when(calendarService.findCalendarByName(DCB_CALENDAR_NAME)).thenReturn(null);
     when(servicePointExpirationPeriodService.getShelfExpiryPeriod()).thenReturn(DEFAULT_PERIOD);
 
-    when(calendarService.findCalendarByName(DCB_CALENDAR_NAME)).thenReturn(getCalendarCollection(DCB_CALENDAR_NAME).getCalendars().get(0));
+    when(calendarService.findCalendarByName(DCB_CALENDAR_NAME)).thenReturn(getCalendarCollection(DCB_CALENDAR_NAME).getCalendars().getFirst());
     service.createOrUpdateTenant(new TenantAttributes());
     verify(calendarService, never()).createCalendar(any());
-  }
-
-  private HoldingSourcesClient.HoldingSource createHoldingRecordSource() {
-    return HoldingSourcesClient.HoldingSource
-      .builder()
-      .id(UUID.randomUUID().toString())
-      .build();
   }
 }

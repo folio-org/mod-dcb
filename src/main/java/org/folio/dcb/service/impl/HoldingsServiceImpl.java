@@ -47,16 +47,7 @@ public class HoldingsServiceImpl implements HoldingsService {
   private HoldingsStorageClient.Holding createHolding() {
     try {
       log.debug("createHolding:: creating holding");
-      var holdingResourceList = holdingSourcesClient.querySourceByName(SOURCE);
-      String holdingResourceId;
-      if (holdingResourceList.getTotalRecords() == 0) {
-        var holdingResource = createHoldingSourceResource();
-        holdingResourceId = holdingResource.getId();
-      } else {
-        log.info("createHolding:: holdingResource record already exists");
-        holdingResourceId = holdingResourceList.getResult().getFirst().getId();
-      }
-
+      var holdingResourceId = getHoldingSourceId();
       HoldingsStorageClient.Holding holding = HoldingsStorageClient.Holding.builder()
         .id(HOLDING_ID)
         .instanceId(INSTANCE_ID)
@@ -72,6 +63,17 @@ public class HoldingsServiceImpl implements HoldingsService {
       log.error("createHolding:: Error while creating holding: {}", ex.getMessage());
       throw InventoryResourceOperationException.createInventoryResourceException("Holding", ex);
     }
+  }
+
+  private String getHoldingSourceId() {
+    log.debug("getHoldingSourceId:: Fetching holding source id for source {}", SOURCE);
+
+    var holdingResourceList = holdingSourcesClient.querySourceByName(SOURCE);
+    if (holdingResourceList.getTotalRecords() == 0) {
+      var holdingResource = createHoldingSourceResource();
+      return holdingResource.getId();
+    }
+    return holdingResourceList.getResult().getFirst().getId();
   }
 
   private HoldingSourcesClient.HoldingSource createHoldingSourceResource() {
