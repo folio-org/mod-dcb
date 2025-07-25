@@ -21,7 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 
 @ExtendWith(MockitoExtension.class)
-public class CirculationItemServiceImplTest {
+class CirculationItemServiceImplTest {
 
   @Mock
   private CirculationItemClient circulationItemClient;
