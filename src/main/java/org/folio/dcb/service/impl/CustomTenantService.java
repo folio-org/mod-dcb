@@ -3,8 +3,6 @@ package org.folio.dcb.service.impl;
 import feign.FeignException;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dcb.client.feign.CancellationReasonClient;
-import org.folio.dcb.client.feign.HoldingSourcesClient;
-import org.folio.dcb.client.feign.HoldingsStorageClient;
 import org.folio.dcb.client.feign.InstanceClient;
 import org.folio.dcb.client.feign.InstanceTypeClient;
 import org.folio.dcb.client.feign.InventoryServicePointClient;
@@ -16,6 +14,7 @@ import org.folio.dcb.domain.dto.NormalHours;
 import org.folio.dcb.domain.dto.ServicePointRequest;
 import org.folio.dcb.listener.kafka.service.KafkaService;
 import org.folio.dcb.service.CalendarService;
+import org.folio.dcb.service.HoldingsService;
 import org.folio.dcb.service.ServicePointExpirationPeriodService;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.liquibase.FolioSpringLiquibase;
@@ -40,8 +39,6 @@ import static org.folio.dcb.utils.DCBConstants.CANCELLATION_REASON_ID;
 import static org.folio.dcb.utils.DCBConstants.CODE;
 import static org.folio.dcb.utils.DCBConstants.DCB_CALENDAR_NAME;
 import static org.folio.dcb.utils.DCBConstants.DCB_CANCELLATION_REASON_NAME;
-import static org.folio.dcb.utils.DCBConstants.HOLDING_ID;
-import static org.folio.dcb.utils.DCBConstants.HOLDING_SOURCE;
 import static org.folio.dcb.utils.DCBConstants.INSTANCE_ID;
 import static org.folio.dcb.utils.DCBConstants.INSTANCE_TITLE;
 import static org.folio.dcb.utils.DCBConstants.INSTANCE_TYPE_ID;
@@ -65,44 +62,42 @@ public class CustomTenantService extends TenantService {
   private final KafkaService kafkaService;
   private final InstanceClient inventoryClient;
   private final InstanceTypeClient instanceTypeClient;
-  private final HoldingsStorageClient holdingsStorageClient;
   private final LocationsClient locationsClient;
-  private final HoldingSourcesClient holdingSourcesClient;
   private final InventoryServicePointClient servicePointClient;
   private final LocationUnitClient locationUnitClient;
   private final CancellationReasonClient cancellationReasonClient;
   private final LoanTypeClient loanTypeClient;
   private final CalendarService calendarService;
   private final ServicePointExpirationPeriodService servicePointExpirationPeriodService;
+  private final HoldingsService holdingsService;
 
 
   public CustomTenantService(JdbcTemplate jdbcTemplate, FolioExecutionContext context, FolioSpringLiquibase folioSpringLiquibase,
                              PrepareSystemUserService prepareSystemUserService, KafkaService kafkaService, InstanceClient inventoryClient,
-                             InstanceTypeClient instanceTypeClient, HoldingsStorageClient holdingsStorageClient,
-                             LocationsClient locationsClient, HoldingSourcesClient holdingSourcesClient,
+                             InstanceTypeClient instanceTypeClient, LocationsClient locationsClient,
                              InventoryServicePointClient servicePointClient, LocationUnitClient locationUnitClient,
                              LoanTypeClient loanTypeClient, CancellationReasonClient cancellationReasonClient, CalendarService calendarService,
-                             ServicePointExpirationPeriodService servicePointExpirationPeriodService) {
+                             ServicePointExpirationPeriodService servicePointExpirationPeriodService,
+                             HoldingsService holdingsService) {
     super(jdbcTemplate, context, folioSpringLiquibase);
 
     this.prepareSystemUserService = prepareSystemUserService;
     this.kafkaService = kafkaService;
     this.inventoryClient = inventoryClient;
     this.instanceTypeClient = instanceTypeClient;
-    this.holdingsStorageClient = holdingsStorageClient;
     this.locationsClient = locationsClient;
-    this.holdingSourcesClient = holdingSourcesClient;
     this.servicePointClient = servicePointClient;
     this.locationUnitClient = locationUnitClient;
     this.loanTypeClient = loanTypeClient;
     this.cancellationReasonClient = cancellationReasonClient;
     this.calendarService = calendarService;
     this.servicePointExpirationPeriodService = servicePointExpirationPeriodService;
+    this.holdingsService = holdingsService;
   }
 
   @Override
   protected void afterTenantUpdate(TenantAttributes tenantAttributes) {
-    log.info("afterTenantUpdate:: parameters tenantAttributes: {}", tenantAttributes);
+    log.debug("afterTenantUpdate:: parameters tenantAttributes: {}", tenantAttributes);
     prepareSystemUserService.setupSystemUser();
     kafkaService.restartEventListeners();
     createInstanceType();
@@ -247,47 +242,9 @@ public class CustomTenantService extends TenantService {
   }
 
   private void createHolding() {
-    try {
-      log.info("get holding with id: {}", HOLDING_ID);
-      var holding = holdingsStorageClient.findHolding(HOLDING_ID);
-      if (holding == null) {
-        log.info("createHolding:: holding with id: {} not found", HOLDING_ID);
-        throw new FeignException.NotFound("Holding not found", null, null, context.getAllHeaders());
-      }
-      log.info("obtained holding with id: {}, instanceId: {}, permanentLocationId: {}, sourceId: {}",
-        holding.getId(), holding.getInstanceId(), holding.getPermanentLocationId(), holding.getSourceId());
-    } catch (FeignException.NotFound ex) {
-      log.info("createHolding:: creating holding with id: {}", HOLDING_ID);
-      var holdingResourceList = holdingSourcesClient.querySourceByName(SOURCE);
-      String holdingResourceId;
-      if (holdingResourceList.getTotalRecords() == 0) {
-        var holdingResource = createHoldingResource();
-        holdingResourceId = holdingResource.getId();
-      } else {
-        log.info("createHolding:: holdingResource record already exists");
-        holdingResourceId = holdingResourceList.getResult().get(0).getId();
-      }
-
-      HoldingsStorageClient.Holding holding = HoldingsStorageClient.Holding.builder()
-        .id(HOLDING_ID)
-        .instanceId(INSTANCE_ID)
-        .permanentLocationId(LOCATION_ID)
-        .sourceId(holdingResourceId)
-        .build();
-
-      holdingsStorageClient.createHolding(holding);
-      log.info("createHolding:: holding created: {}", holding.getId());
-    }
-  }
-
-  private HoldingSourcesClient.HoldingSource createHoldingResource() {
-    log.info("createHoldingResource:: Creating a new Holding Record source");
-    return holdingSourcesClient.createHoldingsRecordSource(HoldingSourcesClient.HoldingSource
-      .builder()
-      .id(UUID.randomUUID().toString())
-      .name(SOURCE)
-      .source(HOLDING_SOURCE)
-      .build());
+    var holding = holdingsService.fetchDcbHoldingOrCreateIfMissing();
+    log.info("DCB holding, id: {}, instanceId: {}, permanentLocationId: {}",
+      holding.getId(), holding.getInstanceId(), holding.getPermanentLocationId());
   }
 
   private void createCancellationReason(){

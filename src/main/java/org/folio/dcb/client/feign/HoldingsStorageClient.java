@@ -19,7 +19,7 @@ public interface HoldingsStorageClient {
   Holding findHolding(@PathVariable("holdingId") String holdingId);
 
   @PostMapping("/holdings")
-  void createHolding(@RequestBody Holding holding);
+  Holding createHolding(@RequestBody Holding holding);
 
   @Data
   @Builder
