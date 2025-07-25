@@ -79,4 +79,25 @@ public class HoldingsServiceImplTest {
     assertThrows(InventoryResourceOperationException.class,
       () -> holdingsService.fetchDcbHoldingOrCreateIfMissing());
   }
+
+  @Test
+  void fetchDcbHoldingOrCreateIfMissing_ShouldCreateHolding_WhenHoldingSourceNotFound() {
+    // Mock
+    when(holdingsStorageClient.findHolding(HOLDING_ID))
+      .thenThrow(FeignException.NotFound.class);
+    var created = HoldingsStorageClient.Holding.builder().id(HOLDING_ID).build();
+    when(holdingsStorageClient.createHolding(any())).thenReturn(created);
+
+    // Also mock holdingSourcesClient for createHolding() path
+    var holdingSource = HoldingSourcesClient.HoldingSource.builder().id("sourceId").build();
+    when(holdingSourcesClient.querySourceByName(any())).thenReturn(ResultList.empty());
+    when(holdingSourcesClient.createHoldingsRecordSource(any()))
+      .thenReturn(holdingSource);
+
+    // Act
+    var holding = holdingsService.fetchDcbHoldingOrCreateIfMissing();
+
+    // Assert
+    assertEquals(created, holding);
+  }
 }
