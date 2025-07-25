@@ -8,6 +8,7 @@ import org.folio.dcb.domain.dto.CirculationItem;
 import org.folio.dcb.domain.dto.DcbItem;
 import org.folio.dcb.domain.dto.ItemStatus;
 import org.folio.dcb.service.CirculationItemService;
+import org.folio.dcb.service.HoldingsService;
 import org.folio.dcb.service.ItemService;
 import org.folio.util.StringUtil;
 import org.springframework.stereotype.Service;
@@ -16,7 +17,6 @@ import java.util.Objects;
 import java.util.UUID;
 
 import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.IN_TRANSIT;
-import static org.folio.dcb.utils.DCBConstants.HOLDING_ID;
 import static org.folio.dcb.utils.DCBConstants.LOAN_TYPE_ID;
 import static org.folio.dcb.utils.DCBConstants.MATERIAL_TYPE_NAME_BOOK;
 
@@ -27,6 +27,7 @@ public class CirculationItemServiceImpl implements CirculationItemService {
 
   private final ItemService itemService;
   private final CirculationItemClient circulationItemClient;
+  private final HoldingsService holdingsService;
 
 
   @Override
@@ -58,6 +59,7 @@ public class CirculationItemServiceImpl implements CirculationItemService {
     //SetupDefaultMaterialTypeIfNotGiven
     String materialType = StringUtils.isBlank(item.getMaterialType()) ? MATERIAL_TYPE_NAME_BOOK : item.getMaterialType();
     var materialTypeId = itemService.fetchItemMaterialTypeIdByMaterialTypeName(materialType);
+    var dcbHolding = holdingsService.fetchDcbHoldingOrCreateIfMissing();
     var itemId = UUID.randomUUID().toString();
     CirculationItem circulationItem =
       CirculationItem.builder()
@@ -66,7 +68,7 @@ public class CirculationItemServiceImpl implements CirculationItemService {
         .status(ItemStatus.builder()
           .name(IN_TRANSIT)
           .build())
-        .holdingsRecordId(HOLDING_ID)
+        .holdingsRecordId(dcbHolding.getId())
         .instanceTitle(item.getTitle())
         .materialTypeId(materialTypeId)
         .permanentLoanTypeId(LOAN_TYPE_ID)
