@@ -135,10 +135,11 @@
           ],
           "pathPattern": "/transactions/{dcbTransactionId}/status",
           "permissionsRequired": [
-            "dcb.transactions.status.get",
-            "circulation.loans.collection.get"
+            "dcb.transactions.status.get"
           ],
-          "modulePermissions": []
+          "modulePermissions": [
+            "circulation.loans.collection.get"
+          ]
         },
         {
           "methods": [
