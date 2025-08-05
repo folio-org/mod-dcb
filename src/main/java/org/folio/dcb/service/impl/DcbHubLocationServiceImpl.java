@@ -103,7 +103,7 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
     AgencyKey agencyKey) {
 
     ResultList<LocationUnit> locationUnitResultList =
-      locationUnitClient.queryInstitutionByNameAndCode(agencyKey.agencyName(), agencyKey.agencyCode());
+      locationUnitClient.findInstitutionsByQuery(formatAgencyQuery(agencyKey.agencyName(), agencyKey.agencyCode()), 10, 0);
 
     if (CollectionUtils.isNotEmpty(locationUnitResultList.getResult())) {
       log.info("createInstitution:: Institution already exists for agency: {} - {}",
@@ -115,19 +115,21 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
       .id(UUID.randomUUID().toString())
       .name(agencyKey.agencyName())
       .code(agencyKey.agencyCode())
+      .isShadow(true)
       .build();
     locationUnitClient.createInstitution(institution);
     log.debug("createInstitution:: Created institution: {} - {}", institution.getCode(), institution.getName());
     return institution;
   }
 
-  private LocationUnitClient.LocationUnit createCampus(
+  private LocationUnit createCampus(
     LocationUnitClient locationUnitClient,
     AgencyKey agencyKey,
     String institutionId) {
 
     ResultList<LocationUnit> locationUnitResultList =
-      locationUnitClient.queryCampusByNameAndCode(agencyKey.agencyName(), agencyKey.agencyCode());
+      locationUnitClient.findCampusesByQuery(
+        formatAgencyQuery(agencyKey.agencyName(), agencyKey.agencyCode()), 10, 0);
 
     if (!locationUnitResultList.getResult().isEmpty()) {
       log.info("createCampus:: campus already exists for agency: {} - {}",
@@ -140,6 +142,7 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
       .id(UUID.randomUUID().toString())
       .name(agencyKey.agencyName())
       .code(agencyKey.agencyCode())
+      .isShadow(true)
       .build();
     locationUnitClient.createCampus(campus);
     log.debug("createCampus:: Created campus: {} - {}", campus.getCode(), campus.getName());
@@ -152,7 +155,8 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
     String campusId) {
 
     ResultList<LocationUnit> locationUnitResultList =
-      locationUnitClient.queryLibraryByNameAndCode(agencyKey.agencyName(), agencyKey.agencyCode());
+      locationUnitClient.findLibrariesByQuery(
+        formatAgencyQuery(agencyKey.agencyName(), agencyKey.agencyCode()), 10, 0);
 
     if (!locationUnitResultList.getResult().isEmpty()) {
       log.info("createLibrary:: library already exists for agency: {} - {}",
@@ -165,10 +169,15 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
       .id(UUID.randomUUID().toString())
       .name(agencyKey.agencyName())
       .code(agencyKey.agencyCode())
+      .isShadow(true)
       .build();
     locationUnitClient.createLibrary(library);
     log.debug("createLibrary:: Created library: {} - {}", library.getCode(), library.getName());
     return library;
+  }
+
+  private @NotNull String formatAgencyQuery(String name, String code) {
+    return String.format("(name==%s AND code==%s)", name, code);
   }
 
   private void createShadowLocationEntries(
@@ -193,7 +202,8 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
     LocationAgenciesIds locationAgenciesIds, ServicePointRequest servicePointRequest) {
 
     ResultList<LocationsClient.LocationDTO> locationDTOResultList =
-      locationsClient.queryLocationsByNameAndCode(location.name(), location.code());
+      locationsClient.findLocationByQuery(
+        formatAgencyQuery(location.name(), location.code()), true, 10, 0);
     if (!locationDTOResultList.getResult().isEmpty()) {
       log.info("createShadowLocation:: Location already exists: {} - {}, skipping...", location.code(), location.name());
       return;

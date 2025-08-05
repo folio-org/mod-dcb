@@ -5,6 +5,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.tuple;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -36,6 +37,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import feign.FeignException;
+import jakarta.validation.constraints.NotNull;
 
 @ExtendWith(MockitoExtension.class)
 class DcbHubLocationServiceImplTest {
@@ -130,13 +132,13 @@ class DcbHubLocationServiceImplTest {
     // Then
     verify(dcbHubLocationClient).getLocations(1, 5, BEARER_TOKEN);
     verify(locationUnitClient, never()).createInstitution(any());
-    verify(locationUnitClient).queryInstitutionByNameAndCode(anyString(), anyString());
+    verify(locationUnitClient).findInstitutionsByQuery(anyString(), anyInt(), anyInt());
     verify(locationUnitClient, never()).createCampus(any());
-    verify(locationUnitClient).queryCampusByNameAndCode(anyString(), anyString());
+    verify(locationUnitClient).findCampusesByQuery(anyString(), anyInt(), anyInt());
     verify(locationUnitClient, never()).createLibrary(any());
-    verify(locationUnitClient).queryLibraryByNameAndCode(anyString(), anyString());
+    verify(locationUnitClient).findLibrariesByQuery(anyString(), anyInt(), anyInt());
     verify(locationsClient, never()).createLocation(any());
-    verify(locationsClient, times(2)).queryLocationsByNameAndCode(anyString(), anyString());
+    verify(locationsClient, times(2)).findLocationByQuery(anyString(), any(Boolean.class), anyInt(), anyInt());
   }
 
   @Test
@@ -170,38 +172,17 @@ class DcbHubLocationServiceImplTest {
     dcbHubLocationService.createShadowLocations(locationsClient, locationUnitClient, servicePointRequest);
 
     // Then
-    // ArgumentCaptors for LocationUnit operations
-    ArgumentCaptor<LocationUnitClient.LocationUnit> createInstitutionCaptor = ArgumentCaptor.forClass(LocationUnitClient.LocationUnit.class);
-    ArgumentCaptor<LocationUnitClient.LocationUnit> createCampusCaptor = ArgumentCaptor.forClass(LocationUnitClient.LocationUnit.class);
-    ArgumentCaptor<LocationUnitClient.LocationUnit> createLibraryCaptor = ArgumentCaptor.forClass(LocationUnitClient.LocationUnit.class);
-
-    // ArgumentCaptors for query operations
-    ArgumentCaptor<String> queryInstitutionNameCaptor = ArgumentCaptor.forClass(String.class);
-    ArgumentCaptor<String> queryInstitutionCodeCaptor = ArgumentCaptor.forClass(String.class);
-    ArgumentCaptor<String> queryCampusNameCaptor = ArgumentCaptor.forClass(String.class);
-    ArgumentCaptor<String> queryCampusCodeCaptor = ArgumentCaptor.forClass(String.class);
-    ArgumentCaptor<String> queryLibraryNameCaptor = ArgumentCaptor.forClass(String.class);
-    ArgumentCaptor<String> queryLibraryCodeCaptor = ArgumentCaptor.forClass(String.class);
-    ArgumentCaptor<String> queryLocationNameCaptor = ArgumentCaptor.forClass(String.class);
-    ArgumentCaptor<String> queryLocationCodeCaptor = ArgumentCaptor.forClass(String.class);
-
-    // ArgumentCaptor for LocationDTO operations
-    ArgumentCaptor<LocationsClient.LocationDTO> createLocationCaptor = ArgumentCaptor.forClass(LocationsClient.LocationDTO.class);
-
     verify(dcbHubLocationClient).getLocations(1, 5, BEARER_TOKEN);
     verify(dcbHubLocationClient).getLocations(2, 5, BEARER_TOKEN);
 
-    validateInstitutions(createInstitutionCaptor, queryInstitutionNameCaptor, queryInstitutionCodeCaptor);
-
-    validateCampus(createCampusCaptor, queryCampusNameCaptor, queryCampusCodeCaptor);
-
-    validateLibrary(createLibraryCaptor, queryLibraryNameCaptor, queryLibraryCodeCaptor);
-
-    validateLocations(createLocationCaptor, queryLocationNameCaptor, queryLocationCodeCaptor);
+    validateInstitutions();
+    validateCampus();
+    validateLibrary();
+    validateLocations();
   }
 
-  private void validateInstitutions(ArgumentCaptor<LocationUnitClient.LocationUnit> createInstitutionCaptor,
-    ArgumentCaptor<String> queryInstitutionNameCaptor, ArgumentCaptor<String> queryInstitutionCodeCaptor) {
+  private void validateInstitutions() {
+    ArgumentCaptor<LocationUnitClient.LocationUnit> createInstitutionCaptor = ArgumentCaptor.forClass(LocationUnitClient.LocationUnit.class);
     // Verify institution creation
     verify(locationUnitClient, times(2)).createInstitution(createInstitutionCaptor.capture());
     List<LocationUnitClient.LocationUnit> institutions = createInstitutionCaptor.getAllValues();
@@ -213,23 +194,20 @@ class DcbHubLocationServiceImplTest {
         tuple("Agency Name 2", "agencyCode2")
       );
 
+
     // Verify institution queries
-    verify(locationUnitClient, times(2)).queryInstitutionByNameAndCode(
-      queryInstitutionNameCaptor.capture(),
-      queryInstitutionCodeCaptor.capture()
-    );
-    List<String> institutionNames = queryInstitutionNameCaptor.getAllValues();
-    List<String> institutionCodes = queryInstitutionCodeCaptor.getAllValues();
-    assertThat(institutionNames)
+    ArgumentCaptor<String> institutionsStringArgCaptor = ArgumentCaptor.forClass(String.class);
+    verify(locationUnitClient, times(2)).findInstitutionsByQuery(institutionsStringArgCaptor.capture(), anyInt(), anyInt());
+    assertThat(institutionsStringArgCaptor.getAllValues())
       .extracting(List::getFirst,l->l.get(1))
-      .containsExactly("Agency Name 1", "Agency Name 2");
-    assertThat(institutionCodes)
-      .extracting(List::getFirst,l->l.get(1))
-      .containsExactly("agencyCode1", "agencyCode2");
+      .containsExactly(
+        formatAgencyQuery("Agency Name 1", "agencyCode1"),
+        formatAgencyQuery("Agency Name 2", "agencyCode2")
+      );
   }
 
-  private void validateCampus(ArgumentCaptor<LocationUnitClient.LocationUnit> createCampusCaptor,
-    ArgumentCaptor<String> queryCampusNameCaptor, ArgumentCaptor<String> queryCampusCodeCaptor) {
+  private void validateCampus() {
+    ArgumentCaptor<LocationUnitClient.LocationUnit> createCampusCaptor = ArgumentCaptor.forClass(LocationUnitClient.LocationUnit.class);
     // Verify campus creation
     verify(locationUnitClient, times(2)).createCampus(createCampusCaptor.capture());
     List<LocationUnitClient.LocationUnit> campuses = createCampusCaptor.getAllValues();
@@ -242,22 +220,19 @@ class DcbHubLocationServiceImplTest {
       );
 
     // Verify campus queries
-    verify(locationUnitClient, times(2)).queryCampusByNameAndCode(
-      queryCampusNameCaptor.capture(),
-      queryCampusCodeCaptor.capture()
-    );
-    List<String> campusNames = queryCampusNameCaptor.getAllValues();
-    List<String> campusCodes = queryCampusCodeCaptor.getAllValues();
-    assertThat(campusNames)
+    ArgumentCaptor<String> campusesStringArgCaptor = ArgumentCaptor.forClass(String.class);
+    verify(locationUnitClient, times(2)).findCampusesByQuery(campusesStringArgCaptor.capture(), anyInt(), anyInt());
+    assertThat(campusesStringArgCaptor.getAllValues())
       .extracting(List::getFirst,l->l.get(1))
-      .containsExactly("Agency Name 1", "Agency Name 2");
-    assertThat(campusCodes)
-      .extracting(List::getFirst,l->l.get(1))
-      .containsExactly("agencyCode1", "agencyCode2");
+      .containsExactly(
+        formatAgencyQuery("Agency Name 1", "agencyCode1"),
+        formatAgencyQuery("Agency Name 2", "agencyCode2")
+      );
   }
 
-  private void validateLibrary(ArgumentCaptor<LocationUnitClient.LocationUnit> createLibraryCaptor,
-    ArgumentCaptor<String> queryLibraryNameCaptor, ArgumentCaptor<String> queryLibraryCodeCaptor) {
+  private void validateLibrary() {
+    ArgumentCaptor<LocationUnitClient.LocationUnit> createLibraryCaptor = ArgumentCaptor.forClass(LocationUnitClient.LocationUnit.class);
+
     // Verify library creation
     verify(locationUnitClient, times(2)).createLibrary(createLibraryCaptor.capture());
     List<LocationUnitClient.LocationUnit> libraries = createLibraryCaptor.getAllValues();
@@ -270,22 +245,19 @@ class DcbHubLocationServiceImplTest {
       );
 
     // Verify library queries
-    verify(locationUnitClient, times(2)).queryLibraryByNameAndCode(
-      queryLibraryNameCaptor.capture(),
-      queryLibraryCodeCaptor.capture()
-    );
-    List<String> libraryNames = queryLibraryNameCaptor.getAllValues();
-    List<String> libraryCodes = queryLibraryCodeCaptor.getAllValues();
-    assertThat(libraryNames)
+    ArgumentCaptor<String> librariesStringArgCaptor = ArgumentCaptor.forClass(String.class);
+    verify(locationUnitClient, times(2)).findCampusesByQuery(librariesStringArgCaptor.capture(), anyInt(), anyInt());
+    assertThat(librariesStringArgCaptor.getAllValues())
       .extracting(List::getFirst,l->l.get(1))
-      .containsExactly("Agency Name 1", "Agency Name 2");
-    assertThat(libraryCodes)
-      .extracting(List::getFirst,l->l.get(1))
-      .containsExactly("agencyCode1", "agencyCode2");
+      .containsExactly(
+        formatAgencyQuery("Agency Name 1", "agencyCode1"),
+        formatAgencyQuery("Agency Name 2", "agencyCode2")
+      );
   }
 
-  private void validateLocations(ArgumentCaptor<LocationsClient.LocationDTO> createLocationCaptor,
-    ArgumentCaptor<String> queryLocationNameCaptor, ArgumentCaptor<String> queryLocationCodeCaptor) {
+  private void validateLocations() {
+    ArgumentCaptor<LocationsClient.LocationDTO> createLocationCaptor = ArgumentCaptor.forClass(LocationsClient.LocationDTO.class);
+
     // Verify location creation
     verify(locationsClient, times(2)).createLocation(createLocationCaptor.capture());
     List<LocationsClient.LocationDTO> locations = createLocationCaptor.getAllValues();
@@ -297,19 +269,15 @@ class DcbHubLocationServiceImplTest {
         tuple("Location 2", "loc2")
       );
 
-    // Verify location queries
-    verify(locationsClient, times(2)).queryLocationsByNameAndCode(
-      queryLocationNameCaptor.capture(),
-      queryLocationCodeCaptor.capture()
-    );
-    List<String> locationNames = queryLocationNameCaptor.getAllValues();
-    List<String> locationCodes = queryLocationCodeCaptor.getAllValues();
-    assertThat(locationNames)
+    // Verify library queries
+    ArgumentCaptor<String> locationStringArgCaptor = ArgumentCaptor.forClass(String.class);
+    verify(locationsClient, times(2)).findLocationByQuery(locationStringArgCaptor.capture(), eq(true), anyInt(), anyInt());
+    assertThat(locationStringArgCaptor.getAllValues())
       .extracting(List::getFirst,l->l.get(1))
-      .containsExactly("Location 1", "Location 2");
-    assertThat(locationCodes)
-      .extracting(List::getFirst,l->l.get(1))
-      .containsExactly("loc1", "loc2");
+      .containsExactly(
+        formatAgencyQuery("Location 1", "loc1"),
+        formatAgencyQuery("Location 2", "loc2")
+      );
   }
 
   @Test
@@ -426,33 +394,33 @@ class DcbHubLocationServiceImplTest {
       .id(UUID.randomUUID().toString()).code(agencyCode).name(agencyName).build();
     locationUnitResult.setResult(List.of(locationUnit));
 
-    when(locationUnitClient.queryInstitutionByNameAndCode(agencyName, agencyCode))
+    when(locationUnitClient.findInstitutionsByQuery(formatAgencyQuery(agencyName, agencyCode), 10, 0))
       .thenReturn(locationUnitResult);
-    when(locationUnitClient.queryCampusByNameAndCode(agencyName, agencyCode))
+    when(locationUnitClient.findCampusesByQuery(formatAgencyQuery(agencyName, agencyCode), 10, 0))
       .thenReturn(locationUnitResult);
-    when(locationUnitClient.queryLibraryByNameAndCode(agencyName, agencyCode))
+    when(locationUnitClient.findLibrariesByQuery(formatAgencyQuery(agencyName, agencyCode), 10, 0))
       .thenReturn(locationUnitResult);
   }
 
   private void mockLocationDTOResponses(String locationName, String locationCode) {
-    ResultList<LocationsClient.LocationDTO> emptyLocationDTO = new ResultList<>();
+    ResultList<LocationsClient.LocationDTO> mockLocationDTO = new ResultList<>();
     LocationsClient.LocationDTO locationDTO = LocationsClient.LocationDTO.builder()
       .id(UUID.randomUUID().toString()).name(locationName).code(locationCode).build();
-    emptyLocationDTO.setResult(List.of(locationDTO));
+    mockLocationDTO.setResult(List.of(locationDTO));
 
-    when(locationsClient.queryLocationsByNameAndCode(locationName, locationCode))
-      .thenReturn(emptyLocationDTO);
+    when(locationsClient.findLocationByQuery(formatAgencyQuery(locationName, locationCode), true, 10, 0))
+      .thenReturn(mockLocationDTO);
   }
 
   private void mockEmptyLocationUnitResponses(String agencyName, String agencyCode) {
     ResultList<LocationUnitClient.LocationUnit> emptyLocationUnit = new ResultList<>();
     emptyLocationUnit.setResult(Collections.emptyList());
 
-    when(locationUnitClient.queryInstitutionByNameAndCode(agencyName, agencyCode))
+    when(locationUnitClient.findInstitutionsByQuery(formatAgencyQuery(agencyName, agencyCode), 10, 0))
       .thenReturn(emptyLocationUnit);
-    when(locationUnitClient.queryCampusByNameAndCode(agencyName, agencyCode))
+    when(locationUnitClient.findCampusesByQuery(formatAgencyQuery(agencyName, agencyCode), 10, 0))
       .thenReturn(emptyLocationUnit);
-    when(locationUnitClient.queryLibraryByNameAndCode(agencyName, agencyCode))
+    when(locationUnitClient.findLibrariesByQuery(formatAgencyQuery(agencyName, agencyCode), 10, 0))
       .thenReturn(emptyLocationUnit);
   }
 
@@ -460,7 +428,13 @@ class DcbHubLocationServiceImplTest {
     ResultList<LocationsClient.LocationDTO> emptyLocationDTO = new ResultList<>();
     emptyLocationDTO.setResult(Collections.emptyList());
 
-    when(locationsClient.queryLocationsByNameAndCode(locationName, locationCode))
+    when(locationsClient.findLocationByQuery(formatAgencyQuery(locationName, locationCode), true, 10, 0))
       .thenReturn(emptyLocationDTO);
+
   }
+
+  private @NotNull String formatAgencyQuery(String name, String code) {
+    return String.format("(name==%s AND code==%s)", name, code);
+  }
+
 }

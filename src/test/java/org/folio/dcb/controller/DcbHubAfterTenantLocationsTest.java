@@ -109,7 +109,7 @@ class DcbHubAfterTenantLocationsTest extends BaseIT {
   }
 
   private String formatLocationQuery(int index) {
-    return String.format("(name==Location-%d and code==LOC-%d)", index, index);
+    return String.format("(name==Location-%d AND code==LOC-%d)", index, index);
   }
 
   private String formatAgencyQuery(AgencyKey agency) {

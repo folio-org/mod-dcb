@@ -6,7 +6,7 @@
         "urlPath": "/locations",
         "queryParameters": {
           "query": {
-            "equalTo": "(name==Location-1 and code==LOC-1)"
+            "equalTo": "(name==Location-1 AND code==LOC-1)"
           }
         }
       },
@@ -41,7 +41,7 @@
         "urlPath": "/locations",
         "queryParameters": {
           "query": {
-            "equalTo": "(name==Location-2 and code==LOC-2)"
+            "equalTo": "(name==Location-2 AND code==LOC-2)"
           }
         }
       },
@@ -62,7 +62,7 @@
         "urlPath": "/locations",
         "queryParameters": {
           "query": {
-            "equalTo": "(name==Location-3 and code==LOC-3)"
+            "equalTo": "(name==Location-3 AND code==LOC-3)"
           }
         }
       },
@@ -97,7 +97,7 @@
         "urlPath": "/locations",
         "queryParameters": {
           "query": {
-            "equalTo": "(name==Location-4 and code==LOC-4)"
+            "equalTo": "(name==Location-4 AND code==LOC-4)"
           }
         }
       },
@@ -118,7 +118,7 @@
         "urlPath": "/locations",
         "queryParameters": {
           "query": {
-            "equalTo": "(name==Location-5 and code==LOC-5)"
+            "equalTo": "(name==Location-5 AND code==LOC-5)"
           }
         }
       },
@@ -153,7 +153,7 @@
         "urlPath": "/locations",
         "queryParameters": {
           "query": {
-            "equalTo": "(name==Location-6 and code==LOC-6)"
+            "equalTo": "(name==Location-6 AND code==LOC-6)"
           }
         }
       },
@@ -174,7 +174,7 @@
         "urlPath": "/locations",
         "queryParameters": {
           "query": {
-            "equalTo": "(name==Location-7 and code==LOC-7)"
+            "equalTo": "(name==Location-7 AND code==LOC-7)"
           }
         }
       },
@@ -209,7 +209,7 @@
         "urlPath": "/locations",
         "queryParameters": {
           "query": {
-            "equalTo": "(name==Location-8 and code==LOC-8)"
+            "equalTo": "(name==Location-8 AND code==LOC-8)"
           }
         }
       },
