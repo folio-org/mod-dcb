@@ -6,6 +6,7 @@
 * MODDCB-216: Item Storage API version update from 10.1 to 11.0 [MODDCB-216](https://folio-org.atlassian.net/browse/MODDCB-216)
 * MODDCB-187: Create Umbrella DCB Inventory Holding if missing before using it [MODDCB-187](https://folio-org.atlassian.net/browse/MODDCB-187)
 * MODDCB-219: 403 from /circulation/loans during transaction status check [MODDCB-219](https://folio-org.atlassian.net/browse/MODDCB-219)
+* MODDCB-223: Add missing permission for DCB transaction status API [MODDCB-223](https://folio-org.atlassian.net/browse/MODDCB-223)
 
 ## v1.3.0 2025-03-13
 
