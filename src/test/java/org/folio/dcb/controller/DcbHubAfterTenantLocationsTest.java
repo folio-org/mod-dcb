@@ -13,39 +13,44 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
 
-import org.folio.dcb.utils.DcbHubLocationsGroupingUtil;
+import org.folio.dcb.model.AgencyKey;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
 class DcbHubAfterTenantLocationsTest extends BaseIT {
-
-  @DynamicPropertySource
-  static void registerProperties(DynamicPropertyRegistry registry) {
-    registry.add("application.dcb-hub.fetch-dcb-locations-enabled", () -> true);
-    registry.add("application.dcb-hub.locations-url", BaseIT::getOkapiUrl);
-    String dcbCredentialsJson = String.format(
-      "{\"client_id\": \"client-id-54321\", \"client_secret\": \"client_secret_54321\", \"username\": \"admin54321\", \"password\": \"admin54321\", \"keycloak_url\": \"%s/realms/master/protocol/openid-connect/token\"}",
-      getOkapiUrl());
-    registry.add("application.secret-store.ephemeral.content.folio_diku_dcb-hub-credentials", () -> dcbCredentialsJson);
-  }
-
   private static final String LOCATIONS_PATH = "/locations";
   private static final String INSTITUTIONS_PATH = "/location-units/institutions";
   private static final String CAMPUSES_PATH = "/location-units/campuses";
   private static final String LIBRARIES_PATH = "/location-units/libraries";
   private final List<String> unitPaths = List.of(INSTITUTIONS_PATH, CAMPUSES_PATH, LIBRARIES_PATH);
 
-  private static final DcbHubLocationsGroupingUtil.AgencyKey AGENCY_1 = new DcbHubLocationsGroupingUtil.AgencyKey("AG-001", "Agency-One");
-  private static final DcbHubLocationsGroupingUtil.AgencyKey AGENCY_2 = new DcbHubLocationsGroupingUtil.AgencyKey("AG-002", "Agency-Two");
-  private static final DcbHubLocationsGroupingUtil.AgencyKey AGENCY_3 = new DcbHubLocationsGroupingUtil.AgencyKey("AG-003", "Agency-Three");
-  private static final DcbHubLocationsGroupingUtil.AgencyKey AGENCY_4 = new DcbHubLocationsGroupingUtil.AgencyKey("AG-004", "Agency-Four");
-  private static final DcbHubLocationsGroupingUtil.AgencyKey AGENCY_5 = new DcbHubLocationsGroupingUtil.AgencyKey("AG-005", "Agency-Five");
-  private static final List<DcbHubLocationsGroupingUtil.AgencyKey> AGENCIES = List.of( AGENCY_1, AGENCY_2, AGENCY_3, AGENCY_4, AGENCY_5);
+  private static final AgencyKey AGENCY_1 = new AgencyKey("AG-001", "Agency-One");
+  private static final AgencyKey AGENCY_2 = new AgencyKey("AG-002", "Agency-Two");
+  private static final AgencyKey AGENCY_3 = new AgencyKey("AG-003", "Agency-Three");
+  private static final AgencyKey AGENCY_4 = new AgencyKey("AG-004", "Agency-Four");
+  private static final AgencyKey AGENCY_5 = new AgencyKey("AG-005", "Agency-Five");
+  private static final List<AgencyKey> AGENCIES = List.of( AGENCY_1, AGENCY_2, AGENCY_3, AGENCY_4, AGENCY_5);
+
+  @DynamicPropertySource
+  static void registerProperties(DynamicPropertyRegistry registry) {
+    registry.add("application.dcb-hub.fetch-dcb-locations-enabled", () -> true);
+    registry.add("application.dcb-hub.locations-url", BaseIT::getOkapiUrl);
+    String dcbCredentialsJson = String.format("""
+    {
+      "client_id": "client-id-54321",
+      "client_secret": "client_secret_54321",
+      "username": "admin54321",
+      "password": "admin54321",
+      "keycloak_url": "%s/realms/master/protocol/openid-connect/token"
+    }
+    """, getOkapiUrl());
+    registry.add("application.secret-store.ephemeral.content.folio_diku_dcb-hub-credentials", () -> dcbCredentialsJson);
+  }
 
   @Test
-  void testHubLocationsInsertedAfterTenantApiCalls1() {
+  void testHubLocationsInsertedAfterTenantApiCalls() {
     verifyDcbHubLocationsCalls();
     verifyLocationQueries();
     verifyLocationCreations();
@@ -78,14 +83,15 @@ class DcbHubAfterTenantLocationsTest extends BaseIT {
   }
 
   private void verifyLocationUnitCreations() {
-    Map<DcbHubLocationsGroupingUtil.AgencyKey, Integer> agencyVerificationCounts = Map.of(
-      new DcbHubLocationsGroupingUtil.AgencyKey("AG-002", "Agency-Two"), 2,
-      new DcbHubLocationsGroupingUtil.AgencyKey("AG-004", "Agency-Four"), 1
+    Map<String, Integer> agencyVerificationCounts = Map.of(
+      AGENCY_1.agencyName(), 0, AGENCY_2.agencyName(), 1, AGENCY_3.agencyName(), 0,
+      AGENCY_4.agencyName(), 1, AGENCY_5.agencyName(), 0
     );
 
-    agencyVerificationCounts.forEach((agency, verificationCount)-> {
+    AGENCIES.forEach(agency -> {
+      int expectedCount = agencyVerificationCounts.get(agency.agencyName());
       unitPaths.forEach(path ->
-        wireMockServer.verify(verificationCount, postRequestedFor(urlPathEqualTo(path))
+        wireMockServer.verify(expectedCount, postRequestedFor(urlPathEqualTo(path))
           .withRequestBody(matchingJsonPath("$.name", equalTo(agency.agencyName())))
           .withRequestBody(matchingJsonPath("$.code", equalTo(agency.agencyCode()))))
       );
@@ -93,17 +99,10 @@ class DcbHubAfterTenantLocationsTest extends BaseIT {
   }
 
   private void verifyLocationUnitQueries() {
-    Map<String, Integer> agencyVerificationCounts = Map.of(
-      AGENCY_1.agencyName(), 2, AGENCY_2.agencyName(), 2, AGENCY_3.agencyName(), 2,
-      AGENCY_4.agencyName(), 1, AGENCY_5.agencyName(), 1
-    );
-
     AGENCIES.forEach(agency -> {
-      int expectedCount = agencyVerificationCounts.get(agency.agencyName());
       String query = formatAgencyQuery(agency);
-
       unitPaths.forEach(path ->
-        wireMockServer.verify(expectedCount, getRequestedFor(urlPathEqualTo(path))
+        wireMockServer.verify(1, getRequestedFor(urlPathEqualTo(path))
           .withQueryParam("query", equalTo(query)))
       );
     });
@@ -113,7 +112,7 @@ class DcbHubAfterTenantLocationsTest extends BaseIT {
     return String.format("(name==Location-%d and code==LOC-%d)", index, index);
   }
 
-  private String formatAgencyQuery(DcbHubLocationsGroupingUtil.AgencyKey agency) {
+  private String formatAgencyQuery(AgencyKey agency) {
     return String.format("(name==%s AND code==%s)", agency.agencyName(), agency.agencyCode());
   }
 }

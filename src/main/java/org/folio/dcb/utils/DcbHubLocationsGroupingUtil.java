@@ -5,8 +5,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.folio.dcb.model.AgencyKey;
 import org.folio.dcb.model.DcbHubLocationResponse;
+import org.folio.dcb.model.LocationCodeNamePair;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class DcbHubLocationsGroupingUtil {
 
   public static Map<AgencyKey, List<LocationCodeNamePair>> groupByAgency(List<DcbHubLocationResponse.Location> locations) {
@@ -23,14 +29,4 @@ public class DcbHubLocationsGroupingUtil {
         )
       ));
   }
-
-  // Record for location code-name pairs
-  public record LocationCodeNamePair(String code, String name) {}
-
-  // Record for agency key (code + name)
-  public record AgencyKey(String agencyCode, String agencyName) {}
-
-  // Record container for location agencies IDs (institutionId, campusId, libraryId)
-  public record LocationAgenciesIds(String institutionId, String campusId, String libraryId) {}
-
 }

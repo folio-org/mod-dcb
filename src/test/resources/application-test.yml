@@ -76,41 +76,13 @@ management:
 
 application:
   dcb-hub:
-    fetch-dcb-locations-enabled: ${FETCH_DCB_LOCATIONS_ENABLED:false}
+    fetch-dcb-locations-enabled: ${FETCH_DCB_LOCATIONS_ENABLED:true}
     locations-url: ${DCB_LOCATIONS_BASE_URL:/locations}
     batch-size: ${DCB_LOCATIONS_BATCH_SIZE:5}
     secure-store-keyname: ${DCB_HUB_SECURE_STORE_KEYNAME:dcb-hub-credentials}
-  keycloak:
-    tls:
-      enabled: ${KC_CLIENT_TLS_ENABLED:false}
-      trust-store-path: ${KC_CLIENT_TLS_TRUSTSTORE_PATH:}
-      trust-store-password: ${KC_CLIENT_TLS_TRUSTSTORE_PASSWORD:}
-      trust-store-type: ${KC_CLIENT_TLS_TRUSTSTORE_TYPE:}
   secret-store:
     type: ${SECRET_STORE_TYPE:EPHEMERAL}
     ephemeral:
       content:
-        folio_diku_dcb-hub-credentials: >-
-          ${DCB_HUB_CREDENTIALS:{"client_id": "test", "client_secret": "test", "username": "test", "password": "test", "keycloak_url": "https://kc-host/realms/master/protocol/openid-connect/token"}}
-    aws-ssm:
-      region: ${SECRET_STORE_AWS_SSM_REGION:}
-      use-iam: ${SECRET_STORE_AWS_SSM_USE_IAM:true}
-      ecs-credentials-endpoint: ${SECRET_STORE_AWS_SSM_ECS_CREDENTIALS_ENDPOINT:}
-      ecs-credentials-path: ${SECRET_STORE_AWS_SSM_ECS_CREDENTIALS_PATH:}
-    vault:
-      token: ${SECRET_STORE_VAULT_TOKEN:}
-      address: ${SECRET_STORE_VAULT_ADDRESS:}
-      enable-ssl: ${SECRET_STORE_VAULT_ENABLE_SSL:false}
-      pem-file-path: ${SECRET_STORE_VAULT_PEM_FILE_PATH:}
-      keystore-password: ${SECRET_STORE_VAULT_KEYSTORE_PASSWORD:}
-      keystore-file-path: ${SECRET_STORE_VAULT_KEYSTORE_FILE_PATH:}
-      truststore-file-path: ${SECRET_STORE_VAULT_TRUSTSTORE_FILE_PATH:}
-    fssp:
-      address: ${SECRET_STORE_FSSP_ADDRESS:}
-      secret-path: ${SECRET_STORE_FSSP_SECRET_PATH:secure-store/entries}
-      enable-ssl: ${SECRET_STORE_FSSP_ENABLE_SSL:false}
-      trust-store-path: ${SECRET_STORE_FSSP_TRUSTSTORE_PATH:}
-      trust-store-file-type: ${SECRET_STORE_FSSP_TRUSTSTORE_FILE_TYPE:}
-      trust-store-password: ${SECRET_STORE_FSSP_TRUSTSTORE_PASSWORD:}
 
 debug: false
