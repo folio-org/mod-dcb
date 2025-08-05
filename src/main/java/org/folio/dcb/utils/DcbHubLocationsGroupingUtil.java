@@ -5,11 +5,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.folio.dcb.model.LocationResponse;
+import org.folio.dcb.model.DcbHubLocationResponse;
 
 public class DcbHubLocationsGroupingUtil {
 
-  public static Map<AgencyKey, List<LocationCodeNamePair>> groupByAgency(List<LocationResponse.Location> locations) {
+  public static Map<AgencyKey, List<LocationCodeNamePair>> groupByAgency(List<DcbHubLocationResponse.Location> locations) {
     if (locations == null || locations.isEmpty()) {
       return Map.of(); // Return empty map if response or content is null
     }

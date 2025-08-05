@@ -1,6 +1,6 @@
 package org.folio.dcb.client.feign;
 
-import org.folio.dcb.model.LocationResponse;
+import org.folio.dcb.model.DcbHubLocationResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface DcbHubLocationClient {
 
     @GetMapping("/locations")
-    LocationResponse getLocations(
+    DcbHubLocationResponse getLocations(
             @RequestParam("number") int pageNumber,
             @RequestParam("size") int pageSize,
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader

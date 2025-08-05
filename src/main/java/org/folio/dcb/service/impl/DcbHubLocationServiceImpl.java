@@ -15,7 +15,7 @@ import org.folio.dcb.exception.ServiceException;
 import org.folio.dcb.integration.keycloak.DcbHubKCCredentialSecureStore;
 import org.folio.dcb.integration.keycloak.DcbHubKCTokenService;
 import org.folio.dcb.integration.keycloak.model.DcbHubKCCredentials;
-import org.folio.dcb.model.LocationResponse;
+import org.folio.dcb.model.DcbHubLocationResponse;
 import org.folio.dcb.service.DcbHubLocationService;
 import org.folio.dcb.utils.DcbHubLocationsGroupingUtil;
 import org.folio.spring.model.ResultList;
@@ -51,7 +51,7 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
       log.info("fetchDcbHubAllLocations:: fetching all locations from DCB Hub");
       while (true) {
         String bearerToken = dcbHubKCTokenService.getBearerAccessToken(dcbHubKCCredentials);
-        LocationResponse response = dcbHubLocationClient.getLocations(pageNumber, pageSize, bearerToken);
+        DcbHubLocationResponse response = dcbHubLocationClient.getLocations(pageNumber, pageSize, bearerToken);
 
         if (Objects.nonNull(response.getContent()) && !response.getContent().isEmpty()) {
           createShadowLocations(locationsClient, locationUnitClient, servicePointRequest, response.getContent());
@@ -73,7 +73,7 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
   }
 
   private void createShadowLocations(LocationsClient locationsClient, LocationUnitClient locationUnitClient,
-    ServicePointRequest servicePointRequest, List<LocationResponse.Location> locations) {
+    ServicePointRequest servicePointRequest, List<DcbHubLocationResponse.Location> locations) {
 
     if (locations == null || locations.isEmpty()) {
       log.warn("createShadowLocations:: No locations found in DCB Hub");

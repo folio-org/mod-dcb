@@ -7,7 +7,7 @@ import java.util.List;
 import lombok.Data;
 
 @Data
-public class LocationResponse {
+public class DcbHubLocationResponse {
   private List<Location> content;
   private Pageable pageable;
   private Integer pageNumber;
