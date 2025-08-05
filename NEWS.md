@@ -1,3 +1,6 @@
+## v1.2.12 2025-08-05
+* MODDCB-219: 403 from /circulation/loans during transaction status check [MODDCB-219](https://folio-org.atlassian.net/browse/MODDCB-219)
+
 ## v1.2.11 2025-06-19
 * MODDCB-196: Allow patrons to request items from own library via DCB
 
