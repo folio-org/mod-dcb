@@ -214,7 +214,7 @@
               "servicePointIds": [
                 "916fe2af-dc73-48b0-8922-0768a403473b"
               ],
-              "shadow": true
+              "isShadow": true
             }
           ]
         }
@@ -270,7 +270,7 @@
               "servicePointIds": [
                 "492544b0-7710-43fb-ab13-9a2595233538"
               ],
-              "shadow": true
+              "isShadow": true
             }
           ]
         }
@@ -326,7 +326,7 @@
               "servicePointIds": [
                 "435884ba-6aee-47d8-9cc7-7aca9b4cf1f9"
               ],
-              "shadow": true
+              "isShadow": true
             }
           ]
         }
@@ -382,7 +382,7 @@
               "servicePointIds": [
                 "e4cea384-e357-40b6-b2b6-c514d32ffef1"
               ],
-              "shadow": true
+              "isShadow": true
             }
           ]
         }
@@ -438,7 +438,7 @@
           "servicePointIds": [
             "c7b6fdb7-f9e1-442e-9cbd-c219840b56d7"
           ],
-          "shadow": true
+          "isShadow": true
         }
       }
     },
@@ -471,7 +471,7 @@
           "servicePointIds": [
             "c5d54e16-4e95-4551-8714-21464cdd0ddc"
           ],
-          "shadow": true
+          "isShadow": true
         }
       }
     },
@@ -504,7 +504,7 @@
           "servicePointIds": [
             "28d8a17c-06a8-4454-a3e6-2ca7fdade0b1"
           ],
-          "shadow": true
+          "isShadow": true
         }
       }
     },
@@ -537,7 +537,7 @@
           "servicePointIds": [
             "ce8e199b-7f14-43b5-8f04-2cefcf41e781"
           ],
-          "shadow": true
+          "isShadow": true
         }
       }
     },
@@ -570,7 +570,7 @@
           "servicePointIds": [
             "508df64a-7c56-46a4-9989-cbe298f85607"
           ],
-          "shadow": true
+          "isShadow": true
         }
       }
     },
@@ -603,7 +603,7 @@
           "servicePointIds": [
             "d497ed56-4489-4b63-812a-5bcd34df950d"
           ],
-          "shadow": true
+          "isShadow": true
         }
       }
     },
@@ -636,7 +636,7 @@
           "servicePointIds": [
             "eb75aa96-a90b-4c37-b9f9-e8e9f0d48947"
           ],
-          "shadow": true
+          "isShadow": true
         }
       }
     },
@@ -669,7 +669,7 @@
           "servicePointIds": [
             "b106040e-f69e-4135-8613-ba621621c73d"
           ],
-          "shadow": true
+          "isShadow": true
         }
       }
     },

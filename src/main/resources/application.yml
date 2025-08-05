@@ -103,11 +103,9 @@ application:
       trust-store-password: ${KC_CLIENT_TLS_TRUSTSTORE_PASSWORD:}
       trust-store-type: ${KC_CLIENT_TLS_TRUSTSTORE_TYPE:}
   secret-store:
-    type: ${SECRET_STORE_TYPE:EPHEMERAL}
+    type: ${SECRET_STORE_TYPE:}
     ephemeral:
       content:
-        dcb-hub-credentials: >-
-          ${DCB_HUB_CREDENTIALS:}
     aws-ssm:
       region: ${SECRET_STORE_AWS_SSM_REGION:}
       use-iam: ${SECRET_STORE_AWS_SSM_USE_IAM:true}

@@ -45,7 +45,7 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
       log.info("fetchDcbHubAllLocations:: fetching all locations from DCB Hub");
 
       int pageNumber = 1;
-      int pageSize = batchSize; // default page size
+      int pageSize = batchSize;
       DcbHubKCCredentials dcbHubKCCredentials = dcbHubKCCredentialSecureStore.getDcbHubKCCredentials();
 
       log.info("fetchDcbHubAllLocations:: fetching all locations from DCB Hub");

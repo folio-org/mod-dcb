@@ -75,9 +75,8 @@ management:
       access: unrestricted
 
 application:
-  environment: ${ENV:folio}
   dcb-hub:
-    fetch-dcb-locations-enabled: ${FETCH_DCB_LOCATIONS_ENABLED:true}
+    fetch-dcb-locations-enabled: ${FETCH_DCB_LOCATIONS_ENABLED:false}
     locations-url: ${DCB_LOCATIONS_BASE_URL:/locations}
     batch-size: ${DCB_LOCATIONS_BATCH_SIZE:5}
     secure-store-keyname: ${DCB_HUB_SECURE_STORE_KEYNAME:dcb-hub-credentials}
@@ -91,7 +90,7 @@ application:
     type: ${SECRET_STORE_TYPE:EPHEMERAL}
     ephemeral:
       content:
-        dcb-hub-credentials: >-
+        folio_diku_dcb-hub-credentials: >-
           ${DCB_HUB_CREDENTIALS:{"client_id": "test", "client_secret": "test", "username": "test", "password": "test", "keycloak_url": "https://kc-host/realms/master/protocol/openid-connect/token"}}
     aws-ssm:
       region: ${SECRET_STORE_AWS_SSM_REGION:}

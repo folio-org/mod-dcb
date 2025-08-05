@@ -23,18 +23,19 @@ class DcbHubAfterTenantLocationsTest extends BaseIT {
 
   @DynamicPropertySource
   static void registerProperties(DynamicPropertyRegistry registry) {
+    registry.add("application.dcb-hub.fetch-dcb-locations-enabled", () -> true);
     registry.add("application.dcb-hub.locations-url", BaseIT::getOkapiUrl);
     String dcbCredentialsJson = String.format(
       "{\"client_id\": \"client-id-54321\", \"client_secret\": \"client_secret_54321\", \"username\": \"admin54321\", \"password\": \"admin54321\", \"keycloak_url\": \"%s/realms/master/protocol/openid-connect/token\"}",
       getOkapiUrl());
-    registry.add("application.secret-store.ephemeral.content.dcb-hub-credentials", () -> dcbCredentialsJson);
+    registry.add("application.secret-store.ephemeral.content.folio_diku_dcb-hub-credentials", () -> dcbCredentialsJson);
   }
 
   private static final String LOCATIONS_PATH = "/locations";
   private static final String INSTITUTIONS_PATH = "/location-units/institutions";
   private static final String CAMPUSES_PATH = "/location-units/campuses";
   private static final String LIBRARIES_PATH = "/location-units/libraries";
-  List<String> unitPaths = List.of(INSTITUTIONS_PATH, CAMPUSES_PATH, LIBRARIES_PATH);
+  private final List<String> unitPaths = List.of(INSTITUTIONS_PATH, CAMPUSES_PATH, LIBRARIES_PATH);
 
   private static final DcbHubLocationsGroupingUtil.AgencyKey AGENCY_1 = new DcbHubLocationsGroupingUtil.AgencyKey("AG-001", "Agency-One");
   private static final DcbHubLocationsGroupingUtil.AgencyKey AGENCY_2 = new DcbHubLocationsGroupingUtil.AgencyKey("AG-002", "Agency-Two");
