@@ -20,16 +20,22 @@ public interface LocationUnitClient {
   LocationUnit createInstitution(@RequestBody LocationUnit locationUnit);
   @GetMapping("/institutions/{institutionId}")
   LocationUnit getInstitutionById(@PathVariable("institutionId") String institutionId);
+  @GetMapping("/institutions?query=(name=={name} AND code=={code})")
+  ResultList<LocationUnit> queryInstitutionByNameAndCode(@PathVariable("name") String name, @PathVariable("code") String code);
 
   @PostMapping("/campuses")
   LocationUnit createCampus(@RequestBody LocationUnit locationUnit);
   @GetMapping("/campuses?query=(name=={name})")
   ResultList<LocationUnit> getCampusByName(@PathVariable("name") String name);
+  @GetMapping("/campuses?query=(name=={name} AND code=={code})")
+  ResultList<LocationUnit> queryCampusByNameAndCode(@PathVariable("name") String name, @PathVariable("code") String code);
 
   @PostMapping("/libraries")
   LocationUnit createLibrary(@RequestBody LocationUnit locationUnit);
   @GetMapping("/libraries?query=(name=={name})")
   ResultList<LocationUnit> getLibraryByName(@PathVariable("name") String name);
+  @GetMapping("/libraries?query=(name=={name} AND code=={code})")
+  ResultList<LocationUnit> queryLibraryByNameAndCode(@PathVariable("name") String name, @PathVariable("code") String code);
 
   @Data
   @Builder

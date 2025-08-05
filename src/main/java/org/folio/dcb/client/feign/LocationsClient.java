@@ -23,6 +23,12 @@ public interface LocationsClient {
   @GetMapping("?query=name=={name}")
   ResultList<LocationDTO> queryLocationsByName(@PathVariable("name") String name);
 
+  @GetMapping("?query=(name=={name} and code=={code})")
+  ResultList<LocationDTO> queryLocationsByNameAndCode(
+      @PathVariable("name") String name,
+      @PathVariable("code") String code
+  );
+
   @Data
   @Builder
   @NoArgsConstructor
@@ -37,6 +43,8 @@ public interface LocationsClient {
     private String libraryId;
     private String primaryServicePoint;
     private List<String> servicePointIds;
+    @Builder.Default
+    private boolean isShadow = false;
   }
 
 }

@@ -1,0 +1,950 @@
+{
+  "mappings": [
+    {
+      "request": {
+        "method": "POST",
+        "urlPattern": ".*/realms/master/protocol/openid-connect/token"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "access_token": "eyJhbGciOiJIUzI1NiJ9.eyJmb2xpb190ZXN0IjoiZm9saW9fdGVzdCIsInN1YiI6ImZvbGlvX3Rlc3QiLCJpc3MiOiJmb2xpb190ZXN0IiwiaWF0IjoxNzU0MzA4NDQxLCJleHAiOjQ5MDk5ODIwNDF9.HCaSJ23WAf4N23zcWxpfO_xxS5bQsbQL6LyQ3T3d84Q",
+          "expires_in": 600,
+          "refresh_expires_in": 600,
+          "refresh_token": "eyJhbGciOiJIUzI1NiJ9.eyJmb2xpb190ZXN0IjoiZm9saW9fdGVzdCIsInN1YiI6ImZvbGlvX3Rlc3QiLCJpc3MiOiJmb2xpb190ZXN0IiwiaWF0IjoxNzU0MzA4NDQxLCJleHAiOjQ5MDk5ODIwNDF9.HCaSJ23WAf4N23zcWxpfO_xxS5bQsbQL6LyQ3T3d84Q",
+          "token_type": "Bearer",
+          "not-before-policy": 0,
+          "session_state": "3af1cbbc-3cbb-436c-9122-f2eb37d0dcd6",
+          "scope": "profile email"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPattern": ".*/locations.*",
+        "queryParameters": {
+          "number": {
+            "equalTo": "1"
+          },
+          "size": {
+            "equalTo": "5"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "content": [
+            {
+              "id": "a910bd13-6f76-4a0b-a595-af6e2b176cc4",
+              "code": "LOC-1",
+              "name": "Location-1",
+              "agency": {
+                "id": "647a6255-7e9e-45a8-898f-cfeb20d62bba",
+                "code": "AG-001",
+                "name": "Agency-One"
+              }
+            },
+            {
+              "id": "eb80dd05-90a3-4f78-a1ba-9eccc29d2c8c",
+              "code": "LOC-2",
+              "name": "Location-2",
+              "agency": {
+                "id": "647a6255-7e9e-45a8-898f-cfeb20d62bba",
+                "code": "AG-002",
+                "name": "Agency-Two"
+              }
+            },
+            {
+              "id": "5a07ad21-4da1-4643-af0e-2b1b342ff3a8",
+              "code": "LOC-3",
+              "name": "Location-3",
+              "agency": {
+                "id": "47809349-f45b-42e0-a77d-05e642847afd",
+                "code": "AG-003",
+                "name": "Agency-Three"
+              }
+            },
+            {
+              "id": "39803f83-2846-4b41-bfd4-91bb415555fb",
+              "code": "LOC-4",
+              "name": "Location-4",
+              "agency": {
+                "id": "7e6b4c08-7259-4f19-aadf-b838c678a543",
+                "code": "AG-004",
+                "name": "Agency-Four"
+              }
+            },
+            {
+              "id": "921f5ac1-34dd-4e7a-9bce-fea45544fac1",
+              "code": "LOC-5",
+              "name": "Location-5",
+              "agency": {
+                "id": "ec1f3ca2-4bca-4040-a740-95f85ec35af3",
+                "code": "AG-005",
+                "name": "Agency-Five"
+              }
+            }
+          ],
+          "totalSize": 8,
+          "totalPages": 2,
+          "empty": false,
+          "numberOfElements": 5
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPattern": ".*/locations.*",
+        "queryParameters": {
+          "number": {
+            "equalTo": "2"
+          },
+          "size": {
+            "equalTo": "5"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "content": [
+            {
+              "id": "304ca54f-6752-4dcc-81f0-1a6891f795e9",
+              "code": "LOC-6",
+              "name": "Location-6",
+              "agency": {
+                "id": "7331e2e6-914b-4c29-a6a0-b1c6190f8826",
+                "code": "AG-001",
+                "name": "Agency-One"
+              }
+            },
+            {
+              "id": "ef3a6791-5c68-432a-8cc3-0ab7fca732a2",
+              "code": "LOC-7",
+              "name": "Location-7",
+              "agency": {
+                "id": "647a6255-7e9e-45a8-898f-cfeb20d62bba",
+                "code": "AG-002",
+                "name": "Agency-Two"
+              }
+            },
+            {
+              "id": "45fc817e-1ff9-4326-abdd-e5581a3079c7",
+              "code": "LOC-8",
+              "name": "Location-8",
+              "agency": {
+                "id": "647a6255-7e9e-45a8-898f-cfeb20d62bba",
+                "code": "AG-003",
+                "name": "Agency-Three"
+              }
+            }
+          ],
+          "totalSize": 8,
+          "totalPages": 2,
+          "empty": false,
+          "numberOfElements": 3
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPattern": ".*/locations.*",
+        "queryParameters": {
+          "number": {
+            "matches": "([3-9]\\d*)"
+          },
+          "size": {
+            "equalTo": "5"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "content": [],
+          "totalSize": 8,
+          "totalPages": 4,
+          "empty": true,
+          "numberOfElements": 0
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/locations",
+        "queryParameters": {
+          "query": {
+            "equalTo": "(name==Location-1 and code==LOC-1)"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "totalRecords": 1,
+          "result": [
+            {
+              "id": "fbc42f2c-6cd0-4637-93c0-9344f8408268",
+              "code": "LOC-1",
+              "name": "Location-1",
+              "institutionId": "9b90bb46-2213-42af-a58b-8e356348abc9",
+              "campusId": "b9023ec8-4c00-4cee-a18b-3e74351a3aae",
+              "libraryId": "184daad4-5ab1-4034-94d2-960acc3a2c4c",
+              "primaryServicePoint": "916fe2af-dc73-48b0-8922-0768a403473b",
+              "servicePointIds": [
+                "916fe2af-dc73-48b0-8922-0768a403473b"
+              ],
+              "shadow": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/locations",
+        "queryParameters": {
+          "query": {
+            "equalTo": "(name==Location-2 and code==LOC-2)"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "totalRecords": 0,
+          "result": []
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/locations",
+        "queryParameters": {
+          "query": {
+            "equalTo": "(name==Location-3 and code==LOC-3)"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "totalRecords": 1,
+          "result": [
+            {
+              "id": "9a0cde4c-ef0a-41dd-8328-29e6aae9e3f4",
+              "code": "LOC-3",
+              "name": "Location-3",
+              "institutionId": "b3465a7c-280d-427a-8d77-e9b57128e1a8",
+              "campusId": "56855eea-ba26-41ca-80b6-d6aad29d9b12",
+              "libraryId": "b8d6685d-a32d-49f7-9ce2-1f1038cda299",
+              "primaryServicePoint": "492544b0-7710-43fb-ab13-9a2595233538",
+              "servicePointIds": [
+                "492544b0-7710-43fb-ab13-9a2595233538"
+              ],
+              "shadow": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/locations",
+        "queryParameters": {
+          "query": {
+            "equalTo": "(name==Location-4 and code==LOC-4)"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "totalRecords": 0,
+          "result": []
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/locations",
+        "queryParameters": {
+          "query": {
+            "equalTo": "(name==Location-5 and code==LOC-5)"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "totalRecords": 1,
+          "result": [
+            {
+              "id": "df03f668-a7b2-4704-9166-aff152e9cab2",
+              "code": "LOC-5",
+              "name": "Location-5",
+              "institutionId": "f03468a5-f97f-4611-8039-21fd0f31b933",
+              "campusId": "b88ffa9d-1d69-4ddc-8251-f6f885213d85",
+              "libraryId": "d5f8d0ff-bbc8-4011-9de8-2a336d25129f",
+              "primaryServicePoint": "435884ba-6aee-47d8-9cc7-7aca9b4cf1f9",
+              "servicePointIds": [
+                "435884ba-6aee-47d8-9cc7-7aca9b4cf1f9"
+              ],
+              "shadow": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/locations",
+        "queryParameters": {
+          "query": {
+            "equalTo": "(name==Location-6 and code==LOC-6)"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "totalRecords": 0,
+          "result": []
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/locations",
+        "queryParameters": {
+          "query": {
+            "equalTo": "(name==Location-7 and code==LOC-7)"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "totalRecords": 1,
+          "result": [
+            {
+              "id": "c381bb64-7cbe-44af-8400-65027a42ae16",
+              "code": "LOC-7",
+              "name": "Location-7",
+              "institutionId": "46fe06ff-cb55-4164-84e7-bfa6e46f6f44",
+              "campusId": "39d40773-1c40-4095-b3d9-596723402a6a",
+              "libraryId": "7e963897-c1ff-4517-9457-4e49694b7d32",
+              "primaryServicePoint": "e4cea384-e357-40b6-b2b6-c514d32ffef1",
+              "servicePointIds": [
+                "e4cea384-e357-40b6-b2b6-c514d32ffef1"
+              ],
+              "shadow": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/locations",
+        "queryParameters": {
+          "query": {
+            "equalTo": "(name==Location-8 and code==LOC-8)"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "totalRecords": 0,
+          "result": []
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "urlPath": "/locations",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$[?(@.name == 'Location-1')]"
+          },
+          {
+            "matchesJsonPath": "$[?(@.code == 'LOC-1')]"
+          }
+        ]
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "id": "98378b69-d8f8-483d-9009-b8f8285cb5fe",
+          "name": "Location-1",
+          "code": "LOC-1",
+          "institutionId": "2e10b4a0-1d2d-4afd-9420-7e54f095f0b7",
+          "campusId": "754f6b79-39f8-40fe-a71c-ed31d9b10c49",
+          "libraryId": "3b30cd85-6a86-49e6-8186-4fa7e52b82f5",
+          "primaryServicePoint": "c7b6fdb7-f9e1-442e-9cbd-c219840b56d7",
+          "servicePointIds": [
+            "c7b6fdb7-f9e1-442e-9cbd-c219840b56d7"
+          ],
+          "shadow": true
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "urlPath": "/locations",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$[?(@.name == 'Location-2')]"
+          },
+          {
+            "matchesJsonPath": "$[?(@.code == 'LOC-2')]"
+          }
+        ]
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "id": "9b09e303-c3dc-4add-846c-92299b81158c",
+          "name": "Location-2",
+          "code": "LOC-2",
+          "institutionId": "311ba1a3-0e04-4b80-907b-5ebce3b022da",
+          "campusId": "4b2dfe87-8d65-4291-bb49-b015108ba4c7",
+          "libraryId": "2943a5b9-7825-4d5b-b256-0c85a6b9a02e",
+          "primaryServicePoint": "c5d54e16-4e95-4551-8714-21464cdd0ddc",
+          "servicePointIds": [
+            "c5d54e16-4e95-4551-8714-21464cdd0ddc"
+          ],
+          "shadow": true
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "urlPath": "/locations",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$[?(@.name == 'Location-3')]"
+          },
+          {
+            "matchesJsonPath": "$[?(@.code == 'LOC-3')]"
+          }
+        ]
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "id": "b5911ec8-49fb-4211-b96b-5818535971ce",
+          "name": "Location-3",
+          "code": "LOC-3",
+          "institutionId": "06b9a08c-5e2b-4fdf-b596-edbd06ea3b79",
+          "campusId": "26af8402-1c6d-45b2-984b-2ca6857245c4",
+          "libraryId": "e8be3126-8983-4b37-9826-bda6b25a1ce3",
+          "primaryServicePoint": "28d8a17c-06a8-4454-a3e6-2ca7fdade0b1",
+          "servicePointIds": [
+            "28d8a17c-06a8-4454-a3e6-2ca7fdade0b1"
+          ],
+          "shadow": true
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "urlPath": "/locations",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$[?(@.name == 'Location-4')]"
+          },
+          {
+            "matchesJsonPath": "$[?(@.code == 'LOC-4')]"
+          }
+        ]
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "id": "4db0a876-e534-4476-8dc5-bc757da407f4",
+          "name": "Location-4",
+          "code": "LOC-4",
+          "institutionId": "d924f17c-ff6f-4f72-b93c-daecb966f745",
+          "campusId": "eae4c7fe-5ea6-4c0c-b0e8-e066e9394664",
+          "libraryId": "278aef7a-72e2-44a0-992a-ccfc0346e48c",
+          "primaryServicePoint": "ce8e199b-7f14-43b5-8f04-2cefcf41e781",
+          "servicePointIds": [
+            "ce8e199b-7f14-43b5-8f04-2cefcf41e781"
+          ],
+          "shadow": true
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "urlPath": "/locations",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$[?(@.name == 'Location-5')]"
+          },
+          {
+            "matchesJsonPath": "$[?(@.code == 'LOC-5')]"
+          }
+        ]
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "id": "b6f970f3-d46f-4da5-aa89-4b81649319a0",
+          "name": "Location-5",
+          "code": "LOC-5",
+          "institutionId": "176a6918-1938-4bf0-88c4-d3012f7cf44e",
+          "campusId": "bd891625-2a78-4d03-a6a3-29e6b3043e23",
+          "libraryId": "b03a3fd0-512d-4a8c-b269-5db486a6de2c",
+          "primaryServicePoint": "508df64a-7c56-46a4-9989-cbe298f85607",
+          "servicePointIds": [
+            "508df64a-7c56-46a4-9989-cbe298f85607"
+          ],
+          "shadow": true
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "urlPath": "/locations",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$[?(@.name == 'Location-6')]"
+          },
+          {
+            "matchesJsonPath": "$[?(@.code == 'LOC-6')]"
+          }
+        ]
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "id": "ccf9eeaf-a0ba-4ed3-8709-587ce24f8c06",
+          "name": "Location-6",
+          "code": "LOC-6",
+          "institutionId": "8ba0f482-1da8-40f6-86f3-8dad2df70675",
+          "campusId": "3d892ab6-77f6-4f7b-857f-5228b230805b",
+          "libraryId": "c3b81357-bcbd-44ed-b169-b338db41c768",
+          "primaryServicePoint": "d497ed56-4489-4b63-812a-5bcd34df950d",
+          "servicePointIds": [
+            "d497ed56-4489-4b63-812a-5bcd34df950d"
+          ],
+          "shadow": true
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "urlPath": "/locations",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$[?(@.name == 'Location-7')]"
+          },
+          {
+            "matchesJsonPath": "$[?(@.code == 'LOC-7')]"
+          }
+        ]
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "id": "46f78535-9436-4761-85dd-9dd3898d4374",
+          "name": "Location-7",
+          "code": "LOC-7",
+          "institutionId": "506080cc-1238-4aa4-b1eb-13d158ddeb2c",
+          "campusId": "a3bb471b-0899-4c91-935f-d542c56e5cce",
+          "libraryId": "6dc7d57a-b895-4cf7-a0ab-8f22e5545c89",
+          "primaryServicePoint": "eb75aa96-a90b-4c37-b9f9-e8e9f0d48947",
+          "servicePointIds": [
+            "eb75aa96-a90b-4c37-b9f9-e8e9f0d48947"
+          ],
+          "shadow": true
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "urlPath": "/locations",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$[?(@.name == 'Location-8')]"
+          },
+          {
+            "matchesJsonPath": "$[?(@.code == 'LOC-8')]"
+          }
+        ]
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "id": "001cb9cb-3747-47a3-8db4-105435938331",
+          "name": "Location-8",
+          "code": "LOC-8",
+          "institutionId": "d0dac312-d2c9-40d5-aa07-05feb45164b2",
+          "campusId": "4198e7a4-e355-4b85-933a-b0e278adf2d4",
+          "libraryId": "604f5844-4d8c-4cdb-97e9-bd92187d3fa1",
+          "primaryServicePoint": "b106040e-f69e-4135-8613-ba621621c73d",
+          "servicePointIds": [
+            "b106040e-f69e-4135-8613-ba621621c73d"
+          ],
+          "shadow": true
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "(/location-units/institutions|/location-units/campuses|/location-units/libraries)",
+        "queryParameters": {
+          "query": {
+            "equalTo": "(name==Agency-One AND code==AG-001)"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "totalRecords": 1,
+          "result": [
+            {
+              "id": "a910bd13-0000-0000-0000-000000000001",
+              "code": "AG-001",
+              "name": "Agency-One"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "(/location-units/institutions|/location-units/campuses|/location-units/libraries)",
+        "queryParameters": {
+          "query": {
+            "equalTo": "(name==Agency-Two AND code==AG-002)"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "totalRecords": 0,
+          "result": []
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "(/location-units/institutions|/location-units/campuses|/location-units/libraries)",
+        "queryParameters": {
+          "query": {
+            "equalTo": "(name==Agency-Three AND code==AG-003)"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "totalRecords": 1,
+          "result": [
+            {
+              "id": "a910bd13-0000-0000-0000-000000000003",
+              "code": "AG-003",
+              "name": "Agency-Three"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "(/location-units/institutions|/location-units/campuses|/location-units/libraries)",
+        "queryParameters": {
+          "query": {
+            "equalTo": "(name==Agency-Four AND code==AG-004)"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "totalRecords": 0,
+          "result": []
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "(/location-units/institutions|/location-units/campuses|/location-units/libraries)",
+        "queryParameters": {
+          "query": {
+            "equalTo": "(name==Agency-Five AND code==AG-005)"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "totalRecords": 1,
+          "result": [
+            {
+              "id": "a910bd13-0000-0000-0000-000000000005",
+              "code": "AG-005",
+              "name": "Agency-Five"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "urlPattern": "(/location-units/institutions|/location-units/campuses|/location-units/libraries)",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$[?(@.name == 'Agency-One')]"
+          },
+          {
+            "matchesJsonPath": "$[?(@.code == 'AG-001')]"
+          }
+        ],
+        "headers": {
+          "Content-Type": {
+            "matches": "application/json.*"
+          }
+        }
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "id": "a910bd13-0000-0000-0000-000000000001",
+          "code": "AG-001",
+          "name": "Agency-One"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "urlPattern": "(/location-units/institutions|/location-units/campuses|/location-units/libraries)",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$[?(@.name == 'Agency-Two')]"
+          },
+          {
+            "matchesJsonPath": "$[?(@.code == 'AG-002')]"
+          }
+        ],
+        "headers": {
+          "Content-Type": {
+            "matches": "application/json.*"
+          }
+        }
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "id": "a910bd13-0000-0000-0000-000000000002",
+          "code": "AG-002",
+          "name": "Agency-Two"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "urlPattern": "(/location-units/institutions|/location-units/campuses|/location-units/libraries)",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$[?(@.name == 'Agency-Three')]"
+          },
+          {
+            "matchesJsonPath": "$[?(@.code == 'AG-003')]"
+          }
+        ],
+        "headers": {
+          "Content-Type": {
+            "matches": "application/json.*"
+          }
+        }
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "id": "a910bd13-0000-0000-0000-000000000003",
+          "code": "AG-003",
+          "name": "Agency-Three"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "urlPattern": "(/location-units/institutions|/location-units/campuses|/location-units/libraries)",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$[?(@.name == 'Agency-Four')]"
+          },
+          {
+            "matchesJsonPath": "$[?(@.code == 'AG-004')]"
+          }
+        ],
+        "headers": {
+          "Content-Type": {
+            "matches": "application/json.*"
+          }
+        }
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "id": "a910bd13-0000-0000-0000-000000000004",
+          "code": "AG-004",
+          "name": "Agency-Four"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "urlPattern": "(/location-units/institutions|/location-units/campuses|/location-units/libraries)",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$[?(@.name == 'Agency-Five')]"
+          },
+          {
+            "matchesJsonPath": "$[?(@.code == 'AG-005')]"
+          }
+        ],
+        "headers": {
+          "Content-Type": {
+            "matches": "application/json.*"
+          }
+        }
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "id": "a910bd13-0000-0000-0000-000000000005",
+          "code": "AG-005",
+          "name": "Agency-Five"
+        }
+      }
+    }
+  ]
+}

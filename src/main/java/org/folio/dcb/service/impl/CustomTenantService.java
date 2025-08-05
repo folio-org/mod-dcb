@@ -14,6 +14,7 @@ import org.folio.dcb.domain.dto.NormalHours;
 import org.folio.dcb.domain.dto.ServicePointRequest;
 import org.folio.dcb.listener.kafka.service.KafkaService;
 import org.folio.dcb.service.CalendarService;
+import org.folio.dcb.service.DcbHubLocationService;
 import org.folio.dcb.service.HoldingsService;
 import org.folio.dcb.service.ServicePointExpirationPeriodService;
 import org.folio.spring.FolioExecutionContext;
@@ -21,6 +22,7 @@ import org.folio.spring.liquibase.FolioSpringLiquibase;
 import org.folio.spring.service.PrepareSystemUserService;
 import org.folio.spring.service.TenantService;
 import org.folio.tenant.domain.dto.TenantAttributes;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -70,7 +72,10 @@ public class CustomTenantService extends TenantService {
   private final CalendarService calendarService;
   private final ServicePointExpirationPeriodService servicePointExpirationPeriodService;
   private final HoldingsService holdingsService;
+  private final DcbHubLocationService dcbHubLocationService;
 
+  @Value("${application.dcb-hub.fetch-dcb-locations-enabled}")
+  private Boolean isFetchDcbHubLocationsEnabled;
 
   public CustomTenantService(JdbcTemplate jdbcTemplate, FolioExecutionContext context, FolioSpringLiquibase folioSpringLiquibase,
                              PrepareSystemUserService prepareSystemUserService, KafkaService kafkaService, InstanceClient inventoryClient,
@@ -78,7 +83,7 @@ public class CustomTenantService extends TenantService {
                              InventoryServicePointClient servicePointClient, LocationUnitClient locationUnitClient,
                              LoanTypeClient loanTypeClient, CancellationReasonClient cancellationReasonClient, CalendarService calendarService,
                              ServicePointExpirationPeriodService servicePointExpirationPeriodService,
-                             HoldingsService holdingsService) {
+                             HoldingsService holdingsService, DcbHubLocationService dcbHubLocationService) {
     super(jdbcTemplate, context, folioSpringLiquibase);
 
     this.prepareSystemUserService = prepareSystemUserService;
@@ -93,6 +98,7 @@ public class CustomTenantService extends TenantService {
     this.calendarService = calendarService;
     this.servicePointExpirationPeriodService = servicePointExpirationPeriodService;
     this.holdingsService = holdingsService;
+    this.dcbHubLocationService = dcbHubLocationService;
   }
 
   @Override
@@ -111,7 +117,26 @@ public class CustomTenantService extends TenantService {
     createCancellationReason();
     createLoanType();
     createCalendarIfNotExists();
+    createShadowLocations();
   }
+
+  private void createShadowLocations() {
+    log.debug("createShadowLocations:: creating shadow locations");
+    if (Boolean.TRUE.equals(isFetchDcbHubLocationsEnabled)) {
+      List<ServicePointRequest> servicePointList = servicePointClient.getServicePointByName(NAME).getResult();
+      if (servicePointList.isEmpty()) {
+        log.warn(
+          "createShadowLocations:: No service points found with name {}, So cannot create shadow locations without {} service point",
+          NAME, NAME);
+        return;
+      }
+      dcbHubLocationService.createShadowLocations(locationsClient, locationUnitClient, servicePointList.getFirst());
+      log.info("createShadowLocations:: shadow locations created");
+    } else {
+      log.debug("createShadowLocations:: DCB Hub locations fetching is disabled, skipping");
+    }
+  }
+
 
   private void createLoanType() {
     if(loanTypeClient.queryLoanTypeByName(DCB_LOAN_TYPE_NAME).getTotalRecords() == 0){
