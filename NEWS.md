@@ -1,3 +1,6 @@
+## v1.3.4 2025-08-05
+* MODDCB-219: 403 from /circulation/loans during transaction status check [MODDCB-219](https://folio-org.atlassian.net/browse/MODDCB-219)
+
 ## v1.3.3 2025-06-30
 * MODDCB-208: Fix cql query for querying patron group by name [MODDCB-208](https://folio-org.atlassian.net/browse/MODDCB-208)
 

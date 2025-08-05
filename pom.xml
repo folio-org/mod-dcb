@@ -10,7 +10,7 @@
   <groupId>org.folio</groupId>
   <artifactId>mod-dcb</artifactId>
   <name>mod-dcb</name>
-  <version>1.3.4-SNAPSHOT</version>
+  <version>1.3.5-SNAPSHOT</version>
   <description>Manage DCB related transactions in folio</description>
   <packaging>jar</packaging>
 
