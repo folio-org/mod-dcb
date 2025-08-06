@@ -92,9 +92,9 @@ management:
 
 application:
   dcb-hub:
-    fetch-dcb-locations-enabled: ${FETCH_DCB_LOCATIONS_ENABLED:false}
-    locations-url: ${DCB_LOCATIONS_BASE_URL:http://dcb-host/locations}
-    batch-size: ${DCB_LOCATIONS_BATCH_SIZE:50}
+    fetch-dcb-locations-enabled: ${FETCH_DCB_LOCATIONS_ENABLED:true}
+    locations-url: ${DCB_LOCATIONS_BASE_URL:https://folio-edev-volaris-mockserver.ci.folio.org}
+    batch-size: ${DCB_LOCATIONS_BATCH_SIZE:5}
     secure-store-keyname: dcb-hub-credentials
   keycloak:
     tls:
@@ -105,6 +105,9 @@ application:
   secret-store:
     type: ${SECRET_STORE_TYPE:EPHEMERAL}
     ephemeral:
+      content:
+        dcb-hub-credentials: >-
+          ${DCB_HUB_CREDENTIALS:{"client_id": "test", "client_secret": "test", "username": "test", "password": "test", "keycloak_url": "https://folio-edev-volaris-mockserver.ci.folio.org/realms/master/protocol/openid-connect/token"}}
     aws-ssm:
       region: ${SECRET_STORE_AWS_SSM_REGION:}
       use-iam: ${SECRET_STORE_AWS_SSM_USE_IAM:true}

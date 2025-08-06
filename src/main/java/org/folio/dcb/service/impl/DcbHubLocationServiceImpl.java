@@ -57,10 +57,10 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
       }
       createShadowLocations(locationsClient, locationUnitClient, servicePointRequest, locationList);
     } catch (FeignException e) {
-      log.error("createShadowLocations:: FeignException while fetching locations from DCB Hub", e);
+      log.info("createShadowLocations:: FeignException while fetching locations from DCB Hub", e);
       throw new ServiceException("FeignException while fetching locations from DCB Hub", e);
     } catch (Exception e) {
-      log.error("createShadowLocations:: Exception while fetching locations from DCB Hub", e);
+      log.info("createShadowLocations:: Exception while fetching locations from DCB Hub", e);
       throw new ServiceException("Exception while fetching locations from DCB Hub", e);
     }
   }
@@ -84,7 +84,7 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
       new HashMap<>();
 
     agencies.forEach(agencyKey -> {
-      log.debug("createLocationUnits:: Creating units for agency: {} - {}",
+      log.info("createLocationUnits:: Creating units for agency: {} - {}",
         agencyKey.agencyCode(), agencyKey.agencyName());
 
       LocationUnit institution = createInstitution(locationUnitClient, agencyKey);
@@ -117,7 +117,7 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
       .code(agencyKey.agencyCode())
       .build();
     locationUnitClient.createInstitution(institution);
-    log.debug("createInstitution:: Created institution: {} - {}", institution.getCode(), institution.getName());
+    log.info("createInstitution:: Created institution: {} - {}", institution.getCode(), institution.getName());
     return institution;
   }
 
@@ -143,7 +143,7 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
       .code(agencyKey.agencyCode())
       .build();
     locationUnitClient.createCampus(campus);
-    log.debug("createCampus:: Created campus: {} - {}", campus.getCode(), campus.getName());
+    log.info("createCampus:: Created campus: {} - {}", campus.getCode(), campus.getName());
     return campus;
   }
 
@@ -169,7 +169,7 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
       .code(agencyKey.agencyCode())
       .build();
     locationUnitClient.createLibrary(library);
-    log.debug("createLibrary:: Created library: {} - {}", library.getCode(), library.getName());
+    log.info("createLibrary:: Created library: {} - {}", library.getCode(), library.getName());
     return library;
   }
 
@@ -184,7 +184,7 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
     ServicePointRequest servicePointRequest) {
 
     locationsGroupedByAgency.forEach((agencyKey, locationCodeNamePairs) -> {
-      log.debug("createShadowLocationEntries:: Processing agency: {} - {}",
+      log.info("createShadowLocationEntries:: Processing agency: {} - {}",
         agencyKey.agencyCode(), agencyKey.agencyName());
 
       LocationAgenciesIds locationAgenciesIds = agencyLocationUnitMapping.get(agencyKey);
@@ -206,7 +206,7 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
       return;
     }
 
-    log.debug("createShadowLocation:: Creating shadow location: {} - {}",
+    log.info("createShadowLocation:: Creating shadow location: {} - {}",
       location.code(), location.name());
 
     LocationsClient.LocationDTO shadowLocation = LocationsClient.LocationDTO.builder()
@@ -222,7 +222,7 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
       .build();
 
     locationsClient.createLocation(shadowLocation);
-    log.debug("createShadowLocation:: Created shadow location: {} - {}",
+    log.info("createShadowLocation:: Created shadow location: {} - {}",
       shadowLocation.getCode(), shadowLocation.getName());
   }
 
@@ -248,7 +248,7 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
 
       pageNumber++;
     }
-    log.debug("fetchDcbHubAllLocations:: successfully fetched {} locations from DCB Hub", allLocations.size());
+    log.info("fetchDcbHubAllLocations:: successfully fetched {} locations from DCB Hub", allLocations.size());
     return allLocations;
   }
 }

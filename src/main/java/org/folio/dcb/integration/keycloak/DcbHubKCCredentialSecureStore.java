@@ -30,7 +30,7 @@ public class DcbHubKCCredentialSecureStore {
   private String retrieveDcbHubCredentials() {
     try {
       var tenantId = folioExecutionContext.getTenantId();
-      return secureStore.get(buildKey(dcbHubSecureStoreKeyName, folioEnvironment.getEnvironment(), tenantId));
+      return secureStore.get(dcbHubSecureStoreKeyName);
     } catch (SecretNotFoundException e) {
       throw new IllegalStateException(
         "Failed to get DCB Hub credentials from secure store", e);
