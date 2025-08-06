@@ -138,7 +138,8 @@
             "dcb.transactions.status.get"
           ],
           "modulePermissions": [
-            "circulation.loans.collection.get"
+            "circulation.loans.collection.get",
+            "circulation-storage.loan-policies.collection.get"
           ]
         },
         {
@@ -360,6 +361,7 @@
         "circulation.requests.item.post",
         "circulation.requests.collection.get",
         "circulation.loans.collection.get",
+        "circulation-storage.loan-policies.collection.get",
         "circulation.check-in-by-barcode.post",
         "circulation.check-out-by-barcode.post",
         "inventory.items.item.put",
