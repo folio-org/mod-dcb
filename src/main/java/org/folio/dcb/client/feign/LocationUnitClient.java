@@ -59,7 +59,5 @@ public interface LocationUnitClient {
     private String institutionId;
     private String campusId;
     private String libraryId;
-    @Builder.Default
-    private boolean isShadow = false;
   }
 }
