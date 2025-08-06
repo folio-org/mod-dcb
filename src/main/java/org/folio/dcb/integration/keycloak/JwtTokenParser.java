@@ -3,6 +3,7 @@ package org.folio.dcb.integration.keycloak;
 import java.time.Instant;
 import java.util.Base64;
 
+import org.apache.commons.lang3.StringUtils;
 import org.folio.dcb.exception.TokenParsingException;
 import org.springframework.stereotype.Component;
 
@@ -23,13 +24,13 @@ public class JwtTokenParser {
   }
 
   private long parseExpiration(String token) {
-    if (token == null) {
-      throw new TokenParsingException("Failed to find auth token in request.");
+    if (StringUtils.isBlank(token)) {
+      throw new TokenParsingException("Blank token is non-parsable.");
     }
 
     var split = token.split("\\.");
     if (split.length < 2 || split.length > 3) {
-      throw new TokenParsingException("Invalid amount of segments in JWT token.");
+      throw new TokenParsingException("Invalid amount of segments in JWT token: %s".formatted(token));
     }
 
     try {
@@ -37,7 +38,7 @@ public class JwtTokenParser {
       return payload.get("exp").asLong();
     } catch (Exception e) {
       log.warn("Failed to parse token", e);
-      throw new TokenParsingException("Invalid token.");
+      throw new TokenParsingException("Invalid token.: %s".formatted(token));
     }
   }
 }
