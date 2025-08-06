@@ -1,6 +1,8 @@
 package org.folio.dcb.client.feign;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -60,6 +62,7 @@ public interface LocationUnitClient {
     private String campusId;
     private String libraryId;
     @Builder.Default
+    @JsonProperty("isShadow")
     private boolean isShadow = false;
   }
 }
