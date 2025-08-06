@@ -1,3 +1,6 @@
+## v1.3.5 2025-08-06
+* MODDCB-223: Add missing permission for DCB transaction status API [MODDCB-223](https://folio-org.atlassian.net/browse/MODDCB-223)
+
 ## v1.3.4 2025-08-05
 * MODDCB-219: 403 from /circulation/loans during transaction status check [MODDCB-219](https://folio-org.atlassian.net/browse/MODDCB-219)
 
