@@ -130,7 +130,7 @@ public class CustomTenantService extends TenantService {
           NAME, NAME);
         return;
       }
-      dcbHubLocationService.createShadowLocations(locationsClient, locationUnitClient, servicePointList.getFirst());
+      dcbHubLocationService.createShadowLocations(servicePointList.getFirst());
       log.info("createShadowLocations:: shadow locations created");
     } else {
       log.debug("createShadowLocations:: DCB Hub locations fetching is disabled, skipping");

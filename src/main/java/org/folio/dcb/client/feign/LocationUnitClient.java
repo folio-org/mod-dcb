@@ -1,6 +1,8 @@
 package org.folio.dcb.client.feign;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -24,6 +26,7 @@ public interface LocationUnitClient {
   @GetMapping("/institutions")
   ResultList<LocationUnit> findInstitutionsByQuery(
     @RequestParam("query") String query,
+    @RequestParam("includeShadow") Boolean includeShadow,
     @RequestParam("limit") int limit,
     @RequestParam("offset") int offset);
 
@@ -34,6 +37,7 @@ public interface LocationUnitClient {
   @GetMapping("/campuses")
   ResultList<LocationUnit> findCampusesByQuery(
     @RequestParam("query") String query,
+    @RequestParam("includeShadow") Boolean includeShadow,
     @RequestParam("limit") int limit,
     @RequestParam("offset") int offset);
 
@@ -44,6 +48,7 @@ public interface LocationUnitClient {
   @GetMapping("/libraries")
   ResultList<LocationUnit> findLibrariesByQuery(
     @RequestParam("query") String query,
+    @RequestParam("includeShadow") Boolean includeShadow,
     @RequestParam("limit") int limit,
     @RequestParam("offset") int offset);
 
@@ -59,5 +64,8 @@ public interface LocationUnitClient {
     private String institutionId;
     private String campusId;
     private String libraryId;
+    @Builder.Default
+    @JsonProperty("isShadow")
+    private boolean isShadow = false;
   }
 }

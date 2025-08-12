@@ -3,6 +3,7 @@ package org.folio.dcb.service;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.tuple;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -97,7 +98,7 @@ class DcbHubLocationServiceImplTest {
     mockEmptyLocationDTOResponses("Location 2", "loc2");
 
     // When
-    dcbHubLocationService.createShadowLocations(locationsClient, locationUnitClient, servicePointRequest);
+    dcbHubLocationService.createShadowLocations(servicePointRequest);
 
     // Then
     verify(dcbHubLocationClient).getLocations(1, 5, BEARER_TOKEN);
@@ -127,16 +128,16 @@ class DcbHubLocationServiceImplTest {
     mockLocationDTOResponses("Location 2", "loc2");
 
     // When
-    dcbHubLocationService.createShadowLocations(locationsClient, locationUnitClient, servicePointRequest);
+    dcbHubLocationService.createShadowLocations(servicePointRequest);
 
     // Then
     verify(dcbHubLocationClient).getLocations(1, 5, BEARER_TOKEN);
     verify(locationUnitClient, never()).createInstitution(any());
-    verify(locationUnitClient).findInstitutionsByQuery(anyString(), anyInt(), anyInt());
+    verify(locationUnitClient).findInstitutionsByQuery(anyString(), anyBoolean(), anyInt(), anyInt());
     verify(locationUnitClient, never()).createCampus(any());
-    verify(locationUnitClient).findCampusesByQuery(anyString(), anyInt(), anyInt());
+    verify(locationUnitClient).findCampusesByQuery(anyString(), anyBoolean(), anyInt(), anyInt());
     verify(locationUnitClient, never()).createLibrary(any());
-    verify(locationUnitClient).findLibrariesByQuery(anyString(), anyInt(), anyInt());
+    verify(locationUnitClient).findLibrariesByQuery(anyString(), anyBoolean(), anyInt(), anyInt());
     verify(locationsClient, never()).createLocation(any());
     verify(locationsClient, times(2)).findLocationByQuery(anyString(), any(Boolean.class), anyInt(), anyInt());
   }
@@ -169,7 +170,7 @@ class DcbHubLocationServiceImplTest {
     mockEmptyLocationDTOResponses("Location 2", "loc2");
 
     // When
-    dcbHubLocationService.createShadowLocations(locationsClient, locationUnitClient, servicePointRequest);
+    dcbHubLocationService.createShadowLocations(servicePointRequest);
 
     // Then
     verify(dcbHubLocationClient).getLocations(1, 5, BEARER_TOKEN);
@@ -197,7 +198,7 @@ class DcbHubLocationServiceImplTest {
 
     // Verify institution queries
     ArgumentCaptor<String> institutionsStringArgCaptor = ArgumentCaptor.forClass(String.class);
-    verify(locationUnitClient, times(2)).findInstitutionsByQuery(institutionsStringArgCaptor.capture(), anyInt(), anyInt());
+    verify(locationUnitClient, times(2)).findInstitutionsByQuery(institutionsStringArgCaptor.capture(), anyBoolean(), anyInt(), anyInt());
     assertThat(institutionsStringArgCaptor.getAllValues())
       .extracting(List::getFirst,l->l.get(1))
       .containsExactly(
@@ -221,7 +222,7 @@ class DcbHubLocationServiceImplTest {
 
     // Verify campus queries
     ArgumentCaptor<String> campusesStringArgCaptor = ArgumentCaptor.forClass(String.class);
-    verify(locationUnitClient, times(2)).findCampusesByQuery(campusesStringArgCaptor.capture(), anyInt(), anyInt());
+    verify(locationUnitClient, times(2)).findCampusesByQuery(campusesStringArgCaptor.capture(), anyBoolean(), anyInt(), anyInt());
     assertThat(campusesStringArgCaptor.getAllValues())
       .extracting(List::getFirst,l->l.get(1))
       .containsExactly(
@@ -246,7 +247,7 @@ class DcbHubLocationServiceImplTest {
 
     // Verify library queries
     ArgumentCaptor<String> librariesStringArgCaptor = ArgumentCaptor.forClass(String.class);
-    verify(locationUnitClient, times(2)).findCampusesByQuery(librariesStringArgCaptor.capture(), anyInt(), anyInt());
+    verify(locationUnitClient, times(2)).findCampusesByQuery(librariesStringArgCaptor.capture(), anyBoolean(), anyInt(), anyInt());
     assertThat(librariesStringArgCaptor.getAllValues())
       .extracting(List::getFirst,l->l.get(1))
       .containsExactly(
@@ -293,7 +294,7 @@ class DcbHubLocationServiceImplTest {
       .thenReturn(emptyResponse);
 
     // When
-    dcbHubLocationService.createShadowLocations(locationsClient, locationUnitClient, servicePointRequest);
+    dcbHubLocationService.createShadowLocations(servicePointRequest);
 
     // Then
     verify(dcbHubLocationClient).getLocations(1, 5, BEARER_TOKEN);
@@ -319,7 +320,7 @@ class DcbHubLocationServiceImplTest {
     mockEmptyLocationDTOResponses("Location 1", "loc1");
 
     // When
-    dcbHubLocationService.createShadowLocations(locationsClient, locationUnitClient, servicePointRequest);
+    dcbHubLocationService.createShadowLocations(servicePointRequest);
 
     // Then
     verify(dcbHubLocationClient).getLocations(1, 5, BEARER_TOKEN);
@@ -345,7 +346,7 @@ class DcbHubLocationServiceImplTest {
     mockLocationDTOResponses("Location 1", "loc1");
 
     // When
-    dcbHubLocationService.createShadowLocations(locationsClient, locationUnitClient, servicePointRequest);
+    dcbHubLocationService.createShadowLocations(servicePointRequest);
 
     // Then
     verify(dcbHubLocationClient).getLocations(1, 5, BEARER_TOKEN);
@@ -363,7 +364,7 @@ class DcbHubLocationServiceImplTest {
 
     // Then
     org.junit.jupiter.api.Assertions.assertThrows(ServiceException.class, () ->
-      dcbHubLocationService.createShadowLocations(locationsClient, locationUnitClient, servicePointRequest));
+      dcbHubLocationService.createShadowLocations(servicePointRequest));
   }
 
   @Test
@@ -374,7 +375,7 @@ class DcbHubLocationServiceImplTest {
 
     // Then
     org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () ->
-      dcbHubLocationService.createShadowLocations(locationsClient, locationUnitClient, servicePointRequest));
+      dcbHubLocationService.createShadowLocations(servicePointRequest));
   }
 
   private DcbHubLocationResponse.Location createTestLocation(String locationName, String locationCode, String agencyName, String agencyCode) {
@@ -394,11 +395,11 @@ class DcbHubLocationServiceImplTest {
       .id(UUID.randomUUID().toString()).code(agencyCode).name(agencyName).build();
     locationUnitResult.setResult(List.of(locationUnit));
 
-    when(locationUnitClient.findInstitutionsByQuery(formatAgencyQuery(agencyName, agencyCode), 10, 0))
+    when(locationUnitClient.findInstitutionsByQuery(formatAgencyQuery(agencyName, agencyCode), true, 10, 0))
       .thenReturn(locationUnitResult);
-    when(locationUnitClient.findCampusesByQuery(formatAgencyQuery(agencyName, agencyCode), 10, 0))
+    when(locationUnitClient.findCampusesByQuery(formatAgencyQuery(agencyName, agencyCode), true, 10, 0))
       .thenReturn(locationUnitResult);
-    when(locationUnitClient.findLibrariesByQuery(formatAgencyQuery(agencyName, agencyCode), 10, 0))
+    when(locationUnitClient.findLibrariesByQuery(formatAgencyQuery(agencyName, agencyCode), true, 10, 0))
       .thenReturn(locationUnitResult);
   }
 
@@ -416,11 +417,11 @@ class DcbHubLocationServiceImplTest {
     ResultList<LocationUnitClient.LocationUnit> emptyLocationUnit = new ResultList<>();
     emptyLocationUnit.setResult(Collections.emptyList());
 
-    when(locationUnitClient.findInstitutionsByQuery(formatAgencyQuery(agencyName, agencyCode), 10, 0))
+    when(locationUnitClient.findInstitutionsByQuery(formatAgencyQuery(agencyName, agencyCode), true,  10, 0))
       .thenReturn(emptyLocationUnit);
-    when(locationUnitClient.findCampusesByQuery(formatAgencyQuery(agencyName, agencyCode), 10, 0))
+    when(locationUnitClient.findCampusesByQuery(formatAgencyQuery(agencyName, agencyCode), true,  10, 0))
       .thenReturn(emptyLocationUnit);
-    when(locationUnitClient.findLibrariesByQuery(formatAgencyQuery(agencyName, agencyCode), 10, 0))
+    when(locationUnitClient.findLibrariesByQuery(formatAgencyQuery(agencyName, agencyCode), true,  10, 0))
       .thenReturn(emptyLocationUnit);
   }
 
