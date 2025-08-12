@@ -50,7 +50,7 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
   @Override
   public void createShadowLocations(ServicePointRequest servicePointRequest) {
     try {
-      log.info("createShadowLocations:: fetching all locations from DCB Hub");
+      log.info("createShadowLocations:: fetching all locations from DCB Hub1");
       List<DcbHubLocationResponse.Location> locationList = fetchDcbHubAllLocations();
       if (CollectionUtils.isEmpty(locationList)) {
         log.info("createShadowLocations:: No locations found in DCB Hub, skipping shadow location creation");
