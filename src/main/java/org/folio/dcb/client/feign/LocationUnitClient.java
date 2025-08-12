@@ -26,6 +26,7 @@ public interface LocationUnitClient {
   @GetMapping("/institutions")
   ResultList<LocationUnit> findInstitutionsByQuery(
     @RequestParam("query") String query,
+    @RequestParam("includeShadow") Boolean includeShadow,
     @RequestParam("limit") int limit,
     @RequestParam("offset") int offset);
 
@@ -36,6 +37,7 @@ public interface LocationUnitClient {
   @GetMapping("/campuses")
   ResultList<LocationUnit> findCampusesByQuery(
     @RequestParam("query") String query,
+    @RequestParam("includeShadow") Boolean includeShadow,
     @RequestParam("limit") int limit,
     @RequestParam("offset") int offset);
 
@@ -46,6 +48,7 @@ public interface LocationUnitClient {
   @GetMapping("/libraries")
   ResultList<LocationUnit> findLibrariesByQuery(
     @RequestParam("query") String query,
+    @RequestParam("includeShadow") Boolean includeShadow,
     @RequestParam("limit") int limit,
     @RequestParam("offset") int offset);
 

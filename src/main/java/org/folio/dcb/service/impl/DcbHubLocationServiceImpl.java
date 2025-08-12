@@ -104,7 +104,7 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
     AgencyKey agencyKey) {
 
     ResultList<LocationUnit> locationUnitResultList =
-      locationUnitClient.findInstitutionsByQuery(formatAgencyQuery(agencyKey.agencyName(), agencyKey.agencyCode()), 10, 0);
+      locationUnitClient.findInstitutionsByQuery(formatAgencyQuery(agencyKey.agencyName(), agencyKey.agencyCode()), true,10, 0);
 
     if (CollectionUtils.isNotEmpty(locationUnitResultList.getResult())) {
       log.info("createInstitution:: Institution already exists for agency: {} - {}",
@@ -130,7 +130,7 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
 
     ResultList<LocationUnit> locationUnitResultList =
       locationUnitClient.findCampusesByQuery(
-        formatAgencyQuery(agencyKey.agencyName(), agencyKey.agencyCode()), 10, 0);
+        formatAgencyQuery(agencyKey.agencyName(), agencyKey.agencyCode()), true, 10, 0);
 
     if (!locationUnitResultList.getResult().isEmpty()) {
       log.info("createCampus:: campus already exists for agency: {} - {}",
@@ -157,7 +157,7 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
 
     ResultList<LocationUnit> locationUnitResultList =
       locationUnitClient.findLibrariesByQuery(
-        formatAgencyQuery(agencyKey.agencyName(), agencyKey.agencyCode()), 10, 0);
+        formatAgencyQuery(agencyKey.agencyName(), agencyKey.agencyCode()), true, 10, 0);
 
     if (!locationUnitResultList.getResult().isEmpty()) {
       log.info("createLibrary:: library already exists for agency: {} - {}",
