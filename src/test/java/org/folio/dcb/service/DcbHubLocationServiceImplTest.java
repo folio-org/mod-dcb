@@ -97,7 +97,7 @@ class DcbHubLocationServiceImplTest {
     mockEmptyLocationDTOResponses("Location 2", "loc2");
 
     // When
-    dcbHubLocationService.createShadowLocations(locationsClient, locationUnitClient, servicePointRequest);
+    dcbHubLocationService.createShadowLocations(servicePointRequest);
 
     // Then
     verify(dcbHubLocationClient).getLocations(1, 5, BEARER_TOKEN);
@@ -127,7 +127,7 @@ class DcbHubLocationServiceImplTest {
     mockLocationDTOResponses("Location 2", "loc2");
 
     // When
-    dcbHubLocationService.createShadowLocations(locationsClient, locationUnitClient, servicePointRequest);
+    dcbHubLocationService.createShadowLocations(servicePointRequest);
 
     // Then
     verify(dcbHubLocationClient).getLocations(1, 5, BEARER_TOKEN);
@@ -169,7 +169,7 @@ class DcbHubLocationServiceImplTest {
     mockEmptyLocationDTOResponses("Location 2", "loc2");
 
     // When
-    dcbHubLocationService.createShadowLocations(locationsClient, locationUnitClient, servicePointRequest);
+    dcbHubLocationService.createShadowLocations(servicePointRequest);
 
     // Then
     verify(dcbHubLocationClient).getLocations(1, 5, BEARER_TOKEN);
@@ -293,7 +293,7 @@ class DcbHubLocationServiceImplTest {
       .thenReturn(emptyResponse);
 
     // When
-    dcbHubLocationService.createShadowLocations(locationsClient, locationUnitClient, servicePointRequest);
+    dcbHubLocationService.createShadowLocations(servicePointRequest);
 
     // Then
     verify(dcbHubLocationClient).getLocations(1, 5, BEARER_TOKEN);
@@ -319,7 +319,7 @@ class DcbHubLocationServiceImplTest {
     mockEmptyLocationDTOResponses("Location 1", "loc1");
 
     // When
-    dcbHubLocationService.createShadowLocations(locationsClient, locationUnitClient, servicePointRequest);
+    dcbHubLocationService.createShadowLocations(servicePointRequest);
 
     // Then
     verify(dcbHubLocationClient).getLocations(1, 5, BEARER_TOKEN);
@@ -345,7 +345,7 @@ class DcbHubLocationServiceImplTest {
     mockLocationDTOResponses("Location 1", "loc1");
 
     // When
-    dcbHubLocationService.createShadowLocations(locationsClient, locationUnitClient, servicePointRequest);
+    dcbHubLocationService.createShadowLocations(servicePointRequest);
 
     // Then
     verify(dcbHubLocationClient).getLocations(1, 5, BEARER_TOKEN);
@@ -363,7 +363,7 @@ class DcbHubLocationServiceImplTest {
 
     // Then
     org.junit.jupiter.api.Assertions.assertThrows(ServiceException.class, () ->
-      dcbHubLocationService.createShadowLocations(locationsClient, locationUnitClient, servicePointRequest));
+      dcbHubLocationService.createShadowLocations(servicePointRequest));
   }
 
   @Test
@@ -374,7 +374,7 @@ class DcbHubLocationServiceImplTest {
 
     // Then
     org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () ->
-      dcbHubLocationService.createShadowLocations(locationsClient, locationUnitClient, servicePointRequest));
+      dcbHubLocationService.createShadowLocations(servicePointRequest));
   }
 
   private DcbHubLocationResponse.Location createTestLocation(String locationName, String locationCode, String agencyName, String agencyCode) {

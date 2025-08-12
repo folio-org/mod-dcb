@@ -93,7 +93,7 @@ management:
 application:
   dcb-hub:
     fetch-dcb-locations-enabled: ${FETCH_DCB_LOCATIONS_ENABLED:false}
-    locations-url: ${DCB_LOCATIONS_BASE_URL:http://dcb-host/locations}
+    locations-url: ${DCB_LOCATIONS_BASE_URL:}
     batch-size: ${DCB_LOCATIONS_BATCH_SIZE:50}
     secure-store-keyname: dcb-hub-credentials
   keycloak:

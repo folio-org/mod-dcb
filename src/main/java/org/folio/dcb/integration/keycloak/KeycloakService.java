@@ -1,5 +1,6 @@
 package org.folio.dcb.integration.keycloak;
 
+import static java.util.Map.entry;
 import static org.springframework.web.util.UriComponentsBuilder.fromUriString;
 
 import java.net.URI;
@@ -9,7 +10,6 @@ import org.folio.dcb.exception.ServiceException;
 import org.folio.dcb.exception.UnauthorizedException;
 import org.folio.dcb.integration.keycloak.model.DcbHubKCCredentials;
 import org.folio.dcb.integration.keycloak.model.KeycloakAuthentication;
-import org.folio.dcb.utils.KeyCloakTokenRequestHelper;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +21,13 @@ import lombok.extern.log4j.Log4j2;
 @Service
 @RequiredArgsConstructor
 public class KeycloakService {
+
+  private static final String GRANT_TYPE = "grant_type";
+  private static final String CLIENT_ID = "client_id";
+  private static final String CLIENT_SECRET = "client_secret";
+  private static final String USERNAME = "username";
+  private static final String PASSWORD = "password";
+
   private final KeycloakClient keycloakClient;
 
   /**
@@ -30,7 +37,7 @@ public class KeycloakService {
    * @return KeycloakAuthentication containing the token information
    */
   public KeycloakAuthentication getUserToken(DcbHubKCCredentials dcbHubKCCredentials) {
-    var requestData = KeyCloakTokenRequestHelper.preparePasswordRequestBody(dcbHubKCCredentials);
+    var requestData = preparePasswordRequestBody(dcbHubKCCredentials);
     return getToken(requestData, dcbHubKCCredentials);
   }
 
@@ -53,5 +60,14 @@ public class KeycloakService {
 
   private static @NotNull URI buildKeyCloakUri(DcbHubKCCredentials dcbHubKCCredentials) {
     return fromUriString(dcbHubKCCredentials.getKeycloakUrl()).build().toUri();
+  }
+
+  public static Map<String, String> preparePasswordRequestBody(DcbHubKCCredentials dcbHubKCCredentials) {
+    return Map.ofEntries(
+      entry(GRANT_TYPE, PASSWORD),
+      entry(CLIENT_ID, dcbHubKCCredentials.getClientId()),
+      entry(USERNAME, dcbHubKCCredentials.getUsername()),
+      entry(PASSWORD, dcbHubKCCredentials.getPassword()),
+      entry(CLIENT_SECRET, dcbHubKCCredentials.getClientSecret() != null ? dcbHubKCCredentials.getClientSecret() : ""));
   }
 }

@@ -41,13 +41,14 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
   private final DcbHubKCTokenService dcbHubKCTokenService;
   private final DcbHubKCCredentialSecureStore dcbHubKCCredentialSecureStore;
   private final DcbHubLocationClient dcbHubLocationClient;
+  private final LocationsClient locationsClient;
+  private final LocationUnitClient locationUnitClient;
 
   @Value("${application.dcb-hub.batch-size}")
   private Integer batchSize;
 
   @Override
-  public void createShadowLocations(LocationsClient locationsClient, LocationUnitClient locationUnitClient,
-    ServicePointRequest servicePointRequest) {
+  public void createShadowLocations(ServicePointRequest servicePointRequest) {
     try {
       log.info("createShadowLocations:: fetching all locations from DCB Hub");
       List<DcbHubLocationResponse.Location> locationList = fetchDcbHubAllLocations();
