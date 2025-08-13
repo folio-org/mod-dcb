@@ -116,6 +116,7 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
       .id(UUID.randomUUID().toString())
       .name(agencyKey.agencyName())
       .code(agencyKey.agencyCode())
+      .isShadow(true)
       .build();
     locationUnitClient.createInstitution(institution);
     log.info("createInstitution:: Created institution: {} - {}", institution.getCode(), institution.getName());
@@ -142,6 +143,7 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
       .id(UUID.randomUUID().toString())
       .name(agencyKey.agencyName())
       .code(agencyKey.agencyCode())
+      .isShadow(true)
       .build();
     locationUnitClient.createCampus(campus);
     log.info("createCampus:: Created campus: {} - {}", campus.getCode(), campus.getName());
@@ -168,6 +170,7 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
       .id(UUID.randomUUID().toString())
       .name(agencyKey.agencyName())
       .code(agencyKey.agencyCode())
+      .isShadow(true)
       .build();
     locationUnitClient.createLibrary(library);
     log.info("createLibrary:: Created library: {} - {}", library.getCode(), library.getName());
