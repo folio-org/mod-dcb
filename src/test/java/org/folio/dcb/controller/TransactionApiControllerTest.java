@@ -1800,7 +1800,7 @@ class TransactionApiControllerTest extends BaseIT {
 
   @ParameterizedTest
   @MethodSource("transactionRolesExceptLender")
-  void createBorrowingPickupCirculationRequestTest1(DcbTransaction.RoleEnum role) throws Exception {
+  void createTransactionAndTestDCBFDefaultLocationWhenShadowLookupDisabled(DcbTransaction.RoleEnum role) throws Exception {
     wireMockServer.resetRequests();
     removeExistedTransactionFromDbIfSoExists();
     removeExistingTransactionsByItemId(ITEM_ID);
@@ -1826,7 +1826,7 @@ class TransactionApiControllerTest extends BaseIT {
 
   @ParameterizedTest
   @MethodSource("transactionRolesExceptLender")
-  void createBorrowingPickupCirculationRequestTest2(DcbTransaction.RoleEnum role) throws Exception {
+  void createTransactionAndTestDCBFDefaultLocationWhenLocationCodeNotFound(DcbTransaction.RoleEnum role) throws Exception {
     wireMockServer.resetRequests();
     ReflectionTestUtils.setField(circulationItemService,  "isShadowLocationLookupEnabled", true);
     removeExistedTransactionFromDbIfSoExists();
@@ -1854,7 +1854,7 @@ class TransactionApiControllerTest extends BaseIT {
 
   @ParameterizedTest
   @MethodSource("transactionRolesExceptLender")
-  void createBorrowingPickupCirculationRequestTest3(DcbTransaction.RoleEnum role) throws Exception {
+  void createTransactionAndTestLocationIdFoundByLocationCode(DcbTransaction.RoleEnum role) throws Exception {
     wireMockServer.resetRequests();
     ReflectionTestUtils.setField(circulationItemService,  "isShadowLocationLookupEnabled", true);
     removeExistedTransactionFromDbIfSoExists();
