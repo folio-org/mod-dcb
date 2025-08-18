@@ -1,24 +1,34 @@
 package org.folio.dcb.service;
 
+import static org.folio.dcb.client.feign.LocationsClient.LocationDTO;
+import static org.folio.dcb.utils.DCBConstants.LOCATION_ID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import org.folio.dcb.client.feign.CirculationItemClient;
 import org.folio.dcb.client.feign.HoldingsStorageClient;
+import org.folio.dcb.client.feign.LocationsClient;
 import org.folio.dcb.domain.dto.CirculationItem;
 import org.folio.dcb.domain.dto.CirculationItemCollection;
 import org.folio.dcb.domain.dto.DcbItem;
 import org.folio.dcb.service.impl.CirculationItemServiceImpl;
 import org.folio.dcb.service.impl.HoldingsServiceImpl;
+import org.folio.spring.model.ResultList;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
+import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 class CirculationItemServiceImplTest {
@@ -29,6 +39,8 @@ class CirculationItemServiceImplTest {
   private HoldingsServiceImpl holdingsService;
   @Mock
   private ItemService itemService;
+  @Mock
+  private LocationsClient locationsClient;
 
   @InjectMocks
   private CirculationItemServiceImpl circulationItemService;
@@ -47,7 +59,7 @@ class CirculationItemServiceImplTest {
         .build());
 
     // Act
-    var result = circulationItemService.checkIfItemExistsAndCreate(dcbItem, pickupServicePointId);
+    var result = circulationItemService.checkIfItemExistsAndCreate(dcbItem, pickupServicePointId, dcbItem.getLocationCode());
 
     // Assert
     verify(circulationItemClient).fetchItemByCqlQuery(any());
@@ -73,12 +85,151 @@ class CirculationItemServiceImplTest {
     when(circulationItemClient.createCirculationItem(any(), any())).thenReturn(createdItem);
 
     // Act
-    var result = circulationItemService.checkIfItemExistsAndCreate(dcbItem, pickupServicePointId);
+    var result = circulationItemService.checkIfItemExistsAndCreate(dcbItem, pickupServicePointId, dcbItem.getLocationCode());
 
     // Assert
     verify(circulationItemClient).fetchItemByCqlQuery(any());
     verify(holdingsService).fetchDcbHoldingOrCreateIfMissing();
     verify(circulationItemClient).createCirculationItem(any(), any());
+    assertEquals(createdItem, result);
+  }
+
+  @Test
+  void checkIfItemExistsAndCreate_ShouldFetchShadowLocation_positive() {
+    ReflectionTestUtils.setField(circulationItemService, "isShadowLocationLookupEnabled", true);
+    // Mock
+    String locationCode = "shadowLocationCode";
+    var randomUuid = UUID.randomUUID().toString();
+    var dcbItem = DcbItem.builder().barcode("barcode123").title("title").id(randomUuid).locationCode(locationCode).build();
+    var pickupServicePointId = "pickupPointId";
+
+    when(circulationItemClient.fetchItemByCqlQuery(any()))
+      .thenReturn(CirculationItemCollection.builder().items(Collections.emptyList()).build());
+
+    var dcbHolding = HoldingsStorageClient.Holding.builder().id(randomUuid).build();
+    when(holdingsService.fetchDcbHoldingOrCreateIfMissing()).thenReturn(dcbHolding);
+
+    when(itemService.fetchItemMaterialTypeIdByMaterialTypeName(any())).thenReturn(randomUuid);
+
+    var createdItem = CirculationItem.builder().id(randomUuid).barcode("barcode123").build();
+    when(circulationItemClient.createCirculationItem(any(), any())).thenReturn(createdItem);
+
+    String mockEffectiveLocationId = UUID.randomUUID().toString();
+    LocationDTO locationDTO = LocationDTO.builder()
+      .id(mockEffectiveLocationId).name("locationName").code(locationCode).build();
+    when(locationsClient.queryLocationsByCode(locationCode, true))
+      .thenReturn(ResultList.of(1, List.of(locationDTO)));
+
+    // Act
+    var result = circulationItemService.checkIfItemExistsAndCreate(dcbItem, pickupServicePointId, dcbItem.getLocationCode());
+
+    // Assert
+    ArgumentCaptor<CirculationItem> circulationItemArgumentCaptor = ArgumentCaptor.forClass(CirculationItem.class);
+    verify(circulationItemClient).createCirculationItem(any(), circulationItemArgumentCaptor.capture());
+    CirculationItem capturedItem = circulationItemArgumentCaptor.getValue();
+    assertEquals(mockEffectiveLocationId, capturedItem.getEffectiveLocationId());
+    assertEquals(createdItem, result);
+  }
+
+  @Test
+  void checkIfItemExistsAndCreate_NoShadowLocationFound_negative() {
+    ReflectionTestUtils.setField(circulationItemService, "isShadowLocationLookupEnabled", true);
+    // Mock
+    String locationCode = "shadowLocationCode";
+    var randomUuid = UUID.randomUUID().toString();
+    var dcbItem = DcbItem.builder().barcode("barcode123").title("title").id(randomUuid).locationCode(locationCode).build();
+    var pickupServicePointId = "pickupPointId";
+
+    when(circulationItemClient.fetchItemByCqlQuery(any()))
+      .thenReturn(CirculationItemCollection.builder().items(Collections.emptyList()).build());
+
+    var dcbHolding = HoldingsStorageClient.Holding.builder().id(randomUuid).build();
+    when(holdingsService.fetchDcbHoldingOrCreateIfMissing()).thenReturn(dcbHolding);
+
+    when(itemService.fetchItemMaterialTypeIdByMaterialTypeName(any())).thenReturn(randomUuid);
+
+    var createdItem = CirculationItem.builder().id(randomUuid).barcode("barcode123").build();
+    when(circulationItemClient.createCirculationItem(any(), any())).thenReturn(createdItem);
+
+    when(locationsClient.queryLocationsByCode(locationCode, true))
+      .thenReturn(ResultList.of(0, Collections.emptyList()));
+
+    // Act
+    var result = circulationItemService.checkIfItemExistsAndCreate(dcbItem, pickupServicePointId, dcbItem.getLocationCode());
+
+    // Assert
+    ArgumentCaptor<CirculationItem> circulationItemArgumentCaptor = ArgumentCaptor.forClass(CirculationItem.class);
+    verify(circulationItemClient).createCirculationItem(any(), circulationItemArgumentCaptor.capture());
+    CirculationItem capturedItem = circulationItemArgumentCaptor.getValue();
+    assertEquals(LOCATION_ID, capturedItem.getEffectiveLocationId());
+    assertEquals(createdItem, result);
+  }
+
+  @ParameterizedTest
+  @NullSource
+  @ValueSource(strings = {"nonExistedShadowLocationCode"})
+  void checkIfItemExistsAndCreate_NullOrNonExistedShadowLocationCode_negative(String locationCode) {
+    ReflectionTestUtils.setField(circulationItemService, "isShadowLocationLookupEnabled", true);
+    // Mock
+    var randomUuid = UUID.randomUUID().toString();
+    var dcbItem = DcbItem.builder().barcode("barcode123").title("title").id(randomUuid).locationCode(locationCode).build();
+    var pickupServicePointId = "pickupPointId";
+
+    when(circulationItemClient.fetchItemByCqlQuery(any()))
+      .thenReturn(CirculationItemCollection.builder().items(Collections.emptyList()).build());
+
+    var dcbHolding = HoldingsStorageClient.Holding.builder().id(randomUuid).build();
+    when(holdingsService.fetchDcbHoldingOrCreateIfMissing()).thenReturn(dcbHolding);
+
+    when(itemService.fetchItemMaterialTypeIdByMaterialTypeName(any())).thenReturn(randomUuid);
+
+    var createdItem = CirculationItem.builder().id(randomUuid).barcode("barcode123").build();
+    when(circulationItemClient.createCirculationItem(any(), any())).thenReturn(createdItem);
+
+    if(Objects.nonNull(locationCode)) {
+      when(locationsClient.queryLocationsByCode("nonExistedShadowLocationCode", true))
+        .thenReturn(ResultList.of(0, Collections.emptyList()));
+    }
+
+    // Act
+    var result = circulationItemService.checkIfItemExistsAndCreate(dcbItem, pickupServicePointId, dcbItem.getLocationCode());
+
+    // Assert
+    ArgumentCaptor<CirculationItem> circulationItemArgumentCaptor = ArgumentCaptor.forClass(CirculationItem.class);
+    verify(circulationItemClient).createCirculationItem(any(), circulationItemArgumentCaptor.capture());
+    CirculationItem capturedItem = circulationItemArgumentCaptor.getValue();
+    assertEquals(LOCATION_ID, capturedItem.getEffectiveLocationId());
+    assertEquals(createdItem, result);
+  }
+
+  @Test
+  void checkIfItemExistsAndCreate_ShadowLocationLookupDisabled_negative() {
+    ReflectionTestUtils.setField(circulationItemService, "isShadowLocationLookupEnabled", false);
+    // Mock
+    String locationCode = "shadowLocationCode";
+    var randomUuid = UUID.randomUUID().toString();
+    var dcbItem = DcbItem.builder().barcode("barcode123").title("title").id(randomUuid).locationCode(locationCode).build();
+    var pickupServicePointId = "pickupPointId";
+
+    when(circulationItemClient.fetchItemByCqlQuery(any()))
+      .thenReturn(CirculationItemCollection.builder().items(Collections.emptyList()).build());
+
+    var dcbHolding = HoldingsStorageClient.Holding.builder().id(randomUuid).build();
+    when(holdingsService.fetchDcbHoldingOrCreateIfMissing()).thenReturn(dcbHolding);
+
+    when(itemService.fetchItemMaterialTypeIdByMaterialTypeName(any())).thenReturn(randomUuid);
+
+    var createdItem = CirculationItem.builder().id(randomUuid).barcode("barcode123").build();
+    when(circulationItemClient.createCirculationItem(any(), any())).thenReturn(createdItem);
+
+    // Act
+    var result = circulationItemService.checkIfItemExistsAndCreate(dcbItem, pickupServicePointId, dcbItem.getLocationCode());
+
+    // Assert
+    ArgumentCaptor<CirculationItem> circulationItemArgumentCaptor = ArgumentCaptor.forClass(CirculationItem.class);
+    verify(circulationItemClient).createCirculationItem(any(), circulationItemArgumentCaptor.capture());
+    CirculationItem capturedItem = circulationItemArgumentCaptor.getValue();
+    assertEquals(LOCATION_ID, capturedItem.getEffectiveLocationId());
     assertEquals(createdItem, result);
   }
 }

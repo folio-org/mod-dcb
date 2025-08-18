@@ -23,6 +23,9 @@ CirculationItem:
     lendingLibraryCode:
       description: 5 digit agency code which identifies the lending library
       type: string
+    effectiveLocationId:
+      description: the effective location of the item
+      type: string
   additionalProperties: false
 
 CirculationItemCollection:

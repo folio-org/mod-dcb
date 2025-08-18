@@ -5,6 +5,7 @@ import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWING_PICKUP;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.PICKUP;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import org.folio.dcb.domain.dto.CirculationItem;
@@ -127,7 +128,8 @@ public class EcsRequestTransactionsServiceImpl implements EcsRequestTransactions
       throw new IllegalArgumentException("Item is required for borrower transaction");
     }
     baseLibraryService.checkItemExistsInInventoryAndThrow(itemVirtual.getBarcode());
-    CirculationItem item = circulationItemService.checkIfItemExistsAndCreate(itemVirtual, circulationRequest.getPickupServicePointId());
+    CirculationItem item = circulationItemService.checkIfItemExistsAndCreate(itemVirtual, circulationRequest.getPickupServicePointId(),
+      Optional.ofNullable(dcbTransaction.getItem()).map(DcbItem::getLocationCode).orElse(null));
     circulationRequest.setItemId(UUID.fromString(item.getId()));
     circulationRequest.setItem(Item.builder()
       .barcode(item.getBarcode())

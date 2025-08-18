@@ -122,7 +122,7 @@ class BaseLibraryServiceTest {
     when(requestService.createHoldItemRequest(any(), any(), anyString())).thenReturn(createCirculationRequest());
     when(transactionMapper.mapToEntity(any(), any())).thenReturn(createTransactionEntity());
     when(itemService.fetchItemByBarcode(item.getBarcode())).thenReturn(new ResultList<>());
-    when(circulationItemService.checkIfItemExistsAndCreate(any(), any())).thenReturn(circulationItem);
+    when(circulationItemService.checkIfItemExistsAndCreate(any(), any(), any())).thenReturn(circulationItem);
     var response = baseLibraryService.createBorrowingLibraryTransaction(DCB_TRANSACTION_ID, createDcbTransactionByRole(BORROWER), PICKUP_SERVICE_POINT_ID);
     verify(userService).fetchUser(patron);
     // Circulation item id will be set as dcb item id in the code, hence setting it for assertion
@@ -148,7 +148,7 @@ class BaseLibraryServiceTest {
 
     var response = baseLibraryService.createBorrowingLibraryTransaction(DCB_TRANSACTION_ID, dcbTransaction, PICKUP_SERVICE_POINT_ID);
     verify(userService).fetchUser(patron);
-    verify(circulationItemService, never()).checkIfItemExistsAndCreate(any(), any());
+    verify(circulationItemService, never()).checkIfItemExistsAndCreate(any(), any(), any());
     verify(requestService).createRequestBasedOnItemStatus(user, item, dcbTransaction.getPickup().getServicePointId());
     verify(transactionRepository).save(any());
 
@@ -165,7 +165,7 @@ class BaseLibraryServiceTest {
     when(userService.fetchUser(any()))
       .thenReturn(user);
     when(itemService.fetchItemByBarcode(item.getBarcode())).thenReturn(new ResultList<>());
-    when(circulationItemService.checkIfItemExistsAndCreate(any(), any())).thenReturn(createCirculationItem());
+    when(circulationItemService.checkIfItemExistsAndCreate(any(), any(), any())).thenReturn(createCirculationItem());
     when(transactionRepository.findTransactionsByItemIdAndStatusNotInClosed(any())).thenReturn(List.of(createTransactionEntity()));
     assertThrows(ResourceAlreadyExistException.class, () -> baseLibraryService.createBorrowingLibraryTransaction(DCB_TRANSACTION_ID, createDcbTransactionByRole(BORROWER), PICKUP_SERVICE_POINT_ID));
   }

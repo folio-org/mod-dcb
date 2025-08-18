@@ -226,6 +226,62 @@
     },
     {
       "request": {
+        "method": "GET",
+        "urlPath": "/locations",
+        "queryParameters": {
+          "query": {
+            "equalTo": "code==EXISTED_LOCATION_CODE"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "totalRecords": 1,
+          "result": [
+            {
+              "id": "fbc42f2c-6cd0-4637-93c0-9344f8408268",
+              "code": "LOC-1",
+              "name": "Location-1",
+              "institutionId": "9b90bb46-2213-42af-a58b-8e356348abc9",
+              "campusId": "b9023ec8-4c00-4cee-a18b-3e74351a3aae",
+              "libraryId": "184daad4-5ab1-4034-94d2-960acc3a2c4c",
+              "primaryServicePoint": "916fe2af-dc73-48b0-8922-0768a403473b",
+              "servicePointIds": [
+                "916fe2af-dc73-48b0-8922-0768a403473b"
+              ],
+              "isShadow": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/locations",
+        "queryParameters": {
+          "query": {
+            "equalTo": "code==NON_EXISTED_LOCATION_CODE"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "totalRecords": 0,
+          "result": []
+        }
+      }
+    },
+    {
+      "request": {
         "method": "POST",
         "urlPath": "/locations",
         "bodyPatterns": [
