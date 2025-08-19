@@ -38,8 +38,9 @@ public class CirculationItemServiceImpl implements CirculationItemService {
   private final LocationsClient locationsClient;
   private final HoldingsService holdingsService;
 
-  @Value("${application.shadow-location-lookup-enabled}")
-  private Boolean isShadowLocationLookupEnabled;
+
+  @Value("${application.dcb-hub.fetch-dcb-locations-enabled}")
+  private Boolean isFetchDcbHubLocationsEnabled;
 
 
   @Override
@@ -57,9 +58,9 @@ public class CirculationItemServiceImpl implements CirculationItemService {
 
   private String fetchShadowLocationIdByLocationCode(String locationCode) {
     log.debug(
-      "fetchShadowLocationIdByLocationCode:: Fetching shadow location id by location code: {} and isShadowLocationLookupEnabled: {}",
-      locationCode, isShadowLocationLookupEnabled);
-    if(Boolean.TRUE.equals(isShadowLocationLookupEnabled) && StringUtils.isNotBlank(locationCode)) {
+      "fetchShadowLocationIdByLocationCode:: Fetching shadow location id by location code: {} and isFetchDcbHubLocationsEnabled: {}",
+      locationCode, isFetchDcbHubLocationsEnabled);
+    if(Boolean.TRUE.equals(isFetchDcbHubLocationsEnabled) && StringUtils.isNotBlank(locationCode)) {
       ResultList<LocationDTO> locationDTOResult = locationsClient.findLocationByQuery(String.format("code==%s", locationCode), true, 1, 0);
       if(locationDTOResult.getResult().isEmpty()) {
         log.warn(

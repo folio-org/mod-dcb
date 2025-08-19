@@ -1802,6 +1802,7 @@ class TransactionApiControllerTest extends BaseIT {
   @MethodSource("transactionRolesExceptLender")
   void createTransactionAndTestDCBFDefaultLocationWhenShadowLookupDisabled(DcbTransaction.RoleEnum role) throws Exception {
     wireMockServer.resetRequests();
+    ReflectionTestUtils.setField(circulationItemService,  "isFetchDcbHubLocationsEnabled", null);
     removeExistedTransactionFromDbIfSoExists();
     removeExistingTransactionsByItemId(ITEM_ID);
 
@@ -1828,7 +1829,7 @@ class TransactionApiControllerTest extends BaseIT {
   @MethodSource("transactionRolesExceptLender")
   void createTransactionAndTestDCBFDefaultLocationWhenLocationCodeNotFound(DcbTransaction.RoleEnum role) throws Exception {
     wireMockServer.resetRequests();
-    ReflectionTestUtils.setField(circulationItemService,  "isShadowLocationLookupEnabled", true);
+    ReflectionTestUtils.setField(circulationItemService,  "isFetchDcbHubLocationsEnabled", true);
     removeExistedTransactionFromDbIfSoExists();
     removeExistingTransactionsByItemId(ITEM_ID);
 
@@ -1856,7 +1857,7 @@ class TransactionApiControllerTest extends BaseIT {
   @MethodSource("transactionRolesExceptLender")
   void createTransactionAndTestLocationIdFoundByLocationCode(DcbTransaction.RoleEnum role) throws Exception {
     wireMockServer.resetRequests();
-    ReflectionTestUtils.setField(circulationItemService,  "isShadowLocationLookupEnabled", true);
+    ReflectionTestUtils.setField(circulationItemService,  "isFetchDcbHubLocationsEnabled", true);
     removeExistedTransactionFromDbIfSoExists();
     removeExistingTransactionsByItemId(ITEM_ID);
 

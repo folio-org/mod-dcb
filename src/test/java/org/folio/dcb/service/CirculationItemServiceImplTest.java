@@ -96,7 +96,7 @@ class CirculationItemServiceImplTest {
 
   @Test
   void checkIfItemExistsAndCreate_ShouldFetchShadowLocation_positive() {
-    ReflectionTestUtils.setField(circulationItemService, "isShadowLocationLookupEnabled", true);
+    ReflectionTestUtils.setField(circulationItemService, "isFetchDcbHubLocationsEnabled", true);
     // Mock
     String locationCode = "shadowLocationCode";
     var randomUuid = UUID.randomUUID().toString();
@@ -133,7 +133,7 @@ class CirculationItemServiceImplTest {
 
   @Test
   void checkIfItemExistsAndCreate_NoShadowLocationFound_negative() {
-    ReflectionTestUtils.setField(circulationItemService, "isShadowLocationLookupEnabled", true);
+    ReflectionTestUtils.setField(circulationItemService, "isFetchDcbHubLocationsEnabled", true);
     // Mock
     String locationCode = "shadowLocationCode";
     var randomUuid = UUID.randomUUID().toString();
@@ -169,7 +169,7 @@ class CirculationItemServiceImplTest {
   @NullSource
   @ValueSource(strings = {"nonExistedShadowLocationCode"})
   void checkIfItemExistsAndCreate_NullOrNonExistedShadowLocationCode_negative(String locationCode) {
-    ReflectionTestUtils.setField(circulationItemService, "isShadowLocationLookupEnabled", true);
+    ReflectionTestUtils.setField(circulationItemService, "isFetchDcbHubLocationsEnabled", true);
     // Mock
     var randomUuid = UUID.randomUUID().toString();
     var dcbItem = DcbItem.builder().barcode("barcode123").title("title").id(randomUuid).locationCode(locationCode).build();
@@ -204,7 +204,7 @@ class CirculationItemServiceImplTest {
 
   @Test
   void checkIfItemExistsAndCreate_ShadowLocationLookupDisabled_negative() {
-    ReflectionTestUtils.setField(circulationItemService, "isShadowLocationLookupEnabled", false);
+    ReflectionTestUtils.setField(circulationItemService, "isFetchDcbHubLocationsEnabled", false);
     // Mock
     String locationCode = "shadowLocationCode";
     var randomUuid = UUID.randomUUID().toString();
