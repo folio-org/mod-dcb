@@ -26,10 +26,6 @@ public interface LocationsClient {
   @GetMapping("?query=name=={name}")
   ResultList<LocationDTO> queryLocationsByName(@PathVariable("name") String name);
 
-  @GetMapping("?query=code=={code}&includeShadowLocations={includeShadowLocations}")
-  ResultList<LocationDTO> queryLocationsByCode(@PathVariable("code") String code,
-    @PathVariable("includeShadowLocations") Boolean includeShadowLocations);
-
   @GetMapping
   ResultList<LocationDTO> findLocationByQuery(
     @RequestParam("query") String query,
