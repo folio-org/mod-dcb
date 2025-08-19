@@ -8,11 +8,11 @@ import static org.mockito.Mockito.*;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 import org.folio.dcb.client.feign.CirculationItemClient;
 import org.folio.dcb.client.feign.HoldingsStorageClient;
 import org.folio.dcb.client.feign.LocationsClient;
+import org.folio.dcb.config.DcbHubProperties;
 import org.folio.dcb.domain.dto.CirculationItem;
 import org.folio.dcb.domain.dto.CirculationItemCollection;
 import org.folio.dcb.domain.dto.DcbItem;
@@ -21,9 +21,6 @@ import org.folio.dcb.service.impl.HoldingsServiceImpl;
 import org.folio.spring.model.ResultList;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.NullSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -68,6 +65,10 @@ class CirculationItemServiceImplTest {
 
   @Test
   void checkIfItemExistsAndCreate_ShouldCreateNewItem_WhenItemDoesNotExist() {
+    DcbHubProperties dcbHubProperties = new DcbHubProperties();
+    dcbHubProperties.setFetchDcbLocationsEnabled(false);
+    ReflectionTestUtils.setField(circulationItemService,  "dcbHubProperties", dcbHubProperties);
+
     // Mock
     var randomUuid = UUID.randomUUID().toString();
     var dcbItem = DcbItem.builder().barcode("barcode123").title("title").id(randomUuid).build();
@@ -96,7 +97,10 @@ class CirculationItemServiceImplTest {
 
   @Test
   void checkIfItemExistsAndCreate_ShouldFetchShadowLocation_positive() {
-    ReflectionTestUtils.setField(circulationItemService, "isFetchDcbHubLocationsEnabled", true);
+    DcbHubProperties dcbHubProperties = new DcbHubProperties();
+    dcbHubProperties.setFetchDcbLocationsEnabled(true);
+    ReflectionTestUtils.setField(circulationItemService,  "dcbHubProperties", dcbHubProperties);
+
     // Mock
     String locationCode = "shadowLocationCode";
     var randomUuid = UUID.randomUUID().toString();
@@ -133,7 +137,10 @@ class CirculationItemServiceImplTest {
 
   @Test
   void checkIfItemExistsAndCreate_NoShadowLocationFound_negative() {
-    ReflectionTestUtils.setField(circulationItemService, "isFetchDcbHubLocationsEnabled", true);
+    DcbHubProperties dcbHubProperties = new DcbHubProperties();
+    dcbHubProperties.setFetchDcbLocationsEnabled(true);
+    ReflectionTestUtils.setField(circulationItemService,  "dcbHubProperties", dcbHubProperties);
+
     // Mock
     String locationCode = "shadowLocationCode";
     var randomUuid = UUID.randomUUID().toString();
@@ -165,13 +172,14 @@ class CirculationItemServiceImplTest {
     assertEquals(createdItem, result);
   }
 
-  @ParameterizedTest
-  @NullSource
-  @ValueSource(strings = {"nonExistedShadowLocationCode"})
-  void checkIfItemExistsAndCreate_NullOrNonExistedShadowLocationCode_negative(String locationCode) {
-    ReflectionTestUtils.setField(circulationItemService, "isFetchDcbHubLocationsEnabled", true);
+  @Test
+  void checkIfItemExistsAndCreate_NonExistedShadowLocationCode_negative() {
+    DcbHubProperties dcbHubProperties = new DcbHubProperties();
+    dcbHubProperties.setFetchDcbLocationsEnabled(true);
+    ReflectionTestUtils.setField(circulationItemService,  "dcbHubProperties", dcbHubProperties);
     // Mock
     var randomUuid = UUID.randomUUID().toString();
+    var locationCode = "nonExistedShadowLocationCode";
     var dcbItem = DcbItem.builder().barcode("barcode123").title("title").id(randomUuid).locationCode(locationCode).build();
     var pickupServicePointId = "pickupPointId";
 
@@ -186,10 +194,41 @@ class CirculationItemServiceImplTest {
     var createdItem = CirculationItem.builder().id(randomUuid).barcode("barcode123").build();
     when(circulationItemClient.createCirculationItem(any(), any())).thenReturn(createdItem);
 
-    if(Objects.nonNull(locationCode)) {
-      when(locationsClient.findLocationByQuery("code==nonExistedShadowLocationCode", true, 1, 0))
-        .thenReturn(ResultList.of(0, Collections.emptyList()));
-    }
+    when(locationsClient.findLocationByQuery("code==nonExistedShadowLocationCode", true, 1, 0))
+      .thenReturn(ResultList.of(0, Collections.emptyList()));
+
+    // Act
+    var result = circulationItemService.checkIfItemExistsAndCreate(dcbItem, pickupServicePointId, dcbItem.getLocationCode());
+
+    // Assert
+    ArgumentCaptor<CirculationItem> circulationItemArgumentCaptor = ArgumentCaptor.forClass(CirculationItem.class);
+    verify(circulationItemClient).createCirculationItem(any(), circulationItemArgumentCaptor.capture());
+    CirculationItem capturedItem = circulationItemArgumentCaptor.getValue();
+    assertEquals(LOCATION_ID, capturedItem.getEffectiveLocationId());
+    assertEquals(createdItem, result);
+  }
+
+  @Test
+  void checkIfItemExistsAndCreate_NullLocationCode_negative() {
+    DcbHubProperties dcbHubProperties = new DcbHubProperties();
+    dcbHubProperties.setFetchDcbLocationsEnabled(true);
+    ReflectionTestUtils.setField(circulationItemService,  "dcbHubProperties", dcbHubProperties);
+    // Mock
+    var randomUuid = UUID.randomUUID().toString();
+    String locationCode = null;
+    var dcbItem = DcbItem.builder().barcode("barcode123").title("title").id(randomUuid).locationCode(locationCode).build();
+    var pickupServicePointId = "pickupPointId";
+
+    when(circulationItemClient.fetchItemByCqlQuery(any()))
+      .thenReturn(CirculationItemCollection.builder().items(Collections.emptyList()).build());
+
+    var dcbHolding = HoldingsStorageClient.Holding.builder().id(randomUuid).build();
+    when(holdingsService.fetchDcbHoldingOrCreateIfMissing()).thenReturn(dcbHolding);
+
+    when(itemService.fetchItemMaterialTypeIdByMaterialTypeName(any())).thenReturn(randomUuid);
+
+    var createdItem = CirculationItem.builder().id(randomUuid).barcode("barcode123").build();
+    when(circulationItemClient.createCirculationItem(any(), any())).thenReturn(createdItem);
 
     // Act
     var result = circulationItemService.checkIfItemExistsAndCreate(dcbItem, pickupServicePointId, dcbItem.getLocationCode());
@@ -204,7 +243,9 @@ class CirculationItemServiceImplTest {
 
   @Test
   void checkIfItemExistsAndCreate_ShadowLocationLookupDisabled_negative() {
-    ReflectionTestUtils.setField(circulationItemService, "isFetchDcbHubLocationsEnabled", false);
+    DcbHubProperties dcbHubProperties = new DcbHubProperties();
+    dcbHubProperties.setFetchDcbLocationsEnabled(false);
+    ReflectionTestUtils.setField(circulationItemService,  "dcbHubProperties", dcbHubProperties);
     // Mock
     String locationCode = "shadowLocationCode";
     var randomUuid = UUID.randomUUID().toString();
