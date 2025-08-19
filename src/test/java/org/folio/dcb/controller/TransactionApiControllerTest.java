@@ -59,6 +59,7 @@ import org.folio.dcb.client.feign.CirculationClient;
 import org.folio.dcb.client.feign.CirculationLoanPolicyStorageClient;
 import org.folio.dcb.client.feign.HoldingsStorageClient;
 import org.folio.dcb.client.feign.InventoryItemStorageClient;
+import org.folio.dcb.config.DcbHubProperties;
 import org.folio.dcb.domain.dto.CirculationRequest;
 import org.folio.dcb.domain.dto.DcbItem;
 import org.folio.dcb.domain.dto.DcbTransaction;
@@ -1802,7 +1803,9 @@ class TransactionApiControllerTest extends BaseIT {
   @MethodSource("transactionRolesExceptLender")
   void createTransactionAndTestDCBFDefaultLocationWhenShadowLookupDisabled(DcbTransaction.RoleEnum role) throws Exception {
     wireMockServer.resetRequests();
-    ReflectionTestUtils.setField(circulationItemService,  "isFetchDcbHubLocationsEnabled", null);
+    DcbHubProperties dcbHubProperties = new DcbHubProperties();
+    dcbHubProperties.setFetchDcbLocationsEnabled(false);
+    ReflectionTestUtils.setField(circulationItemService,  "dcbHubProperties", dcbHubProperties);
     removeExistedTransactionFromDbIfSoExists();
     removeExistingTransactionsByItemId(ITEM_ID);
 
@@ -1829,7 +1832,9 @@ class TransactionApiControllerTest extends BaseIT {
   @MethodSource("transactionRolesExceptLender")
   void createTransactionAndTestDCBFDefaultLocationWhenLocationCodeNotFound(DcbTransaction.RoleEnum role) throws Exception {
     wireMockServer.resetRequests();
-    ReflectionTestUtils.setField(circulationItemService,  "isFetchDcbHubLocationsEnabled", true);
+    DcbHubProperties dcbHubProperties = new DcbHubProperties();
+    dcbHubProperties.setFetchDcbLocationsEnabled(true);
+    ReflectionTestUtils.setField(circulationItemService,  "dcbHubProperties", dcbHubProperties);
     removeExistedTransactionFromDbIfSoExists();
     removeExistingTransactionsByItemId(ITEM_ID);
 
@@ -1857,7 +1862,9 @@ class TransactionApiControllerTest extends BaseIT {
   @MethodSource("transactionRolesExceptLender")
   void createTransactionAndTestLocationIdFoundByLocationCode(DcbTransaction.RoleEnum role) throws Exception {
     wireMockServer.resetRequests();
-    ReflectionTestUtils.setField(circulationItemService,  "isFetchDcbHubLocationsEnabled", true);
+    DcbHubProperties dcbHubProperties = new DcbHubProperties();
+    dcbHubProperties.setFetchDcbLocationsEnabled(true);
+    ReflectionTestUtils.setField(circulationItemService,  "dcbHubProperties", dcbHubProperties);
     removeExistedTransactionFromDbIfSoExists();
     removeExistingTransactionsByItemId(ITEM_ID);
 

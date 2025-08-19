@@ -7,6 +7,7 @@ import org.folio.dcb.client.feign.CirculationItemClient;
 import static org.folio.dcb.client.feign.LocationsClient.LocationDTO;
 
 import org.folio.dcb.client.feign.LocationsClient;
+import org.folio.dcb.config.DcbHubProperties;
 import org.folio.dcb.domain.dto.CirculationItem;
 import org.folio.dcb.domain.dto.DcbItem;
 import org.folio.dcb.domain.dto.ItemStatus;
@@ -15,7 +16,6 @@ import org.folio.dcb.service.HoldingsService;
 import org.folio.dcb.service.ItemService;
 import org.folio.spring.model.ResultList;
 import org.folio.util.StringUtil;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
@@ -37,11 +37,7 @@ public class CirculationItemServiceImpl implements CirculationItemService {
   private final CirculationItemClient circulationItemClient;
   private final LocationsClient locationsClient;
   private final HoldingsService holdingsService;
-
-
-  @Value("${application.dcb-hub.fetch-dcb-locations-enabled}")
-  private Boolean isFetchDcbHubLocationsEnabled;
-
+  private final DcbHubProperties dcbHubProperties;
 
   @Override
   public CirculationItem checkIfItemExistsAndCreate(DcbItem dcbItem, String pickupServicePointId, String locationCode) {
@@ -58,12 +54,12 @@ public class CirculationItemServiceImpl implements CirculationItemService {
 
   private String fetchShadowLocationIdByLocationCode(String locationCode) {
     log.debug(
-      "fetchShadowLocationIdByLocationCode:: Fetching shadow location id by location code: {} and isFetchDcbHubLocationsEnabled: {}",
-      locationCode, isFetchDcbHubLocationsEnabled);
-    if(Boolean.TRUE.equals(isFetchDcbHubLocationsEnabled) && StringUtils.isNotBlank(locationCode)) {
+      "fetchShadowLocationIdByLocationCode:: Fetching shadow location id by location code: {} and fetch-dcb-locations-enabled: {}",
+      locationCode, dcbHubProperties.getFetchDcbLocationsEnabled());
+    if(Boolean.TRUE.equals(dcbHubProperties.getFetchDcbLocationsEnabled()) && StringUtils.isNotBlank(locationCode)) {
       ResultList<LocationDTO> locationDTOResult = locationsClient.findLocationByQuery(String.format("code==%s", locationCode), true, 1, 0);
       if(locationDTOResult.getResult().isEmpty()) {
-        log.warn(
+        log.debug(
           "fetchShadowLocationIdByLocationCode:: No shadow location found for code: {}. Falling back to default location id: {}, code: {}, name: {}",
           locationCode, LOCATION_ID, CODE, NAME);
         return LOCATION_ID;
@@ -74,7 +70,7 @@ public class CirculationItemServiceImpl implements CirculationItemService {
         locationCode, locationDTO.getId());
       return locationDTO.getId();
     } else {
-      log.warn(
+      log.debug(
         "fetchShadowLocationIdByLocationCode:: Shadow location lookup is disabled or location code is blank. " +
         "Falling back to default location id: {}, code: {}, name: {}",
         LOCATION_ID, CODE, NAME);
