@@ -62,8 +62,8 @@ public class BaseLibraryService {
     if (BooleanUtils.isFalse(selfBorrowing)) {
       // check existence of virtual item only if selfBorrowing is false, item will be real if selfBorrowing is true.
       checkItemExistsInInventoryAndThrow(itemVirtualOrReal.getBarcode());
-      CirculationItem item = circulationItemService.checkIfItemExistsAndCreate(itemVirtualOrReal, pickupServicePointId,
-        Optional.ofNullable(dcbTransaction.getItem()).map(DcbItem::getLocationCode).orElse(null));
+      var locationCode = Optional.ofNullable(dcbTransaction.getItem()).map(DcbItem::getLocationCode).orElse(null);
+      CirculationItem item = circulationItemService.checkIfItemExistsAndCreate(itemVirtualOrReal, pickupServicePointId, locationCode);
       dcbTransaction.getItem().setId(item.getId());
     }
     checkOpenTransactionExistsAndThrow(dcbTransaction.getItem().getId());
