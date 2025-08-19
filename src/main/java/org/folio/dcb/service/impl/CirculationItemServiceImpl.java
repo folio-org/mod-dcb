@@ -60,7 +60,7 @@ public class CirculationItemServiceImpl implements CirculationItemService {
       "fetchShadowLocationIdByLocationCode:: Fetching shadow location id by location code: {} and isShadowLocationLookupEnabled: {}",
       locationCode, isShadowLocationLookupEnabled);
     if(Boolean.TRUE.equals(isShadowLocationLookupEnabled) && StringUtils.isNotBlank(locationCode)) {
-      ResultList<LocationDTO> locationDTOResult = locationsClient.findLocationByQuery(String.format("code==%s", locationCode), true, 10, 0);
+      ResultList<LocationDTO> locationDTOResult = locationsClient.findLocationByQuery(String.format("code==%s", locationCode), true, 1, 0);
       if(locationDTOResult.getResult().isEmpty()) {
         log.warn(
           "fetchShadowLocationIdByLocationCode:: No shadow location found for code: {}. Falling back to default location id: {}, code: {}, name: {}",

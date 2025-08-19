@@ -117,7 +117,7 @@ class CirculationItemServiceImplTest {
     String mockEffectiveLocationId = UUID.randomUUID().toString();
     LocationDTO locationDTO = LocationDTO.builder()
       .id(mockEffectiveLocationId).name("locationName").code(locationCode).build();
-    when(locationsClient.findLocationByQuery(String.format("code==%s", locationCode), true, 10, 0))
+    when(locationsClient.findLocationByQuery(String.format("code==%s", locationCode), true, 1, 0))
       .thenReturn(ResultList.of(1, List.of(locationDTO)));
 
     // Act
@@ -151,7 +151,7 @@ class CirculationItemServiceImplTest {
     var createdItem = CirculationItem.builder().id(randomUuid).barcode("barcode123").build();
     when(circulationItemClient.createCirculationItem(any(), any())).thenReturn(createdItem);
 
-    when(locationsClient.findLocationByQuery(String.format("code==%s", locationCode), true, 10, 0))
+    when(locationsClient.findLocationByQuery(String.format("code==%s", locationCode), true, 1, 0))
       .thenReturn(ResultList.of(0, Collections.emptyList()));
 
     // Act
@@ -187,7 +187,7 @@ class CirculationItemServiceImplTest {
     when(circulationItemClient.createCirculationItem(any(), any())).thenReturn(createdItem);
 
     if(Objects.nonNull(locationCode)) {
-      when(locationsClient.findLocationByQuery("code==nonExistedShadowLocationCode", true, 10, 0))
+      when(locationsClient.findLocationByQuery("code==nonExistedShadowLocationCode", true, 1, 0))
         .thenReturn(ResultList.of(0, Collections.emptyList()));
     }
 
