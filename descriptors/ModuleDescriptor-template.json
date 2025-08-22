@@ -448,7 +448,8 @@
       { "name": "KAFKA_SSL_TRUSTSTORE_LOCATION", "value": "" },
       { "name": "KAFKA_SSL_TRUSTSTORE_PASSWORD", "value": "" },
       { "name": "OKAPI_URL",  "value": "http://okapi:9130" },
-      { "name": "ENV", "value": "folio" }
+      { "name": "ENV", "value": "folio" },
+      { "name": "FETCH_DCB_LOCATIONS_ENABLED", "value": "false" }
     ]
   }
 }
