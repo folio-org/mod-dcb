@@ -1,0 +1,48 @@
+openapi: 3.0.3
+info:
+  title: dcb hub shadow location refresh API
+  description: dcb hub shadow location refresh API
+  version: 1.0.0
+paths:
+  /dcb/shadow-locations/refresh:
+    description: dcb hub shadow location refresh endpoint
+    post:
+      tags:
+        - RefreshShadowLocations
+      description: Refresh shadow location
+      operationId: refreshShadowLocation
+      responses:
+        '201':
+          $ref: '#/components/responses/RefreshShadowLocationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+components:
+  responses:
+    RefreshShadowLocationResponse:
+      description: DCB hub shadow location refresh response
+      content:
+        application/json:
+          schema:
+            $ref: "schemas/refreshShadowLocationResponse.yaml#/RefreshShadowLocationResponse"
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: "schemas/common.yaml#/Error"
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: "schemas/common.yaml#/Error"
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: "schemas/common.yaml#/Error"

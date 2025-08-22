@@ -2,10 +2,13 @@ package org.folio.dcb.controller;
 
 import feign.FeignException;
 import lombok.extern.log4j.Log4j2;
+
+import org.folio.dcb.exception.DcbHubLocationException;
 import org.folio.dcb.exception.ResourceAlreadyExistException;
 import org.folio.dcb.exception.StatusException;
 import org.folio.spring.exception.NotFoundException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -82,6 +85,13 @@ public class ExceptionHandlingController {
   public Errors handleValidationErrors(Exception ex) {
     logExceptionMessage(ex);
     return createExternalError(ex.getMessage(), VALIDATION_ERROR);
+  }
+
+  @ExceptionHandler(DcbHubLocationException.class)
+  public ResponseEntity<Errors> handleDcbHubLocationException(DcbHubLocationException ex) {
+    logExceptionMessage(ex);
+    return ResponseEntity.status(ex.getHttpStatus())
+      .body(createInternalError(ex.getMessage(), null));
   }
 
   private void logExceptionMessage(Exception ex) {
