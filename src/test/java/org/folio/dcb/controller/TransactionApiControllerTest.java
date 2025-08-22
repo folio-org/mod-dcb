@@ -1,5 +1,10 @@
 package org.folio.dcb.controller;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.matchingJsonPath;
+import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWER;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWING_PICKUP;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.PICKUP;
@@ -54,6 +59,7 @@ import org.folio.dcb.client.feign.CirculationClient;
 import org.folio.dcb.client.feign.CirculationLoanPolicyStorageClient;
 import org.folio.dcb.client.feign.HoldingsStorageClient;
 import org.folio.dcb.client.feign.InventoryItemStorageClient;
+import org.folio.dcb.config.DcbHubProperties;
 import org.folio.dcb.domain.dto.CirculationRequest;
 import org.folio.dcb.domain.dto.DcbItem;
 import org.folio.dcb.domain.dto.DcbTransaction;
@@ -80,6 +86,8 @@ import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.repository.TransactionAuditRepository;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.RequestService;
+import org.folio.dcb.service.impl.CirculationItemServiceImpl;
+import org.folio.dcb.utils.DCBConstants;
 import org.folio.spring.model.ResultList;
 import org.folio.spring.service.SystemUserScopedExecutionService;
 import org.junit.jupiter.api.Test;
@@ -91,7 +99,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MvcResult;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -106,6 +117,22 @@ class TransactionApiControllerTest extends BaseIT {
   private static final String DUPLICATE_ERROR_TRANSACTION_ID = "-1";
 
   private final ArgumentCaptor<CirculationRequest> captor = ArgumentCaptor.forClass(CirculationRequest.class);
+
+  @DynamicPropertySource
+  static void registerProperties(DynamicPropertyRegistry registry) {
+    registry.add("application.dcb-hub.fetch-dcb-locations-enabled", () -> true);
+    registry.add("application.dcb-hub.locations-url", BaseIT::getOkapiUrl);
+    String dcbCredentialsJson = String.format("""
+    {
+      "client_id": "client-id-54321",
+      "client_secret": "client_secret_54321",
+      "username": "admin54321",
+      "password": "admin54321",
+      "keycloak_url": "%s/realms/master/protocol/openid-connect/token"
+    }
+    """, getOkapiUrl());
+    registry.add("application.secret-store.ephemeral.content.folio_diku_dcb-hub-credentials", () -> dcbCredentialsJson);
+  }
 
   @Autowired
   private TransactionRepository transactionRepository;
@@ -124,6 +151,8 @@ class TransactionApiControllerTest extends BaseIT {
   private HoldingsStorageClient holdingsStorageClient;
   @MockitoSpyBean
   private RequestService requestService;
+  @MockitoSpyBean
+  private CirculationItemServiceImpl circulationItemService;
 
   @Test
   void createLendingCirculationRequestTest() throws Exception {
@@ -1760,5 +1789,102 @@ class TransactionApiControllerTest extends BaseIT {
         assertNotNull(transactionEntity);
         assertNull(transactionEntity.getItemLocationCode());
       });
+  }
+
+  private static Stream<Arguments> transactionRolesExceptLender() {
+    return Stream.of(
+      Arguments.of(BORROWER),
+      Arguments.of(BORROWING_PICKUP),
+      Arguments.of(PICKUP)
+    );
+  }
+
+  @ParameterizedTest
+  @MethodSource("transactionRolesExceptLender")
+  void createTransactionAndTestDCBFDefaultLocationWhenShadowLookupDisabled(DcbTransaction.RoleEnum role) throws Exception {
+    wireMockServer.resetRequests();
+    DcbHubProperties dcbHubProperties = new DcbHubProperties();
+    dcbHubProperties.setFetchDcbLocationsEnabled(false);
+    ReflectionTestUtils.setField(circulationItemService,  "dcbHubProperties", dcbHubProperties);
+    removeExistedTransactionFromDbIfSoExists();
+    removeExistingTransactionsByItemId(ITEM_ID);
+
+    DcbTransaction dcbTransaction = createDcbTransactionByRole(role);
+    dcbTransaction.getItem().barcode("DCB_NON_EXISTED_ITEM");
+
+    this.mockMvc.perform(
+        post("/transactions/" + DCB_TRANSACTION_ID)
+          .content(asJsonString(dcbTransaction))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isCreated())
+      .andExpect(jsonPath("$.status").value("CREATED"));
+
+    wireMockServer.verify( 0, getRequestedFor(urlPathMatching(".*/locations.*"))
+      .withQueryParam("query", equalTo("code==LOC-1")));
+    wireMockServer.verify(1, postRequestedFor(urlPathMatching(".*/circulation-item/.*"))
+      .withRequestBody(matchingJsonPath("$.effectiveLocationId", equalTo(DCBConstants.LOCATION_ID))));
+    wireMockServer.resetRequests();
+  }
+
+  @ParameterizedTest
+  @MethodSource("transactionRolesExceptLender")
+  void createTransactionAndTestDCBFDefaultLocationWhenLocationCodeNotFound(DcbTransaction.RoleEnum role) throws Exception {
+    wireMockServer.resetRequests();
+    DcbHubProperties dcbHubProperties = new DcbHubProperties();
+    dcbHubProperties.setFetchDcbLocationsEnabled(true);
+    ReflectionTestUtils.setField(circulationItemService,  "dcbHubProperties", dcbHubProperties);
+    removeExistedTransactionFromDbIfSoExists();
+    removeExistingTransactionsByItemId(ITEM_ID);
+
+    DcbTransaction dcbTransaction = createDcbTransactionByRole(role);
+    dcbTransaction.getItem().barcode("DCB_NON_EXISTED_ITEM");
+    dcbTransaction.getItem().locationCode("NON_EXISTED_LOCATION_CODE");
+
+    this.mockMvc.perform(
+        post("/transactions/" + DCB_TRANSACTION_ID)
+          .content(asJsonString(dcbTransaction))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isCreated())
+      .andExpect(jsonPath("$.status").value("CREATED"));
+
+    wireMockServer.verify( 1, getRequestedFor(urlPathMatching(".*/locations.*"))
+      .withQueryParam("query", equalTo("code==" + dcbTransaction.getItem().getLocationCode())));
+    wireMockServer.verify(1, postRequestedFor(urlPathMatching(".*/circulation-item/.*"))
+      .withRequestBody(matchingJsonPath("$.effectiveLocationId", equalTo(DCBConstants.LOCATION_ID))));
+    wireMockServer.resetRequests();
+  }
+
+  @ParameterizedTest
+  @MethodSource("transactionRolesExceptLender")
+  void createTransactionAndTestLocationIdFoundByLocationCode(DcbTransaction.RoleEnum role) throws Exception {
+    wireMockServer.resetRequests();
+    DcbHubProperties dcbHubProperties = new DcbHubProperties();
+    dcbHubProperties.setFetchDcbLocationsEnabled(true);
+    ReflectionTestUtils.setField(circulationItemService,  "dcbHubProperties", dcbHubProperties);
+    removeExistedTransactionFromDbIfSoExists();
+    removeExistingTransactionsByItemId(ITEM_ID);
+
+    DcbTransaction dcbTransaction = createDcbTransactionByRole(role);
+    dcbTransaction.getItem().barcode("DCB_NON_EXISTED_ITEM");
+    dcbTransaction.getItem().locationCode("EXISTED_LOCATION_CODE");
+
+    this.mockMvc.perform(
+        post("/transactions/" + DCB_TRANSACTION_ID)
+          .content(asJsonString(dcbTransaction))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isCreated())
+      .andExpect(jsonPath("$.status").value("CREATED"));
+
+    wireMockServer.verify( 1, getRequestedFor(urlPathMatching(".*/locations.*"))
+      .withQueryParam("query", equalTo("code==" + dcbTransaction.getItem().getLocationCode())));
+    wireMockServer.verify(1, postRequestedFor(urlPathMatching(".*/circulation-item/.*"))
+      .withRequestBody(matchingJsonPath("$.effectiveLocationId", equalTo("fbc42f2c-6cd0-4637-93c0-9344f8408268"))));
+    wireMockServer.resetRequests();
   }
 }

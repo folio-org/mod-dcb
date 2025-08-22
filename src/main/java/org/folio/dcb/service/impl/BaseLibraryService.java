@@ -3,7 +3,6 @@ package org.folio.dcb.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.BooleanUtils;
-import org.apache.commons.lang3.ObjectUtils;
 import org.folio.dcb.domain.dto.CirculationItem;
 import org.folio.dcb.domain.dto.CirculationRequest;
 import org.folio.dcb.domain.dto.DcbItem;
@@ -34,7 +33,6 @@ import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_IN;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
 import static org.folio.dcb.utils.DCBConstants.DCB_TYPE;
-import static org.folio.dcb.utils.DCBConstants.SHADOW_TYPE;
 
 @Service
 @RequiredArgsConstructor
@@ -64,7 +62,8 @@ public class BaseLibraryService {
     if (BooleanUtils.isFalse(selfBorrowing)) {
       // check existence of virtual item only if selfBorrowing is false, item will be real if selfBorrowing is true.
       checkItemExistsInInventoryAndThrow(itemVirtualOrReal.getBarcode());
-      CirculationItem item = circulationItemService.checkIfItemExistsAndCreate(itemVirtualOrReal, pickupServicePointId);
+      var locationCode = Optional.ofNullable(dcbTransaction.getItem()).map(DcbItem::getLocationCode).orElse(null);
+      CirculationItem item = circulationItemService.checkIfItemExistsAndCreate(itemVirtualOrReal, pickupServicePointId, locationCode);
       dcbTransaction.getItem().setId(item.getId());
     }
     checkOpenTransactionExistsAndThrow(dcbTransaction.getItem().getId());
@@ -155,7 +154,8 @@ public class BaseLibraryService {
     DcbPatron dcbPatron = transactionMapper.mapTransactionEntityToDcbPatron(transactionEntity);
     DcbItem dcbItem = transactionMapper.convertTransactionUpdateItemToDcbItem(dcbUpdateItem, transactionEntity);
     checkItemExistsInInventoryAndThrow(dcbItem.getBarcode());
-    CirculationItem item = circulationItemService.checkIfItemExistsAndCreate(dcbItem, transactionEntity.getServicePointId());
+    CirculationItem item = circulationItemService.checkIfItemExistsAndCreate(dcbItem, transactionEntity.getServicePointId(),
+      dcbItem.getLocationCode());
     dcbItem.setId(item.getId());
     checkOpenTransactionExistsAndThrow(item.getId());
     circulationService.cancelRequest(transactionEntity, true);

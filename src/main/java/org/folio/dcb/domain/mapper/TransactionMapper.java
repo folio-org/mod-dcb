@@ -102,6 +102,7 @@ public class TransactionMapper {
       .barcode(dcbUpdateItem.getBarcode())
       .materialType(dcbUpdateItem.getMaterialType())
       .title(entity.getItemTitle())
+      .locationCode(entity.getItemLocationCode())
       .build();
   }
 
