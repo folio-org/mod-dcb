@@ -52,12 +52,12 @@ class PickupLibraryServiceTest {
     when(userService.fetchOrCreateUser(any()))
       .thenReturn(user);
     when(requestService.createHoldItemRequest(any(), any(), anyString())).thenReturn(createCirculationRequest());
-    when(circulationItemService.checkIfItemExistsAndCreate(any(), any())).thenReturn(circulationItem);
+    when(circulationItemService.checkIfItemExistsAndCreate(any(), any(), any())).thenReturn(circulationItem);
     doNothing().when(baseLibraryService).saveDcbTransaction(any(), any(), any());
 
     var response = pickupLibraryService.createCirculation(DCB_TRANSACTION_ID, createDcbTransactionByRole(PICKUP));
     verify(userService).fetchOrCreateUser(patron);
-    verify(circulationItemService).checkIfItemExistsAndCreate(item, PICKUP_SERVICE_POINT_ID);
+    verify(circulationItemService).checkIfItemExistsAndCreate(item, PICKUP_SERVICE_POINT_ID, item.getLocationCode());
     verify(requestService).createHoldItemRequest(user, item, PICKUP_SERVICE_POINT_ID);
 
     assertEquals(TransactionStatusResponse.StatusEnum.CREATED, response.getStatus());
