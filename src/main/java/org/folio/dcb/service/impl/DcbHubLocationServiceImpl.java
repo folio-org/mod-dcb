@@ -64,7 +64,7 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
 
       if (!Boolean.TRUE.equals(dcbHubProperties.getFetchDcbLocationsEnabled())) {
         log.info("createShadowLocations:: DCB Hub locations fetching is disabled, skipping shadow location creation");
-        throw new DcbHubLocationException("DCB Hub locations fetching is disabled, skipping shadow location creation", HttpStatus.BAD_REQUEST);
+        throw new DcbHubLocationException("DCB Hub locations fetching is disabled", HttpStatus.BAD_REQUEST);
       }
 
       List<ServicePointRequest> servicePointList = servicePointClient.getServicePointByName(NAME).getResult();

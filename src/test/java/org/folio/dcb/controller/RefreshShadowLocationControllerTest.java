@@ -195,7 +195,7 @@ class RefreshShadowLocationControllerTest extends BaseIT {
           .contentType(MediaType.APPLICATION_JSON)
           .accept(MediaType.APPLICATION_JSON))
       .andExpect(status().isBadRequest())
-      .andExpect(jsonPath("$.errors[0].message", containsString("DCB Hub locations fetching is disabled, skipping shadow location creation")));
+      .andExpect(jsonPath("$.errors[0].message", containsString("DCB Hub locations fetching is disabled")));
   }
 
   @Test
