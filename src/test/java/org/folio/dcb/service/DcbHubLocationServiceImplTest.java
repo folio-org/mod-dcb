@@ -38,7 +38,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import feign.FeignException;
@@ -304,14 +303,9 @@ class DcbHubLocationServiceImplTest {
       .thenReturn(emptyResponse);
 
     // When
-    DcbHubLocationException dcbHubLocationException = assertThrows(DcbHubLocationException.class, () -> {
-      dcbHubLocationService.createShadowLocations();
-    });
+    dcbHubLocationService.createShadowLocations();
 
     // Then
-    assertThat(dcbHubLocationException.getMessage()).isEqualTo("No locations found in DCB Hub, skipping shadow location creation");
-    assertThat(dcbHubLocationException.getHttpStatus()).isEqualTo(HttpStatus.NOT_FOUND);
-
     verify(dcbHubLocationClient).getLocations(1, 5, BEARER_TOKEN);
     verify(locationUnitClient, never()).createInstitution(any());
     verify(locationUnitClient, never()).createCampus(any());

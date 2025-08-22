@@ -1,10 +1,13 @@
 package org.folio.dcb.service.impl;
 
+import static org.folio.dcb.client.feign.LocationUnitClient.LocationUnit;
+import static org.folio.dcb.utils.DCBConstants.NAME;
+import static org.folio.dcb.utils.DcbHubLocationsGroupingUtil.groupByAgency;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -12,10 +15,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.folio.dcb.client.feign.DcbHubLocationClient;
 import org.folio.dcb.client.feign.InventoryServicePointClient;
 import org.folio.dcb.client.feign.LocationUnitClient;
-import static org.folio.dcb.client.feign.LocationUnitClient.LocationUnit;
-import static org.folio.dcb.utils.DCBConstants.NAME;
-import static org.folio.dcb.utils.DcbHubLocationsGroupingUtil.groupByAgency;
-
 import org.folio.dcb.client.feign.LocationsClient;
 import org.folio.dcb.config.DcbHubProperties;
 import org.folio.dcb.domain.dto.LocationUnitsStatus;
@@ -59,7 +58,6 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
   @Value("${application.dcb-hub.batch-size}")
   private Integer batchSize;
 
-  @Override
   public RefreshShadowLocationResponse createShadowLocations() {
     try {
       log.debug("createShadowLocations:: creating shadow locations");
@@ -74,7 +72,7 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
         log.info(
           "createShadowLocations:: No service points found with name {}, So cannot create shadow locations without {} service point",
           NAME, NAME);
-        throw new DcbHubLocationException(String.format("No service points found with name %s, So cannot create shadow locations without %s service point", NAME, NAME), HttpStatus.NOT_FOUND);
+        throw new DcbHubLocationException("DCB Service point is not found", HttpStatus.NOT_FOUND);
       }
 
       ServicePointRequest servicePointRequest = servicePointList.getFirst();
@@ -82,15 +80,13 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
 
       List<DcbHubLocationResponse.Location> locationList = fetchDcbHubAllLocations();
       if (CollectionUtils.isEmpty(locationList)) {
-        log.info("createShadowLocations:: No locations found in DCB Hub, skipping shadow location creation");
-        throw new DcbHubLocationException("No locations found in DCB Hub, skipping shadow location creation", HttpStatus.NOT_FOUND);
+        log.warn("createShadowLocations:: No locations found in DCB Hub, skipping shadow location creation");
+        return new RefreshShadowLocationResponse();
       }
 
-      RefreshShadowLocationResponse refreshShadowLocationResponse = new RefreshShadowLocationResponse()
-        .locationUnits(new RefreshShadowLocationResponseLocationUnits());
-      createShadowLocations(servicePointRequest, locationList, refreshShadowLocationResponse);
+      RefreshShadowLocationResponse response = createShadowLocations(servicePointRequest, locationList);
       log.info("createShadowLocations:: shadow locations created");
-      return refreshShadowLocationResponse;
+      return response;
     } catch (FeignException e) {
       log.error("createShadowLocations:: FeignException while fetching locations from DCB Hub", e);
       throw new DcbHubLocationException("FeignException while fetching locations from DCB Hub", HttpStatus.resolve(e.status()), e);
@@ -102,51 +98,70 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
     }
   }
 
-  private void createShadowLocations(ServicePointRequest servicePointRequest, List<DcbHubLocationResponse.Location> locations,
-    RefreshShadowLocationResponse refreshShadowLocationResponse) {
-    Map<AgencyKey, List<LocationCodeNamePair>> locationsGroupedByAgency =
-      groupByAgency(locations);
+  private RefreshShadowLocationResponse createShadowLocations(
+    ServicePointRequest servicePointRequest,
+    List<DcbHubLocationResponse.Location> locations) {
 
-    Map<AgencyKey, LocationAgenciesIds> agencyLocationUnitMapping =
-      createLocationUnits(locationsGroupedByAgency.keySet(), refreshShadowLocationResponse);
+    Map<AgencyKey, List<LocationCodeNamePair>> locationsGroupedByAgency = groupByAgency(locations);
 
-    createShadowLocationEntries(locationsGroupedByAgency, agencyLocationUnitMapping, servicePointRequest, refreshShadowLocationResponse);
+    LocationUnitsResult locationUnitsResult = createLocationUnits(locationsGroupedByAgency.keySet());
+    List<LocationsStatus> locationStatuses = createShadowLocationEntries(
+      locationsGroupedByAgency,
+      locationUnitsResult.agencyLocationUnitMapping,
+      servicePointRequest);
+
+    return new RefreshShadowLocationResponse()
+      .locationUnits(locationUnitsResult.locationUnits)
+      .locations(locationStatuses);
   }
 
-  private Map<AgencyKey, LocationAgenciesIds> createLocationUnits(
-    Set<AgencyKey> agencies, RefreshShadowLocationResponse refreshShadowLocationResponse) {
-
-    Map<AgencyKey, LocationAgenciesIds> agencyLocationUnitMapping =
-      new HashMap<>();
+  private LocationUnitsResult createLocationUnits(Set<AgencyKey> agencies) {
+    RefreshShadowLocationResponseLocationUnits locationUnits = new RefreshShadowLocationResponseLocationUnits();
+    Map<AgencyKey, LocationAgenciesIds> agencyLocationUnitMapping = new HashMap<>();
 
     agencies.forEach(agencyKey -> {
       log.debug("createLocationUnits:: Creating units for agency: {} - {}",
         agencyKey.agencyCode(), agencyKey.agencyName());
 
-      LocationUnit institution = createInstitution(agencyKey, refreshShadowLocationResponse);
-      LocationUnit campus = createCampus(agencyKey, institution, refreshShadowLocationResponse);
-      LocationUnit library = createLibrary(agencyKey, campus, refreshShadowLocationResponse);
+      InstitutionResult institutionResult = createInstitution(agencyKey);
+      locationUnits.addInstitutionsItem(institutionResult.locationUnitsStatus);
+
+      CampusResult campusResult = createCampus(agencyKey, institutionResult.institution);
+      locationUnits.addCampusesItem(campusResult.locationUnitsStatus);
+
+      LibraryResult libraryResult = createLibrary(agencyKey, campusResult.campus);
+      locationUnits.addLibrariesItem(libraryResult.locationUnitsStatus);
 
       agencyLocationUnitMapping.put(agencyKey, new LocationAgenciesIds(
-        institution != null ? institution.getId() : null,
-        campus != null ? campus.getId() : null,
-        library != null ? library.getId() : null)
+        institutionResult.institution != null ? institutionResult.institution.getId() : null,
+        campusResult.campus != null ? campusResult.campus.getId() : null,
+        libraryResult.library != null ? libraryResult.library.getId() : null)
       );
     });
 
-    return agencyLocationUnitMapping;
+    return new LocationUnitsResult(locationUnits, agencyLocationUnitMapping);
   }
 
-  private LocationUnit createInstitution(AgencyKey agencyKey, RefreshShadowLocationResponse refreshShadowLocationResponse) {
+  private record LocationUnitsResult(
+    RefreshShadowLocationResponseLocationUnits locationUnits,
+    Map<AgencyKey, LocationAgenciesIds> agencyLocationUnitMapping) {
+  }
+
+  private InstitutionResult createInstitution(AgencyKey agencyKey) {
     try {
       ResultList<LocationUnit> locationUnitResultList =
-        locationUnitClient.findInstitutionsByQuery(formatAgencyQuery(agencyKey.agencyName(), agencyKey.agencyCode()), true,10, 0);
+        locationUnitClient.findInstitutionsByQuery(formatAgencyQuery(agencyKey.agencyName(), agencyKey.agencyCode()), true, 10, 0);
 
       if (CollectionUtils.isNotEmpty(locationUnitResultList.getResult())) {
         log.info("createInstitution:: Institution already exists for agency: {} - {}",
           agencyKey.agencyCode(), agencyKey.agencyName());
-        addInstitutionsResponse(refreshShadowLocationResponse, agencyKey, LocationUnitsStatus.StatusEnum.SKIPPED, null);
-        return locationUnitResultList.getResult().getFirst();
+
+        return new InstitutionResult(
+          locationUnitResultList.getResult().getFirst(),
+          LocationUnitsStatus.builder()
+            .code(agencyKey.agencyCode())
+            .status(LocationUnitsStatus.StatusEnum.SKIPPED)
+            .build());
       }
 
       LocationUnit institution = LocationUnit.builder()
@@ -156,27 +171,46 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
         .isShadow(true)
         .build();
       locationUnitClient.createInstitution(institution);
-      addInstitutionsResponse(refreshShadowLocationResponse, agencyKey, LocationUnitsStatus.StatusEnum.SUCCESS, null);
+
       log.debug("createInstitution:: Created institution: {} - {}", institution.getCode(), institution.getName());
-      return institution;
+
+      return new InstitutionResult(
+        institution,
+        LocationUnitsStatus.builder()
+          .code(agencyKey.agencyCode())
+          .status(LocationUnitsStatus.StatusEnum.SUCCESS)
+          .build());
     } catch (Exception e) {
       log.error("createInstitution:: Error creating institution for agency: {} - {}",
         agencyKey.agencyCode(), agencyKey.agencyName(), e);
-      addInstitutionsResponse(refreshShadowLocationResponse, agencyKey, LocationUnitsStatus.StatusEnum.ERROR, e.getMessage());
-      return null;
+
+      return new InstitutionResult(
+        null,
+        LocationUnitsStatus.builder()
+          .code(agencyKey.agencyCode())
+          .status(LocationUnitsStatus.StatusEnum.ERROR)
+          .cause(e.getMessage())
+          .build());
     }
   }
 
-  private LocationUnit createCampus(
-    AgencyKey agencyKey, LocationUnit institution, RefreshShadowLocationResponse refreshShadowLocationResponse) {
+  private record InstitutionResult(LocationUnit institution, LocationUnitsStatus locationUnitsStatus) {}
+
+  private CampusResult createCampus(AgencyKey agencyKey, LocationUnit institution) {
     try {
       if (institution == null) {
         log.error("createCampus:: Institution is null for agency: {} - {}, cannot create campus",
           agencyKey.agencyCode(), agencyKey.agencyName());
-        addCampusResponse(refreshShadowLocationResponse, agencyKey, LocationUnitsStatus.StatusEnum.SKIPPED,
-          "Institution is null and it was not created, so cannot create campus");
-        return null;
+
+        return new CampusResult(
+          null,
+          LocationUnitsStatus.builder()
+            .code(agencyKey.agencyCode())
+            .status(LocationUnitsStatus.StatusEnum.SKIPPED)
+            .cause("Institution is null and it was not created, so cannot create campus")
+            .build());
       }
+
       ResultList<LocationUnit> locationUnitResultList =
         locationUnitClient.findCampusesByQuery(
           formatAgencyQuery(agencyKey.agencyName(), agencyKey.agencyCode()), true, 10, 0);
@@ -184,8 +218,13 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
       if (!locationUnitResultList.getResult().isEmpty()) {
         log.info("createCampus:: campus already exists for agency: {} - {}",
           agencyKey.agencyCode(), agencyKey.agencyName());
-        addCampusResponse(refreshShadowLocationResponse, agencyKey, LocationUnitsStatus.StatusEnum.SKIPPED, null);
-        return locationUnitResultList.getResult().getFirst();
+
+        return new CampusResult(
+          locationUnitResultList.getResult().getFirst(),
+          LocationUnitsStatus.builder()
+            .code(agencyKey.agencyCode())
+            .status(LocationUnitsStatus.StatusEnum.SKIPPED)
+            .build());
       }
 
       LocationUnit campus = LocationUnit.builder()
@@ -196,27 +235,46 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
         .isShadow(true)
         .build();
       locationUnitClient.createCampus(campus);
-      addCampusResponse(refreshShadowLocationResponse, agencyKey, LocationUnitsStatus.StatusEnum.SUCCESS, null);
+
       log.debug("createCampus:: Created campus: {} - {}", campus.getCode(), campus.getName());
-      return campus;
+
+      return new CampusResult(
+        campus,
+        LocationUnitsStatus.builder()
+          .code(agencyKey.agencyCode())
+          .status(LocationUnitsStatus.StatusEnum.SUCCESS)
+          .build());
     } catch (Exception e) {
       log.error("createCampus:: Error creating campus for agency: {} - {}",
         agencyKey.agencyCode(), agencyKey.agencyName(), e);
-      addCampusResponse(refreshShadowLocationResponse, agencyKey, LocationUnitsStatus.StatusEnum.ERROR, e.getMessage());
-      return null;
+
+      return new CampusResult(
+        null,
+        LocationUnitsStatus.builder()
+          .code(agencyKey.agencyCode())
+          .status(LocationUnitsStatus.StatusEnum.ERROR)
+          .cause(e.getMessage())
+          .build());
     }
   }
 
-  private LocationUnit createLibrary(
-    AgencyKey agencyKey, LocationUnit campus, RefreshShadowLocationResponse refreshShadowLocationResponse) {
+  private record CampusResult(LocationUnit campus, LocationUnitsStatus locationUnitsStatus) {}
+
+  private LibraryResult createLibrary(AgencyKey agencyKey, LocationUnit campus) {
     try {
       if (campus == null) {
         log.error("createLibrary:: Campus is null for agency: {} - {}, cannot create library",
           agencyKey.agencyCode(), agencyKey.agencyName());
-        addLibraryResponse(refreshShadowLocationResponse, agencyKey, LocationUnitsStatus.StatusEnum.SKIPPED,
-          "Campus is null and it was not created, so cannot create library");
-        return null;
+
+        return new LibraryResult(
+          null,
+          LocationUnitsStatus.builder()
+            .code(agencyKey.agencyCode())
+            .status(LocationUnitsStatus.StatusEnum.SKIPPED)
+            .cause("Campus is null and it was not created, so cannot create library")
+            .build());
       }
+
       ResultList<LocationUnit> locationUnitResultList =
         locationUnitClient.findLibrariesByQuery(
           formatAgencyQuery(agencyKey.agencyName(), agencyKey.agencyCode()), true, 10, 0);
@@ -224,8 +282,13 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
       if (!locationUnitResultList.getResult().isEmpty()) {
         log.info("createLibrary:: library already exists for agency: {} - {}",
           agencyKey.agencyCode(), agencyKey.agencyName());
-        addLibraryResponse(refreshShadowLocationResponse, agencyKey, LocationUnitsStatus.StatusEnum.SKIPPED, null);
-        return locationUnitResultList.getResult().getFirst();
+
+        return new LibraryResult(
+          locationUnitResultList.getResult().getFirst(),
+          LocationUnitsStatus.builder()
+            .code(agencyKey.agencyCode())
+            .status(LocationUnitsStatus.StatusEnum.SKIPPED)
+            .build());
       }
 
       LocationUnit library = LocationUnit.builder()
@@ -236,49 +299,68 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
         .isShadow(true)
         .build();
       locationUnitClient.createLibrary(library);
-      addLibraryResponse(refreshShadowLocationResponse, agencyKey, LocationUnitsStatus.StatusEnum.SUCCESS, null);
+
       log.debug("createLibrary:: Created library: {} - {}", library.getCode(), library.getName());
-      return library;
+
+      return new LibraryResult(
+        library,
+        LocationUnitsStatus.builder()
+          .code(agencyKey.agencyCode())
+          .status(LocationUnitsStatus.StatusEnum.SUCCESS)
+          .build());
     } catch (Exception e) {
       log.error("createLibrary:: Error creating library for agency: {} - {}",
         agencyKey.agencyCode(), agencyKey.agencyName(), e);
-      addLibraryResponse(refreshShadowLocationResponse, agencyKey, LocationUnitsStatus.StatusEnum.ERROR, e.getMessage());
-      return null;
+
+      return new LibraryResult(
+        null,
+        LocationUnitsStatus.builder()
+          .code(agencyKey.agencyCode())
+          .status(LocationUnitsStatus.StatusEnum.ERROR)
+          .cause(e.getMessage())
+          .build());
     }
   }
 
-  private @NotNull String formatAgencyQuery(String name, String code) {
-    return String.format("(name==%s AND code==%s)", name, code);
-  }
+  private record LibraryResult(LocationUnit library, LocationUnitsStatus locationUnitsStatus) {}
 
-  private void createShadowLocationEntries(
+  private List<LocationsStatus> createShadowLocationEntries(
     Map<AgencyKey, List<LocationCodeNamePair>> locationsGroupedByAgency,
     Map<AgencyKey, LocationAgenciesIds> agencyLocationUnitMapping,
-    ServicePointRequest servicePointRequest, RefreshShadowLocationResponse refreshShadowLocationResponse) {
+    ServicePointRequest servicePointRequest) {
+
+    List<LocationsStatus> locationStatuses = new ArrayList<>();
 
     locationsGroupedByAgency.forEach((agencyKey, locationCodeNamePairs) -> {
       log.debug("createShadowLocationEntries:: Processing agency: {} - {}",
         agencyKey.agencyCode(), agencyKey.agencyName());
 
       LocationAgenciesIds locationAgenciesIds = agencyLocationUnitMapping.get(agencyKey);
-      locationCodeNamePairs.forEach(
-        location -> createShadowLocation(location, locationAgenciesIds, servicePointRequest, refreshShadowLocationResponse));
+      locationCodeNamePairs.forEach(location -> {
+        LocationsStatus status = createShadowLocation(location, locationAgenciesIds, servicePointRequest);
+        locationStatuses.add(status);
+      });
     });
+
+    return locationStatuses;
   }
 
-  private void createShadowLocation(
+  private LocationsStatus createShadowLocation(
     LocationCodeNamePair location,
-    LocationAgenciesIds locationAgenciesIds, ServicePointRequest servicePointRequest,
-    RefreshShadowLocationResponse refreshShadowLocationResponse) {
+    LocationAgenciesIds locationAgenciesIds, ServicePointRequest servicePointRequest) {
     try {
       if (locationAgenciesIds.institutionId() == null ||
           locationAgenciesIds.libraryId() == null ||
           locationAgenciesIds.campusId() == null) {
         log.error("createShadowLocation:: Location agencies IDs are incomplete or null for location: {} - {}, cannot create shadow location. locationAgenciesIds are: {}",
           location.code(), location.name(), locationAgenciesIds.toString());
-        addLocationsResponse(refreshShadowLocationResponse, location, LocationsStatus.StatusEnum.SKIPPED,
-          String.format("Location agencies IDs are incomplete or null, cannot create shadow location. locationAgenciesIds are: %s", locationAgenciesIds));
-        return;
+        return LocationsStatus.builder()
+          .code(location.code())
+          .status(LocationsStatus.StatusEnum.SKIPPED)
+          .cause(String.format(
+            "Location agencies IDs are incomplete or null, cannot create shadow location. locationAgenciesIds are: %s",
+            locationAgenciesIds))
+          .build();
       }
 
       ResultList<LocationsClient.LocationDTO> locationDTOResultList =
@@ -286,8 +368,10 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
           formatAgencyQuery(location.name(), location.code()), true, 10, 0);
       if (!locationDTOResultList.getResult().isEmpty()) {
         log.info("createShadowLocation:: Location already exists: {} - {}, skipping...", location.code(), location.name());
-        addLocationsResponse(refreshShadowLocationResponse, location, LocationsStatus.StatusEnum.SKIPPED, null);
-        return;
+        return LocationsStatus.builder()
+          .code(location.code())
+          .status(LocationsStatus.StatusEnum.SKIPPED)
+          .build();
       }
 
       log.debug("createShadowLocation:: Creating shadow location: {} - {}",
@@ -306,13 +390,20 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
         .build();
 
       locationsClient.createLocation(shadowLocation);
-      addLocationsResponse(refreshShadowLocationResponse, location, LocationsStatus.StatusEnum.SUCCESS, null);
       log.debug("createShadowLocation:: Created shadow location: {} - {}",
         shadowLocation.getCode(), shadowLocation.getName());
+      return LocationsStatus.builder()
+        .code(location.code())
+        .status(LocationsStatus.StatusEnum.SUCCESS)
+        .build();
     } catch (Exception e) {
       log.error("createShadowLocation:: Unexpected error creating shadow location: {} - {}",
         location.code(), location.name(), e);
-      addLocationsResponse(refreshShadowLocationResponse, location, LocationsStatus.StatusEnum.ERROR, e.getMessage());
+      return LocationsStatus.builder()
+        .code(location.code())
+        .status(LocationsStatus.StatusEnum.ERROR)
+        .cause(e.getMessage())
+        .build();
     }
   }
 
@@ -342,39 +433,7 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
     return allLocations;
   }
 
-  private static void addInstitutionsResponse(RefreshShadowLocationResponse refreshShadowLocationResponse, AgencyKey agencyKey,
-    LocationUnitsStatus.StatusEnum statusEnum, String cause) {
-    Objects.requireNonNull(refreshShadowLocationResponse.getLocationUnits())
-      .addInstitutionsItem(LocationUnitsStatus.builder()
-        .code(agencyKey.agencyCode())
-        .status(statusEnum)
-        .cause(cause).build());
-  }
-
-  private static void addCampusResponse(RefreshShadowLocationResponse refreshShadowLocationResponse, AgencyKey agencyKey,
-    LocationUnitsStatus.StatusEnum statusEnum, String cause) {
-    Objects.requireNonNull(refreshShadowLocationResponse.getLocationUnits())
-      .addCampusesItem(LocationUnitsStatus.builder()
-        .code(agencyKey.agencyCode())
-        .status(statusEnum)
-        .cause(cause).build());
-  }
-
-  private static void addLibraryResponse(RefreshShadowLocationResponse refreshShadowLocationResponse, AgencyKey agencyKey,
-    LocationUnitsStatus.StatusEnum statusEnum, String cause) {
-    Objects.requireNonNull(refreshShadowLocationResponse.getLocationUnits())
-      .addLibrariesItem(LocationUnitsStatus.builder()
-        .code(agencyKey.agencyCode())
-        .status(statusEnum)
-        .cause(cause).build());
-  }
-
-  private static void addLocationsResponse(RefreshShadowLocationResponse refreshShadowLocationResponse,
-    LocationCodeNamePair locationCodeNamePair, LocationsStatus.StatusEnum statusEnum, String cause) {
-    refreshShadowLocationResponse.getLocations()
-      .add(LocationsStatus.builder()
-        .code(locationCodeNamePair.code())
-        .status(statusEnum)
-        .cause(cause).build());
+  private @NotNull String formatAgencyQuery(String name, String code) {
+    return String.format("(name==%s AND code==%s)", name, code);
   }
 }

@@ -213,8 +213,9 @@ class RefreshShadowLocationControllerTest extends BaseIT {
           .headers(defaultHeaders())
           .contentType(MediaType.APPLICATION_JSON)
           .accept(MediaType.APPLICATION_JSON))
-      .andExpect(status().isNotFound())
-      .andExpect(jsonPath("$.errors[0].message", containsString("No locations found in DCB Hub, skipping shadow location creation")));
+      .andExpect(status().isCreated())
+      .andExpect(jsonPath("$.locations").doesNotExist())
+      .andExpect(jsonPath("$.location-units").doesNotExist());
   }
 
   @Test
@@ -232,6 +233,6 @@ class RefreshShadowLocationControllerTest extends BaseIT {
           .contentType(MediaType.APPLICATION_JSON)
           .accept(MediaType.APPLICATION_JSON))
       .andExpect(status().isNotFound())
-      .andExpect(jsonPath("$.errors[0].message", containsString("No service points found with name DCB, So cannot create shadow locations without DCB service point")));
+      .andExpect(jsonPath("$.errors[0].message", containsString("DCB Service point is not found")));
   }
 }
