@@ -10,7 +10,7 @@ paths:
       description: Create circulation request
       operationId: createCirculationRequest
       tags:
-        - circulation
+        - transactions
       parameters:
         - $ref: '#/components/parameters/dcbTransactionId'
       requestBody:
@@ -28,7 +28,7 @@ paths:
       description: Update the details of a transaction
       operationId: updateTransactionDetails
       tags:
-        - circulation
+        - transactions
       parameters:
         - $ref: '#/components/parameters/dcbTransactionId'
       requestBody:
@@ -47,7 +47,7 @@ paths:
       description: Get transaction status across circulation institutions
       operationId: getTransactionStatusById
       tags:
-        - circulation
+        - transactions
       responses:
         '200':
           $ref: '#/components/responses/TransactionStatusResponse'
@@ -61,7 +61,7 @@ paths:
       description: Update transaction status across circulation institutions
       operationId: updateTransactionStatus
       tags:
-        - circulation
+        - transactions
       requestBody:
         $ref: '#/components/requestBodies/TransactionStatusBody'
       responses:
@@ -83,7 +83,7 @@ paths:
       description: Get a list of updated transactions between from date and to date with optional filtering and pagination
       operationId: getTransactionStatusList
       tags:
-        - circulation
+        - transactions
       responses:
         '200':
           $ref: '#/components/responses/TransactionStatusResponseCollection'
@@ -97,7 +97,7 @@ paths:
       description: Create transaction for existing circulation TLR
       operationId: createEcsRequestTransactions
       tags:
-        - ecs-tlr-transaction
+        - ecs-request-transactions
       parameters:
         - $ref: '#/components/parameters/ecsRequestTransactionId'
       requestBody:
@@ -115,7 +115,7 @@ paths:
       description: Update ECS request transaction
       operationId: updateEcsRequestTransaction
       tags:
-        - ecs-tlr-transaction
+        - ecs-request-transactions
       parameters:
         - $ref: '#/components/parameters/ecsRequestTransactionId'
       requestBody:
@@ -136,7 +136,7 @@ paths:
       description: Increment the renew loan count and returned transaction status with renewal details
       operationId: renewItemLoanByTransactionId
       tags:
-        - circulation
+        - transactions
       responses:
         '200':
           $ref: '#/components/responses/TransactionStatusResponse'
@@ -144,6 +144,22 @@ paths:
           $ref: '#/components/responses/NotFound'
         '400':
           $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /dcb/shadow-locations/refresh:
+    description: dcb hub shadow location refresh endpoint
+    post:
+      tags:
+        - RefreshShadowLocations
+      description: Refresh shadow location
+      operationId: refreshShadowLocation
+      responses:
+        '201':
+          $ref: '#/components/responses/RefreshShadowLocationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
 components:
@@ -187,6 +203,12 @@ components:
         application/json:
           schema:
             $ref: "schemas/transactionStatusResponse.yaml#/TransactionStatusResponseCollection"
+    RefreshShadowLocationResponse:
+      description: DCB hub shadow location refresh response
+      content:
+        application/json:
+          schema:
+            $ref: "schemas/refreshShadowLocationResponse.yaml#/RefreshShadowLocationResponse"
     NotFound:
       description: Resource not found
       content:
