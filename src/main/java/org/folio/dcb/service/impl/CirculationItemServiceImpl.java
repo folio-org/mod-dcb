@@ -53,24 +53,24 @@ public class CirculationItemServiceImpl implements CirculationItemService {
   }
 
   private String fetchShadowLocationIdByLocationCode(String locationCode) {
-    log.debug(
+    log.info(
       "fetchShadowLocationIdByLocationCode:: Fetching shadow location id by location code: {} and fetch-dcb-locations-enabled: {}",
       locationCode, dcbHubProperties.getFetchDcbLocationsEnabled());
     if(Boolean.TRUE.equals(dcbHubProperties.getFetchDcbLocationsEnabled()) && StringUtils.isNotBlank(locationCode)) {
       ResultList<LocationDTO> locationDTOResult = locationsClient.findLocationByQuery(String.format("code==%s", locationCode), true, 1, 0);
       if(locationDTOResult.getResult().isEmpty()) {
-        log.debug(
+        log.info(
           "fetchShadowLocationIdByLocationCode:: No shadow location found for code: {}. Falling back to default location id: {}, code: {}, name: {}",
           locationCode, LOCATION_ID, CODE, NAME);
         return LOCATION_ID;
       }
 
       LocationDTO locationDTO = locationDTOResult.getResult().getFirst();
-      log.debug("fetchShadowLocationIdByLocationCode:: Shadow location lookup is enabled. Found location for code: {} with id: {}",
+      log.info("fetchShadowLocationIdByLocationCode:: Shadow location lookup is enabled. Found location for code: {} with id: {}",
         locationCode, locationDTO.getId());
       return locationDTO.getId();
     } else {
-      log.debug(
+      log.info(
         "fetchShadowLocationIdByLocationCode:: Shadow location lookup is disabled or location code is blank. " +
         "Falling back to default location id: {}, code: {}, name: {}",
         LOCATION_ID, CODE, NAME);
