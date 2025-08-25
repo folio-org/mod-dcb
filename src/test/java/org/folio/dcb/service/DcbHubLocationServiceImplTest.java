@@ -2,6 +2,7 @@ package org.folio.dcb.service;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.tuple;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -18,10 +19,12 @@ import java.util.List;
 import java.util.UUID;
 
 import org.folio.dcb.client.feign.DcbHubLocationClient;
+import org.folio.dcb.client.feign.InventoryServicePointClient;
 import org.folio.dcb.client.feign.LocationUnitClient;
 import org.folio.dcb.client.feign.LocationsClient;
+import org.folio.dcb.config.DcbHubProperties;
 import org.folio.dcb.domain.dto.ServicePointRequest;
-import org.folio.dcb.exception.ServiceException;
+import org.folio.dcb.exception.DcbHubLocationException;
 import org.folio.dcb.integration.keycloak.DcbHubKCCredentialSecureStore;
 import org.folio.dcb.integration.keycloak.DcbHubKCTokenService;
 import org.folio.dcb.integration.keycloak.model.DcbHubKCCredentials;
@@ -58,22 +61,28 @@ class DcbHubLocationServiceImplTest {
   @Mock
   private LocationUnitClient locationUnitClient;
 
+  @Mock
+  private InventoryServicePointClient servicePointClient;
+
   @InjectMocks
   private DcbHubLocationServiceImpl dcbHubLocationService;
 
-  private ServicePointRequest servicePointRequest;
   private static final String BEARER_TOKEN = "test-token";
 
   @BeforeEach
   void setUp() {
     ReflectionTestUtils.setField(dcbHubLocationService, "batchSize", 5);
+    DcbHubProperties dcbHubProperties = new DcbHubProperties();
+    dcbHubProperties.setFetchDcbLocationsEnabled(true);
+    ReflectionTestUtils.setField(dcbHubLocationService, "dcbHubProperties", dcbHubProperties);
+
     DcbHubKCCredentials credentials = new DcbHubKCCredentials();
     credentials.setClientId("test-client");
     credentials.setClientSecret("test-secret");
 
-    servicePointRequest = new ServicePointRequest();
+    ServicePointRequest servicePointRequest = new ServicePointRequest();
     servicePointRequest.setId("sp-123");
-
+    when(servicePointClient.getServicePointByName(any())).thenReturn(ResultList.of(1, List.of(servicePointRequest)));
     when(dcbHubKCCredentialSecureStore.getDcbHubKCCredentials()).thenReturn(credentials);
     when(dcbHubKCTokenService.getBearerAccessToken(any())).thenReturn(BEARER_TOKEN);
   }
@@ -98,7 +107,7 @@ class DcbHubLocationServiceImplTest {
     mockEmptyLocationDTOResponses("Location 2", "loc2");
 
     // When
-    dcbHubLocationService.createShadowLocations(servicePointRequest);
+    dcbHubLocationService.createShadowLocations();
 
     // Then
     verify(dcbHubLocationClient).getLocations(1, 5, BEARER_TOKEN);
@@ -128,7 +137,7 @@ class DcbHubLocationServiceImplTest {
     mockLocationDTOResponses("Location 2", "loc2");
 
     // When
-    dcbHubLocationService.createShadowLocations(servicePointRequest);
+    dcbHubLocationService.createShadowLocations();
 
     // Then
     verify(dcbHubLocationClient).getLocations(1, 5, BEARER_TOKEN);
@@ -170,7 +179,7 @@ class DcbHubLocationServiceImplTest {
     mockEmptyLocationDTOResponses("Location 2", "loc2");
 
     // When
-    dcbHubLocationService.createShadowLocations(servicePointRequest);
+    dcbHubLocationService.createShadowLocations();
 
     // Then
     verify(dcbHubLocationClient).getLocations(1, 5, BEARER_TOKEN);
@@ -294,7 +303,7 @@ class DcbHubLocationServiceImplTest {
       .thenReturn(emptyResponse);
 
     // When
-    dcbHubLocationService.createShadowLocations(servicePointRequest);
+    dcbHubLocationService.createShadowLocations();
 
     // Then
     verify(dcbHubLocationClient).getLocations(1, 5, BEARER_TOKEN);
@@ -320,7 +329,7 @@ class DcbHubLocationServiceImplTest {
     mockEmptyLocationDTOResponses("Location 1", "loc1");
 
     // When
-    dcbHubLocationService.createShadowLocations(servicePointRequest);
+    dcbHubLocationService.createShadowLocations();
 
     // Then
     verify(dcbHubLocationClient).getLocations(1, 5, BEARER_TOKEN);
@@ -346,7 +355,7 @@ class DcbHubLocationServiceImplTest {
     mockLocationDTOResponses("Location 1", "loc1");
 
     // When
-    dcbHubLocationService.createShadowLocations(servicePointRequest);
+    dcbHubLocationService.createShadowLocations();
 
     // Then
     verify(dcbHubLocationClient).getLocations(1, 5, BEARER_TOKEN);
@@ -357,14 +366,14 @@ class DcbHubLocationServiceImplTest {
   }
 
   @Test
-  void createShadowLocations_FeignException_ThrowsServiceException() {
+  void createShadowLocations_FeignException_ThrowsDcbHubLocationException() {
     // Given
     when(dcbHubLocationClient.getLocations(anyInt(), anyInt(), anyString()))
       .thenThrow(FeignException.class);
 
     // Then
-    org.junit.jupiter.api.Assertions.assertThrows(ServiceException.class, () ->
-      dcbHubLocationService.createShadowLocations(servicePointRequest));
+    assertThrows(DcbHubLocationException.class, () ->
+      dcbHubLocationService.createShadowLocations());
   }
 
   @Test
@@ -374,8 +383,8 @@ class DcbHubLocationServiceImplTest {
       .thenThrow(RuntimeException.class);
 
     // Then
-    org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () ->
-      dcbHubLocationService.createShadowLocations(servicePointRequest));
+    assertThrows(RuntimeException.class, () ->
+      dcbHubLocationService.createShadowLocations());
   }
 
   private DcbHubLocationResponse.Location createTestLocation(String locationName, String locationCode, String agencyName, String agencyCode) {
@@ -437,5 +446,4 @@ class DcbHubLocationServiceImplTest {
   private @NotNull String formatAgencyQuery(String name, String code) {
     return String.format("(name==%s AND code==%s)", name, code);
   }
-
 }

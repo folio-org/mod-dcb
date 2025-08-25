@@ -79,9 +79,6 @@ public class CustomTenantService extends TenantService {
   private final ServicePointExpirationPeriodService servicePointExpirationPeriodService;
   private final DcbHubLocationService dcbHubLocationService;
 
-  @Value("${application.dcb-hub.fetch-dcb-locations-enabled}")
-  private Boolean isFetchDcbHubLocationsEnabled;
-
   public CustomTenantService(JdbcTemplate jdbcTemplate, FolioExecutionContext context, FolioSpringLiquibase folioSpringLiquibase,
                              PrepareSystemUserService prepareSystemUserService, KafkaService kafkaService, InstanceClient inventoryClient,
                              InstanceTypeClient instanceTypeClient, HoldingsStorageClient holdingsStorageClient,
@@ -127,22 +124,12 @@ public class CustomTenantService extends TenantService {
   }
 
   private void createShadowLocations() {
-    log.debug("createShadowLocations:: creating shadow locations");
-    if (Boolean.TRUE.equals(isFetchDcbHubLocationsEnabled)) {
-      List<ServicePointRequest> servicePointList = servicePointClient.getServicePointByName(NAME).getResult();
-      if (servicePointList.isEmpty()) {
-        log.warn(
-          "createShadowLocations:: No service points found with name {}, So cannot create shadow locations without {} service point",
-          NAME, NAME);
-        return;
-      }
-      dcbHubLocationService.createShadowLocations(servicePointList.getFirst());
-      log.info("createShadowLocations:: shadow locations created");
-    } else {
-      log.debug("createShadowLocations:: DCB Hub locations fetching is disabled, skipping");
+    try {
+      dcbHubLocationService.createShadowLocations();
+    } catch (Exception e) {
+      log.error("createShadowLocations:: Error creating shadow locations: {}", e.getMessage(), e);
     }
   }
-
 
   private void createLoanType() {
     if(loanTypeClient.queryLoanTypeByName(DCB_LOAN_TYPE_NAME).getTotalRecords() == 0){

@@ -2,6 +2,10 @@ package org.folio.dcb.exception;
 
 public class ServiceException extends RuntimeException {
 
+  public ServiceException(String message) {
+    super(message);
+  }
+
   /**
    * Creates {@link ServiceException}  with error message and error cause.
    *
