@@ -1,7 +1,7 @@
 package org.folio.dcb.service;
 
-import org.folio.dcb.domain.dto.ServicePointRequest;
+import org.folio.dcb.domain.dto.RefreshShadowLocationResponse;
 
 public interface DcbHubLocationService {
-  void createShadowLocations(ServicePointRequest servicePointRequest);
+  RefreshShadowLocationResponse createShadowLocations();
 }

@@ -57,6 +57,9 @@ class CustomTenantServiceTest {
   @Mock
   private CalendarService calendarService;
 
+  @Mock
+  private DcbHubLocationService dcbHubLocationService;
+
   @InjectMocks
   private CustomTenantService service;
 
