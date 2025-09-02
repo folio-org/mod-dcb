@@ -60,7 +60,7 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
 
   public RefreshShadowLocationResponse createShadowLocations() {
     try {
-      log.debug("createShadowLocations:: creating shadow locations");
+      log.debug("createShadowLocations:: creating shadow locations.test");
 
       if (!Boolean.TRUE.equals(dcbHubProperties.getFetchDcbLocationsEnabled())) {
         log.info("createShadowLocations:: DCB Hub locations fetching is disabled, skipping shadow location creation");
