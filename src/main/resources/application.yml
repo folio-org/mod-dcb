@@ -92,9 +92,9 @@ management:
 
 application:
   dcb-hub:
-    fetch-dcb-locations-enabled: ${FETCH_DCB_LOCATIONS_ENABLED:false}
-    locations-url: ${DCB_LOCATIONS_BASE_URL:}
-    batch-size: ${DCB_LOCATIONS_BATCH_SIZE:50}
+    fetch-dcb-locations-enabled: ${FETCH_DCB_LOCATIONS_ENABLED:true}
+    locations-url: ${DCB_LOCATIONS_BASE_URL:https://folio-edev-volaris-mockserver.ci.folio.org}
+    batch-size: ${DCB_LOCATIONS_BATCH_SIZE:5}
     secure-store-keyname: dcb-hub-credentials
   keycloak:
     tls:
@@ -103,13 +103,13 @@ application:
       trust-store-password: ${KC_CLIENT_TLS_TRUSTSTORE_PASSWORD:}
       trust-store-type: ${KC_CLIENT_TLS_TRUSTSTORE_TYPE:}
   secret-store:
-    type: ${SECRET_STORE_TYPE:EPHEMERAL}
+    type: ${SECRET_STORE_TYPE:AWS_SSM}
     ephemeral:
     aws-ssm:
-      region: ${SECRET_STORE_AWS_SSM_REGION:}
-      use-iam: ${SECRET_STORE_AWS_SSM_USE_IAM:true}
-      ecs-credentials-endpoint: ${SECRET_STORE_AWS_SSM_ECS_CREDENTIALS_ENDPOINT:}
-      ecs-credentials-path: ${SECRET_STORE_AWS_SSM_ECS_CREDENTIALS_PATH:}
+      region: ${SECRET_STORE_AWS_SSM_REGION:us-west-2}
+      use-iam: ${SECRET_STORE_AWS_SSM_USE_IAM:false}
+      ecs-credentials-endpoint: ${SECRET_STORE_AWS_SSM_ECS_CREDENTIALS_ENDPOINT:https://folio-edev-volaris-mockserver.ci.folio.org}
+      ecs-credentials-path: ${SECRET_STORE_AWS_SSM_ECS_CREDENTIALS_PATH:/folio_diku_dcb-hub-credentials}
     vault:
       token: ${SECRET_STORE_VAULT_TOKEN:}
       address: ${SECRET_STORE_VAULT_ADDRESS:}
