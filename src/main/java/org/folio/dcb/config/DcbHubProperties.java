@@ -1,30 +1,24 @@
 package org.folio.dcb.config;
 
+import jakarta.validation.constraints.AssertTrue;
+import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
-import jakarta.validation.constraints.AssertTrue;
-import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.Setter;
-
-@ConfigurationProperties(prefix = "application.dcb-hub")
+@Data
 @Component
 @Validated
-@Getter
-@Setter
+@ConfigurationProperties(prefix = "application.dcb-hub")
 public class DcbHubProperties {
 
     private String locationsUrl;
-
-    @NotNull
-    private Boolean fetchDcbLocationsEnabled;
+    private boolean fetchDcbLocationsEnabled = false;
 
     @AssertTrue(message = "dcb-hub.locations-url must be provided when dcb-hub.fetch-dcb-locations-enabled is true")
     public boolean isLocationsUrl() {
-        if (Boolean.TRUE.equals(fetchDcbLocationsEnabled)) {
+        if (fetchDcbLocationsEnabled) {
             return StringUtils.isNotBlank(locationsUrl);
         }
         return true;

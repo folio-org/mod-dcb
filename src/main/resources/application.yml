@@ -104,6 +104,7 @@ application:
       trust-store-type: ${KC_CLIENT_TLS_TRUSTSTORE_TYPE:}
   secret-store:
     type: ${SECRET_STORE_TYPE:EPHEMERAL}
+    environment: ${SECURE_STORE_ENV:${ENV:folio}}
     ephemeral:
     aws-ssm:
       region: ${SECRET_STORE_AWS_SSM_REGION:}
