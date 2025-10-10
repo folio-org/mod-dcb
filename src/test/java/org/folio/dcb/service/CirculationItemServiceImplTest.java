@@ -339,10 +339,6 @@ class CirculationItemServiceImplTest {
     return UUID.randomUUID().toString();
   }
 
-  private static ResultList<LocationUnit> emptyLocationItems() {
-    return ResultList.of(0, Collections.emptyList());
-  }
-
   private static CirculationItemCollection emptyCirculationItems() {
     return CirculationItemCollection.builder().items(Collections.emptyList()).build();
   }
