@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.ObjectUtils;
 import org.folio.dcb.client.feign.UsersClient;
+import org.folio.dcb.domain.DcbPersonal;
 import org.folio.dcb.domain.dto.DcbPatron;
 import org.folio.dcb.domain.dto.Personal;
 import org.folio.dcb.domain.dto.User;
@@ -79,13 +80,18 @@ public class UserServiceImpl implements UserService {
   }
 
   private User createVirtualUser(DcbPatron patron, String groupId) {
+    var personalData = DcbPersonal.parseLocalNames(patron.getLocalNames());
     return User.builder()
       .active(true)
       .barcode(patron.getBarcode())
       .patronGroup(groupId)
       .id(patron.getId())
       .type(DCB_TYPE)
-      .personal(Personal.builder().lastName(LAST_NAME).build())
+      .personal(Personal.builder()
+        .firstName(personalData.getFirstName())
+        .middleName(personalData.getMiddleName())
+        .lastName(personalData.getLastName())
+        .build())
       .build();
   }
 
