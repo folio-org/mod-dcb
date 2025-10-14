@@ -1,7 +1,11 @@
 package org.folio.dcb.domain;
 
+import static java.util.Arrays.copyOfRange;
 import static org.apache.commons.lang3.StringUtils.trimToNull;
 
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
@@ -70,7 +74,7 @@ public class DcbPersonal {
 
     var trimmed = localNames.trim();
     if (!(trimmed.startsWith("[") && trimmed.endsWith("]"))) {
-      return DEFAULT_VALUE;
+      throw new IllegalArgumentException("Malformed localNames format. Value must start with '[' and end with ']'");
     }
 
     var inner = trimmed.substring(1, trimmed.length() - 1);
@@ -80,9 +84,9 @@ public class DcbPersonal {
 
     var parts = inner.split(",", -1);
     var patronInfo = switch (parts.length) {
-      case 3 -> new DcbPersonal(parts[0], parts[1], parts[2]);
-      case 2 -> new DcbPersonal(parts[0], null, parts[1]);
       case 1 -> new DcbPersonal(null, null, parts[0]);
+      case 2 -> new DcbPersonal(parts[0], null, parts[1]);
+      case 3 -> new DcbPersonal(parts[0], parts[1], parts[2]);
       default -> new DcbPersonal(null, null, null);
     };
 

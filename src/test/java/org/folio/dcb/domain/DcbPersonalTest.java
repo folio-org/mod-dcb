@@ -1,6 +1,7 @@
 package org.folio.dcb.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import java.util.stream.Stream;
@@ -31,19 +32,33 @@ class DcbPersonalTest {
     "",
     " ",
     "   ",
-    "John, Michael, Doe",
-    "[John, Michael, Doe, Extra]",
-    "John, Michael, Doe]",
-    "[John, Michael, Doe",
     "[]",
-    "random text",
     "[,,]",
     "[ ,  ,  ]",
+    "[ ,  ,  ,  ,  ,]",
+    "[John, Michael, , Doe]",
+    "[John, Michael, , , Doe]",
+    "[a, b, c, d, e, f]",
   })
   @ParameterizedTest
-  void parseLocalNames_parameterized_invalidValue(String input) {
+  void parseLocalNames_parameterized_blankValues(String input) {
     var result = DcbPersonal.parseLocalNames(input);
     assertThat(result).isEqualTo(DEFAULT_VALUE);
+  }
+
+  @ValueSource(strings = {
+    "[",
+    "]",
+    "random text",
+    "John, Michael, Doe",
+    "John, Michael, Doe]",
+    "[John, Michael, Doe",
+  })
+  @ParameterizedTest
+  void parseLocalNames_parameterized_invalidValues(String input) {
+    assertThatThrownBy(() -> DcbPersonal.parseLocalNames(input))
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessage("Malformed localNames format. Value must start with '[' and end with ']'");
   }
 
   @Test
@@ -127,7 +142,8 @@ class DcbPersonalTest {
       arguments("[Dr. John, M.D., Smith Jr.]", patronInfo("Dr. John", "M.D.", "Smith Jr.")),
 
       // Mixed scripts and complex names
-      arguments("[José-María, François-Xavier, García-Hernández]", patronInfo("José-María", "François-Xavier", "García-Hernández")),
+      arguments("[José-María, François-Xavier, García-Hernández]",
+        patronInfo("José-María", "François-Xavier", "García-Hernández")),
       arguments("[Михаил, Jean-Claude, Дмитриевич]", patronInfo("Михаил", "Jean-Claude", "Дмитриевич")),
 
       // Emoji and modern Unicode symbols (edge cases)

@@ -26,7 +26,6 @@ public class UserServiceImpl implements UserService {
 
   private final PatronGroupService patronGroupService;
   private final UsersClient usersClient;
-  private static final String LAST_NAME = "DcbSystem";
 
   @Override
   public User fetchUser(DcbPatron dcbPatron) {
@@ -108,5 +107,4 @@ public class UserServiceImpl implements UserService {
       throw new IllegalArgumentException(String.format("User with type %s is retrieved. so unable to create transaction", userType));
     }
   }
-
 }
