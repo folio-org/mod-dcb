@@ -1,11 +1,7 @@
 package org.folio.dcb.domain;
 
-import static java.util.Arrays.copyOfRange;
 import static org.apache.commons.lang3.StringUtils.trimToNull;
 
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
