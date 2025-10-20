@@ -6,7 +6,7 @@
         "urlPath": "/locations",
         "queryParameters": {
           "query": {
-            "equalTo": "(name==Location-1 AND code==LOC-1)"
+            "equalTo": "(name==\"Location-1\" AND code==\"LOC-1\")"
           }
         }
       },
@@ -41,7 +41,7 @@
         "urlPath": "/locations",
         "queryParameters": {
           "query": {
-            "equalTo": "(name==Location-2 AND code==LOC-2)"
+            "equalTo": "(name==\"Location-2\" AND code==\"LOC-2\")"
           }
         }
       },
@@ -62,7 +62,7 @@
         "urlPath": "/locations",
         "queryParameters": {
           "query": {
-            "equalTo": "(name==Location-3 AND code==LOC-3)"
+            "equalTo": "(name==\"Location-3\" AND code==\"LOC-3\")"
           }
         }
       },
@@ -97,7 +97,7 @@
         "urlPath": "/locations",
         "queryParameters": {
           "query": {
-            "equalTo": "(name==Location-4 AND code==LOC-4)"
+            "equalTo": "(name==\"Location-4\" AND code==\"LOC-4\")"
           }
         }
       },
@@ -118,7 +118,7 @@
         "urlPath": "/locations",
         "queryParameters": {
           "query": {
-            "equalTo": "(name==Location-5 AND code==LOC-5)"
+            "equalTo": "(name==\"Location-5\" AND code==\"LOC-5\")"
           }
         }
       },
@@ -153,7 +153,7 @@
         "urlPath": "/locations",
         "queryParameters": {
           "query": {
-            "equalTo": "(name==Location-6 AND code==LOC-6)"
+            "equalTo": "(name==\"Location-6\" AND code==\"LOC-6\")"
           }
         }
       },
@@ -174,7 +174,7 @@
         "urlPath": "/locations",
         "queryParameters": {
           "query": {
-            "equalTo": "(name==Location-7 AND code==LOC-7)"
+            "equalTo": "(name==\"Location-7\" AND code==\"LOC-7\")"
           }
         }
       },
@@ -209,7 +209,63 @@
         "urlPath": "/locations",
         "queryParameters": {
           "query": {
-            "equalTo": "(name==Location-8 AND code==LOC-8)"
+            "equalTo": "(name==\"Location-8\" AND code==\"LOC-8\")"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "totalRecords": 0,
+          "result": []
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/locations",
+        "queryParameters": {
+          "query": {
+            "equalTo": "code==\"EXISTED_LOCATION_CODE\""
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "totalRecords": 1,
+          "result": [
+            {
+              "id": "fbc42f2c-6cd0-4637-93c0-9344f8408268",
+              "code": "LOC-1",
+              "name": "Location-1",
+              "institutionId": "9b90bb46-2213-42af-a58b-8e356348abc9",
+              "campusId": "b9023ec8-4c00-4cee-a18b-3e74351a3aae",
+              "libraryId": "184daad4-5ab1-4034-94d2-960acc3a2c4c",
+              "primaryServicePoint": "916fe2af-dc73-48b0-8922-0768a403473b",
+              "servicePointIds": [
+                "916fe2af-dc73-48b0-8922-0768a403473b"
+              ],
+              "isShadow": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/locations",
+        "queryParameters": {
+          "query": {
+            "equalTo": "code==\"NON_EXISTED_LOCATION_CODE\""
           }
         }
       },
@@ -485,6 +541,145 @@
             "b106040e-f69e-4135-8613-ba621621c73d"
           ],
           "isShadow": true
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/location-units/libraries",
+        "queryParameters": {
+          "query": {
+            "equalTo": "code==\"KU\""
+          },
+          "limit": {
+            "equalTo": "1"
+          },
+          "offset": {
+            "equalTo": "0"
+          },
+          "includeShadow": {
+            "equalTo": "true"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "jsonBody": {
+          "loclibs": [],
+          "totalRecords": 0
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/location-units/libraries",
+        "queryParameters": {
+          "query": {
+            "equalTo": "code==\"LEN\""
+          },
+          "limit": {
+            "equalTo": "1"
+          },
+          "offset": {
+            "equalTo": "0"
+          },
+          "includeShadow": {
+            "equalTo": "true"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "jsonBody": {
+          "loclibs": [],
+          "totalRecords": 0
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/location-units/libraries",
+        "queryParameters": {
+          "query": {
+            "equalTo": "code==\"ELC\""
+          },
+          "limit": {
+            "equalTo": "1"
+          },
+          "offset": {
+            "equalTo": "0"
+          },
+          "includeShadow": {
+            "equalTo": "true"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "jsonBody": {
+          "loclibs": [
+            {
+              "id": "9d1b77e7-f02e-4b7f-b296-3f2042ddac54",
+              "name": "ELC",
+              "code": "132",
+              "campusId": "9d1b77e6-f02e-4b7f-b296-3f2042ddac54",
+              "isShadow": false,
+              "metadata": {
+                "createdDate": "2025-10-09T01:47:01.044+00:00",
+                "createdByUserId": "2c2b2a15-1693-4c57-9ea2-ab0cfbe66e58",
+                "updatedDate": "2025-10-09T01:47:01.044+00:00",
+                "updatedByUserId": "2c2b2a15-1693-4c57-9ea2-ab0cfbe66e58"
+              }
+            }
+          ],
+          "totalRecords": 1
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/locations",
+        "queryParameters": {
+          "query": {
+            "equalTo": "libraryId==\"9d1b77e7-f02e-4b7f-b296-3f2042ddac54\""
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "totalRecords": 1,
+          "result": [
+            {
+              "id": "fbc42f2c-6cd0-4637-93c0-9344f8408268",
+              "code": "LOC-1",
+              "name": "Location-1",
+              "institutionId": "9b90bb46-2213-42af-a58b-8e356348abc9",
+              "campusId": "b9023ec8-4c00-4cee-a18b-3e74351a3aae",
+              "libraryId": "9d1b77e7-f02e-4b7f-b296-3f2042ddac54",
+              "primaryServicePoint": "916fe2af-dc73-48b0-8922-0768a403473b",
+              "servicePointIds": [
+                "916fe2af-dc73-48b0-8922-0768a403473b"
+              ],
+              "isShadow": true
+            }
+          ]
         }
       }
     }

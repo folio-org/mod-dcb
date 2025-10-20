@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
+import lombok.NoArgsConstructor;
 import org.folio.util.PercentCodec;
 import org.folio.util.StringUtil;
 

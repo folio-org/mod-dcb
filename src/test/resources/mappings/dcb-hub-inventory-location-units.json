@@ -6,7 +6,7 @@
         "urlPathPattern": "(/location-units/institutions|/location-units/campuses|/location-units/libraries)",
         "queryParameters": {
           "query": {
-            "equalTo": "(name==Agency-One AND code==AG-001)"
+            "equalTo": "(name==\"Agency-One\" AND code==\"AG-001\")"
           }
         }
       },
@@ -33,7 +33,7 @@
         "urlPathPattern": "(/location-units/institutions|/location-units/campuses|/location-units/libraries)",
         "queryParameters": {
           "query": {
-            "equalTo": "(name==Agency-Two AND code==AG-002)"
+            "equalTo": "(name==\"Agency-Two\" AND code==\"AG-002\")"
           }
         }
       },
@@ -54,7 +54,7 @@
         "urlPathPattern": "(/location-units/institutions|/location-units/campuses|/location-units/libraries)",
         "queryParameters": {
           "query": {
-            "equalTo": "(name==Agency-Three AND code==AG-003)"
+            "equalTo": "(name==\"Agency-Three\" AND code==\"AG-003\")"
           }
         }
       },
@@ -81,7 +81,7 @@
         "urlPathPattern": "(/location-units/institutions|/location-units/campuses|/location-units/libraries)",
         "queryParameters": {
           "query": {
-            "equalTo": "(name==Agency-Four AND code==AG-004)"
+            "equalTo": "(name==\"Agency-Four\" AND code==\"AG-004\")"
           }
         }
       },
@@ -102,7 +102,7 @@
         "urlPathPattern": "(/location-units/institutions|/location-units/campuses|/location-units/libraries)",
         "queryParameters": {
           "query": {
-            "equalTo": "(name==Agency-Five AND code==AG-005)"
+            "equalTo": "(name==\"Agency-Five\" AND code==\"AG-005\")"
           }
         }
       },

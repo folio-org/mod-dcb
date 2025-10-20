@@ -30,6 +30,7 @@ import org.folio.dcb.integration.keycloak.DcbHubKCTokenService;
 import org.folio.dcb.integration.keycloak.model.DcbHubKCCredentials;
 import org.folio.dcb.model.DcbHubLocationResponse;
 import org.folio.dcb.service.impl.DcbHubLocationServiceImpl;
+import org.folio.dcb.utils.CqlQuery;
 import org.folio.spring.model.ResultList;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,7 +42,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import feign.FeignException;
-import jakarta.validation.constraints.NotNull;
 
 @ExtendWith(MockitoExtension.class)
 class DcbHubLocationServiceImplTest {
@@ -443,7 +443,7 @@ class DcbHubLocationServiceImplTest {
 
   }
 
-  private @NotNull String formatAgencyQuery(String name, String code) {
-    return String.format("(name==%s AND code==%s)", name, code);
+  private String formatAgencyQuery(String name, String code) {
+    return CqlQuery.byNameAndCode(name, code);
   }
 }
