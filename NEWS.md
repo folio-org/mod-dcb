@@ -10,6 +10,7 @@
 * MODDCB-214: Load shadow locations from DCB-Hub [MODDCB-214](https://folio-org.atlassian.net/browse/MODDCB-214)
 * MODDCB-207: Populate effective location id for circulation item [MODDCB-207](https://folio-org.atlassian.net/browse/MODDCB-207)
 * MODDCB-222: Implement an ability to trigger the shadow location refresh operation [MODDCB-222](https://folio-org.atlassian.net/browse/MODDCB-222)
+* MODDCB-233: Implement location search by lendingLibraryCode  [MODDCB-233](https://folio-org.atlassian.net/browse/MODDCB-233)
 
 ## v1.3.0 2025-03-13
 
