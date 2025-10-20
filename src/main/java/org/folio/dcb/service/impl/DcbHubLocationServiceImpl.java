@@ -17,6 +17,7 @@ import org.folio.dcb.client.feign.InventoryServicePointClient;
 import org.folio.dcb.client.feign.LocationUnitClient;
 import org.folio.dcb.client.feign.LocationsClient;
 import org.folio.dcb.config.DcbHubProperties;
+import org.folio.dcb.utils.CqlQuery;
 import org.folio.dcb.domain.dto.LocationUnitsStatus;
 import org.folio.dcb.domain.dto.LocationsStatus;
 import org.folio.dcb.domain.dto.RefreshShadowLocationResponse;
@@ -33,7 +34,6 @@ import org.folio.dcb.model.LocationAgenciesIds;
 import org.folio.dcb.model.LocationCodeNamePair;
 import org.folio.dcb.service.DcbHubLocationService;
 import org.folio.spring.model.ResultList;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -62,7 +62,7 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
     try {
       log.debug("createShadowLocations:: creating shadow locations");
 
-      if (!Boolean.TRUE.equals(dcbHubProperties.getFetchDcbLocationsEnabled())) {
+      if (!dcbHubProperties.isFetchDcbLocationsEnabled()) {
         log.info("createShadowLocations:: DCB Hub locations fetching is disabled, skipping shadow location creation");
         throw new DcbHubLocationException("DCB Hub locations fetching is disabled", HttpStatus.BAD_REQUEST);
       }
@@ -149,8 +149,9 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
 
   private InstitutionResult createInstitution(AgencyKey agencyKey) {
     try {
+      var query = CqlQuery.byNameAndCode(agencyKey.agencyName(), agencyKey.agencyCode());
       ResultList<LocationUnit> locationUnitResultList =
-        locationUnitClient.findInstitutionsByQuery(formatAgencyQuery(agencyKey.agencyName(), agencyKey.agencyCode()), true, 10, 0);
+        locationUnitClient.findInstitutionsByQuery(query, true, 10, 0);
 
       if (CollectionUtils.isNotEmpty(locationUnitResultList.getResult())) {
         log.info("createInstitution:: Institution already exists for agency: {} - {}",
@@ -213,7 +214,7 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
 
       ResultList<LocationUnit> locationUnitResultList =
         locationUnitClient.findCampusesByQuery(
-          formatAgencyQuery(agencyKey.agencyName(), agencyKey.agencyCode()), true, 10, 0);
+          CqlQuery.byNameAndCode(agencyKey.agencyName(), agencyKey.agencyCode()), true, 10, 0);
 
       if (!locationUnitResultList.getResult().isEmpty()) {
         log.info("createCampus:: campus already exists for agency: {} - {}",
@@ -277,7 +278,7 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
 
       ResultList<LocationUnit> locationUnitResultList =
         locationUnitClient.findLibrariesByQuery(
-          formatAgencyQuery(agencyKey.agencyName(), agencyKey.agencyCode()), true, 10, 0);
+          CqlQuery.byNameAndCode(agencyKey.agencyName(), agencyKey.agencyCode()), true, 10, 0);
 
       if (!locationUnitResultList.getResult().isEmpty()) {
         log.info("createLibrary:: library already exists for agency: {} - {}",
@@ -365,7 +366,7 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
 
       ResultList<LocationsClient.LocationDTO> locationDTOResultList =
         locationsClient.findLocationByQuery(
-          formatAgencyQuery(location.name(), location.code()), true, 10, 0);
+          CqlQuery.byNameAndCode(location.name(), location.code()), true, 10, 0);
       if (!locationDTOResultList.getResult().isEmpty()) {
         log.info("createShadowLocation:: Location already exists: {} - {}, skipping...", location.code(), location.name());
         return LocationsStatus.builder()
@@ -431,9 +432,5 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
     }
     log.debug("fetchDcbHubAllLocations:: successfully fetched {} locations from DCB Hub", allLocations.size());
     return allLocations;
-  }
-
-  private @NotNull String formatAgencyQuery(String name, String code) {
-    return String.format("(name==%s AND code==%s)", name, code);
   }
 }
