@@ -11,3 +11,6 @@ DcbPatron:
     barcode:
       description: The barcode of the patron
       type: string
+    localNames:
+      description: "The local names for the patron, for example: \"[John, Johnny, Doe]\""
+      type: string

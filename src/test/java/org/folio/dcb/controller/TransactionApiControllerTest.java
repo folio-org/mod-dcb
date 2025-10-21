@@ -7,6 +7,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWER;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWING_PICKUP;
+import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.PICKUP;
 import static org.folio.dcb.domain.dto.TransactionStatusResponse.StatusEnum.ITEM_CHECKED_OUT;
 import static org.folio.dcb.utils.EntityUtils.DCB_NEW_BARCODE;
@@ -180,6 +181,44 @@ class TransactionApiControllerTest extends BaseIT {
           .accept(MediaType.APPLICATION_JSON))
       .andExpectAll(status().is4xxClientError(),
         jsonPath("$.errors[0].code", is("DUPLICATE_ERROR")));
+
+    // check for DUPLICATE_ERROR propagated into transactions_audit.
+    systemUserScopedExecutionService.executeAsyncSystemUserScoped(
+      TENANT,
+      () -> {
+        TransactionAuditEntity auditExisting = transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(
+            DCB_TRANSACTION_ID)
+          .orElse(null);
+        assertNotNull(auditExisting);
+        assertNotEquals(TRANSACTION_AUDIT_DUPLICATE_ERROR_ACTION, auditExisting.getAction());
+        assertNotEquals(DUPLICATE_ERROR_TRANSACTION_ID, auditExisting.getTransactionId());
+      }
+    );
+  }
+
+  @Test
+  void createLendingCirculationRequestTestWithLocalNames() throws Exception {
+    removeExistedTransactionFromDbIfSoExists();
+    removeExistingTransactionsByItemId(ITEM_ID);
+
+    var dcbTransactionByRole = createDcbTransactionByRole(LENDER);
+    var patron = createDcbPatronWithExactPatronId(NOT_EXISTED_PATRON_ID).localNames("[John, Doe]");
+    dcbTransactionByRole.setPatron(patron);
+
+    this.mockMvc.perform(
+        post("/transactions/" + DCB_TRANSACTION_ID)
+          .content(asJsonString(dcbTransactionByRole))
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isCreated())
+      .andExpect(jsonPath("$.status").value("CREATED"))
+      .andExpect(jsonPath("$.item").value(createDcbItem()))
+      .andExpect(jsonPath("$.patron").value(patron));
+
+    wireMockServer.verify(1, postRequestedFor(urlPathMatching(".*/users"))
+      .withRequestBody(matchingJsonPath("$.personal.firstName", equalTo("John")))
+      .withRequestBody(matchingJsonPath("$.personal.lastName", equalTo("Doe"))));
 
     // check for DUPLICATE_ERROR propagated into transactions_audit.
     systemUserScopedExecutionService.executeAsyncSystemUserScoped(
