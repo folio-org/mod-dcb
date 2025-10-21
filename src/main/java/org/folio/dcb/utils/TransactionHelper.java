@@ -21,11 +21,8 @@ public class TransactionHelper {
   private static final String LOAN_ACTION_CHECKED_IN = "checkedin";
   public static final String IS_DCB = "isDcb";
   public static final String INSTANCE = "instance";
-  public static final String REQUESTER = "requester";
   public static final String TITLE = "title";
-  public static final String LASTNAME = "lastName";
   public static final String DCB_INSTANCE_TITLE = "DCB_INSTANCE";
-  public static final String DCB_REQUESTER_LASTNAME = "DcbSystem";
 
   private TransactionHelper(){}
 
@@ -91,8 +88,9 @@ public class TransactionHelper {
   }
 
   private static boolean checkDcbRequest(KafkaEvent kafkaEvent) {
-    return (kafkaEvent.getNewNode().has(INSTANCE) && kafkaEvent.getNewNode().get(INSTANCE).has(TITLE)
-      && kafkaEvent.getNewNode().get(INSTANCE).get(TITLE).asText().equals(DCB_INSTANCE_TITLE)) || (kafkaEvent.getNewNode().has(REQUESTER)
-      && kafkaEvent.getNewNode().get(REQUESTER).has(LASTNAME) && kafkaEvent.getNewNode().get(REQUESTER).get(LASTNAME).asText().equals(DCB_REQUESTER_LASTNAME));
+    var newNode = kafkaEvent.getNewNode();
+    return newNode.has(INSTANCE)
+      && newNode.get(INSTANCE).has(TITLE)
+      && Objects.equals(DCB_INSTANCE_TITLE, newNode.get(INSTANCE).get(TITLE).asText());
   }
 }
