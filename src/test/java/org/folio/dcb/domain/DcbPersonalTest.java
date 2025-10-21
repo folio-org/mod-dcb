@@ -36,9 +36,6 @@ class DcbPersonalTest {
     "[,,]",
     "[ ,  ,  ]",
     "[ ,  ,  ,  ,  ,]",
-    "[John, Michael, , Doe]",
-    "[John, Michael, , , Doe]",
-    "[a, b, c, d, e, f]",
   })
   @ParameterizedTest
   void parseLocalNames_parameterized_blankValues(String input) {
@@ -157,7 +154,13 @@ class DcbPersonalTest {
         patronInfo("Jean-Baptiste-Emmanuel", "Marie-Thérèse-Antoinette", "Pérez-González-Rodríguez")),
 
       // Edge case: Names with brackets in them (should still work)
-      arguments("[John[Jr], Mary(Smith), Doe{Senior}]", patronInfo("John[Jr]", "Mary(Smith)", "Doe{Senior}"))
+      arguments("[John[Jr], Mary(Smith), Doe{Senior}]", patronInfo("John[Jr]", "Mary(Smith)", "Doe{Senior}")),
+
+      // Multiple elements (more than 3)
+      arguments("[John, Michael, , Doe]", patronInfo("John", "Michael", "Doe")),
+      arguments("[John, Michael, , , Doe]", patronInfo("John", "Michael", "Doe")),
+      arguments("[John, Michael, William, Doe]", patronInfo("John", "Michael William", "Doe")),
+      arguments("[a, b, c, d, e, f]", patronInfo("a", "b c d e", "f"))
     );
   }
 

@@ -1,7 +1,11 @@
 package org.folio.dcb.domain;
 
+import static java.util.Arrays.copyOfRange;
 import static org.apache.commons.lang3.StringUtils.trimToNull;
 
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
@@ -83,7 +87,7 @@ public class DcbPersonal {
       case 1 -> new DcbPersonal(null, null, parts[0]);
       case 2 -> new DcbPersonal(parts[0], null, parts[1]);
       case 3 -> new DcbPersonal(parts[0], parts[1], parts[2]);
-      default -> new DcbPersonal(null, null, null);
+      default -> parseMultiple(parts);
     };
 
     return patronInfo.isEmpty() ? DEFAULT_VALUE : patronInfo;
@@ -96,5 +100,15 @@ public class DcbPersonal {
    */
   public boolean isEmpty() {
     return StringUtils.isAllBlank(firstName, middleName, lastName);
+  }
+
+  private static DcbPersonal parseMultiple(String[] parts) {
+    var firstName = parts[0];
+    var lastName = parts[parts.length - 1];
+    var middleName = Arrays.stream(copyOfRange(parts, 1, parts.length - 1))
+      .map(StringUtils::trimToNull)
+      .filter(Objects::nonNull)
+      .collect(Collectors.joining(" "));
+    return new DcbPersonal(firstName, middleName, lastName);
   }
 }
