@@ -22,6 +22,7 @@ import static org.folio.dcb.utils.EntityUtils.ITEM_ID_STATUS_NOT_AVAILABLE;
 import static org.folio.dcb.utils.EntityUtils.NOT_EXISTED_ITEM_ID;
 import static org.folio.dcb.utils.EntityUtils.NOT_EXISTED_PATRON_ID;
 import static org.folio.dcb.utils.EntityUtils.PATRON_TYPE_USER_ID;
+import static org.folio.dcb.utils.EntityUtils.createCirculationRequest;
 import static org.folio.dcb.utils.EntityUtils.createDcbItem;
 import static org.folio.dcb.utils.EntityUtils.createDcbPatronWithExactPatronId;
 import static org.folio.dcb.utils.EntityUtils.createDcbTransactionByRole;
@@ -554,6 +555,9 @@ class TransactionApiControllerTest extends BaseIT {
   @Test
   void getLendingTransactionStatusSuccessTest() throws Exception {
     var id = UUID.randomUUID().toString();
+    var circulationRequest = createCirculationRequest();
+    Mockito.doReturn(List.of(circulationRequest)).when(circulationClient).getRequestsInQueueByItemId(anyString());
+
     this.mockMvc.perform(
         post("/transactions/" + id)
           .content(asJsonString(createDcbTransactionByRole(DcbTransaction.RoleEnum.LENDER)))
@@ -616,6 +620,8 @@ class TransactionApiControllerTest extends BaseIT {
     Mockito.doReturn(loanPolicyCollection)
       .when(circulationLoanPolicyStorageClient)
       .fetchLoanPolicyByQuery(anyString());
+    var circulationRequest = createCirculationRequest();
+    Mockito.doReturn(List.of(circulationRequest)).when(circulationClient).getRequestsInQueueByItemId(anyString());
 
     mockMvc.perform(
         get("/transactions/" + transactionID + "/status")
@@ -769,6 +775,8 @@ class TransactionApiControllerTest extends BaseIT {
     Mockito.doReturn(loanPolicyCollection)
       .when(circulationLoanPolicyStorageClient)
       .fetchLoanPolicyByQuery(anyString());
+    var circulationRequest = createCirculationRequest();
+    Mockito.doReturn(List.of(circulationRequest)).when(circulationClient).getRequestsInQueueByItemId(anyString());
 
     mockMvc.perform(
         get("/transactions/" + transactionID + "/status")
@@ -812,6 +820,8 @@ class TransactionApiControllerTest extends BaseIT {
     Mockito.doReturn(loanPolicyCollection)
       .when(circulationLoanPolicyStorageClient)
       .fetchLoanPolicyByQuery(anyString());
+    var circulationRequest = createCirculationRequest();
+    Mockito.doReturn(List.of(circulationRequest)).when(circulationClient).getRequestsInQueueByItemId(anyString());
 
     mockMvc.perform(
         get("/transactions/" + transactionID + "/status")
@@ -860,6 +870,8 @@ class TransactionApiControllerTest extends BaseIT {
     Mockito.doReturn(loanPolicyCollection)
       .when(circulationLoanPolicyStorageClient)
       .fetchLoanPolicyByQuery(anyString());
+    var circulationRequest = createCirculationRequest();
+    Mockito.doReturn(List.of(circulationRequest)).when(circulationClient).getRequestsInQueueByItemId(anyString());
 
     mockMvc.perform(
         get("/transactions/" + transactionID + "/status")
@@ -889,6 +901,8 @@ class TransactionApiControllerTest extends BaseIT {
       .totalRecords(0)
       .build();
     Mockito.doReturn(loanCollection).when(circulationClient).fetchLoanByQuery(anyString());
+    var circulationRequest = createCirculationRequest();
+    Mockito.doReturn(List.of(circulationRequest)).when(circulationClient).getRequestsInQueueByItemId(anyString());
 
     mockMvc.perform(
         get("/transactions/" + transactionID + "/status")
@@ -908,6 +922,8 @@ class TransactionApiControllerTest extends BaseIT {
 
     systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT,
       () -> transactionRepository.save(dcbTransaction));
+    var circulationRequest = createCirculationRequest();
+    Mockito.doReturn(List.of(circulationRequest)).when(circulationClient).getRequestsInQueueByItemId(anyString());
 
     mockMvc.perform(
         get("/transactions/" + transactionID + "/status")

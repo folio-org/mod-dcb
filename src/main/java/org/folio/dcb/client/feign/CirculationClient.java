@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.List;
+
 @FeignClient(name = "circulation", configuration = FeignClientConfiguration.class)
 public interface CirculationClient {
   @PostMapping("/requests")
@@ -35,4 +37,8 @@ public interface CirculationClient {
 
   @PostMapping("/renew-by-id")
   RenewByIdResponse renewById(@RequestBody RenewByIdRequest renewByIdRequest);
+
+  @GetMapping("/requests/queue/item/{itemId}")
+  List<CirculationRequest> getRequestsInQueueByItemId(@PathVariable("itemId") String itemId);
+
 }
