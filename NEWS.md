@@ -1,3 +1,6 @@
+## v1.3.6 2025-10-29
+* MODDCB-234: Update POST API for DCB transaction creation to support localNames field [MODDCB-234](https://folio-org.atlassian.net/browse/MODDCB-234)
+
 ## v1.3.5 2025-08-06
 * MODDCB-223: Add missing permission for DCB transaction status API [MODDCB-223](https://folio-org.atlassian.net/browse/MODDCB-223)
 
