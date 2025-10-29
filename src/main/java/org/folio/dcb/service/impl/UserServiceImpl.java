@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.ObjectUtils;
 import org.folio.dcb.client.feign.UsersClient;
+import org.folio.dcb.domain.DcbPersonal;
 import org.folio.dcb.domain.dto.DcbPatron;
 import org.folio.dcb.domain.dto.Personal;
 import org.folio.dcb.domain.dto.User;
@@ -25,7 +26,6 @@ public class UserServiceImpl implements UserService {
 
   private final PatronGroupService patronGroupService;
   private final UsersClient usersClient;
-  private static final String LAST_NAME = "DcbSystem";
 
   @Override
   public User fetchUser(DcbPatron dcbPatron) {
@@ -79,13 +79,18 @@ public class UserServiceImpl implements UserService {
   }
 
   private User createVirtualUser(DcbPatron patron, String groupId) {
+    var personalData = DcbPersonal.parseLocalNames(patron.getLocalNames());
     return User.builder()
       .active(true)
       .barcode(patron.getBarcode())
       .patronGroup(groupId)
       .id(patron.getId())
       .type(DCB_TYPE)
-      .personal(Personal.builder().lastName(LAST_NAME).build())
+      .personal(Personal.builder()
+        .firstName(personalData.getFirstName())
+        .middleName(personalData.getMiddleName())
+        .lastName(personalData.getLastName())
+        .build())
       .build();
   }
 
@@ -102,5 +107,4 @@ public class UserServiceImpl implements UserService {
       throw new IllegalArgumentException(String.format("User with type %s is retrieved. so unable to create transaction", userType));
     }
   }
-
 }
