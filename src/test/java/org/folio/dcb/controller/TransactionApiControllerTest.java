@@ -22,7 +22,6 @@ import static org.folio.dcb.utils.EntityUtils.ITEM_ID_STATUS_NOT_AVAILABLE;
 import static org.folio.dcb.utils.EntityUtils.NOT_EXISTED_ITEM_ID;
 import static org.folio.dcb.utils.EntityUtils.NOT_EXISTED_PATRON_ID;
 import static org.folio.dcb.utils.EntityUtils.PATRON_TYPE_USER_ID;
-import static org.folio.dcb.utils.EntityUtils.createCirculationRequest;
 import static org.folio.dcb.utils.EntityUtils.createDcbItem;
 import static org.folio.dcb.utils.EntityUtils.createDcbPatronWithExactPatronId;
 import static org.folio.dcb.utils.EntityUtils.createDcbTransactionByRole;
@@ -555,9 +554,6 @@ class TransactionApiControllerTest extends BaseIT {
   @Test
   void getLendingTransactionStatusSuccessTest() throws Exception {
     var id = UUID.randomUUID().toString();
-    var circulationRequest = createCirculationRequest();
-    Mockito.doReturn(List.of(circulationRequest)).when(circulationClient).getRequestsInQueueByItemId(anyString());
-
     this.mockMvc.perform(
         post("/transactions/" + id)
           .content(asJsonString(createDcbTransactionByRole(DcbTransaction.RoleEnum.LENDER)))
@@ -573,7 +569,9 @@ class TransactionApiControllerTest extends BaseIT {
         get("/transactions/" + id + "/status")
           .headers(defaultHeaders())
           .contentType(MediaType.APPLICATION_JSON))
-      .andExpect(status().isOk());
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.item").exists())
+      .andExpect(jsonPath("$.item.holdCount", is(5)));
   }
 
   private static Stream<Arguments> transactionRoles() {
@@ -620,8 +618,6 @@ class TransactionApiControllerTest extends BaseIT {
     Mockito.doReturn(loanPolicyCollection)
       .when(circulationLoanPolicyStorageClient)
       .fetchLoanPolicyByQuery(anyString());
-    var circulationRequest = createCirculationRequest();
-    Mockito.doReturn(List.of(circulationRequest)).when(circulationClient).getRequestsInQueueByItemId(anyString());
 
     mockMvc.perform(
         get("/transactions/" + transactionID + "/status")
@@ -630,7 +626,9 @@ class TransactionApiControllerTest extends BaseIT {
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.item.renewalInfo.renewalCount").value(8))
       .andExpect(jsonPath("$.item.renewalInfo.renewable").value(true))
-      .andExpect(jsonPath("$.item.renewalInfo.renewalMaxCount").value(22));
+      .andExpect(jsonPath("$.item.renewalInfo.renewalMaxCount").value(22))
+      .andExpect(jsonPath("$.item.holdCount").doesNotExist())
+    ;
   }
 
   @Test
@@ -668,6 +666,7 @@ class TransactionApiControllerTest extends BaseIT {
               .renewalCount(1)
               .build()
           )
+          .holdCount(5)
           .build()
       )
       .status(ITEM_CHECKED_OUT)
@@ -775,8 +774,6 @@ class TransactionApiControllerTest extends BaseIT {
     Mockito.doReturn(loanPolicyCollection)
       .when(circulationLoanPolicyStorageClient)
       .fetchLoanPolicyByQuery(anyString());
-    var circulationRequest = createCirculationRequest();
-    Mockito.doReturn(List.of(circulationRequest)).when(circulationClient).getRequestsInQueueByItemId(anyString());
 
     mockMvc.perform(
         get("/transactions/" + transactionID + "/status")
@@ -785,7 +782,8 @@ class TransactionApiControllerTest extends BaseIT {
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.item.renewalInfo.renewalCount").value(8))
       .andExpect(jsonPath("$.item.renewalInfo.renewable").value(true))
-      .andExpect(jsonPath("$.item.renewalInfo.renewalMaxCount").value(-1));
+      .andExpect(jsonPath("$.item.renewalInfo.renewalMaxCount").value(-1))
+      .andExpect(jsonPath("$.item.holdCount").doesNotExist());
   }
 
   @ParameterizedTest
@@ -820,8 +818,6 @@ class TransactionApiControllerTest extends BaseIT {
     Mockito.doReturn(loanPolicyCollection)
       .when(circulationLoanPolicyStorageClient)
       .fetchLoanPolicyByQuery(anyString());
-    var circulationRequest = createCirculationRequest();
-    Mockito.doReturn(List.of(circulationRequest)).when(circulationClient).getRequestsInQueueByItemId(anyString());
 
     mockMvc.perform(
         get("/transactions/" + transactionID + "/status")
@@ -830,7 +826,8 @@ class TransactionApiControllerTest extends BaseIT {
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.item.renewalInfo.renewalCount").value(8))
       .andExpect(jsonPath("$.item.renewalInfo.renewable").value(false))
-      .andExpect(jsonPath("$.item.renewalInfo.renewalMaxCount").doesNotExist());
+      .andExpect(jsonPath("$.item.renewalInfo.renewalMaxCount").doesNotExist())
+      .andExpect(jsonPath("$.item.holdCount").doesNotExist());
   }
 
   @ParameterizedTest
@@ -870,8 +867,6 @@ class TransactionApiControllerTest extends BaseIT {
     Mockito.doReturn(loanPolicyCollection)
       .when(circulationLoanPolicyStorageClient)
       .fetchLoanPolicyByQuery(anyString());
-    var circulationRequest = createCirculationRequest();
-    Mockito.doReturn(List.of(circulationRequest)).when(circulationClient).getRequestsInQueueByItemId(anyString());
 
     mockMvc.perform(
         get("/transactions/" + transactionID + "/status")
@@ -880,7 +875,8 @@ class TransactionApiControllerTest extends BaseIT {
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.item.renewalInfo.renewalCount").value(0))
       .andExpect(jsonPath("$.item.renewalInfo.renewable").value(true))
-      .andExpect(jsonPath("$.item.renewalInfo.renewalMaxCount").value(22));
+      .andExpect(jsonPath("$.item.renewalInfo.renewalMaxCount").value(22))
+      .andExpect(jsonPath("$.item.holdCount").doesNotExist());
   }
 
   @ParameterizedTest
@@ -901,8 +897,6 @@ class TransactionApiControllerTest extends BaseIT {
       .totalRecords(0)
       .build();
     Mockito.doReturn(loanCollection).when(circulationClient).fetchLoanByQuery(anyString());
-    var circulationRequest = createCirculationRequest();
-    Mockito.doReturn(List.of(circulationRequest)).when(circulationClient).getRequestsInQueueByItemId(anyString());
 
     mockMvc.perform(
         get("/transactions/" + transactionID + "/status")
@@ -922,15 +916,15 @@ class TransactionApiControllerTest extends BaseIT {
 
     systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT,
       () -> transactionRepository.save(dcbTransaction));
-    var circulationRequest = createCirculationRequest();
-    Mockito.doReturn(List.of(circulationRequest)).when(circulationClient).getRequestsInQueueByItemId(anyString());
 
     mockMvc.perform(
         get("/transactions/" + transactionID + "/status")
           .headers(defaultHeaders())
           .contentType(MediaType.APPLICATION_JSON))
       .andExpect(status().isOk())
-      .andExpect(jsonPath("$.item.renewalInfo").doesNotExist());
+      .andExpect(jsonPath("$.item").exists())
+      .andExpect(jsonPath("$.item.renewalInfo").doesNotExist())
+      .andExpect(jsonPath("$.item.holdCount", is(5)));
   }
 
   @Test

@@ -20,6 +20,7 @@ import org.folio.dcb.domain.dto.CirculationItemCollection;
 import org.folio.dcb.domain.dto.DcbItem;
 import org.folio.dcb.service.impl.CirculationItemServiceImpl;
 import org.folio.dcb.service.impl.HoldingsServiceImpl;
+import org.folio.dcb.utils.CqlQuery;
 import org.folio.dcb.utils.DCBConstants;
 import org.folio.spring.model.ResultList;
 import org.junit.jupiter.api.Test;
@@ -99,8 +100,8 @@ class CirculationItemServiceImplTest {
     when(circulationItemClient.createCirculationItem(any(), any())).thenReturn(createdItem);
 
     LocationDTO locationDTO = testLocation();
-    when(locationsClient.findLocationByQuery(String.format("code==\"%s\"", TEST_DCB_LOCATION_CODE), true, 1, 0))
-      .thenReturn(asSinglePage(locationDTO));
+    var cqlByCode = CqlQuery.exactMatch("code", "TST");
+    when(locationsClient.findLocationByQuery(cqlByCode, true, 1, 0)).thenReturn(asSinglePage(locationDTO));
 
     var result = circulationItemService.checkIfItemExistsAndCreate(dcbItem, pickupServicePointId);
 
@@ -127,8 +128,8 @@ class CirculationItemServiceImplTest {
     var createdItem = CirculationItem.builder().id(randomUuid).barcode("barcode123").build();
     when(circulationItemClient.createCirculationItem(any(), any())).thenReturn(createdItem);
 
-    var expectedQuery = String.format("code==\"%s\"", TEST_DCB_LOCATION_CODE);
-    when(locationsClient.findLocationByQuery(expectedQuery, true, 1, 0)).thenReturn(ResultList.empty());
+    var cqlByCode = CqlQuery.exactMatch("code", TEST_DCB_LOCATION_CODE);
+    when(locationsClient.findLocationByQuery(cqlByCode, true, 1, 0)).thenReturn(ResultList.empty());
 
     // Act
     var result = circulationItemService.checkIfItemExistsAndCreate(dcbItem, TEST_SERVICE_POINT_ID);
@@ -160,7 +161,8 @@ class CirculationItemServiceImplTest {
     var createdItem = CirculationItem.builder().id(randomUuid).barcode("barcode123").build();
     when(circulationItemClient.createCirculationItem(any(), any())).thenReturn(createdItem);
 
-    when(locationsClient.findLocationByQuery("code==\"nonExistedShadowLocationCode\"", true, 1, 0))
+    var cqlByCode = CqlQuery.exactMatch("code", "nonExistedShadowLocationCode");
+    when(locationsClient.findLocationByQuery(cqlByCode, true, 1, 0))
       .thenReturn(ResultList.of(0, Collections.emptyList()));
 
     // Act
@@ -246,9 +248,12 @@ class CirculationItemServiceImplTest {
     when(circulationItemClient.createCirculationItem(any(), any())).thenReturn(createdItem);
 
     var dcbItem = dcbItem(null, TEST_LENDING_LIBRARY_CODE);
-    when(locationUnitClient.findLibrariesByQuery("code==\"TST\"", true, 1, 0))
+    var cqlByCode = CqlQuery.exactMatch("code", "TST");
+    when(locationUnitClient.findLibrariesByQuery(cqlByCode, true, 1, 0))
       .thenReturn(asSinglePage(testLibraryUnit()));
-    when(locationsClient.findLocationByQuery("libraryId==\"" + TEST_LOCATION_ID + "\"", true, 1, 0))
+
+    var cqlByLibraryId = CqlQuery.exactMatch("libraryId", TEST_LOCATION_ID);
+    when(locationsClient.findLocationByQuery(cqlByLibraryId, true, 1, 0))
       .thenReturn(asSinglePage(testLocation()));
 
     var result = circulationItemService.checkIfItemExistsAndCreate(dcbItem, pickupServicePointId);
@@ -277,7 +282,8 @@ class CirculationItemServiceImplTest {
     when(circulationItemClient.createCirculationItem(any(), any())).thenReturn(createdItem);
 
     var dcbItem = dcbItem(null, TEST_LENDING_LIBRARY_CODE);
-    when(locationUnitClient.findLibrariesByQuery("code==\"TST\"", true, 1, 0)).thenReturn(ResultList.empty());
+    var cqlByCode = CqlQuery.exactMatch("code", "TST");
+    when(locationUnitClient.findLibrariesByQuery(cqlByCode, true, 1, 0)).thenReturn(ResultList.empty());
 
     var result = circulationItemService.checkIfItemExistsAndCreate(dcbItem, pickupServicePointId);
 
@@ -305,9 +311,12 @@ class CirculationItemServiceImplTest {
     when(circulationItemClient.createCirculationItem(any(), any())).thenReturn(createdItem);
 
     var dcbItem = dcbItem(null, TEST_LENDING_LIBRARY_CODE);
-    when(locationUnitClient.findLibrariesByQuery("code==\"TST\"", true, 1, 0))
+    var expectedQueryByCode = CqlQuery.exactMatch("code", "TST");
+    when(locationUnitClient.findLibrariesByQuery(expectedQueryByCode, true, 1, 0))
       .thenReturn(asSinglePage(testLibraryUnit()));
-    when(locationsClient.findLocationByQuery("libraryId==\"" + TEST_LOCATION_ID + "\"", true, 1, 0))
+
+    var expectedQueryByLibId = CqlQuery.exactMatch("libraryId", TEST_LOCATION_ID);
+    when(locationsClient.findLocationByQuery(expectedQueryByLibId, true, 1, 0))
       .thenReturn(ResultList.empty());
 
     var result = circulationItemService.checkIfItemExistsAndCreate(dcbItem, pickupServicePointId);

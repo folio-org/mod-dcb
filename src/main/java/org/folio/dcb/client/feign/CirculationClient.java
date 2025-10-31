@@ -7,6 +7,7 @@ import org.folio.dcb.domain.dto.LoanCollection;
 import org.folio.dcb.domain.dto.RenewByIdRequest;
 import org.folio.dcb.domain.dto.RenewByIdResponse;
 import org.folio.spring.config.FeignClientConfiguration;
+import org.folio.spring.model.ResultList;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,12 +16,15 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.List;
-
 @FeignClient(name = "circulation", configuration = FeignClientConfiguration.class)
 public interface CirculationClient {
   @PostMapping("/requests")
   CirculationRequest createRequest(@RequestBody CirculationRequest circulationRequest);
+
+  @GetMapping("/requests")
+  ResultList<CirculationRequest> findByQuery(
+    @RequestParam("query") String query,
+    @RequestParam("limit") Integer limit);
 
   @PostMapping("/check-in-by-barcode")
   void checkInByBarcode(@RequestBody CheckInRequest checkInRequest);
@@ -37,8 +41,4 @@ public interface CirculationClient {
 
   @PostMapping("/renew-by-id")
   RenewByIdResponse renewById(@RequestBody RenewByIdRequest renewByIdRequest);
-
-  @GetMapping("/requests/queue/item/{itemId}")
-  List<CirculationRequest> getRequestsInQueueByItemId(@PathVariable("itemId") String itemId);
-
 }

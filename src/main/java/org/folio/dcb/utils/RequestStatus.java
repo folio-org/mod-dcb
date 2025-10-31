@@ -39,6 +39,11 @@ public enum RequestStatus {
   public String getValue() {
     return value;
   }
+
+  public static EnumSet<RequestStatus> getOpenStatuses() {
+    return OPEN_STATUSES;
+  }
+
   public static boolean isRequestOpen(RequestStatus currentStatus){
     return OPEN_STATUSES.contains(currentStatus);
   }

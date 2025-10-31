@@ -7,9 +7,9 @@ import static org.folio.dcb.utils.TransactionDetailsUtil.statusesNotEqual;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.ObjectUtils;
 import org.folio.dcb.client.feign.CirculationClient;
 import org.folio.dcb.client.feign.CirculationLoanPolicyStorageClient;
-import org.folio.dcb.domain.dto.CirculationRequest;
 import org.folio.dcb.domain.dto.DcbItem;
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.DcbUpdateTransaction;
@@ -32,7 +32,9 @@ import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.LibraryService;
 import org.folio.dcb.service.StatusProcessorService;
 import org.folio.dcb.service.TransactionsService;
+import org.folio.dcb.utils.CqlQuery;
 import org.folio.spring.exception.NotFoundException;
+import org.folio.spring.model.ResultList;
 import org.folio.util.PercentCodec;
 import org.folio.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
@@ -42,7 +44,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -114,12 +115,9 @@ public class TransactionsServiceImpl implements TransactionsService {
 
   public TransactionStatusResponse getTransactionStatusById(String dcbTransactionId) {
     log.debug("getTransactionStatusById:: id {} ", dcbTransactionId);
-    TransactionEntity transactionEntity = getTransactionEntityOrThrow(dcbTransactionId);
-    List<CirculationRequest> circulationRequests =
-      circulationClient.getRequestsInQueueByItemId(transactionEntity.getItemId());
-    Optional<LoanRenewalDetails> loanRenewalDetails = getLoanRenewalDetails(transactionEntity);
-    return generateTransactionStatusResponseFromTransactionEntity(transactionEntity, loanRenewalDetails,
-      circulationRequests.size());
+    var transactionEntity = getTransactionEntityOrThrow(dcbTransactionId);
+    var loanRenewalDetails = getLoanRenewalDetails(transactionEntity);
+    return generateTransactionStatusResponseFromTransactionEntity(transactionEntity, loanRenewalDetails);
   }
 
   private Optional<LoanRenewalDetails> getLoanRenewalDetails(TransactionEntity transactionEntity) {
@@ -205,7 +203,7 @@ public class TransactionsServiceImpl implements TransactionsService {
     validateLoanPolicy(renewalResponse.getLoanPolicyId(), loanPolicy);
     var loanRenewalDetails = Optional.of(new LoanRenewalDetails(renewalResponse.getRenewalCount(),
       loanPolicy.getRenewalsPolicy().getNumberAllowed(), loanPolicy.getRenewable()));
-    return generateTransactionStatusResponseFromTransactionEntity(transaction, loanRenewalDetails, null);
+    return generateTransactionStatusResponseFromTransactionEntity(transaction, loanRenewalDetails);
   }
 
   private void validateLoanPolicy(String loanPolicyId, LoanPolicy loanPolicy) {
@@ -262,25 +260,11 @@ public class TransactionsServiceImpl implements TransactionsService {
   }
 
   private TransactionStatusResponse generateTransactionStatusResponseFromTransactionEntity(
-    TransactionEntity transactionEntity,
-    Optional<LoanRenewalDetails> loanRenewalDetails,
-    Integer holdCount
-  ) {
-    TransactionStatus.StatusEnum transactionStatus = transactionEntity.getStatus();
-    TransactionStatusResponse.StatusEnum transactionStatusResponseStatusEnum = TransactionStatusResponse.StatusEnum.fromValue(transactionStatus.getValue());
-    DcbTransaction.RoleEnum transactionRole = transactionEntity.getRole();
-    DcbItem dcbItem = loanRenewalDetails.map(loanDetails -> DcbItem.builder()
-      .renewalInfo(RenewalInfo.builder()
-        .renewalCount(loanDetails.loanRenewalCount())
-        .renewalMaxCount(loanDetails.renewalMaxCount())
-        .renewable(loanDetails.renewable())
-        .build())
-      .holdCount(holdCount)
-      .build()).orElse(null);
+    TransactionEntity transactionEntity, Optional<LoanRenewalDetails> loanRenewalDetails) {
     return TransactionStatusResponse.builder()
-      .status(transactionStatusResponseStatusEnum)
-      .item(dcbItem)
-      .role((TransactionStatusResponse.RoleEnum.fromValue(transactionRole.getValue())))
+      .status(TransactionStatusResponse.StatusEnum.fromValue(transactionEntity.getStatus().getValue()))
+      .item(getDcbItemForTransactionStatus(transactionEntity, loanRenewalDetails).orElse(null))
+      .role((TransactionStatusResponse.RoleEnum.fromValue(transactionEntity.getRole().getValue())))
       .build();
   }
 
@@ -296,4 +280,35 @@ public class TransactionsServiceImpl implements TransactionsService {
     }
   }
 
+  private Optional<DcbItem> getDcbItemForTransactionStatus(
+    TransactionEntity tx, Optional<LoanRenewalDetails> loanRenewalDetails) {
+    var renewalInfo = loanRenewalDetails.map(this::createRenewalInfo).orElse(null);
+    var holdCount = getOpenHoldRequestsNumber(tx).orElse(null);
+    if (ObjectUtils.allNull(renewalInfo, holdCount)) {
+      return Optional.empty();
+    }
+
+    return Optional.of(DcbItem.builder()
+      .renewalInfo(renewalInfo)
+      .holdCount(holdCount)
+      .build());
+  }
+
+  private Optional<Integer> getOpenHoldRequestsNumber(TransactionEntity transactionEntity) {
+    if (transactionEntity.getRole() != LENDER) {
+      return Optional.empty();
+    }
+
+    var cqlQuery = CqlQuery.createForOpenHoldRequests(transactionEntity.getItemId());
+    var circulationRequests = circulationClient.findByQuery(cqlQuery, 0);
+    return Optional.ofNullable(circulationRequests).map(ResultList::getTotalRecords);
+  }
+
+  private  RenewalInfo createRenewalInfo(LoanRenewalDetails loanDetails) {
+    return RenewalInfo.builder()
+      .renewalCount(loanDetails.loanRenewalCount())
+      .renewalMaxCount(loanDetails.renewalMaxCount())
+      .renewable(loanDetails.renewable())
+      .build();
+  }
 }
