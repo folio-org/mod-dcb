@@ -22,6 +22,9 @@ DcbItem:
       type: string
     renewalInfo:
       "$ref": "dcbItem.yaml#/renewalInfo"
+    holdCount:
+      description: The number of holds on the item (Will be returned only for Lender role)
+      type: integer
 
 renewalInfo:
   type: object

@@ -13,6 +13,7 @@
 * MODDCB-233: Implement location search by lendingLibraryCode  [MODDCB-233](https://folio-org.atlassian.net/browse/MODDCB-233)
 * MODDCB-234: Update POST API for DCB transaction creation to support localNames field [MODDCB-234](https://folio-org.atlassian.net/browse/MODDCB-234)
 * MODDCB-240: Fix inventory API call for location and location-units [MODDCB-240](https://folio-org.atlassian.net/browse/MODDCB-240)
+* MODDCB-235: Add hold count field to transaction status response [MODDCB-235](https://folio-org.atlassian.net/browse/MODDCB-235)
 
 ## v1.3.0 2025-03-13
 

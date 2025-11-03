@@ -82,7 +82,7 @@
   "provides": [
     {
       "id": "transactions",
-      "version": "1.3",
+      "version": "1.4",
       "handlers": [
         {
           "methods": [
@@ -127,6 +127,7 @@
           ],
           "modulePermissions": [
             "circulation.renew-by-id.post",
+            "circulation.requests.collection.get",
             "circulation-storage.loan-policies.item.get"
           ]
         },
@@ -140,6 +141,7 @@
           ],
           "modulePermissions": [
             "circulation.loans.collection.get",
+            "circulation.requests.collection.get",
             "circulation-storage.loan-policies.collection.get"
           ]
         },
