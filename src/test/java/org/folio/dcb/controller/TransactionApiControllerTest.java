@@ -4,6 +4,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.matchingJsonPath;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWER;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWING_PICKUP;
@@ -1969,6 +1971,61 @@ class TransactionApiControllerTest extends BaseIT {
       .withQueryParam("query", equalTo("libraryId==\"9d1b77e7-f02e-4b7f-b296-3f2042ddac54\"")));
     wireMockServer.verify(1, postRequestedFor(urlPathMatching(".*/circulation-item/.*"))
       .withRequestBody(matchingJsonPath("$.effectiveLocationId", equalTo("fbc42f2c-6cd0-4637-93c0-9344f8408268"))));
+    wireMockServer.resetRequests();
+  }
+
+  @ParameterizedTest
+  @MethodSource("transactionRoles")
+  void blockRenewalForDcbTransaction(DcbTransaction.RoleEnum role) throws Exception {
+    removeExistedTransactionFromDbIfSoExists();
+    removeExistingTransactionsByItemId(ITEM_ID);
+
+    var dcbTransaction = createTransactionEntity();
+    dcbTransaction.setId(DCB_TRANSACTION_ID);
+    dcbTransaction.setRole(role);
+    dcbTransaction.setStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_OUT);
+
+    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT,
+      () -> transactionRepository.save(dcbTransaction));
+
+    this.mockMvc.perform(
+        put("/transactions/{id}/block-renewal", DCB_TRANSACTION_ID)
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isNoContent());
+
+    var loanId = "d217d4d5-8b2b-496b-8aa5-7e60d530e124";
+    wireMockServer.verify(1, putRequestedFor(urlPathEqualTo("/circulation/loans/" + loanId))
+      .withRequestBody(matchingJsonPath("$.renewalCount", equalTo("2147483647"))));
+    wireMockServer.resetRequests();
+  }
+
+
+  @ParameterizedTest
+  @MethodSource("transactionRoles")
+  void unblockRenewalForDcbTransaction(DcbTransaction.RoleEnum role) throws Exception {
+    removeExistedTransactionFromDbIfSoExists();
+    removeExistingTransactionsByItemId(ITEM_ID);
+
+    var dcbTransaction = createTransactionEntity();
+    dcbTransaction.setId(DCB_TRANSACTION_ID);
+    dcbTransaction.setRole(role);
+    dcbTransaction.setStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_OUT);
+
+    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT,
+      () -> transactionRepository.save(dcbTransaction));
+
+    this.mockMvc.perform(
+        put("/transactions/{id}/unblock-renewal", DCB_TRANSACTION_ID)
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isNoContent());
+
+    var loanId = "d217d4d5-8b2b-496b-8aa5-7e60d530e124";
+    wireMockServer.verify(1, putRequestedFor(urlPathEqualTo("/circulation/loans/" + loanId))
+      .withRequestBody(matchingJsonPath("$.renewalCount", equalTo("0"))));
     wireMockServer.resetRequests();
   }
 }

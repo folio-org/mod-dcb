@@ -82,7 +82,7 @@
   "provides": [
     {
       "id": "transactions",
-      "version": "1.4",
+      "version": "1.5",
       "handlers": [
         {
           "methods": [
@@ -129,6 +129,39 @@
             "circulation.renew-by-id.post",
             "circulation.requests.collection.get",
             "circulation-storage.loan-policies.item.get"
+          ]
+        },
+        {
+          "methods": [
+            "PUT"
+          ],
+          "pathPattern": "/transactions/{dcbTransactionId}/renew",
+          "permissionsRequired": [
+            "dcb.transactions.renew.put"
+          ],
+          "modulePermissions": [
+            "circulation.renew-by-id.post",
+            "circulation-storage.loan-policies.item.get"
+          ]
+        },
+        {
+          "methods": [ "PUT" ],
+          "pathPattern": "/transactions/{dcbTransactionId}/block-renewal",
+          "permissionsRequired": [ "dcb.transactions.block-renewal.put" ],
+          "modulePermissions": [
+            "circulation.loans.item.put",
+            "circulation.loans.collection.get"
+          ]
+        },
+        {
+          "methods": [ "PUT" ],
+          "pathPattern": "/transactions/{dcbTransactionId}/unblock-renewal",
+          "permissionsRequired": [
+            "dcb.transactions.block-renewal.put"
+          ],
+          "modulePermissions": [
+            "circulation.loans.item.put",
+            "circulation.loans.collection.get"
           ]
         },
         {
@@ -321,6 +354,8 @@
         "dcb.transactions.status.put",
         "dcb.transactions.status.get",
         "dcb.transactions.collection.get",
+        "dcb.transactions.block-renewal.put",
+        "dcb.transactions.unblock-renewal.put",
         "dcb.ecs-request.transactions.post",
         "dcb.transactions.item.put",
         "dcb.transactions.renew.put",
@@ -335,6 +370,16 @@
     {
       "permissionName": "dcb.transactions.renew.put",
       "displayName": "renew loan by transaction id",
+      "description": "renew loan by transaction id"
+    },
+    {
+      "permissionName": "dcb.transactions.block-renewal.put",
+      "displayName": "Block renewal for item by transaction id",
+      "description": "Block renewal for item by transaction id"
+    },
+    {
+      "permissionName": "dcb.transactions.unblock-renewal.put",
+      "displayName": "Unblock renewal for item by transaction id",
       "description": "renew loan by transaction id"
     },
     {
@@ -402,6 +447,7 @@
         "circulation.requests.item.get",
         "circulation.requests.item.post",
         "circulation.requests.collection.get",
+        "circulation.loans.item.put",
         "circulation.loans.collection.get",
         "circulation-storage.loan-policies.collection.get",
         "circulation.check-in-by-barcode.post",

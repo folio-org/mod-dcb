@@ -1,6 +1,7 @@
 Loan:
   type: object
   title: Loan
+  additionalProperties: true
   properties:
     id:
       description: A globally unique (UUID) identifier for the Loan
@@ -19,6 +20,7 @@ Loan:
       type: string
     status:
       "$ref": "Loan.yaml#/status"
+
 status:
   type: object
   properties:

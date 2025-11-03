@@ -19,6 +19,7 @@ source-storage.records.matching.collection.post
 circulation.requests.item.get
 circulation.requests.item.post
 circulation.requests.collection.get
+circulation.loans.item.put
 circulation.loans.collection.get
 circulation.check-in-by-barcode.post
 circulation.check-out-by-barcode.post
