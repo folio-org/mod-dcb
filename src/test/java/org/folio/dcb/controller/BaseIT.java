@@ -4,8 +4,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
-import com.github.tomakehurst.wiremock.common.ConsoleNotifier;
-import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import lombok.SneakyThrows;
 import org.folio.spring.config.properties.FolioEnvironment;
 import org.folio.spring.integration.XOkapiHeaders;
@@ -66,10 +64,7 @@ public class BaseIT {
 
   @BeforeAll
   static void beforeAll() {
-    var options = WireMockConfiguration.options()
-      .port(WIRE_MOCK_PORT)
-      .notifier(new ConsoleNotifier(true));
-    wireMockServer = new WireMockServer(options);
+    wireMockServer = new WireMockServer(WIRE_MOCK_PORT);
     wireMockServer.start();
   }
 

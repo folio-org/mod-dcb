@@ -20,7 +20,6 @@ Loan:
       type: string
     status:
       "$ref": "Loan.yaml#/status"
-
 status:
   type: object
   properties:
