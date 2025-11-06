@@ -155,6 +155,7 @@ public class EntityUtils {
       .title("ITEM")
       .lendingLibraryCode("KU")
       .materialType("book")
+      .holdCount(0)
       .build();
   }
 
