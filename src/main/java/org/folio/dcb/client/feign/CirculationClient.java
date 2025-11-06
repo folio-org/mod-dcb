@@ -3,6 +3,7 @@ package org.folio.dcb.client.feign;
 import org.folio.dcb.domain.dto.CheckInRequest;
 import org.folio.dcb.domain.dto.CheckOutRequest;
 import org.folio.dcb.domain.dto.CirculationRequest;
+import org.folio.dcb.domain.dto.Loan;
 import org.folio.dcb.domain.dto.LoanCollection;
 import org.folio.dcb.domain.dto.RenewByIdRequest;
 import org.folio.dcb.domain.dto.RenewByIdResponse;
@@ -41,4 +42,7 @@ public interface CirculationClient {
 
   @PostMapping("/renew-by-id")
   RenewByIdResponse renewById(@RequestBody RenewByIdRequest renewByIdRequest);
+
+  @PutMapping("/loans/{loanId}")
+  void updateLoan(@PathVariable("loanId") String loanId, Loan requestBody);
 }
