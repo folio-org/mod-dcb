@@ -157,7 +157,7 @@
           "methods": [ "PUT" ],
           "pathPattern": "/transactions/{dcbTransactionId}/unblock-renewal",
           "permissionsRequired": [
-            "dcb.transactions.block-renewal.put"
+            "dcb.transactions.unblock-renewal.put"
           ],
           "modulePermissions": [
             "circulation.loans.item.put",
