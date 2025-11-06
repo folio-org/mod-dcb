@@ -541,7 +541,9 @@ class TransactionApiControllerTest extends BaseIT {
         get("/transactions/" + id + "/status")
           .headers(defaultHeaders())
           .contentType(MediaType.APPLICATION_JSON))
-      .andExpect(status().isOk());
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.item").exists())
+      .andExpect(jsonPath("$.item.holdCount", is(5)));
   }
 
   private static Stream<Arguments> transactionRoles() {
@@ -596,7 +598,9 @@ class TransactionApiControllerTest extends BaseIT {
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.item.renewalInfo.renewalCount").value(8))
       .andExpect(jsonPath("$.item.renewalInfo.renewable").value(true))
-      .andExpect(jsonPath("$.item.renewalInfo.renewalMaxCount").value(22));
+      .andExpect(jsonPath("$.item.renewalInfo.renewalMaxCount").value(22))
+      .andExpect(jsonPath("$.item.holdCount").doesNotExist())
+    ;
   }
 
   @Test
@@ -634,6 +638,7 @@ class TransactionApiControllerTest extends BaseIT {
               .renewalCount(1)
               .build()
           )
+          .holdCount(5)
           .build()
       )
       .status(ITEM_CHECKED_OUT)
@@ -749,7 +754,8 @@ class TransactionApiControllerTest extends BaseIT {
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.item.renewalInfo.renewalCount").value(8))
       .andExpect(jsonPath("$.item.renewalInfo.renewable").value(true))
-      .andExpect(jsonPath("$.item.renewalInfo.renewalMaxCount").value(-1));
+      .andExpect(jsonPath("$.item.renewalInfo.renewalMaxCount").value(-1))
+      .andExpect(jsonPath("$.item.holdCount").doesNotExist());
   }
 
   @ParameterizedTest
@@ -792,7 +798,8 @@ class TransactionApiControllerTest extends BaseIT {
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.item.renewalInfo.renewalCount").value(8))
       .andExpect(jsonPath("$.item.renewalInfo.renewable").value(false))
-      .andExpect(jsonPath("$.item.renewalInfo.renewalMaxCount").doesNotExist());
+      .andExpect(jsonPath("$.item.renewalInfo.renewalMaxCount").doesNotExist())
+      .andExpect(jsonPath("$.item.holdCount").doesNotExist());
   }
 
   @ParameterizedTest
@@ -840,7 +847,8 @@ class TransactionApiControllerTest extends BaseIT {
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.item.renewalInfo.renewalCount").value(0))
       .andExpect(jsonPath("$.item.renewalInfo.renewable").value(true))
-      .andExpect(jsonPath("$.item.renewalInfo.renewalMaxCount").value(22));
+      .andExpect(jsonPath("$.item.renewalInfo.renewalMaxCount").value(22))
+      .andExpect(jsonPath("$.item.holdCount").doesNotExist());
   }
 
   @ParameterizedTest
@@ -886,7 +894,9 @@ class TransactionApiControllerTest extends BaseIT {
           .headers(defaultHeaders())
           .contentType(MediaType.APPLICATION_JSON))
       .andExpect(status().isOk())
-      .andExpect(jsonPath("$.item.renewalInfo").doesNotExist());
+      .andExpect(jsonPath("$.item").exists())
+      .andExpect(jsonPath("$.item.renewalInfo").doesNotExist())
+      .andExpect(jsonPath("$.item.holdCount", is(5)));
   }
 
   @Test

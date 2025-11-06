@@ -2,6 +2,7 @@ package org.folio.dcb.utils;
 
 import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
 
@@ -39,6 +40,11 @@ public enum RequestStatus {
   public String getValue() {
     return value;
   }
+
+  public static Set<RequestStatus> getOpenStatuses() {
+    return OPEN_STATUSES;
+  }
+
   public static boolean isRequestOpen(RequestStatus currentStatus){
     return OPEN_STATUSES.contains(currentStatus);
   }

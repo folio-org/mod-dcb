@@ -49,6 +49,31 @@
           "Content-Type": "application/json"
         }
       }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/circulation/requests",
+        "queryParameters": {
+          "limit": {
+            "equalTo": "0"
+          },
+          "query": {
+            "matches": "itemId==\".{36}\" and requestType==\"Hold\" and status==\\(\"Open - Not yet filled\" or \"Open - Awaiting pickup\" or \"Open - In transit\" or \"Open - Awaiting delivery\"\\)"
+
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "requests": [],
+          "totalRecords": 5
+        }
+      }
     }
   ]
 }
