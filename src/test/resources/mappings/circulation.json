@@ -74,6 +74,251 @@
           "totalRecords": 5
         }
       }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPath": "/circulation/loans",
+        "queryParameters": {
+          "query": {
+            "equalTo": "itemId==\"5b95877d-86c0-4cb7-a0cd-7660b348ae5a\" AND status.name==\"OPEN\" AND isDcb==\"true\" AND userId==\"571b0a2c-9456-40b5-a449-d41fe6017082\""
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "loans": [
+            {
+              "id": "d217d4d5-8b2b-496b-8aa5-7e60d530e124",
+              "userId": "571b0a2c-9456-40b5-a449-d41fe6017082",
+              "itemId": "5b95877d-86c0-4cb7-a0cd-7660b348ae5a",
+              "itemEffectiveLocationIdAtCheckOut": "c6f80a64-8932-406f-a60f-d04775106758",
+              "status": {
+                "name": "Open"
+              },
+              "loanDate": "2025-04-10T13:07:39.510Z",
+              "dueDate": "2025-06-09T23:59:59.000+00:00",
+              "action": "checkedout",
+              "loanPolicyId": "d9cd0bed-1b49-4b5e-a7bd-064b8d177231",
+              "checkoutServicePointId": "3a40852d-49fd-4df2-a1f9-6e2641a6e91f",
+              "isDcb": true,
+              "overdueFinePolicyId": "cd3f6cac-fa17-4079-9fae-2fb28e521412",
+              "lostItemPolicyId": "ed892c0e-52e0-4cd9-8133-c0ef07b4a709",
+              "patronGroupAtCheckout": {
+                "id": "503a81cd-6c26-400f-b620-14c08943697c",
+                "name": "faculty"
+              },
+              "item": {
+                "id": "5b95877d-86c0-4cb7-a0cd-7660b348ae5a",
+                "holdingsRecordId": "10cd3a5a-d36f-4c7a-bc4f-e1ae3cf820c9",
+                "instanceId": "9d1b77e4-f02e-4b7f-b296-3f2042ddac54",
+                "instanceHrid": "dcb_instance",
+                "title": "DCB_INSTANCE",
+                "status": {
+                  "name": "Checked out",
+                  "date": "2025-04-10T13:07:43.989+00:00"
+                }
+              },
+              "checkoutServicePoint": {
+                "name": "DCB_test_test",
+                "code": "DCB_TEST_TEST",
+                "discoveryDisplayName": "DCB_test_test",
+                "pickupLocation": true
+              },
+              "borrower": {
+                "firstName": "John",
+                "lastName": "Doe",
+                "middleName": "Michael",
+                "barcode": "real_user_barcode",
+                "patronGroup": "503a81cd-6c26-400f-b620-14c08943697c"
+              },
+              "loanPolicy": {
+                "name": "Example Loan Policy"
+              },
+              "overdueFinePolicy": {
+                "name": "Overdue fine policy"
+              },
+              "lostItemPolicy": {
+                "name": "Lost item fee policy"
+              },
+              "feesAndFines": {
+                "amountRemainingToPay": 0.0
+              },
+              "metadata": {
+                "createdDate": "2025-04-10T13:07:44.021+00:00",
+                "createdByUserId": "da2809d0-7767-45b9-83c1-c5ea6ca0c74d",
+                "updatedDate": "2025-04-10T13:07:44.021+00:00",
+                "updatedByUserId": "da2809d0-7767-45b9-83c1-c5ea6ca0c74d"
+              }
+            }
+          ],
+          "totalRecords": 0
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "urlPath": "/circulation/loans/d217d4d5-8b2b-496b-8aa5-7e60d530e124",
+        "bodyPatterns": [
+          {
+            "equalToJson": {
+              "id": "d217d4d5-8b2b-496b-8aa5-7e60d530e124",
+              "userId": "571b0a2c-9456-40b5-a449-d41fe6017082",
+              "itemId": "5b95877d-86c0-4cb7-a0cd-7660b348ae5a",
+              "itemEffectiveLocationIdAtCheckOut": "c6f80a64-8932-406f-a60f-d04775106758",
+              "status": {
+                "name": "Open"
+              },
+              "renewalCount": "2147483647",
+              "loanDate": "2025-04-10T13:07:39.510Z",
+              "dueDate": "2025-06-09T23:59:59.000+00:00",
+              "action": "checkedout",
+              "loanPolicyId": "d9cd0bed-1b49-4b5e-a7bd-064b8d177231",
+              "checkoutServicePointId": "3a40852d-49fd-4df2-a1f9-6e2641a6e91f",
+              "isDcb": true,
+              "overdueFinePolicyId": "cd3f6cac-fa17-4079-9fae-2fb28e521412",
+              "lostItemPolicyId": "ed892c0e-52e0-4cd9-8133-c0ef07b4a709",
+              "patronGroupAtCheckout": {
+                "id": "503a81cd-6c26-400f-b620-14c08943697c",
+                "name": "faculty"
+              },
+              "item": {
+                "id": "5b95877d-86c0-4cb7-a0cd-7660b348ae5a",
+                "holdingsRecordId": "10cd3a5a-d36f-4c7a-bc4f-e1ae3cf820c9",
+                "instanceId": "9d1b77e4-f02e-4b7f-b296-3f2042ddac54",
+                "instanceHrid": "dcb_instance",
+                "title": "DCB_INSTANCE",
+                "status": {
+                  "name": "Checked out",
+                  "date": "2025-04-10T13:07:43.989+00:00"
+                }
+              },
+              "checkoutServicePoint": {
+                "name": "DCB_test_test",
+                "code": "DCB_TEST_TEST",
+                "discoveryDisplayName": "DCB_test_test",
+                "pickupLocation": true
+              },
+              "borrower": {
+                "firstName": "John",
+                "lastName": "Doe",
+                "middleName": "Michael",
+                "barcode": "real_user_barcode",
+                "patronGroup": "503a81cd-6c26-400f-b620-14c08943697c"
+              },
+              "loanPolicy": {
+                "name": "Example Loan Policy"
+              },
+              "overdueFinePolicy": {
+                "name": "Overdue fine policy"
+              },
+              "lostItemPolicy": {
+                "name": "Lost item fee policy"
+              },
+              "feesAndFines": {
+                "amountRemainingToPay": 0.0
+              },
+              "metadata": {
+                "createdDate": "2025-04-10T13:07:44.021+00:00",
+                "createdByUserId": "da2809d0-7767-45b9-83c1-c5ea6ca0c74d",
+                "updatedDate": "2025-04-10T13:07:44.021+00:00",
+                "updatedByUserId": "da2809d0-7767-45b9-83c1-c5ea6ca0c74d"
+              }
+            }
+          }
+        ]
+      },
+      "response": {
+        "status": 204,
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "urlPath": "/circulation/loans/d217d4d5-8b2b-496b-8aa5-7e60d530e124",
+        "bodyPatterns": [
+          {
+            "equalToJson": {
+              "id": "d217d4d5-8b2b-496b-8aa5-7e60d530e124",
+              "userId": "571b0a2c-9456-40b5-a449-d41fe6017082",
+              "itemId": "5b95877d-86c0-4cb7-a0cd-7660b348ae5a",
+              "itemEffectiveLocationIdAtCheckOut": "c6f80a64-8932-406f-a60f-d04775106758",
+              "status": {
+                "name": "Open"
+              },
+              "renewalCount": "0",
+              "loanDate": "2025-04-10T13:07:39.510Z",
+              "dueDate": "2025-06-09T23:59:59.000+00:00",
+              "action": "checkedout",
+              "loanPolicyId": "d9cd0bed-1b49-4b5e-a7bd-064b8d177231",
+              "checkoutServicePointId": "3a40852d-49fd-4df2-a1f9-6e2641a6e91f",
+              "isDcb": true,
+              "overdueFinePolicyId": "cd3f6cac-fa17-4079-9fae-2fb28e521412",
+              "lostItemPolicyId": "ed892c0e-52e0-4cd9-8133-c0ef07b4a709",
+              "patronGroupAtCheckout": {
+                "id": "503a81cd-6c26-400f-b620-14c08943697c",
+                "name": "faculty"
+              },
+              "item": {
+                "id": "5b95877d-86c0-4cb7-a0cd-7660b348ae5a",
+                "holdingsRecordId": "10cd3a5a-d36f-4c7a-bc4f-e1ae3cf820c9",
+                "instanceId": "9d1b77e4-f02e-4b7f-b296-3f2042ddac54",
+                "instanceHrid": "dcb_instance",
+                "title": "DCB_INSTANCE",
+                "status": {
+                  "name": "Checked out",
+                  "date": "2025-04-10T13:07:43.989+00:00"
+                }
+              },
+              "checkoutServicePoint": {
+                "name": "DCB_test_test",
+                "code": "DCB_TEST_TEST",
+                "discoveryDisplayName": "DCB_test_test",
+                "pickupLocation": true
+              },
+              "borrower": {
+                "firstName": "John",
+                "lastName": "Doe",
+                "middleName": "Michael",
+                "barcode": "real_user_barcode",
+                "patronGroup": "503a81cd-6c26-400f-b620-14c08943697c"
+              },
+              "loanPolicy": {
+                "name": "Example Loan Policy"
+              },
+              "overdueFinePolicy": {
+                "name": "Overdue fine policy"
+              },
+              "lostItemPolicy": {
+                "name": "Lost item fee policy"
+              },
+              "feesAndFines": {
+                "amountRemainingToPay": 0.0
+              },
+              "metadata": {
+                "createdDate": "2025-04-10T13:07:44.021+00:00",
+                "createdByUserId": "da2809d0-7767-45b9-83c1-c5ea6ca0c74d",
+                "updatedDate": "2025-04-10T13:07:44.021+00:00",
+                "updatedByUserId": "da2809d0-7767-45b9-83c1-c5ea6ca0c74d"
+              }
+            }
+          }
+        ]
+      },
+      "response": {
+        "status": 204,
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
     }
   ]
 }

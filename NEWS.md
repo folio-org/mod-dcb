@@ -1,5 +1,6 @@
 ## v1.3.7 2025-11-28
 * MODDCB-235: Add hold count field to transaction status response [MODDCB-235](https://folio-org.atlassian.net/browse/MODDCB-235)
+* MODDCB-236: Provide endpoints to toggles borrower role renewals on virtual items [MODDCB-236](https://folio-org.atlassian.net/browse/MODDCB-236)
 
 ## v1.3.6 2025-10-29
 * MODDCB-234: Update POST API for DCB transaction creation to support localNames field [MODDCB-234](https://folio-org.atlassian.net/browse/MODDCB-234)

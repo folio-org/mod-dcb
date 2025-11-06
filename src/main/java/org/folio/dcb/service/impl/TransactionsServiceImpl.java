@@ -8,6 +8,7 @@ import static org.folio.dcb.utils.TransactionDetailsUtil.statusesNotEqual;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.folio.dcb.client.feign.CirculationClient;
 import org.folio.dcb.client.feign.CirculationLoanPolicyStorageClient;
 import org.folio.dcb.domain.dto.DcbItem;
@@ -113,6 +114,7 @@ public class TransactionsServiceImpl implements TransactionsService {
     }).orElseThrow(() -> new IllegalArgumentException(String.format("Transaction with id %s not found", dcbTransactionId)));
   }
 
+  @Override
   public TransactionStatusResponse getTransactionStatusById(String dcbTransactionId) {
     log.debug("getTransactionStatusById:: id {} ", dcbTransactionId);
     var transactionEntity = getTransactionEntityOrThrow(dcbTransactionId);
@@ -204,6 +206,28 @@ public class TransactionsServiceImpl implements TransactionsService {
     var loanRenewalDetails = Optional.of(new LoanRenewalDetails(renewalResponse.getRenewalCount(),
       loanPolicy.getRenewalsPolicy().getNumberAllowed(), loanPolicy.getRenewable()));
     return generateTransactionStatusResponseFromTransactionEntity(transaction, loanRenewalDetails);
+  }
+
+  @Override
+  public void blockItemRenewalByTransactionId(String dcbTransactionId) {
+    var transactionEntity = getTransactionEntityOrThrow(dcbTransactionId);
+    if (!isTxnItemCheckoutAndRoleIsBorrowerOrBorrowingPickup(transactionEntity)) {
+      throw new StatusException("DCB transaction has invalid state for renewal block. "
+        + "Item must be already checked out by borrower or borrowing pickup role.");
+    }
+
+    setRenewalNumberForVirtualLoan(transactionEntity, Integer.MAX_VALUE);
+  }
+
+  @Override
+  public void unblockItemRenewalByTransactionId(String dcbTransactionId) {
+    var transactionEntity = getTransactionEntityOrThrow(dcbTransactionId);
+    if (!isTxnItemCheckoutAndRoleIsBorrowerOrBorrowingPickup(transactionEntity)) {
+      throw new StatusException("DCB transaction has invalid state for renewal unblock. "
+        + "Item must be already checked out by borrower or borrowing pickup role.");
+    }
+
+    setRenewalNumberForVirtualLoan(transactionEntity, 0);
   }
 
   private void validateLoanPolicy(String loanPolicyId, LoanPolicy loanPolicy) {
@@ -310,5 +334,23 @@ public class TransactionsServiceImpl implements TransactionsService {
       .renewalMaxCount(loanDetails.renewalMaxCount())
       .renewable(loanDetails.renewable())
       .build();
+  }
+
+  private void setRenewalNumberForVirtualLoan(TransactionEntity entity, int renewalCount) {
+    var virtualItemLoansResult = circulationClient.fetchLoanByQuery(buildLoanQuery(entity));
+    var virtualItemLoans = virtualItemLoansResult.getLoans();
+    if (CollectionUtils.isEmpty(virtualItemLoans)) {
+      throw new StatusException("Virtual loan for DCB transaction not found.");
+    }
+
+    if (virtualItemLoans.size() > 1) {
+      var id = entity.getId();
+      log.debug("Multiple virtual loans found for DCB transaction id: {}", id);
+      throw new StatusException("Multiple virtual loans found for DCB transaction.");
+    }
+
+    var virtualItemLoan = virtualItemLoans.getFirst();
+    virtualItemLoan.setRenewalCount(Integer.toString(renewalCount));
+    circulationClient.updateLoan(virtualItemLoan.getId(), virtualItemLoan);
   }
 }

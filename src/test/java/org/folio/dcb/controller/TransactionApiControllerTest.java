@@ -3,6 +3,8 @@ package org.folio.dcb.controller;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.matchingJsonPath;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWER;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWING_PICKUP;
@@ -1751,5 +1753,60 @@ class TransactionApiControllerTest extends BaseIT {
         assertEquals(TRANSACTION_AUDIT_ERROR_ACTION, auditExisting.getAction());
       }
     );
+  }
+
+  @ParameterizedTest
+  @MethodSource("transactionRoles")
+  void blockRenewalForDcbTransaction(DcbTransaction.RoleEnum role) throws Exception {
+    removeExistedTransactionFromDbIfSoExists();
+    removeExistingTransactionsByItemId(ITEM_ID);
+
+    var dcbTransaction = createTransactionEntity();
+    dcbTransaction.setId(DCB_TRANSACTION_ID);
+    dcbTransaction.setRole(role);
+    dcbTransaction.setStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_OUT);
+
+    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT,
+      () -> transactionRepository.save(dcbTransaction));
+
+    this.mockMvc.perform(
+        put("/transactions/{id}/block-renewal", DCB_TRANSACTION_ID)
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isNoContent());
+
+    var loanId = "d217d4d5-8b2b-496b-8aa5-7e60d530e124";
+    wireMockServer.verify(1, putRequestedFor(urlPathEqualTo("/circulation/loans/" + loanId))
+      .withRequestBody(matchingJsonPath("$.renewalCount", equalTo("2147483647"))));
+    wireMockServer.resetRequests();
+  }
+
+
+  @ParameterizedTest
+  @MethodSource("transactionRoles")
+  void unblockRenewalForDcbTransaction(DcbTransaction.RoleEnum role) throws Exception {
+    removeExistedTransactionFromDbIfSoExists();
+    removeExistingTransactionsByItemId(ITEM_ID);
+
+    var dcbTransaction = createTransactionEntity();
+    dcbTransaction.setId(DCB_TRANSACTION_ID);
+    dcbTransaction.setRole(role);
+    dcbTransaction.setStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_OUT);
+
+    systemUserScopedExecutionService.executeAsyncSystemUserScoped(TENANT,
+      () -> transactionRepository.save(dcbTransaction));
+
+    this.mockMvc.perform(
+        put("/transactions/{id}/unblock-renewal", DCB_TRANSACTION_ID)
+          .headers(defaultHeaders())
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isNoContent());
+
+    var loanId = "d217d4d5-8b2b-496b-8aa5-7e60d530e124";
+    wireMockServer.verify(1, putRequestedFor(urlPathEqualTo("/circulation/loans/" + loanId))
+      .withRequestBody(matchingJsonPath("$.renewalCount", equalTo("0"))));
+    wireMockServer.resetRequests();
   }
 }
