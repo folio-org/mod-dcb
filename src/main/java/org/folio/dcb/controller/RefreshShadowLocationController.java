@@ -20,6 +20,6 @@ public class RefreshShadowLocationController implements RefreshShadowLocationsAp
   @Override
   public ResponseEntity<RefreshShadowLocationResponse> refreshShadowLocation() {
     return ResponseEntity.status(HttpStatus.CREATED)
-      .body(dcbHubLocationService.createShadowLocations());
+      .body(dcbHubLocationService.createShadowLocations(false));
   }
 }

@@ -63,7 +63,7 @@ import org.folio.dcb.client.feign.CirculationClient;
 import org.folio.dcb.client.feign.CirculationLoanPolicyStorageClient;
 import org.folio.dcb.client.feign.HoldingsStorageClient;
 import org.folio.dcb.client.feign.InventoryItemStorageClient;
-import org.folio.dcb.config.DcbHubProperties;
+import org.folio.dcb.integration.dcb.config.DcbHubProperties;
 import org.folio.dcb.domain.dto.CirculationRequest;
 import org.folio.dcb.domain.dto.DcbItem;
 import org.folio.dcb.domain.dto.DcbTransaction;

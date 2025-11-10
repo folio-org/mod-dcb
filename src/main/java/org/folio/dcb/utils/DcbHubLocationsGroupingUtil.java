@@ -6,9 +6,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.folio.dcb.model.AgencyKey;
-import org.folio.dcb.model.DcbHubLocationResponse;
-import org.folio.dcb.model.LocationCodeNamePair;
+import org.folio.dcb.integration.dcb.model.AgencyKey;
+import org.folio.dcb.integration.dcb.model.DcbLocation;
+import org.folio.dcb.integration.dcb.model.LocationCodeNamePair;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class DcbHubLocationsGroupingUtil {
 
-  public static Map<AgencyKey, List<LocationCodeNamePair>> groupByAgency(List<DcbHubLocationResponse.Location> locations) {
+  public static Map<AgencyKey, List<LocationCodeNamePair>> groupByAgency(List<DcbLocation> locations) {
     if (CollectionUtils.isEmpty(locations)) {
       return Map.of(); // Return empty map if response or content is null
     }

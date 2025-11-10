@@ -1,4 +1,4 @@
-package org.folio.dcb.service;
+package org.folio.dcb.integration.dcb;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.tuple;
@@ -18,18 +18,18 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import org.folio.dcb.client.feign.DcbHubLocationClient;
 import org.folio.dcb.client.feign.InventoryServicePointClient;
 import org.folio.dcb.client.feign.LocationUnitClient;
 import org.folio.dcb.client.feign.LocationsClient;
-import org.folio.dcb.config.DcbHubProperties;
+import org.folio.dcb.integration.dcb.config.DcbHubProperties;
 import org.folio.dcb.domain.dto.ServicePointRequest;
 import org.folio.dcb.exception.DcbHubLocationException;
+import org.folio.dcb.integration.dcb.model.DcbAgency;
+import org.folio.dcb.integration.dcb.model.DcbLocation;
 import org.folio.dcb.integration.keycloak.DcbHubKCCredentialSecureStore;
 import org.folio.dcb.integration.keycloak.DcbHubKCTokenService;
 import org.folio.dcb.integration.keycloak.model.DcbHubKCCredentials;
-import org.folio.dcb.model.DcbHubLocationResponse;
-import org.folio.dcb.service.impl.DcbHubLocationServiceImpl;
+import org.folio.dcb.integration.dcb.model.DcbHubLocationResponse;
 import org.folio.dcb.utils.CqlQuery;
 import org.folio.spring.model.ResultList;
 import org.junit.jupiter.api.BeforeEach;
@@ -90,8 +90,8 @@ class DcbHubLocationServiceImplTest {
   @Test
   void createShadowLocations_SinglePage_AgencyAndLocationNotExistAlready_Success() {
     // Given
-    DcbHubLocationResponse.Location location1 = createTestLocation("Location 1", "loc1", "Agency Name 1", "agencyCode1");
-    DcbHubLocationResponse.Location location2 = createTestLocation("Location 2", "loc2", "Agency Name 1", "agencyCode1");
+    DcbLocation location1 = createTestLocation("Location 1", "loc1", "Agency Name 1", "agencyCode1");
+    DcbLocation location2 = createTestLocation("Location 2", "loc2", "Agency Name 1", "agencyCode1");
 
     DcbHubLocationResponse response = new DcbHubLocationResponse();
     response.setContent(Arrays.asList(location1, location2));
@@ -107,7 +107,7 @@ class DcbHubLocationServiceImplTest {
     mockEmptyLocationDTOResponses("Location 2", "loc2");
 
     // When
-    dcbHubLocationService.createShadowLocations();
+    dcbHubLocationService.createShadowLocations(false);
 
     // Then
     verify(dcbHubLocationClient).getLocations(1, 5, BEARER_TOKEN);
@@ -120,8 +120,8 @@ class DcbHubLocationServiceImplTest {
   @Test
   void createShadowLocations_SinglePage_AgencyAndLocationExistAlready_Success1() {
     // Given
-    DcbHubLocationResponse.Location location1 = createTestLocation( "Location 1", "loc1",  "Agency Name 1", "agencyCode1");
-    DcbHubLocationResponse.Location location2 = createTestLocation("Location 2", "loc2",  "Agency Name 1", "agencyCode1");
+    DcbLocation location1 = createTestLocation( "Location 1", "loc1",  "Agency Name 1", "agencyCode1");
+    DcbLocation location2 = createTestLocation("Location 2", "loc2",  "Agency Name 1", "agencyCode1");
 
     DcbHubLocationResponse response = new DcbHubLocationResponse();
     response.setContent(Arrays.asList(location1, location2));
@@ -137,7 +137,7 @@ class DcbHubLocationServiceImplTest {
     mockLocationDTOResponses("Location 2", "loc2");
 
     // When
-    dcbHubLocationService.createShadowLocations();
+    dcbHubLocationService.createShadowLocations(false);
 
     // Then
     verify(dcbHubLocationClient).getLocations(1, 5, BEARER_TOKEN);
@@ -154,8 +154,8 @@ class DcbHubLocationServiceImplTest {
   @Test
   void createShadowLocations_MultiplePages_Success() {
     // Given
-    DcbHubLocationResponse.Location location1 = createTestLocation( "Location 1", "loc1", "Agency Name 1", "agencyCode1");
-    DcbHubLocationResponse.Location location2 = createTestLocation("Location 2", "loc2", "Agency Name 2", "agencyCode2");
+    DcbLocation location1 = createTestLocation( "Location 1", "loc1", "Agency Name 1", "agencyCode1");
+    DcbLocation location2 = createTestLocation("Location 2", "loc2", "Agency Name 2", "agencyCode2");
 
     DcbHubLocationResponse page1 = new DcbHubLocationResponse();
     page1.setContent(Collections.singletonList(location1));
@@ -179,7 +179,7 @@ class DcbHubLocationServiceImplTest {
     mockEmptyLocationDTOResponses("Location 2", "loc2");
 
     // When
-    dcbHubLocationService.createShadowLocations();
+    dcbHubLocationService.createShadowLocations(false);
 
     // Then
     verify(dcbHubLocationClient).getLocations(1, 5, BEARER_TOKEN);
@@ -303,7 +303,7 @@ class DcbHubLocationServiceImplTest {
       .thenReturn(emptyResponse);
 
     // When
-    dcbHubLocationService.createShadowLocations();
+    dcbHubLocationService.createShadowLocations(false);
 
     // Then
     verify(dcbHubLocationClient).getLocations(1, 5, BEARER_TOKEN);
@@ -316,7 +316,7 @@ class DcbHubLocationServiceImplTest {
   @Test
   void createShadowLocations_ExistingLocationUnits_AgenciesNotCalled_Success() {
     // Given
-    DcbHubLocationResponse.Location location = createTestLocation("Location 1", "loc1", "Agency Name 1", "agencyCode1");
+    DcbLocation location = createTestLocation("Location 1", "loc1", "Agency Name 1", "agencyCode1");
     DcbHubLocationResponse response = new DcbHubLocationResponse();
     response.setContent(Collections.singletonList(location));
     response.setTotalPages(1);
@@ -329,7 +329,7 @@ class DcbHubLocationServiceImplTest {
     mockEmptyLocationDTOResponses("Location 1", "loc1");
 
     // When
-    dcbHubLocationService.createShadowLocations();
+    dcbHubLocationService.createShadowLocations(false);
 
     // Then
     verify(dcbHubLocationClient).getLocations(1, 5, BEARER_TOKEN);
@@ -342,7 +342,7 @@ class DcbHubLocationServiceImplTest {
   @Test
   void createShadowLocations_ExistingLocationDTO_createLocationNotCalled_Success() {
     // Given
-    DcbHubLocationResponse.Location location = createTestLocation("Location 1", "loc1", "Agency Name 1", "agencyCode1");
+    DcbLocation location = createTestLocation("Location 1", "loc1", "Agency Name 1", "agencyCode1");
     DcbHubLocationResponse response = new DcbHubLocationResponse();
     response.setContent(Collections.singletonList(location));
     response.setTotalPages(1);
@@ -355,7 +355,7 @@ class DcbHubLocationServiceImplTest {
     mockLocationDTOResponses("Location 1", "loc1");
 
     // When
-    dcbHubLocationService.createShadowLocations();
+    dcbHubLocationService.createShadowLocations(false);
 
     // Then
     verify(dcbHubLocationClient).getLocations(1, 5, BEARER_TOKEN);
@@ -373,7 +373,7 @@ class DcbHubLocationServiceImplTest {
 
     // Then
     assertThrows(DcbHubLocationException.class, () ->
-      dcbHubLocationService.createShadowLocations());
+      dcbHubLocationService.createShadowLocations(false));
   }
 
   @Test
@@ -384,14 +384,14 @@ class DcbHubLocationServiceImplTest {
 
     // Then
     assertThrows(RuntimeException.class, () ->
-      dcbHubLocationService.createShadowLocations());
+      dcbHubLocationService.createShadowLocations(false));
   }
 
-  private DcbHubLocationResponse.Location createTestLocation(String locationName, String locationCode, String agencyName, String agencyCode) {
-    DcbHubLocationResponse.Location location = new DcbHubLocationResponse.Location();
+  private DcbLocation createTestLocation(String locationName, String locationCode, String agencyName, String agencyCode) {
+    DcbLocation location = new DcbLocation();
     location.setCode(locationCode);
     location.setName(locationName);
-    DcbHubLocationResponse.Agency agency = new DcbHubLocationResponse.Agency();
+    DcbAgency agency = new DcbAgency();
     agency.setCode(agencyCode);
     agency.setName(agencyName);
     location.setAgency(agency);

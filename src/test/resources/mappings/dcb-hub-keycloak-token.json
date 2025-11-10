@@ -3,7 +3,7 @@
     {
       "request": {
         "method": "POST",
-        "urlPattern": ".*/realms/master/protocol/openid-connect/token"
+        "urlPath": "/realms/master/protocol/openid-connect/token"
       },
       "response": {
         "status": 200,
