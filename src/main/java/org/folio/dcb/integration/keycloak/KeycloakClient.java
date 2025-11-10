@@ -5,6 +5,7 @@ import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED_VAL
 import java.net.URI;
 import java.util.Map;
 
+import org.folio.dcb.integration.keycloak.config.DcbHubKeycloakConfiguration;
 import org.folio.dcb.integration.keycloak.model.KeycloakAuthentication;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,7 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import feign.Headers;
 
 @FeignClient(
-  name = "keycloak-client"
+  name = "keycloak-client",
+  configuration = DcbHubKeycloakConfiguration.class
 )
 public interface KeycloakClient {
 

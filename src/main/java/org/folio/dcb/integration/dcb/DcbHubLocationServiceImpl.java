@@ -1,4 +1,4 @@
-package org.folio.dcb.service.impl;
+package org.folio.dcb.integration.dcb;
 
 import static org.folio.dcb.client.feign.LocationUnitClient.LocationUnit;
 import static org.folio.dcb.utils.DCBConstants.NAME;
@@ -8,30 +8,31 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.folio.dcb.client.feign.DcbHubLocationClient;
 import org.folio.dcb.client.feign.InventoryServicePointClient;
 import org.folio.dcb.client.feign.LocationUnitClient;
 import org.folio.dcb.client.feign.LocationsClient;
-import org.folio.dcb.config.DcbHubProperties;
+import org.folio.dcb.domain.dto.RefreshLocationStatus;
+import org.folio.dcb.domain.dto.RefreshLocationStatusType;
+import org.folio.dcb.domain.dto.RefreshLocationUnitsStatus;
+import org.folio.dcb.integration.dcb.config.DcbHubProperties;
+import org.folio.dcb.integration.dcb.model.DcbLocation;
 import org.folio.dcb.utils.CqlQuery;
-import org.folio.dcb.domain.dto.LocationUnitsStatus;
-import org.folio.dcb.domain.dto.LocationsStatus;
 import org.folio.dcb.domain.dto.RefreshShadowLocationResponse;
-import org.folio.dcb.domain.dto.RefreshShadowLocationResponseLocationUnits;
 import org.folio.dcb.domain.dto.ServicePointRequest;
 import org.folio.dcb.exception.DcbHubLocationException;
 import org.folio.dcb.exception.ServiceException;
 import org.folio.dcb.integration.keycloak.DcbHubKCCredentialSecureStore;
 import org.folio.dcb.integration.keycloak.DcbHubKCTokenService;
 import org.folio.dcb.integration.keycloak.model.DcbHubKCCredentials;
-import org.folio.dcb.model.AgencyKey;
-import org.folio.dcb.model.DcbHubLocationResponse;
-import org.folio.dcb.model.LocationAgenciesIds;
-import org.folio.dcb.model.LocationCodeNamePair;
+import org.folio.dcb.integration.dcb.model.AgencyKey;
+import org.folio.dcb.integration.dcb.model.DcbHubLocationResponse;
+import org.folio.dcb.integration.dcb.model.LocationAgenciesIds;
+import org.folio.dcb.integration.dcb.model.LocationCodeNamePair;
 import org.folio.dcb.service.DcbHubLocationService;
 import org.folio.spring.model.ResultList;
 import org.springframework.beans.factory.annotation.Value;
@@ -58,15 +59,19 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
   @Value("${application.dcb-hub.batch-size}")
   private Integer batchSize;
 
-  public RefreshShadowLocationResponse createShadowLocations() {
-    try {
-      log.debug("createShadowLocations:: creating shadow locations");
-
-      if (!dcbHubProperties.isFetchDcbLocationsEnabled()) {
-        log.info("createShadowLocations:: DCB Hub locations fetching is disabled, skipping shadow location creation");
-        throw new DcbHubLocationException("DCB Hub locations fetching is disabled", HttpStatus.BAD_REQUEST);
+  public RefreshShadowLocationResponse createShadowLocations(boolean isTenantInitRequest) {
+    log.debug("createShadowLocations:: creating shadow locations");
+    if (!dcbHubProperties.isFetchDcbLocationsEnabled()) {
+      log.info("createShadowLocations:: DCB Hub locations fetching is disabled, skipping shadow location creation");
+      if (isTenantInitRequest) {
+        // skip shadow location creation during tenant init without error log message
+        return new RefreshShadowLocationResponse();
       }
 
+      throw new DcbHubLocationException("DCB Hub locations fetching is disabled", HttpStatus.BAD_REQUEST);
+    }
+
+    try {
       List<ServicePointRequest> servicePointList = servicePointClient.getServicePointByName(NAME).getResult();
       if (servicePointList.isEmpty()) {
         log.info(
@@ -78,7 +83,7 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
       ServicePointRequest servicePointRequest = servicePointList.getFirst();
       log.info("createShadowLocations:: fetching all locations from DCB Hub");
 
-      List<DcbHubLocationResponse.Location> locationList = fetchDcbHubAllLocations();
+      List<DcbLocation> locationList = fetchDcbHubAllLocations();
       if (CollectionUtils.isEmpty(locationList)) {
         log.warn("createShadowLocations:: No locations found in DCB Hub, skipping shadow location creation");
         return new RefreshShadowLocationResponse();
@@ -99,13 +104,12 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
   }
 
   private RefreshShadowLocationResponse createShadowLocations(
-    ServicePointRequest servicePointRequest,
-    List<DcbHubLocationResponse.Location> locations) {
+    ServicePointRequest servicePointRequest, List<DcbLocation> locations) {
 
     Map<AgencyKey, List<LocationCodeNamePair>> locationsGroupedByAgency = groupByAgency(locations);
 
     LocationUnitsResult locationUnitsResult = createLocationUnits(locationsGroupedByAgency.keySet());
-    List<LocationsStatus> locationStatuses = createShadowLocationEntries(
+    List<RefreshLocationStatus> locationStatuses = createShadowLocationEntries(
       locationsGroupedByAgency,
       locationUnitsResult.agencyLocationUnitMapping,
       servicePointRequest);
@@ -116,7 +120,7 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
   }
 
   private LocationUnitsResult createLocationUnits(Set<AgencyKey> agencies) {
-    RefreshShadowLocationResponseLocationUnits locationUnits = new RefreshShadowLocationResponseLocationUnits();
+    RefreshLocationUnitsStatus locationUnits = new RefreshLocationUnitsStatus();
     Map<AgencyKey, LocationAgenciesIds> agencyLocationUnitMapping = new HashMap<>();
 
     agencies.forEach(agencyKey -> {
@@ -133,23 +137,18 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
       locationUnits.addLibrariesItem(libraryResult.locationUnitsStatus);
 
       agencyLocationUnitMapping.put(agencyKey, new LocationAgenciesIds(
-        institutionResult.institution != null ? institutionResult.institution.getId() : null,
-        campusResult.campus != null ? campusResult.campus.getId() : null,
-        libraryResult.library != null ? libraryResult.library.getId() : null)
+        getLocationUnitId(institutionResult.institution()),
+        getLocationUnitId(campusResult.campus()),
+        getLocationUnitId(libraryResult.library()))
       );
     });
 
     return new LocationUnitsResult(locationUnits, agencyLocationUnitMapping);
   }
 
-  private record LocationUnitsResult(
-    RefreshShadowLocationResponseLocationUnits locationUnits,
-    Map<AgencyKey, LocationAgenciesIds> agencyLocationUnitMapping) {
-  }
-
   private InstitutionResult createInstitution(AgencyKey agencyKey) {
     try {
-      var query = CqlQuery.byNameAndCode(agencyKey.agencyName(), agencyKey.agencyCode());
+      String query = CqlQuery.byNameAndCode(agencyKey.agencyName(), agencyKey.agencyCode());
       ResultList<LocationUnit> locationUnitResultList =
         locationUnitClient.findInstitutionsByQuery(query, true, 10, 0);
 
@@ -159,9 +158,9 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
 
         return new InstitutionResult(
           locationUnitResultList.getResult().getFirst(),
-          LocationUnitsStatus.builder()
+          RefreshLocationStatus.builder()
             .code(agencyKey.agencyCode())
-            .status(LocationUnitsStatus.StatusEnum.SKIPPED)
+            .status(RefreshLocationStatusType.SKIPPED)
             .build());
       }
 
@@ -177,9 +176,9 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
 
       return new InstitutionResult(
         institution,
-        LocationUnitsStatus.builder()
+        RefreshLocationStatus.builder()
           .code(agencyKey.agencyCode())
-          .status(LocationUnitsStatus.StatusEnum.SUCCESS)
+          .status(RefreshLocationStatusType.SUCCESS)
           .build());
     } catch (Exception e) {
       log.error("createInstitution:: Error creating institution for agency: {} - {}",
@@ -187,15 +186,13 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
 
       return new InstitutionResult(
         null,
-        LocationUnitsStatus.builder()
+        RefreshLocationStatus.builder()
           .code(agencyKey.agencyCode())
-          .status(LocationUnitsStatus.StatusEnum.ERROR)
+          .status(RefreshLocationStatusType.ERROR)
           .cause(e.getMessage())
           .build());
     }
   }
-
-  private record InstitutionResult(LocationUnit institution, LocationUnitsStatus locationUnitsStatus) {}
 
   private CampusResult createCampus(AgencyKey agencyKey, LocationUnit institution) {
     try {
@@ -205,9 +202,9 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
 
         return new CampusResult(
           null,
-          LocationUnitsStatus.builder()
+          RefreshLocationStatus.builder()
             .code(agencyKey.agencyCode())
-            .status(LocationUnitsStatus.StatusEnum.SKIPPED)
+            .status(RefreshLocationStatusType.SKIPPED)
             .cause("Institution is null and it was not created, so cannot create campus")
             .build());
       }
@@ -222,9 +219,9 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
 
         return new CampusResult(
           locationUnitResultList.getResult().getFirst(),
-          LocationUnitsStatus.builder()
+          RefreshLocationStatus.builder()
             .code(agencyKey.agencyCode())
-            .status(LocationUnitsStatus.StatusEnum.SKIPPED)
+            .status(RefreshLocationStatusType.SKIPPED)
             .build());
       }
 
@@ -241,9 +238,9 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
 
       return new CampusResult(
         campus,
-        LocationUnitsStatus.builder()
+        RefreshLocationStatus.builder()
           .code(agencyKey.agencyCode())
-          .status(LocationUnitsStatus.StatusEnum.SUCCESS)
+          .status(RefreshLocationStatusType.SUCCESS)
           .build());
     } catch (Exception e) {
       log.error("createCampus:: Error creating campus for agency: {} - {}",
@@ -251,15 +248,13 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
 
       return new CampusResult(
         null,
-        LocationUnitsStatus.builder()
+        RefreshLocationStatus.builder()
           .code(agencyKey.agencyCode())
-          .status(LocationUnitsStatus.StatusEnum.ERROR)
+          .status(RefreshLocationStatusType.ERROR)
           .cause(e.getMessage())
           .build());
     }
   }
-
-  private record CampusResult(LocationUnit campus, LocationUnitsStatus locationUnitsStatus) {}
 
   private LibraryResult createLibrary(AgencyKey agencyKey, LocationUnit campus) {
     try {
@@ -269,9 +264,9 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
 
         return new LibraryResult(
           null,
-          LocationUnitsStatus.builder()
+          RefreshLocationStatus.builder()
             .code(agencyKey.agencyCode())
-            .status(LocationUnitsStatus.StatusEnum.SKIPPED)
+            .status(RefreshLocationStatusType.SKIPPED)
             .cause("Campus is null and it was not created, so cannot create library")
             .build());
       }
@@ -286,9 +281,9 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
 
         return new LibraryResult(
           locationUnitResultList.getResult().getFirst(),
-          LocationUnitsStatus.builder()
+          RefreshLocationStatus.builder()
             .code(agencyKey.agencyCode())
-            .status(LocationUnitsStatus.StatusEnum.SKIPPED)
+            .status(RefreshLocationStatusType.SKIPPED)
             .build());
       }
 
@@ -305,9 +300,9 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
 
       return new LibraryResult(
         library,
-        LocationUnitsStatus.builder()
+        RefreshLocationStatus.builder()
           .code(agencyKey.agencyCode())
-          .status(LocationUnitsStatus.StatusEnum.SUCCESS)
+          .status(RefreshLocationStatusType.SUCCESS)
           .build());
     } catch (Exception e) {
       log.error("createLibrary:: Error creating library for agency: {} - {}",
@@ -315,22 +310,20 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
 
       return new LibraryResult(
         null,
-        LocationUnitsStatus.builder()
+        RefreshLocationStatus.builder()
           .code(agencyKey.agencyCode())
-          .status(LocationUnitsStatus.StatusEnum.ERROR)
+          .status(RefreshLocationStatusType.ERROR)
           .cause(e.getMessage())
           .build());
     }
   }
 
-  private record LibraryResult(LocationUnit library, LocationUnitsStatus locationUnitsStatus) {}
-
-  private List<LocationsStatus> createShadowLocationEntries(
+  private List<RefreshLocationStatus> createShadowLocationEntries(
     Map<AgencyKey, List<LocationCodeNamePair>> locationsGroupedByAgency,
     Map<AgencyKey, LocationAgenciesIds> agencyLocationUnitMapping,
     ServicePointRequest servicePointRequest) {
 
-    List<LocationsStatus> locationStatuses = new ArrayList<>();
+    List<RefreshLocationStatus> locationStatuses = new ArrayList<>();
 
     locationsGroupedByAgency.forEach((agencyKey, locationCodeNamePairs) -> {
       log.debug("createShadowLocationEntries:: Processing agency: {} - {}",
@@ -338,7 +331,7 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
 
       LocationAgenciesIds locationAgenciesIds = agencyLocationUnitMapping.get(agencyKey);
       locationCodeNamePairs.forEach(location -> {
-        LocationsStatus status = createShadowLocation(location, locationAgenciesIds, servicePointRequest);
+        RefreshLocationStatus status = createShadowLocation(location, locationAgenciesIds, servicePointRequest);
         locationStatuses.add(status);
       });
     });
@@ -346,7 +339,7 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
     return locationStatuses;
   }
 
-  private LocationsStatus createShadowLocation(
+  private RefreshLocationStatus createShadowLocation(
     LocationCodeNamePair location,
     LocationAgenciesIds locationAgenciesIds, ServicePointRequest servicePointRequest) {
     try {
@@ -355,9 +348,9 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
           locationAgenciesIds.campusId() == null) {
         log.error("createShadowLocation:: Location agencies IDs are incomplete or null for location: {} - {}, cannot create shadow location. locationAgenciesIds are: {}",
           location.code(), location.name(), locationAgenciesIds.toString());
-        return LocationsStatus.builder()
+        return RefreshLocationStatus.builder()
           .code(location.code())
-          .status(LocationsStatus.StatusEnum.SKIPPED)
+          .status(RefreshLocationStatusType.SKIPPED)
           .cause(String.format(
             "Location agencies IDs are incomplete or null, cannot create shadow location. locationAgenciesIds are: %s",
             locationAgenciesIds))
@@ -369,9 +362,9 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
           CqlQuery.byNameAndCode(location.name(), location.code()), true, 10, 0);
       if (!locationDTOResultList.getResult().isEmpty()) {
         log.info("createShadowLocation:: Location already exists: {} - {}, skipping...", location.code(), location.name());
-        return LocationsStatus.builder()
+        return RefreshLocationStatus.builder()
           .code(location.code())
-          .status(LocationsStatus.StatusEnum.SKIPPED)
+          .status(RefreshLocationStatusType.SKIPPED)
           .build();
       }
 
@@ -393,28 +386,28 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
       locationsClient.createLocation(shadowLocation);
       log.debug("createShadowLocation:: Created shadow location: {} - {}",
         shadowLocation.getCode(), shadowLocation.getName());
-      return LocationsStatus.builder()
+      return RefreshLocationStatus.builder()
         .code(location.code())
-        .status(LocationsStatus.StatusEnum.SUCCESS)
+        .status(RefreshLocationStatusType.SUCCESS)
         .build();
     } catch (Exception e) {
       log.error("createShadowLocation:: Unexpected error creating shadow location: {} - {}",
         location.code(), location.name(), e);
-      return LocationsStatus.builder()
+      return RefreshLocationStatus.builder()
         .code(location.code())
-        .status(LocationsStatus.StatusEnum.ERROR)
+        .status(RefreshLocationStatusType.ERROR)
         .cause(e.getMessage())
         .build();
     }
   }
 
-  private List<DcbHubLocationResponse.Location> fetchDcbHubAllLocations() {
+  private List<DcbLocation> fetchDcbHubAllLocations() {
     log.info("fetchDcbHubAllLocations:: fetching all locations from DCB Hub");
 
     int pageNumber = 1;
     int pageSize = batchSize;
     DcbHubKCCredentials dcbHubKCCredentials = dcbHubKCCredentialSecureStore.getDcbHubKCCredentials();
-    List<DcbHubLocationResponse.Location> allLocations = new ArrayList<>();
+    List<DcbLocation> allLocations = new ArrayList<>();
 
     while (true) {
       String bearerToken = dcbHubKCTokenService.getBearerAccessToken(dcbHubKCCredentials);
@@ -433,4 +426,20 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
     log.debug("fetchDcbHubAllLocations:: successfully fetched {} locations from DCB Hub", allLocations.size());
     return allLocations;
   }
+
+  private static String getLocationUnitId(LocationUnit institutionResult) {
+    return Optional.ofNullable(institutionResult)
+      .map(LocationUnit::getId)
+      .orElse(null);
+  }
+
+  private record LocationUnitsResult(
+    RefreshLocationUnitsStatus locationUnits,
+    Map<AgencyKey, LocationAgenciesIds> agencyLocationUnitMapping) {}
+
+  private record InstitutionResult(LocationUnit institution, RefreshLocationStatus locationUnitsStatus) {}
+
+  private record CampusResult(LocationUnit campus, RefreshLocationStatus locationUnitsStatus) {}
+
+  private record LibraryResult(LocationUnit library, RefreshLocationStatus locationUnitsStatus) {}
 }

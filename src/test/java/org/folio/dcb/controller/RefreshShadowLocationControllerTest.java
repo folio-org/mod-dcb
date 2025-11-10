@@ -14,12 +14,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.Collections;
 
-import org.folio.dcb.client.feign.DcbHubLocationClient;
+import org.folio.dcb.integration.dcb.DcbHubLocationClient;
 import org.folio.dcb.client.feign.InventoryServicePointClient;
 import org.folio.dcb.client.feign.LocationUnitClient;
 import org.folio.dcb.client.feign.LocationsClient;
-import org.folio.dcb.config.DcbHubProperties;
-import org.folio.dcb.model.DcbHubLocationResponse;
+import org.folio.dcb.integration.dcb.config.DcbHubProperties;
+import org.folio.dcb.integration.dcb.model.DcbHubLocationResponse;
 import org.folio.dcb.service.DcbHubLocationService;
 import org.folio.spring.model.ResultList;
 import org.junit.jupiter.api.Test;

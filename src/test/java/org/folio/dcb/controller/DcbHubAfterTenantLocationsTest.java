@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
 
-import org.folio.dcb.model.AgencyKey;
+import org.folio.dcb.integration.dcb.model.AgencyKey;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.DynamicPropertyRegistry;

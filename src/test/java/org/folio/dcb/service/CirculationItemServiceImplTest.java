@@ -14,7 +14,7 @@ import org.folio.dcb.client.feign.HoldingsStorageClient.Holding;
 import org.folio.dcb.client.feign.LocationUnitClient;
 import org.folio.dcb.client.feign.LocationUnitClient.LocationUnit;
 import org.folio.dcb.client.feign.LocationsClient;
-import org.folio.dcb.config.DcbHubProperties;
+import org.folio.dcb.integration.dcb.config.DcbHubProperties;
 import org.folio.dcb.domain.dto.CirculationItem;
 import org.folio.dcb.domain.dto.CirculationItemCollection;
 import org.folio.dcb.domain.dto.DcbItem;

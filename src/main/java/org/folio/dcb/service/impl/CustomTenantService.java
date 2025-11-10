@@ -22,7 +22,6 @@ import org.folio.spring.liquibase.FolioSpringLiquibase;
 import org.folio.spring.service.PrepareSystemUserService;
 import org.folio.spring.service.TenantService;
 import org.folio.tenant.domain.dto.TenantAttributes;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -119,7 +118,7 @@ public class CustomTenantService extends TenantService {
 
   private void createShadowLocations() {
     try {
-      dcbHubLocationService.createShadowLocations();
+      dcbHubLocationService.createShadowLocations(true);
     } catch (Exception e) {
       log.error("createShadowLocations:: Error creating shadow locations: {}", e.getMessage(), e);
     }

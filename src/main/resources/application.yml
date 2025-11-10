@@ -96,12 +96,17 @@ application:
     locations-url: ${DCB_LOCATIONS_BASE_URL:}
     batch-size: ${DCB_LOCATIONS_BATCH_SIZE:50}
     secure-store-keyname: dcb-hub-credentials
-  keycloak:
     tls:
-      enabled: ${KC_CLIENT_TLS_ENABLED:false}
-      trust-store-path: ${KC_CLIENT_TLS_TRUSTSTORE_PATH:}
-      trust-store-password: ${KC_CLIENT_TLS_TRUSTSTORE_PASSWORD:}
-      trust-store-type: ${KC_CLIENT_TLS_TRUSTSTORE_TYPE:}
+      enabled: ${DCB_HUB_CLIENT_TLS_ENABLED:false}
+      trust-store-path: ${DCB_HUB_CLIENT_TLS_TRUSTSTORE_PATH:}
+      trust-store-password: ${DCB_HUB_CLIENT_TLS_TRUSTSTORE_PASSWORD:}
+      trust-store-type: ${DCB_HUB_CLIENT_TLS_TRUSTSTORE_TYPE:}
+  dcb-keycloak:
+    tls:
+      enabled: ${DCB_KC_CLIENT_TLS_ENABLED:false}
+      trust-store-path: ${DCB_KC_CLIENT_TLS_TRUSTSTORE_PATH:}
+      trust-store-password: ${DCB_KC_CLIENT_TLS_TRUSTSTORE_PASSWORD:}
+      trust-store-type: ${DCB_KC_CLIENT_TLS_TRUSTSTORE_TYPE:}
   secret-store:
     type: ${SECRET_STORE_TYPE:EPHEMERAL}
     environment: ${SECURE_STORE_ENV:${ENV:folio}}
