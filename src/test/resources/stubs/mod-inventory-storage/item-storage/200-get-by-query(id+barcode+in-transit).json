@@ -1,0 +1,44 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/item-storage/items",
+    "queryParameters": {
+      "query": {
+        "equalTo": "barcode==\"DCB_ITEM\" AND id==\"5b95877d-86c0-4cb7-a0cd-7660b348ae5a\""
+      }
+    },
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "test_tenant"
+      },
+      "x-okapi-token": {
+        "equalTo": "dGVzdF9qd3RfdG9rZW4="
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "items": [
+        {
+          "id": "5b95877d-86c0-4cb7-a0cd-7660b348ae5a",
+          "barcode": "DCB_ITEM",
+          "holdingsRecordId": "fcee331d-2b50-49de-9395-a76a6ff4e385",
+          "status": {
+            "name": "In transit",
+            "date": "2023-09-21T01:49:50.620+00:00"
+          }
+        }
+      ],
+      "totalRecords": 1,
+      "resultInfo": {
+        "totalRecords": 1,
+        "facets": [],
+        "diagnostics": []
+      }
+    }
+  }
+}

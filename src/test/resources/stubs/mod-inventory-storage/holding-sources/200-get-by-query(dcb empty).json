@@ -1,0 +1,26 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/holdings-sources",
+    "queryParameters": {
+      "query": {
+        "equalTo": "name==\"FOLIO\""
+      }
+    },
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "test_tenant"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "holdingsRecordsSources": [],
+      "totalRecords": 0
+    }
+  }
+}

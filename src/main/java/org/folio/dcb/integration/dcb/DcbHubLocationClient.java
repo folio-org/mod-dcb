@@ -1,5 +1,7 @@
 package org.folio.dcb.integration.dcb;
 
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+
 import org.folio.dcb.integration.dcb.config.DcbHubClientConfiguration;
 import org.folio.dcb.integration.dcb.model.DcbHubLocationResponse;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -15,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 )
 public interface DcbHubLocationClient {
 
-  @GetMapping("/locations")
+  @GetMapping(value = "/locations", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
   DcbHubLocationResponse getLocations(
     @RequestParam("number") int pageNumber,
     @RequestParam("size") int pageSize,

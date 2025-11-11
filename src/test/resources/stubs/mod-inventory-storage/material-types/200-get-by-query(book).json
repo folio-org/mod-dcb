@@ -1,0 +1,36 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/material-types",
+    "queryParameters": {
+      "query": {
+        "equalTo": "name==\"book\""
+      }
+    },
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "test_tenant"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "mtypes": [
+        {
+          "id": "1a54b431-2e4f-452d-9cae-9cee66c9a892",
+          "name": "book",
+          "source": "folio",
+          "metadata": {
+            "createdDate": "2025-11-04T08:51:05.405+00:00",
+            "updatedDate": "2025-11-04T08:51:05.405+00:00"
+          }
+        }
+      ],
+      "totalRecords": 1
+    }
+  }
+}

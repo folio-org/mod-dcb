@@ -9,14 +9,16 @@ import org.folio.spring.config.FeignClientConfiguration;
 import org.folio.spring.model.ResultList;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @FeignClient(name = "holdings-sources", configuration = FeignClientConfiguration.class)
 public interface HoldingSourcesClient {
-  @GetMapping("?query=name=={sourceName}")
-  ResultList<HoldingSource> querySourceByName(@PathVariable("sourceName") String sourceName);
+
+  @GetMapping
+  ResultList<HoldingSource> findByQuery(@RequestParam("query") String query);
+
   @PostMapping
   HoldingSource createHoldingsRecordSource(@RequestBody HoldingSourcesClient.HoldingSource holdingSource);
 

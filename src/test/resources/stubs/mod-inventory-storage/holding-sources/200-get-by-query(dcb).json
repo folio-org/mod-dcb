@@ -1,0 +1,36 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/holdings-sources",
+    "queryParameters": {
+      "query": {
+        "equalTo": "name==\"folio\""
+      }
+    },
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "test_tenant"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "holdingsRecordsSources": [
+        {
+          "id": "f32d531e-df79-46b3-8932-cdd35f7a2264",
+          "name": "FOLIO",
+          "source": "folio",
+          "metadata": {
+            "createdDate": "2025-10-24T02:06:00.127+00:00",
+            "updatedDate": "2025-10-24T02:06:00.127+00:00"
+          }
+        }
+      ],
+      "totalRecords": 1
+    }
+  }
+}

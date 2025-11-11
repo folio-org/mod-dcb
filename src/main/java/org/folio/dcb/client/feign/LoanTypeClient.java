@@ -9,20 +9,20 @@ import org.folio.spring.config.FeignClientConfiguration;
 import org.folio.spring.model.ResultList;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @FeignClient(name = "loan-types", configuration = FeignClientConfiguration.class)
 public interface LoanTypeClient {
 
-    @GetMapping(value = "?query=(name=={name})", produces = APPLICATION_JSON_VALUE)
-    ResultList<LoanType> queryLoanTypeByName(@PathVariable("name") String name);
+    @GetMapping(produces = APPLICATION_JSON_VALUE)
+    ResultList<LoanType> findByQuery(@RequestParam("query") String query);
 
     @PostMapping
-    void createLoanType(@RequestBody LoanTypeClient.LoanType loanType);
+    LoanType createLoanType(@RequestBody LoanType loanType);
 
     @Data
     @Builder

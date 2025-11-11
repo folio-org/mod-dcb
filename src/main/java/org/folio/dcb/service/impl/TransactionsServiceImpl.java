@@ -38,7 +38,6 @@ import org.folio.spring.exception.NotFoundException;
 import org.folio.spring.model.ResultList;
 import org.folio.util.PercentCodec;
 import org.folio.util.StringUtil;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -160,7 +159,7 @@ public class TransactionsServiceImpl implements TransactionsService {
             || transactionEntity.getRole() == DcbTransaction.RoleEnum.BORROWER);
   }
 
-  private static @NotNull String buildLoanQuery(TransactionEntity transactionEntity) {
+  private static String buildLoanQuery(TransactionEntity transactionEntity) {
     String itemId = "itemId==" + StringUtil.cqlEncode(transactionEntity.getItemId());
     String statusOpen = "status.name==" + StringUtil.cqlEncode("OPEN");
     String isDCB = "isDcb==" + StringUtil.cqlEncode("true");

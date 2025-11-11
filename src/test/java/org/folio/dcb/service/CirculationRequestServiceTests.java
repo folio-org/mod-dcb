@@ -1,7 +1,9 @@
 package org.folio.dcb.service;
 
+import org.folio.dcb.client.feign.CancellationReasonClient;
 import org.folio.dcb.client.feign.CirculationRequestClient;
 import org.folio.dcb.domain.dto.CirculationRequest;
+import org.folio.dcb.service.entities.DcbEntityServiceFacade;
 import org.folio.dcb.service.impl.CirculationRequestServiceImpl;
 import org.folio.dcb.utils.RequestStatus;
 import org.folio.spring.FolioExecutionContext;
@@ -21,14 +23,10 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class CirculationRequestServiceTests {
 
-  @InjectMocks
-  private CirculationRequestServiceImpl circulationRequestService;
-
-  @Mock
-  private CirculationRequestClient circulationStorageClient;
-
-  @Mock
-  private FolioExecutionContext folioExecutionContext;
+  @InjectMocks private CirculationRequestServiceImpl circulationRequestService;
+  @Mock private CirculationRequestClient circulationStorageClient;
+  @Mock private FolioExecutionContext folioExecutionContext;
+  @Mock private DcbEntityServiceFacade dcbEntityServiceFacade;
 
   @Test
   void getCancellationRequestIfOpenOrNullTest() {
@@ -36,6 +34,9 @@ class CirculationRequestServiceTests {
     openRequest.setStatus(RequestStatus.OPEN_AWAITING_PICKUP.getValue());
     when(circulationStorageClient.fetchRequestById(anyString())).thenReturn(openRequest);
     when(folioExecutionContext.getUserId()).thenReturn(UUID.randomUUID());
+    var defaultCancellationReasont = new CancellationReasonClient.CancellationReason();
+    defaultCancellationReasont.setId(UUID.randomUUID().toString());
+    when(dcbEntityServiceFacade.findOrCreateCancellationReason()).thenReturn(defaultCancellationReasont);
     var cancelRequest = circulationRequestService.getCancellationRequestIfOpenOrNull(anyString());
     Assertions.assertEquals(RequestStatus.CLOSED_CANCELLED, RequestStatus.from(cancelRequest.getStatus()));
   }

@@ -1,8 +1,8 @@
 package org.folio.dcb.listener;
 
-import org.folio.dcb.controller.BaseIT;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.entity.TransactionEntity;
+import org.folio.dcb.it.base.BaseTenantIntegrationTest;
 import org.folio.dcb.listener.kafka.CirculationEventListener;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.impl.BaseLibraryService;
@@ -15,8 +15,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.messaging.MessageHeaders;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
@@ -37,9 +37,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@SpringBootTest
-class CirculationLoanEventListenerTest extends BaseIT {
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+class CirculationLoanEventListenerTest extends BaseTenantIntegrationTest {
 
+  private static final String TENANT = "diku";
   private static final String CHECK_OUT_EVENT_SAMPLE = getMockDataAsString("mockdata/kafka/check_out.json");
   private static final String LOAN_EVENT_WITH_OUT_IS_DCB = getMockDataAsString("mockdata/kafka/loan_sample_without_isdcb.json");
   private static final String CHECK_OUT_EVENT_SAMPLE_FOR_DCB = getMockDataAsString("mockdata/kafka/check_out_dcb.json");

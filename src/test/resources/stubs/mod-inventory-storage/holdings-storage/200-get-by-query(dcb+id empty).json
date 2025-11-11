@@ -1,0 +1,31 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/holdings-storage/holdings",
+    "queryParameters": {
+      "query": {
+        "equalTo": "id==\"10cd3a5a-d36f-4c7a-bc4f-e1ae3cf820c9\""
+      }
+    },
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "test_tenant"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "holdingsRecords": [],
+      "totalRecords": 0,
+      "resultInfo": {
+        "totalRecords": 0,
+        "facets": [],
+        "diagnostics": []
+      }
+    }
+  }
+}

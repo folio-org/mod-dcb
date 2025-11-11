@@ -1,0 +1,48 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/locations",
+    "queryParameters": {
+      "query": {
+        "equalTo": "code==\"KU\""
+      },
+      "includeShadowLocations": {
+        "equalTo": "true"
+      }
+    },
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "test_tenant"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "locations": [
+        {
+          "id": "e78b9006-c477-4fea-b8e1-5af659948491",
+          "name": "KU",
+          "code": "123",
+          "institutionId": "0f23027c-b545-4aed-b606-7866143d26d0",
+          "campusId": "475f9b15-2f37-4e07-8027-72908ea1fc42",
+          "libraryId": "32188fb2-ac26-42ab-9fd0-1f027e9bf7e2",
+          "primaryServicePoint": "9d1b77e8-f02e-4b7f-b296-3f2042ddac54",
+          "servicePointIds": [ "9d1b77e8-f02e-4b7f-b296-3f2042ddac54" ],
+          "servicePoints": [],
+          "isShadow": false,
+          "metadata": {
+            "createdDate": "2025-10-24T02:07:32.014+00:00",
+            "createdByUserId": "b849e4a5-ac4f-4b4c-80a8-6c4220d04784",
+            "updatedDate": "2025-10-24T02:07:32.014+00:00",
+            "updatedByUserId": "b849e4a5-ac4f-4b4c-80a8-6c4220d04784"
+          }
+        }
+      ],
+      "totalRecords": 1
+    }
+  }
+}

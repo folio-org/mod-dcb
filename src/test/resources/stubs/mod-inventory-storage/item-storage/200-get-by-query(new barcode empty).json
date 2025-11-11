@@ -1,0 +1,34 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/item-storage/items",
+    "queryParameters": {
+      "query": {
+        "equalTo": "barcode==\"DCB_ITEM_NEW_BARCODE\""
+      }
+    },
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "test_tenant"
+      },
+      "x-okapi-token": {
+        "equalTo": "dGVzdF9qd3RfdG9rZW4="
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "items": [],
+      "totalRecords": 0,
+      "resultInfo": {
+        "totalRecords": 0,
+        "facets": [],
+        "diagnostics": []
+      }
+    }
+  }
+}

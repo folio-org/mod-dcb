@@ -8,7 +8,6 @@ import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
 import java.nio.file.Path;
-import org.folio.dcb.controller.BaseIT;
 import org.folio.spring.integration.XOkapiHeaders;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,6 +25,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.kafka.KafkaContainer;
 import org.testcontainers.utility.DockerImageName;
+import support.postgres.PostgresContainerExtension;
 
 @Testcontainers
 class FolioDcbApplicationIT {
@@ -44,7 +44,7 @@ class FolioDcbApplicationIT {
 
   @Container
   private static final PostgreSQLContainer<?> POSTGRES =
-    new PostgreSQLContainer<>(BaseIT.POSTGRES_IMAGE_NAME)
+    new PostgreSQLContainer<>(PostgresContainerExtension.IMAGE_NAME)
       .withNetwork(NETWORK)
       .withNetworkAliases("mypostgres")
       .withUsername("username")
@@ -77,7 +77,8 @@ class FolioDcbApplicationIT {
       .withEnv("DB_PASSWORD", "password")
       .withEnv("DB_DATABASE", "postgres")
       .withEnv("KAFKA_HOST", "ourkafka")
-      .withEnv("FOLIO_SYSTEMUSER_ENABLED", "false");
+      .withEnv("FOLIO_SYSTEMUSER_ENABLED", "false")
+      .withEnv("DCB_ENTITIES_RUNTIME_VERIFICATION_ENABLED", "false");
 
   @BeforeAll
   static void beforeAll() {

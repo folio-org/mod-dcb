@@ -1,0 +1,32 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/circulation/requests",
+    "queryParameters": {
+      "query": {
+        "equalTo": "itemId==\"5b95877d-86c0-4cb7-a0cd-7660b348ae5a\" and requestType==\"Hold\" and status==(\"Open - Not yet filled\" or \"Open - Awaiting pickup\" or \"Open - In transit\" or \"Open - Awaiting delivery\")"
+      },
+      "limit": {
+        "equalTo": "0"
+      }
+    },
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "test_tenant"
+      },
+      "x-okapi-token": {
+        "equalTo": "dGVzdF9qd3RfdG9rZW4="
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "requests": [],
+      "totalRecords": 3
+    }
+  }
+}

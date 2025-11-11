@@ -3,11 +3,8 @@ package org.folio.dcb.service.impl;
 import static org.folio.dcb.client.feign.LocationsClient.LocationDTO;
 import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.IN_TRANSIT;
 import static org.folio.dcb.utils.DCBConstants.CODE;
-import static org.folio.dcb.utils.DCBConstants.LOAN_TYPE_ID;
-import static org.folio.dcb.utils.DCBConstants.LOCATION_ID;
 import static org.folio.dcb.utils.DCBConstants.MATERIAL_TYPE_NAME_BOOK;
 import static org.folio.dcb.utils.DCBConstants.NAME;
-import static org.folio.util.StringUtil.cqlEncode;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -24,8 +21,8 @@ import org.folio.dcb.domain.dto.CirculationItem;
 import org.folio.dcb.domain.dto.DcbItem;
 import org.folio.dcb.domain.dto.ItemStatus;
 import org.folio.dcb.service.CirculationItemService;
-import org.folio.dcb.service.HoldingsService;
 import org.folio.dcb.service.ItemService;
+import org.folio.dcb.service.entities.DcbEntityServiceFacade;
 import org.folio.dcb.utils.CqlQuery;
 import org.springframework.stereotype.Service;
 
@@ -38,8 +35,8 @@ public class CirculationItemServiceImpl implements CirculationItemService {
   private final CirculationItemClient circulationItemClient;
   private final LocationsClient locationsClient;
   private final LocationUnitClient locationUnitClient;
-  private final HoldingsService holdingsService;
   private final DcbHubProperties dcbHubProperties;
+  private final DcbEntityServiceFacade dcbEntityService;
 
   @Override
   public CirculationItem checkIfItemExistsAndCreate(DcbItem dcbItem, String pickupServicePointId) {
@@ -66,7 +63,7 @@ public class CirculationItemServiceImpl implements CirculationItemService {
   }
 
   private CirculationItem fetchCirculationItemByBarcode(String barcode) {
-    return circulationItemClient.fetchItemByCqlQuery("barcode==" + cqlEncode(barcode))
+    return circulationItemClient.fetchItemByCqlQuery(CqlQuery.exactMatch("barcode", barcode))
       .getItems()
       .stream()
       .findFirst()
@@ -82,8 +79,9 @@ public class CirculationItemServiceImpl implements CirculationItemService {
     //SetupDefaultMaterialTypeIfNotGiven
     String materialType = StringUtils.isBlank(item.getMaterialType()) ? MATERIAL_TYPE_NAME_BOOK : item.getMaterialType();
     var materialTypeId = itemService.fetchItemMaterialTypeIdByMaterialTypeName(materialType);
-    var dcbHolding = holdingsService.fetchDcbHoldingOrCreateIfMissing();
+    var dcbHolding = dcbEntityService.findOrCreateHolding();
     var itemId = UUID.randomUUID().toString();
+    var loanType = dcbEntityService.findOrCreateLoanType();
     CirculationItem circulationItem =
       CirculationItem.builder()
         .id(itemId)
@@ -94,7 +92,7 @@ public class CirculationItemServiceImpl implements CirculationItemService {
         .holdingsRecordId(dcbHolding.getId())
         .instanceTitle(item.getTitle())
         .materialTypeId(materialTypeId)
-        .permanentLoanTypeId(LOAN_TYPE_ID)
+        .permanentLoanTypeId(loanType.getId())
         .pickupLocation(pickupServicePointId)
         .lendingLibraryCode(item.getLendingLibraryCode())
         .effectiveLocationId(effectiveLocationId)
@@ -165,8 +163,9 @@ public class CirculationItemServiceImpl implements CirculationItemService {
   }
 
   private String getDefaultDcbLocationId() {
+    var locationId = dcbEntityService.findOrCreateLocation().getId();
     log.debug("getDefaultDcbLocationId:: Falling back to default "
-      + "location id: {}, code: {}, name: {}", LOCATION_ID, CODE, NAME);
-    return LOCATION_ID;
+      + "location id: {}, code: {}, name: {}", locationId, CODE, NAME);
+    return locationId;
   }
 }

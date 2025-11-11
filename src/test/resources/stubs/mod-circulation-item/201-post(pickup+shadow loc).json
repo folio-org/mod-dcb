@@ -1,0 +1,69 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPathTemplate": "/circulation-item/{itemId}",
+    "pathParameters": {
+      "itemId": {
+        "matches": ".{36}"
+      }
+    },
+    "bodyPatterns": [
+      {
+        "equalToJson": {
+          "holdingsRecordId": "10cd3a5a-d36f-4c7a-bc4f-e1ae3cf820c9",
+          "status": {
+            "name": "In transit"
+          },
+          "materialTypeId": "1a54b431-2e4f-452d-9cae-9cee66c9a892",
+          "permanentLoanTypeId": "4dec5417-0765-4767-bed6-b363a2d7d4e2",
+          "instanceTitle": "ITEM",
+          "barcode": "DCB_ITEM",
+          "pickupLocation": "0da8c1e4-1c1f-4dd9-b189-70ba978b7d94",
+          "lendingLibraryCode": "KU",
+          "effectiveLocationId": "e78b9006-c477-4fea-b8e1-5af659948491"
+        },
+        "ignoreExtraElements": true
+      },
+      {
+        "matchesJsonPath": {
+          "expression": "$.id",
+          "matches": "[0-9a-f-]{36}"
+        }
+      }
+    ],
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "test_tenant"
+      },
+      "x-okapi-token": {
+        "equalTo": "dGVzdF9qd3RfdG9rZW4="
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "id": "5b95877d-86c0-4cb7-a0cd-7660b348ae5a",
+      "holdingsRecordId": "10cd3a5a-d36f-4c7a-bc4f-e1ae3cf820c9",
+      "status": {
+        "name": "In transit"
+      },
+      "materialTypeId": "1a54b431-2e4f-452d-9cae-9cee66c9a892",
+      "permanentLoanTypeId": "4dec5417-0765-4767-bed6-b363a2d7d4e2",
+      "instanceTitle": "ITEM",
+      "barcode": "DCB_ITEM",
+      "pickupLocation": "0da8c1e4-1c1f-4dd9-b189-70ba978b7d94",
+      "lendingLibraryCode": "KU",
+      "effectiveLocationId": "e78b9006-c477-4fea-b8e1-5af659948491",
+      "metadata": {
+        "createdDate": "2025-10-24T02:07:32.660+00:00",
+        "createdByUserId": "b849e4a5-ac4f-4b4c-80a8-6c4220d04784",
+        "updatedDate": "2025-10-24T02:07:32.660+00:00",
+        "updatedByUserId": "b849e4a5-ac4f-4b4c-80a8-6c4220d04784"
+      }
+    }
+  }
+}

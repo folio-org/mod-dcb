@@ -9,10 +9,4 @@ public interface HoldingsService {
    * @return InventoryHolding
    */
   HoldingsStorageClient.Holding fetchInventoryHoldingDetailsByHoldingId(String holdingId);
-
-  /**
-   * Get predefined DCB holding or create a new one if it does not exist.
-   * @return DCB Holding
-   */
-  HoldingsStorageClient.Holding fetchDcbHoldingOrCreateIfMissing();
 }

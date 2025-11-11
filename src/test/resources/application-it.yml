@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: mod-dcb
+  jpa:
+    properties:
+      hibernate:
+        format_sql: false
+    show-sql: true
+
+folio:
+  system-user:
+    enabled: false
+
+application:
+  dcb-entities:
+    runtime-verification-enabled: false
+
+logging:
+  level:
+    org.folio.dcb: debug
+    org.springframework.test.context.jdbc: warn
+    org.springframework.jdbc.datasource.init: warn

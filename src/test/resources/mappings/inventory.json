@@ -236,7 +236,12 @@
     {
       "request": {
         "method": "GET",
-        "url": "/locations?query=name==DCB"
+        "urlPath": "/locations",
+        "queryParameters": {
+          "query": {
+            "equalTo": "name==\"DCB\""
+          }
+        }
       },
       "response": {
         "status": 200,

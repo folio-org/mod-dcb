@@ -13,7 +13,6 @@ import org.folio.spring.config.FeignClientConfiguration;
 import org.folio.spring.model.ResultList;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -25,8 +24,14 @@ public interface LocationsClient {
 
   @PostMapping
   LocationDTO createLocation(@RequestBody LocationDTO locationDTO);
-  @GetMapping("?query=name=={name}")
-  ResultList<LocationDTO> queryLocationsByName(@PathVariable("name") String name);
+
+  @GetMapping
+  ResultList<LocationDTO> findByQuery(@RequestParam("query") String query);
+
+  @GetMapping
+  ResultList<LocationDTO> findByQuery(
+    @RequestParam("query") String query,
+    @RequestParam("includeShadowLocations") Boolean includeShadowLocations);
 
   @GetMapping
   ResultList<LocationDTO> findLocationByQuery(
@@ -34,7 +39,6 @@ public interface LocationsClient {
     @RequestParam("includeShadowLocations") Boolean includeShadowLocations,
     @RequestParam("limit") int limit,
     @RequestParam("offset") int offset);
-
 
   @Data
   @Builder

@@ -2,6 +2,7 @@ package org.folio.dcb.integration.dcb;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.tuple;
+import static org.folio.dcb.utils.CqlQuery.byNameAndCode;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -13,23 +14,23 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import feign.FeignException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
-
-import org.folio.dcb.client.feign.InventoryServicePointClient;
 import org.folio.dcb.client.feign.LocationUnitClient;
 import org.folio.dcb.client.feign.LocationsClient;
-import org.folio.dcb.integration.dcb.config.DcbHubProperties;
 import org.folio.dcb.domain.dto.ServicePointRequest;
 import org.folio.dcb.exception.DcbHubLocationException;
+import org.folio.dcb.integration.dcb.config.DcbHubProperties;
 import org.folio.dcb.integration.dcb.model.DcbAgency;
+import org.folio.dcb.integration.dcb.model.DcbHubLocationResponse;
 import org.folio.dcb.integration.dcb.model.DcbLocation;
 import org.folio.dcb.integration.keycloak.DcbHubKCCredentialSecureStore;
 import org.folio.dcb.integration.keycloak.DcbHubKCTokenService;
 import org.folio.dcb.integration.keycloak.model.DcbHubKCCredentials;
-import org.folio.dcb.integration.dcb.model.DcbHubLocationResponse;
+import org.folio.dcb.service.entities.DcbEntityServiceFacade;
 import org.folio.dcb.utils.CqlQuery;
 import org.folio.spring.model.ResultList;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,8 +41,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
-
-import feign.FeignException;
 
 @ExtendWith(MockitoExtension.class)
 class DcbHubLocationServiceImplTest {
@@ -62,7 +61,7 @@ class DcbHubLocationServiceImplTest {
   private LocationUnitClient locationUnitClient;
 
   @Mock
-  private InventoryServicePointClient servicePointClient;
+  private DcbEntityServiceFacade dcbEntityServiceFacade;
 
   @InjectMocks
   private DcbHubLocationServiceImpl dcbHubLocationService;
@@ -82,7 +81,7 @@ class DcbHubLocationServiceImplTest {
 
     ServicePointRequest servicePointRequest = new ServicePointRequest();
     servicePointRequest.setId("sp-123");
-    when(servicePointClient.getServicePointByName(any())).thenReturn(ResultList.of(1, List.of(servicePointRequest)));
+    when(dcbEntityServiceFacade.findOrCreateServicePoint()).thenReturn(servicePointRequest);
     when(dcbHubKCCredentialSecureStore.getDcbHubKCCredentials()).thenReturn(credentials);
     when(dcbHubKCTokenService.getBearerAccessToken(any())).thenReturn(BEARER_TOKEN);
   }

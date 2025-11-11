@@ -1,0 +1,41 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/holdings-sources",
+    "bodyPatterns": [
+      {
+        "equalToJson": {
+          "name": "FOLIO",
+          "source": "folio"
+        },
+        "ignoreExtraElements": true
+      },
+      {
+        "matchesJsonPath": {
+          "expression": "$.id",
+          "matches": "[0-9a-f-]{36}"
+        }
+      }
+    ],
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "test_tenant"
+      }
+    }
+  },
+  "response": {
+    "status": 201,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "id": "f32d531e-df79-46b3-8932-cdd35f7a2264",
+      "name": "FOLIO",
+      "source": "folio",
+      "metadata": {
+        "createdDate": "2025-10-24T02:06:00.127+00:00",
+        "updatedDate": "2025-10-24T02:06:00.127+00:00"
+      }
+    }
+  }
+}
