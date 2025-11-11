@@ -27,7 +27,7 @@ public class DcbLoanTypeService implements DcbEntityService<LoanType> {
 
   @Override
   public LoanType createDcbEntity() {
-    log.info("createDcbEntity:: Creating DCB loan type");
+    log.debug("createDcbEntity:: Creating DCB loan type");
     var loanType = getDcbLoanType();
     var createdLoanType = loanTypeClient.createLoanType(loanType);
     log.info("createDcbEntity:: DCB loan type created");

@@ -37,7 +37,7 @@ public class DcbCalendarService implements DcbEntityService<Calendar> {
     log.debug("createDcbEntity:: Creating a new  DCB Calendar");
     var newCalendar = getDcbCalendar(servicePoint.getId());
     var createdCalendar = calendarService.createCalendar(newCalendar);
-    log.debug("createDcbEntity:: DCB Calendar created");
+    log.info("createDcbEntity:: DCB Calendar created");
     return createdCalendar;
   }
 

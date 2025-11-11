@@ -15,6 +15,7 @@
 * MODDCB-240: Fix inventory API call for location and location-units [MODDCB-240](https://folio-org.atlassian.net/browse/MODDCB-240)
 * MODDCB-235: Add hold count field to transaction status response [MODDCB-235](https://folio-org.atlassian.net/browse/MODDCB-235)
 * MODDCB-236: Provide endpoints to toggles borrower role renewals on virtual items [MODDCB-236](https://folio-org.atlassian.net/browse/MODDCB-236)
+* MODDCB-226: Create umbrella when data when requested if not present [MODDCB-226](https://folio-org.atlassian.net/browse/MODDCB-226)
 
 ## v1.3.0 2025-03-13
 

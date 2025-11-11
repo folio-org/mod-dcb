@@ -50,7 +50,7 @@ public class DcbLocationService implements DcbEntityService<LocationDTO> {
 
   private LocationDTO createLocation(String libraryId, String campusId,
     String institutionId, String servicePointId) {
-    log.info("createLocation:: creating a new DCB Location");
+    log.debug("createLocation:: creating a new DCB Location");
     var dcbLocation = getDcbLocation(libraryId, campusId, institutionId, servicePointId);
 
     var createdLocation = locationsClient.createLocation(dcbLocation);
