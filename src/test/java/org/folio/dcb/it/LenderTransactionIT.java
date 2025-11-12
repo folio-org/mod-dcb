@@ -36,7 +36,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.it.base.BaseTenantIntegrationTest;
-import org.folio.dcb.utils.DCBConstants;
 import org.folio.dcb.utils.EntityUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.jdbc.Sql;

@@ -42,14 +42,14 @@ class DcbCalendarServiceTest {
     var expectedCalendar = dcbCalendar();
     when(calendarService.findCalendarByName(DCB_CALENDAR_NAME)).thenReturn(expectedCalendar);
     var result = dcbCalendarService.findDcbEntity();
-    assertThat(result).contains(dcbCalendar());;
+    assertThat(result).contains(dcbCalendar());
   }
 
   @Test
   void findDcbEntity_positive_shouldReturnEmptyWhenNotExists() {
     when(calendarService.findCalendarByName(DCB_CALENDAR_NAME)).thenReturn(null);
     var result = dcbCalendarService.findDcbEntity();
-    assertThat(result).isEmpty();;
+    assertThat(result).isEmpty();
   }
 
   @Test

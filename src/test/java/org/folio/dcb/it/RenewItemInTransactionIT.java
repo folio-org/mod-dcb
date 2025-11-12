@@ -11,7 +11,7 @@ import support.types.IntegrationTest;
 import support.wiremock.WireMockStub;
 
 @IntegrationTest
-public class RenewItemInTransactionIT extends BaseTenantIntegrationTest {
+class RenewItemInTransactionIT extends BaseTenantIntegrationTest {
 
   @Test
   @WireMockStub({

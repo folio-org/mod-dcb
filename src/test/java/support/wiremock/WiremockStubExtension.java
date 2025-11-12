@@ -5,7 +5,6 @@ import static java.util.Collections.emptyList;
 import static org.apache.commons.lang3.StringUtils.trimToNull;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.springframework.test.context.util.TestContextResourceUtils.convertToClasspathResourcePaths;
 import static support.wiremock.WiremockContainerExtension.getWireMockAdminClient;
 
 import com.fasterxml.jackson.annotation.JsonInclude;

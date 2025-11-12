@@ -27,7 +27,7 @@ class CustomTenantServiceTest {
 
   @Test
   void shouldInitTenant() {
-    doNothing().when(dcbEntityServiceFacade).createAll();;
+    doNothing().when(dcbEntityServiceFacade).createAll();
     doNothing().when(kafkaService).restartEventListeners();
     doNothing().when(systemUserService).setupSystemUser();
     when(dcbHubLocationService.createShadowLocations(true))

@@ -4,7 +4,7 @@
     "urlPath": "/holdings-sources",
     "queryParameters": {
       "query": {
-        "equalTo": "name==\"folio\""
+        "equalTo": "name==\"FOLIO\""
       }
     },
     "headers": {

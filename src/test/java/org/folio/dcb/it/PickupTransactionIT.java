@@ -56,6 +56,9 @@ class PickupTransactionIT extends BaseTenantIntegrationTest {
       .andExpect(jsonPath("$.item").value(dcbItem()))
       .andExpect(jsonPath("$.patron").value(patron));
 
+    wiremock.verifyThat(1, postRequestedFor(urlPathEqualTo("/users")));
+    wiremock.verifyThat(1, postRequestedFor(urlPathMatching("/circulation-item/.{36}")));
+
     auditEntityVerifier.assertThatLatestEntityIsNotDuplicate(DCB_TRANSACTION_ID);
     verifyPostCirculationRequestCalledOnce(NOT_EXISTED_PATRON_ID);
   }
@@ -65,10 +68,8 @@ class PickupTransactionIT extends BaseTenantIntegrationTest {
     "/stubs/mod-users/users/200-get-by-query(new_user empty).json",
     "/stubs/mod-users/users/201-post-user(dcb user).json",
     "/stubs/mod-inventory-storage/item-storage/200-get-by-query(barcode empty).json",
-    "/stubs/mod-inventory-storage/material-types/200-get-by-query(book).json",
-    "/stubs/mod-circulation-item/200-get-by-query(barcode empty).json",
+    "/stubs/mod-circulation-item/200-get-by-query(barcode).json",
     "/stubs/mod-users/groups/200-get-by-query(staff).json",
-    "/stubs/mod-circulation-item/201-post(pickup).json",
     "/stubs/mod-circulation/requests/201-post(any).json",
   })
   void createTransaction_positive_existingDcbItem() throws Exception {
@@ -78,6 +79,9 @@ class PickupTransactionIT extends BaseTenantIntegrationTest {
       .andExpect(jsonPath("$.status").value("CREATED"))
       .andExpect(jsonPath("$.item").value(dcbItem()))
       .andExpect(jsonPath("$.patron").value(patron));
+
+    wiremock.verifyThat(1, postRequestedFor(urlPathEqualTo("/users")));
+    wiremock.verifyThat(0, postRequestedFor(urlPathMatching("/circulation-item/.{36}")));
 
     auditEntityVerifier.assertThatLatestEntityIsNotDuplicate(DCB_TRANSACTION_ID);
     verifyPostCirculationRequestCalledOnce(NOT_EXISTED_PATRON_ID);
@@ -131,6 +135,9 @@ class PickupTransactionIT extends BaseTenantIntegrationTest {
       .andExpect(jsonPath("$.status").value("CREATED"))
       .andExpect(jsonPath("$.item").value(dcbItem()))
       .andExpect(jsonPath("$.patron").value(dcbPatron));
+
+    wiremock.verifyThat(0, postRequestedFor(urlPathEqualTo("/users")));
+    wiremock.verifyThat(0, postRequestedFor(urlPathMatching("/circulation-item/.{36}")));
 
     auditEntityVerifier.assertThatLatestEntityIsNotDuplicate(DCB_TRANSACTION_ID);
     verifyPostCirculationRequestCalledOnce(EXISTED_PATRON_ID);

@@ -7,9 +7,7 @@ import static org.folio.spring.integration.XOkapiHeaders.URL;
 import static org.folio.spring.integration.XOkapiHeaders.USER_ID;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.context.jdbc.SqlMergeMode.MergeMode.MERGE;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static support.wiremock.WiremockContainerExtension.WM_URL_PROPERTY;
 
@@ -40,7 +38,7 @@ import support.wiremock.WithWiremockContainer;
 @WithPostgresContainer
 @WithWiremockContainer
 @SqlMergeMode(MERGE)
-public class BaseIntegrationTest {
+public abstract class BaseIntegrationTest {
 
   protected static final String MODULE_NAME = "mod-dcb";
   protected static final String TEST_TENANT = "test_tenant";

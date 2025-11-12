@@ -52,25 +52,25 @@ public class EntityUtils {
    * the Mocked userClient returns empty result,
    * while requesting it by the query, including such a patron id
    * */
-  public static String NOT_EXISTED_PATRON_ID = "571b0a2c-9456-40b5-a449-d41fe6017082";
+  public static final String NOT_EXISTED_PATRON_ID = "571b0a2c-9456-40b5-a449-d41fe6017082";
 
   /**
    * EXISTED_PATRON_ID - means
    * the Mocked userClient returns result with single value,
    * while requesting it by the query, including such a patron id
    * */
-  public static String EXISTED_PATRON_ID = "284056f5-0670-4e1e-9e2f-61b9f1ee2d18";
-  public static String PICKUP_SERVICE_POINT_ID = "0da8c1e4-1c1f-4dd9-b189-70ba978b7d94";
-  public static String BORROWER_SERVICE_POINT_ID = "9d1b77e8-f02e-4b7f-b296-3f2042ddac55";
-  public static String DCB_TRANSACTION_ID = "571b0a2c-8883-40b5-a449-d41fe6017082";
-  public static String CIRCULATION_REQUEST_ID = "571b0a2c-8883-40b5-a449-d41fe6017083";
+  public static final String EXISTED_PATRON_ID = "284056f5-0670-4e1e-9e2f-61b9f1ee2d18";
+  public static final String PICKUP_SERVICE_POINT_ID = "0da8c1e4-1c1f-4dd9-b189-70ba978b7d94";
+  public static final String BORROWER_SERVICE_POINT_ID = "9d1b77e8-f02e-4b7f-b296-3f2042ddac55";
+  public static final String DCB_TRANSACTION_ID = "571b0a2c-8883-40b5-a449-d41fe6017082";
+  public static final String CIRCULATION_REQUEST_ID = "571b0a2c-8883-40b5-a449-d41fe6017083";
 
-  public static String CIRCULATION_ITEM_REQUEST_ID = "571b0a2c-8883-40b5-a449-d41fe6017183";
-  public static String DCB_USER_TYPE = "dcb";
-  public static String DCB_TYPE_USER_ID = "910c512c-ebc5-40c6-96a5-a20bfd81e154";
-  public static String EXISTED_INVENTORY_ITEM_BARCODE = "INVENTORY_ITEM";
-  public static String PATRON_TYPE_USER_ID = "18c1741d-e678-4c8e-9fe7-cfaeefab5eea";
-  public static String REQUEST_ID = "398501a2-5c97-4ba6-9ee7-d1cd6433cb98";
+  public static final String CIRCULATION_ITEM_REQUEST_ID = "571b0a2c-8883-40b5-a449-d41fe6017183";
+  public static final String DCB_USER_TYPE = "dcb";
+  public static final String DCB_TYPE_USER_ID = "910c512c-ebc5-40c6-96a5-a20bfd81e154";
+  public static final String EXISTED_INVENTORY_ITEM_BARCODE = "INVENTORY_ITEM";
+  public static final String PATRON_TYPE_USER_ID = "18c1741d-e678-4c8e-9fe7-cfaeefab5eea";
+  public static final String REQUEST_ID = "398501a2-5c97-4ba6-9ee7-d1cd6433cb98";
   public static final String DCB_NEW_BARCODE = "398501a2-5c97-4ba6-9ee7-d1cd6433cb91";
   public static final String DCB_ITEM_NEW_BARCODE = "DCB_ITEM_NEW_BARCODE";
   public static final String HOLDING_RECORD_ID = "fcee331d-2b50-49de-9395-a76a6ff4e385";

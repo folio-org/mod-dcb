@@ -1,6 +1,7 @@
 package org.folio.dcb.it;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.matchingJsonPath;
+import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
 import static org.folio.dcb.utils.EntityUtils.EXISTED_PATRON_ID;
 import static org.folio.dcb.utils.EntityUtils.borrowerDcbTransaction;
@@ -9,7 +10,6 @@ import static org.folio.dcb.utils.EntityUtils.dcbItem;
 import static org.folio.dcb.utils.EntityUtils.dcbPatron;
 import static org.folio.dcb.utils.EntityUtils.dcbTransactionUpdate;
 import static org.folio.dcb.utils.EntityUtils.pickupDcbTransaction;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -23,10 +23,8 @@ import support.types.IntegrationTest;
 import support.wiremock.WireMockStub;
 
 @IntegrationTest
-@TestPropertySource(properties = {
-  "application.dcb-entities.runtime-verification-enabled=true"
-})
-public class RuntimeEntityVerificationIT extends BaseTenantIntegrationTest {
+@TestPropertySource(properties = { "application.dcb-entities.runtime-verification-enabled=true" })
+class RuntimeEntityVerificationIT extends BaseTenantIntegrationTest {
 
   @Nested
   @DisplayName("BorrowerRoleIT")
@@ -47,6 +45,8 @@ public class RuntimeEntityVerificationIT extends BaseTenantIntegrationTest {
     void createTransaction_positive_dcbEntitiesExists() throws Exception {
       postDcbTransaction(DCB_TRANSACTION_ID, borrowerDcbTransaction())
         .andExpect(jsonPath("$.status").value("CREATED"));
+
+      wiremock.verifyThat(0, postRequestedFor(urlPathEqualTo("/holdings-storage/holdings")));
     }
 
     @Test
@@ -61,29 +61,37 @@ public class RuntimeEntityVerificationIT extends BaseTenantIntegrationTest {
 
       // DCB Entities existence verification
       "/stubs/mod-inventory-storage/locations/200-get-by-query(dcb empty).json",
-      "/stubs/mod-inventory-storage/location-units/institutions/200-get-by-query(dcb empty).json",
-      "/stubs/mod-inventory-storage/location-units/campuses/200-get-by-query(dcb empty).json",
+      "/stubs/mod-inventory-storage/location-units/institutions/dcb-entity-scenario.json",
+      "/stubs/mod-inventory-storage/location-units/campuses/dcb-entity-scenario.json",
       "/stubs/mod-inventory-storage/location-units/libraries/200-get-by-query(dcb empty).json",
       "/stubs/mod-inventory-storage/holdings-storage/200-get-by-query(dcb+id empty).json",
       "/stubs/mod-inventory-storage/service-points/200-get-by-query(dcb empty).json",
       "/stubs/mod-inventory/instances/200-get-by-query(dcb empty).json",
       "/stubs/mod-inventory-storage/instance-types/200-get-by-query(dcb empty).json",
-      "/stubs/mod-inventory-storage/holding-sources/200-get-by-query(dcb empty).json",
+      "/stubs/mod-inventory-storage/holdings-sources/200-get-by-query(dcb empty).json",
 
       // POST DCB entity mappings
-      "/stubs/mod-inventory-storage/location-units/institutions/201-post(dcb).json",
-      "/stubs/mod-inventory-storage/location-units/campuses/201-post(dcb).json",
       "/stubs/mod-inventory-storage/location-units/libraries/201-post(dcb).json",
       "/stubs/mod-inventory-storage/locations/201-post(dcb).json",
       "/stubs/mod-inventory-storage/service-points/201-post(dcb).json",
       "/stubs/mod-inventory/instances/201-post(dcb).json",
       "/stubs/mod-inventory-storage/instance-types/201-post(dcb).json",
-      "/stubs/mod-inventory-storage/holding-sources/201-post(dcb).json",
+      "/stubs/mod-inventory-storage/holdings-sources/201-post(dcb).json",
       "/stubs/mod-inventory-storage/holdings-storage/201-post(dcb).json",
     })
     void createTransaction_positive_dcbEntitiesNotFound() throws Exception {
       postDcbTransaction(DCB_TRANSACTION_ID, borrowerDcbTransaction())
         .andExpect(jsonPath("$.status").value("CREATED"));
+
+      wiremock.verifyThat(1, postRequestedFor(urlPathEqualTo("/location-units/institutions")));
+      wiremock.verifyThat(1, postRequestedFor(urlPathEqualTo("/location-units/libraries")));
+      wiremock.verifyThat(1, postRequestedFor(urlPathEqualTo("/location-units/campuses")));
+      wiremock.verifyThat(1, postRequestedFor(urlPathEqualTo("/locations")));
+      wiremock.verifyThat(1, postRequestedFor(urlPathEqualTo("/service-points")));
+      wiremock.verifyThat(1, postRequestedFor(urlPathEqualTo("/instance-types")));
+      wiremock.verifyThat(1, postRequestedFor(urlPathEqualTo("/holdings-sources")));
+      wiremock.verifyThat(1, postRequestedFor(urlPathEqualTo("/inventory/instances")));
+      wiremock.verifyThat(1, postRequestedFor(urlPathEqualTo("/holdings-storage/holdings")));
     }
 
     @Test
@@ -104,6 +112,9 @@ public class RuntimeEntityVerificationIT extends BaseTenantIntegrationTest {
     void updateTransaction_positive_cancellationReasonNotFound() throws Exception {
       putDcbTransactionDetailsAttempt(DCB_TRANSACTION_ID, dcbTransactionUpdate())
         .andExpect(status().isNoContent());
+
+      wiremock.verifyThat(0, postRequestedFor(urlPathEqualTo("/holdings-storage/holdings")));
+      wiremock.verifyThat(0, postRequestedFor(urlPathEqualTo("/locations")));
     }
   }
 
@@ -131,6 +142,9 @@ public class RuntimeEntityVerificationIT extends BaseTenantIntegrationTest {
         .andExpect(jsonPath("$.status").value("CREATED"))
         .andExpect(jsonPath("$.item").value(dcbItem()))
         .andExpect(jsonPath("$.patron").value(patron));
+
+      wiremock.verifyThat(0, postRequestedFor(urlPathEqualTo("/holdings-storage/holdings")));
+      wiremock.verifyThat(0, postRequestedFor(urlPathEqualTo("/locations")));
     }
 
     @Test
@@ -143,27 +157,23 @@ public class RuntimeEntityVerificationIT extends BaseTenantIntegrationTest {
       "/stubs/mod-circulation/requests/201-post(any).json",
 
       // DCB Entities existence verification
-      "/stubs/mod-inventory-storage/locations/200-get-by-query(dcb empty).json",
-      "/stubs/mod-inventory-storage/location-units/institutions/200-get-by-query(dcb empty).json",
-      "/stubs/mod-inventory-storage/location-units/campuses/200-get-by-query(dcb empty).json",
+      "/stubs/mod-inventory-storage/locations/dcb-entity-scenario.json",
+      "/stubs/mod-inventory-storage/location-units/institutions/dcb-entity-scenario.json",
+      "/stubs/mod-inventory-storage/location-units/campuses/dcb-entity-scenario.json",
       "/stubs/mod-inventory-storage/location-units/libraries/200-get-by-query(dcb empty).json",
-      "/stubs/mod-inventory-storage/holdings-storage/200-get-by-query(dcb+id empty).json",
       "/stubs/mod-inventory-storage/loan-types/200-get-by-query(dcb empty).json",
       "/stubs/mod-inventory-storage/service-points/200-get-by-query(dcb empty).json",
       "/stubs/mod-inventory/instances/200-get-by-query(dcb empty).json",
       "/stubs/mod-inventory-storage/instance-types/200-get-by-query(dcb empty).json",
-      "/stubs/mod-inventory-storage/holding-sources/200-get-by-query(dcb empty).json",
+      "/stubs/mod-inventory-storage/holdings-sources/200-get-by-query(dcb empty).json",
+      "/stubs/mod-inventory-storage/holdings-storage/dcb-entity-scenario.json",
 
       // POST DCB entity mappings
-      "/stubs/mod-inventory-storage/location-units/institutions/201-post(dcb).json",
-      "/stubs/mod-inventory-storage/location-units/campuses/201-post(dcb).json",
-      "/stubs/mod-inventory-storage/location-units/libraries/201-post(dcb).json",
-      "/stubs/mod-inventory-storage/locations/201-post(dcb).json",
       "/stubs/mod-inventory-storage/service-points/201-post(dcb).json",
-      "/stubs/mod-inventory/instances/201-post(dcb).json",
+      "/stubs/mod-inventory-storage/location-units/libraries/201-post(dcb).json",
       "/stubs/mod-inventory-storage/instance-types/201-post(dcb).json",
-      "/stubs/mod-inventory-storage/holding-sources/201-post(dcb).json",
-      "/stubs/mod-inventory-storage/holdings-storage/201-post(dcb).json",
+      "/stubs/mod-inventory/instances/201-post(dcb).json",
+      "/stubs/mod-inventory-storage/holdings-sources/201-post(dcb).json",
       "/stubs/mod-inventory-storage/loan-types/201-post(dcb).json",
     })
     void createTransaction_positive_notFoundDcbEntities() throws Exception {
@@ -172,6 +182,16 @@ public class RuntimeEntityVerificationIT extends BaseTenantIntegrationTest {
         .andExpect(jsonPath("$.status").value("CREATED"))
         .andExpect(jsonPath("$.item").value(dcbItem()))
         .andExpect(jsonPath("$.patron").value(patron));
+
+      wiremock.verifyThat(1, postRequestedFor(urlPathEqualTo("/location-units/institutions")));
+      wiremock.verifyThat(1, postRequestedFor(urlPathEqualTo("/location-units/libraries")));
+      wiremock.verifyThat(1, postRequestedFor(urlPathEqualTo("/location-units/campuses")));
+      wiremock.verifyThat(1, postRequestedFor(urlPathEqualTo("/locations")));
+      wiremock.verifyThat(1, postRequestedFor(urlPathEqualTo("/service-points")));
+      wiremock.verifyThat(1, postRequestedFor(urlPathEqualTo("/instance-types")));
+      wiremock.verifyThat(1, postRequestedFor(urlPathEqualTo("/holdings-sources")));
+      wiremock.verifyThat(1, postRequestedFor(urlPathEqualTo("/inventory/instances")));
+      wiremock.verifyThat(1, postRequestedFor(urlPathEqualTo("/holdings-storage/holdings")));
     }
   }
 
@@ -196,6 +216,9 @@ public class RuntimeEntityVerificationIT extends BaseTenantIntegrationTest {
         .andExpect(jsonPath("$.status").value("CREATED"))
         .andExpect(jsonPath("$.item").value(dcbItem()))
         .andExpect(jsonPath("$.patron").value(dcbPatron));
+
+      wiremock.verifyThat(0, postRequestedFor(urlPathEqualTo("/holdings-storage/holdings")));
+      wiremock.verifyThat(0, postRequestedFor(urlPathEqualTo("/locations")));
     }
 
     @Test
@@ -207,25 +230,24 @@ public class RuntimeEntityVerificationIT extends BaseTenantIntegrationTest {
       "/stubs/mod-circulation/requests/201-post(any).json",
 
       // DCB Entities existence verification
+      "/stubs/mod-inventory-storage/location-units/institutions/dcb-entity-scenario.json",
+      "/stubs/mod-inventory-storage/location-units/campuses/dcb-entity-scenario.json",
       "/stubs/mod-inventory-storage/locations/200-get-by-query(dcb empty).json",
-      "/stubs/mod-inventory-storage/location-units/institutions/200-get-by-query(dcb empty).json",
-      "/stubs/mod-inventory-storage/location-units/campuses/200-get-by-query(dcb empty).json",
       "/stubs/mod-inventory-storage/location-units/libraries/200-get-by-query(dcb empty).json",
       "/stubs/mod-inventory-storage/holdings-storage/200-get-by-query(dcb+id empty).json",
       "/stubs/mod-inventory-storage/service-points/200-get-by-query(dcb empty).json",
       "/stubs/mod-inventory/instances/200-get-by-query(dcb empty).json",
       "/stubs/mod-inventory-storage/instance-types/200-get-by-query(dcb empty).json",
-      "/stubs/mod-inventory-storage/holding-sources/200-get-by-query(dcb empty).json",
+      "/stubs/mod-inventory-storage/holdings-sources/200-get-by-query(dcb empty).json",
 
       // POST DCB entity mappings
-      "/stubs/mod-inventory-storage/location-units/institutions/201-post(dcb).json",
-      "/stubs/mod-inventory-storage/location-units/campuses/201-post(dcb).json",
+
       "/stubs/mod-inventory-storage/location-units/libraries/201-post(dcb).json",
       "/stubs/mod-inventory-storage/locations/201-post(dcb).json",
       "/stubs/mod-inventory-storage/service-points/201-post(dcb).json",
       "/stubs/mod-inventory/instances/201-post(dcb).json",
       "/stubs/mod-inventory-storage/instance-types/201-post(dcb).json",
-      "/stubs/mod-inventory-storage/holding-sources/201-post(dcb).json",
+      "/stubs/mod-inventory-storage/holdings-sources/201-post(dcb).json",
       "/stubs/mod-inventory-storage/holdings-storage/201-post(dcb).json",
     })
     void createTransaction_positive_notFoundDcbEntities() throws Exception {
@@ -234,6 +256,16 @@ public class RuntimeEntityVerificationIT extends BaseTenantIntegrationTest {
         .andExpect(jsonPath("$.status").value("CREATED"))
         .andExpect(jsonPath("$.item").value(dcbItem()))
         .andExpect(jsonPath("$.patron").value(dcbPatron));
+
+      wiremock.verifyThat(1, postRequestedFor(urlPathEqualTo("/location-units/institutions")));
+      wiremock.verifyThat(1, postRequestedFor(urlPathEqualTo("/location-units/libraries")));
+      wiremock.verifyThat(1, postRequestedFor(urlPathEqualTo("/location-units/campuses")));
+      wiremock.verifyThat(1, postRequestedFor(urlPathEqualTo("/locations")));
+      wiremock.verifyThat(1, postRequestedFor(urlPathEqualTo("/service-points")));
+      wiremock.verifyThat(1, postRequestedFor(urlPathEqualTo("/instance-types")));
+      wiremock.verifyThat(1, postRequestedFor(urlPathEqualTo("/holdings-sources")));
+      wiremock.verifyThat(1, postRequestedFor(urlPathEqualTo("/inventory/instances")));
+      wiremock.verifyThat(1, postRequestedFor(urlPathEqualTo("/holdings-storage/holdings")));
     }
   }
 }

@@ -21,9 +21,9 @@ class TenantInitializationIT extends BaseIntegrationTest {
   @Test
   @WireMockStub(value = {
     // scenarios for entities that being queries several times (GET and POST requests)
-    "/stubs/mod-inventory-storage/locations/dcb-locations-scenario.json",
-    "/stubs/mod-inventory-storage/location-units/campuses/dcb-campus-scenario.json",
-    "/stubs/mod-inventory-storage/location-units/institutions/dcb-institution-scenario.json",
+    "/stubs/mod-inventory-storage/locations/dcb-entity-scenario.json",
+    "/stubs/mod-inventory-storage/location-units/campuses/dcb-entity-scenario.json",
+    "/stubs/mod-inventory-storage/location-units/institutions/dcb-entity-scenario.json",
     "/stubs/mod-inventory-storage/service-points/dcb-service-point-scenario.json",
 
     // stubs for absent DCB Entities
@@ -32,7 +32,7 @@ class TenantInitializationIT extends BaseIntegrationTest {
     "/stubs/mod-inventory/instances/200-get-by-query(dcb empty).json",
     "/stubs/mod-inventory-storage/instance-types/200-get-by-query(dcb empty).json",
     "/stubs/mod-inventory-storage/loan-types/200-get-by-query(dcb empty).json",
-    "/stubs/mod-inventory-storage/holding-sources/200-get-by-query(dcb empty).json",
+    "/stubs/mod-inventory-storage/holdings-sources/200-get-by-query(dcb empty).json",
     "/stubs/mod-circulation-storage/cancellation-reason-storage/200-get-by-query(dcb empty).json",
     "/stubs/mod-calendar/calendars/200-get-all(empty).json",
 
@@ -40,7 +40,7 @@ class TenantInitializationIT extends BaseIntegrationTest {
     "/stubs/mod-inventory-storage/location-units/libraries/201-post(dcb).json",
     "/stubs/mod-inventory-storage/instance-types/201-post(dcb).json",
     "/stubs/mod-inventory/instances/201-post(dcb).json",
-    "/stubs/mod-inventory-storage/holding-sources/201-post(dcb).json",
+    "/stubs/mod-inventory-storage/holdings-sources/201-post(dcb).json",
     "/stubs/mod-inventory-storage/holdings-storage/201-post(dcb).json",
     "/stubs/mod-circulation-storage/cancellation-reason-storage/201-post(dcb).json",
     "/stubs/mod-inventory-storage/loan-types/201-post(dcb).json",

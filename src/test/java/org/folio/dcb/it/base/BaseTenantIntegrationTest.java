@@ -31,7 +31,7 @@ import support.AuditEntityTestVerifier;
 import support.wiremock.WiremockStubExtension;
 
 @Sql(value = "/db/scripts/cleanup_dcb_tables.sql", executionPhase = AFTER_TEST_METHOD)
-public class BaseTenantIntegrationTest extends BaseIntegrationTest {
+public abstract class BaseTenantIntegrationTest extends BaseIntegrationTest {
 
   protected static WireMock wiremock;
   protected static AuditEntityTestVerifier auditEntityVerifier;
@@ -96,11 +96,6 @@ public class BaseTenantIntegrationTest extends BaseIntegrationTest {
   @SneakyThrows
   protected static ResultActions putRenewTransaction(String id) {
     return putRenewTransactionAttempt(id).andExpect(status().isOk());
-  }
-
-  @SneakyThrows
-  protected static ResultActions putDcbTransactionDetails(String id, DcbUpdateTransaction body) {
-    return putDcbTransactionDetailsAttempt(id, body).andExpect(status().isNoContent());
   }
 
   @SneakyThrows

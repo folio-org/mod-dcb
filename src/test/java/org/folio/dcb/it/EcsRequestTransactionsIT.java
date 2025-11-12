@@ -33,7 +33,7 @@ import support.types.IntegrationTest;
 import support.wiremock.WireMockStub;
 
 @IntegrationTest
-public class EcsRequestTransactionsIT extends BaseTenantIntegrationTest {
+class EcsRequestTransactionsIT extends BaseTenantIntegrationTest {
 
   @Test
   @WireMockStub("/stubs/mod-circulation-storage/request-storage/200-get-by-id(item).json")

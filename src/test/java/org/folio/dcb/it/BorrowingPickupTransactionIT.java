@@ -60,7 +60,7 @@ class BorrowingPickupTransactionIT extends BaseTenantIntegrationTest {
 
     wiremock.verifyThat(0, getRequestedFor(urlPathEqualTo("/locations")));
     wiremock.verifyThat(0, getRequestedFor(urlPathEqualTo("/locations-units/libraries")));
-
+    wiremock.verifyThat(1, postRequestedFor(urlPathMatching("/circulation-item/.{36}")));
     verifyPostCirculationRequestCalledOnce(EXISTED_PATRON_ID);
     auditEntityVerifier.assertThatLatestEntityIsNotDuplicate(DCB_TRANSACTION_ID);
   }
@@ -81,8 +81,8 @@ class BorrowingPickupTransactionIT extends BaseTenantIntegrationTest {
 
     wiremock.verifyThat(0, getRequestedFor(urlPathEqualTo("/locations")));
     wiremock.verifyThat(0, getRequestedFor(urlPathEqualTo("/locations-units/libraries")));
+    wiremock.verifyThat(0, getRequestedFor(urlPathMatching("/circulation-item/.{36}")));
     verifyPostCirculationRequestCalledOnce(EXISTED_PATRON_ID);
-
     auditEntityVerifier.assertThatLatestEntityIsNotDuplicate(DCB_TRANSACTION_ID);
   }
 
