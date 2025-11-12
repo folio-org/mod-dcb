@@ -11,7 +11,7 @@ import static org.mockito.Mockito.when;
 import java.util.UUID;
 import org.folio.dcb.client.feign.HoldingSourcesClient;
 import org.folio.dcb.client.feign.HoldingSourcesClient.HoldingSource;
-import org.folio.spring.model.ResultList;
+import org.folio.dcb.domain.ResultList;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

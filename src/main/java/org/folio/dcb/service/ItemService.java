@@ -1,7 +1,7 @@
 package org.folio.dcb.service;
 
+import org.folio.dcb.domain.ResultList;
 import org.folio.dcb.domain.dto.InventoryItem;
-import org.folio.spring.model.ResultList;
 
 public interface ItemService {
 

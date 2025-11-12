@@ -10,7 +10,7 @@ import static org.mockito.Mockito.when;
 
 import org.folio.dcb.client.feign.InstanceTypeClient;
 import org.folio.dcb.client.feign.InstanceTypeClient.InstanceType;
-import org.folio.spring.model.ResultList;
+import org.folio.dcb.domain.ResultList;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

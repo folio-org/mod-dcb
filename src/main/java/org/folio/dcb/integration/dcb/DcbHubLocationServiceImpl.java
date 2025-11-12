@@ -14,6 +14,7 @@ import java.util.UUID;
 import org.apache.commons.collections4.CollectionUtils;
 import org.folio.dcb.client.feign.LocationUnitClient;
 import org.folio.dcb.client.feign.LocationsClient;
+import org.folio.dcb.domain.ResultList;
 import org.folio.dcb.domain.dto.RefreshLocationStatus;
 import org.folio.dcb.domain.dto.RefreshLocationStatusType;
 import org.folio.dcb.domain.dto.RefreshLocationUnitsStatus;
@@ -33,7 +34,6 @@ import org.folio.dcb.integration.dcb.model.DcbHubLocationResponse;
 import org.folio.dcb.integration.dcb.model.LocationAgenciesIds;
 import org.folio.dcb.integration.dcb.model.LocationCodeNamePair;
 import org.folio.dcb.service.DcbHubLocationService;
-import org.folio.spring.model.ResultList;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -348,7 +348,7 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
           .build();
       }
 
-      ResultList<LocationsClient.LocationDTO> locationDTOResultList =
+      org.folio.dcb.domain.ResultList<LocationsClient.LocationDTO> locationDTOResultList =
         locationsClient.findLocationByQuery(
           CqlQuery.byNameAndCode(location.name(), location.code()), true, 10, 0);
       if (!locationDTOResultList.getResult().isEmpty()) {

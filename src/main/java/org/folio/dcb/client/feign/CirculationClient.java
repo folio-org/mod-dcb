@@ -1,5 +1,6 @@
 package org.folio.dcb.client.feign;
 
+import org.folio.dcb.domain.ResultList;
 import org.folio.dcb.domain.dto.CheckInRequest;
 import org.folio.dcb.domain.dto.CheckOutRequest;
 import org.folio.dcb.domain.dto.CirculationRequest;
@@ -8,7 +9,6 @@ import org.folio.dcb.domain.dto.LoanCollection;
 import org.folio.dcb.domain.dto.RenewByIdRequest;
 import org.folio.dcb.domain.dto.RenewByIdResponse;
 import org.folio.spring.config.FeignClientConfiguration;
-import org.folio.spring.model.ResultList;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

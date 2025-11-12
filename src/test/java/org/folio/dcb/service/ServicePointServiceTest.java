@@ -13,11 +13,11 @@ import java.util.List;
 import java.util.UUID;
 
 import org.folio.dcb.client.feign.InventoryServicePointClient;
+import org.folio.dcb.domain.ResultList;
 import org.folio.dcb.domain.dto.HoldShelfExpiryPeriod;
 import org.folio.dcb.domain.dto.IntervalIdEnum;
 import org.folio.dcb.service.impl.ServicePointServiceImpl;
 import org.folio.dcb.utils.DCBConstants;
-import org.folio.spring.model.ResultList;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
