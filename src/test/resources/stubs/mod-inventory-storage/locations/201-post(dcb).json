@@ -1,0 +1,50 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/locations",
+    "bodyPatterns": [
+      {
+        "equalToJson": {
+          "id": "9d1b77e8-f02e-4b7f-b296-3f2042ddac54",
+          "name": "DCB",
+          "code": "000",
+          "institutionId": "9d1b77e5-f02e-4b7f-b296-3f2042ddac54",
+          "campusId": "9d1b77e6-f02e-4b7f-b296-3f2042ddac54",
+          "libraryId": "9d1b77e7-f02e-4b7f-b296-3f2042ddac54",
+          "primaryServicePoint": "9d1b77e8-f02e-4b7f-b296-3f2042ddac54",
+          "servicePointIds": [ "9d1b77e8-f02e-4b7f-b296-3f2042ddac54" ],
+          "isShadow": false
+        }
+      }
+    ],
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "test_tenant"
+      }
+    }
+  },
+  "response": {
+    "status": 201,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "id": "9d1b77e8-f02e-4b7f-b296-3f2042ddac54",
+      "name": "DCB",
+      "code": "000",
+      "institutionId": "9d1b77e5-f02e-4b7f-b296-3f2042ddac54",
+      "campusId": "9d1b77e6-f02e-4b7f-b296-3f2042ddac54",
+      "libraryId": "9d1b77e7-f02e-4b7f-b296-3f2042ddac54",
+      "primaryServicePoint": "9d1b77e8-f02e-4b7f-b296-3f2042ddac54",
+      "servicePointIds": [ "9d1b77e8-f02e-4b7f-b296-3f2042ddac54" ],
+      "servicePoints": [],
+      "isShadow": false,
+      "metadata": {
+        "createdDate": "2025-10-24T02:07:32.014+00:00",
+        "createdByUserId": "b849e4a5-ac4f-4b4c-80a8-6c4220d04784",
+        "updatedDate": "2025-10-24T02:07:32.014+00:00",
+        "updatedByUserId": "b849e4a5-ac4f-4b4c-80a8-6c4220d04784"
+      }
+    }
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "request": {
+    "method": "PUT",
+    "urlPath": "/service-points/9d1b77e8-f02e-4b7f-b296-3f2042ddac55",
+    "bodyPatterns": [
+      {
+        "equalToJson": {
+          "id": "9d1b77e8-f02e-4b7f-b296-3f2042ddac55",
+          "name": "DCB_TestLibraryCode_TestServicePointCode",
+          "code": "DCB_TestLibraryCode_TestServicePointCode",
+          "discoveryDisplayName": "DCB_TestLibraryCode_TestServicePointCode",
+          "pickupLocation": true,
+          "holdShelfExpiryPeriod": {
+            "duration": 10,
+            "intervalId": "Days"
+          },
+          "holdShelfClosedLibraryDateManagement": "Keep_the_current_due_date"
+        }
+      }
+    ],
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "test_tenant"
+      },
+      "x-okapi-token": {
+        "equalTo": "dGVzdF9qd3RfdG9rZW4="
+      }
+    }
+  },
+  "response": {
+    "status": 204,
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

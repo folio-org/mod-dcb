@@ -1,8 +1,25 @@
 package org.folio.dcb.listener;
 
-import org.folio.dcb.controller.BaseIT;
+import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWING_PICKUP;
+import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
+import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.PICKUP;
+import static org.folio.dcb.utils.EntityUtils.createCirculationItem;
+import static org.folio.dcb.utils.EntityUtils.createTransactionEntity;
+import static org.folio.dcb.utils.EntityUtils.getMockDataAsString;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.when;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Stream;
 import org.folio.dcb.domain.dto.ItemStatus;
 import org.folio.dcb.domain.dto.TransactionStatus;
+import org.folio.dcb.it.base.BaseTenantIntegrationTest;
 import org.folio.dcb.listener.kafka.CirculationEventListener;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.CirculationItemService;
@@ -13,27 +30,14 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.messaging.MessageHeaders;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Stream;
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+class CirculationRequestEventListenerTest extends BaseTenantIntegrationTest {
 
-import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.*;
-import static org.folio.dcb.utils.EntityUtils.createCirculationItem;
-import static org.folio.dcb.utils.EntityUtils.createTransactionEntity;
-import static org.folio.dcb.utils.EntityUtils.getMockDataAsString;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-
-@SpringBootTest
-class CirculationRequestEventListenerTest extends BaseIT {
-
+  private static final String TENANT = "diku";
   private static final String REQUEST_EVENT_SAMPLE_NON_DCB = getMockDataAsString("mockdata/kafka/request_sample.json");
 
   private static final String CHECK_IN_EVENT_SAMPLE_FOR_DCB = getMockDataAsString("mockdata/kafka/check_in_dcb.json");

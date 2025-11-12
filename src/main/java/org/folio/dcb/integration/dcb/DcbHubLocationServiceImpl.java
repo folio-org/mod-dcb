@@ -1,7 +1,6 @@
 package org.folio.dcb.integration.dcb;
 
 import static org.folio.dcb.client.feign.LocationUnitClient.LocationUnit;
-import static org.folio.dcb.utils.DCBConstants.NAME;
 import static org.folio.dcb.utils.DcbHubLocationsGroupingUtil.groupByAgency;
 
 import java.util.ArrayList;
@@ -13,7 +12,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.folio.dcb.client.feign.InventoryServicePointClient;
 import org.folio.dcb.client.feign.LocationUnitClient;
 import org.folio.dcb.client.feign.LocationsClient;
 import org.folio.dcb.domain.dto.RefreshLocationStatus;
@@ -21,6 +19,7 @@ import org.folio.dcb.domain.dto.RefreshLocationStatusType;
 import org.folio.dcb.domain.dto.RefreshLocationUnitsStatus;
 import org.folio.dcb.integration.dcb.config.DcbHubProperties;
 import org.folio.dcb.integration.dcb.model.DcbLocation;
+import org.folio.dcb.service.entities.DcbEntityServiceFacade;
 import org.folio.dcb.utils.CqlQuery;
 import org.folio.dcb.domain.dto.RefreshShadowLocationResponse;
 import org.folio.dcb.domain.dto.ServicePointRequest;
@@ -53,7 +52,7 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
   private final DcbHubLocationClient dcbHubLocationClient;
   private final LocationsClient locationsClient;
   private final LocationUnitClient locationUnitClient;
-  private final InventoryServicePointClient servicePointClient;
+  private final DcbEntityServiceFacade dcbEntityServiceFacade;
   private final DcbHubProperties dcbHubProperties;
 
   @Value("${application.dcb-hub.batch-size}")
@@ -72,15 +71,7 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
     }
 
     try {
-      List<ServicePointRequest> servicePointList = servicePointClient.getServicePointByName(NAME).getResult();
-      if (servicePointList.isEmpty()) {
-        log.info(
-          "createShadowLocations:: No service points found with name {}, So cannot create shadow locations without {} service point",
-          NAME, NAME);
-        throw new DcbHubLocationException("DCB Service point is not found", HttpStatus.NOT_FOUND);
-      }
-
-      ServicePointRequest servicePointRequest = servicePointList.getFirst();
+      ServicePointRequest servicePointRequest = dcbEntityServiceFacade.findOrCreateServicePoint();
       log.info("createShadowLocations:: fetching all locations from DCB Hub");
 
       List<DcbLocation> locationList = fetchDcbHubAllLocations();

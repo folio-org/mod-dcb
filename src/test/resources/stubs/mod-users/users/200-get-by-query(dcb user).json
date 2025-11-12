@@ -1,0 +1,47 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/users",
+    "queryParameters": {
+      "query": {
+        "equalTo": "barcode==\"DCB_PATRON\" and id==\"284056f5-0670-4e1e-9e2f-61b9f1ee2d18\""
+      }
+    },
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "test_tenant"
+      },
+      "x-okapi-token": {
+        "equalTo": "dGVzdF9qd3RfdG9rZW4="
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "users": [
+        {
+          "id": "284056f5-0670-4e1e-9e2f-61b9f1ee2d18",
+          "barcode": "DCB_PATRON",
+          "active": true,
+          "type": "dcb",
+          "patronGroup": "3684a786-6671-4268-8ed0-9db82ebca60b",
+          "personal": {
+            "lastName": "William",
+            "firstName": "Guyer",
+            "email": "William.Guyer@folio.org"
+          }
+        }
+      ],
+      "totalRecords": 1,
+      "resultInfo": {
+        "totalRecords": 1,
+        "facets": [],
+        "diagnostics": []
+      }
+    }
+  }
+}

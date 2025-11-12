@@ -1,0 +1,50 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/users",
+    "bodyPatterns": [
+      {
+        "equalToJson": {
+          "id": "571b0a2c-9456-40b5-a449-d41fe6017082",
+          "barcode": "DCB_PATRON",
+          "active": true,
+          "type": "dcb",
+          "patronGroup": "3684a786-6671-4268-8ed0-9db82ebca60b",
+          "personal": {
+            "lastName": "DcbSystem"
+          }
+        }
+      }
+    ],
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "test_tenant"
+      },
+      "x-okapi-token": {
+        "equalTo": "dGVzdF9qd3RfdG9rZW4="
+      }
+    }
+  },
+  "response": {
+    "status": 201,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "id": "571b0a2c-9456-40b5-a449-d41fe6017082",
+      "barcode": "DCB_PATRON",
+      "active": true,
+      "type": "dcb",
+      "patronGroup": "3684a786-6671-4268-8ed0-9db82ebca60b",
+      "personal": {
+        "lastName": "DcbSystem"
+      },
+      "metadata": {
+        "createdDate": "2024-01-01T12:00:00Z",
+        "createdByUserId": "08d51c7a-0f36-4f3d-9e35-d285612a23df",
+        "updatedDate": "2024-01-01T12:00:00Z",
+        "updatedByUserId": "08d51c7a-0f36-4f3d-9e35-d285612a23df"
+      }
+    }
+  }
+}

@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @FeignClient(name = "service-points", configuration = FeignClientConfiguration.class)
 public interface InventoryServicePointClient {
@@ -20,4 +21,7 @@ public interface InventoryServicePointClient {
   ServicePointRequest createServicePoint(@RequestBody ServicePointRequest pickupServicePoint);
   @GetMapping("?query=name=={name}")
   ResultList<ServicePointRequest> getServicePointByName(@PathVariable("name") String name);
+
+  @GetMapping
+  ResultList<ServicePointRequest> findByQuery(@RequestParam("query") String query);
 }

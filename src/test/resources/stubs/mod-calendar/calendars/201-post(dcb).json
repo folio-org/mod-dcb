@@ -1,0 +1,59 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/calendar/calendars",
+    "bodyPatterns": [
+      {
+        "equalToJson": {
+          "name": "DCB Calendar",
+          "assignments": [ "9d1b77e8-f02e-4b7f-b296-3f2042ddac54" ],
+          "normalHours": [
+            {
+              "startDay": "SUNDAY",
+              "startTime": "00:00",
+              "endDay": "SATURDAY",
+              "endTime": "23:59"
+            }
+          ],
+          "exceptions" : [ ]
+        },
+        "ignoreExtraElements": true
+      },
+      { "matchesJsonPath": "$.endDate" },
+      { "matchesJsonPath": "$.startDate" }
+    ],
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "test_tenant"
+      }
+    }
+  },
+  "response": {
+    "status": 201,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "id": "d42cee84-9f57-414f-9e30-21311b341b7d",
+      "name": "DCB Calendar",
+      "startDate": "2025-10-24",
+      "endDate": "2035-10-24",
+      "assignments": [ "9d1b77e8-f02e-4b7f-b296-3f2042ddac54" ],
+      "normalHours": [
+        {
+          "startDay": "SUNDAY",
+          "startTime": "00:00:00",
+          "endDay": "SATURDAY",
+          "endTime": "23:59:00"
+        }
+      ],
+      "exceptions": [],
+      "metadata": {
+        "createdDate": "2025-10-24T02:07:32.787028Z",
+        "createdByUserId": "b849e4a5-ac4f-4b4c-80a8-6c4220d04784",
+        "updatedDate": "2025-10-24T02:07:32.787029Z",
+        "updatedByUserId": "b849e4a5-ac4f-4b4c-80a8-6c4220d04784"
+      }
+    }
+  }
+}

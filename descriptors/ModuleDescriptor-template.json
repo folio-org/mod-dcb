@@ -405,6 +405,11 @@
       "description": "creates new ECS request transaction"
     },
     {
+      "permissionName": "dcb.ecs-request.transactions.patch",
+      "displayName": "Patch ECS request transaction",
+      "description": "Patches ECS request transaction"
+    },
+    {
       "permissionName": "dcb.transactions.item.put",
       "displayName": "update transaction details",
       "description": "update transaction details"

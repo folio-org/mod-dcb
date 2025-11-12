@@ -1,0 +1,29 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/location-units/libraries",
+    "queryParameters": {
+      "query": {
+        "equalTo": "code==\"KU\""
+      },
+      "includeShadow": {
+        "equalTo": "true"
+      }
+    },
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "test_tenant"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "loclibs": [],
+      "totalRecords": 0
+    }
+  }
+}

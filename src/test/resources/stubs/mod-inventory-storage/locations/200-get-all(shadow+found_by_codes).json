@@ -1,0 +1,50 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/locations",
+    "queryParameters": {
+      "query": {
+        "or": [
+          { "equalTo": "(name==\"Location-3\" AND code==\"LOC-3\")" },
+          { "equalTo": "(name==\"Location-5\" AND code==\"LOC-5\")" },
+          { "equalTo": "(name==\"Location-7\" AND code==\"LOC-7\")" }
+        ]
+      }
+    },
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "test_tenant"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "transformers": ["response-template"],
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "locations": [
+        {
+          "id": "{{randomValue type='UUID'}}",
+          "name": "Location-{{randomValue length=10 type='NUMERIC'}}",
+          "code": "{{randomValue length=3 type='NUMERIC'}}",
+          "institutionId": "{{randomValue type='UUID'}}",
+          "campusId": "{{randomValue type='UUID'}}",
+          "libraryId": "{{randomValue type='UUID'}}",
+          "primaryServicePoint": "9d1b77e8-f02e-4b7f-b296-3f2042ddac54",
+          "servicePointIds": [ "9d1b77e8-f02e-4b7f-b296-3f2042ddac54" ],
+          "servicePoints": [],
+          "isShadow": true,
+          "metadata": {
+            "createdDate": "2025-10-24T02:07:32.014+00:00",
+            "createdByUserId": "b849e4a5-ac4f-4b4c-80a8-6c4220d04784",
+            "updatedDate": "2025-10-24T02:07:32.014+00:00",
+            "updatedByUserId": "b849e4a5-ac4f-4b4c-80a8-6c4220d04784"
+          }
+        }
+      ],
+      "totalRecords": 1
+    }
+  }
+}

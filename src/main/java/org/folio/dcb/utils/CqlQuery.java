@@ -25,6 +25,26 @@ public class CqlQuery {
   private final String query;
 
   /**
+   * Creates a CqlQuery that matches both the given id.
+   *
+   * @param name the value to match for the "id" field
+   * @return a new CqlQuery representing the match on both name and code
+   */
+  public static String exactMatchById(String name) {
+    return exactMatchQuery("id", name).toText();
+  }
+
+  /**
+   * Creates a CqlQuery that matches both the given name.
+   *
+   * @param name the value to match for the "name" field
+   * @return a new CqlQuery representing the match on both name and code
+   */
+  public static String exactMatchByName(String name) {
+    return exactMatchQuery("name", name).toText();
+  }
+
+  /**
    * Creates a CqlQuery that matches both the given name and code fields.
    *
    * @param name the value to match for the "name" field

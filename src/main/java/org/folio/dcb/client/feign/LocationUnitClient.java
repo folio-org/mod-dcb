@@ -3,7 +3,6 @@ package org.folio.dcb.client.feign;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,7 +12,6 @@ import org.folio.spring.config.FeignClientConfiguration;
 import org.folio.spring.model.ResultList;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,8 +21,10 @@ public interface LocationUnitClient {
 
   @PostMapping("/institutions")
   LocationUnit createInstitution(@RequestBody LocationUnit locationUnit);
-  @GetMapping("/institutions/{institutionId}")
-  LocationUnit getInstitutionById(@PathVariable("institutionId") String institutionId);
+
+  @GetMapping("/institutions")
+  ResultList<LocationUnit> findInstitutionsByQuery(@RequestParam("query") String query);
+
   @GetMapping("/institutions")
   ResultList<LocationUnit> findInstitutionsByQuery(
     @RequestParam("query") String query,
@@ -34,8 +34,13 @@ public interface LocationUnitClient {
 
   @PostMapping("/campuses")
   LocationUnit createCampus(@RequestBody LocationUnit locationUnit);
-  @GetMapping("/campuses?query=(name=={name})")
-  ResultList<LocationUnit> getCampusByName(@PathVariable("name") String name);
+
+  @GetMapping("/campuses")
+  ResultList<LocationUnit> findCampusesByQuery(@RequestParam("query") String query);
+
+  @GetMapping("/libraries")
+  ResultList<LocationUnit> findLibrariesByQuery(@RequestParam("query") String query);
+
   @GetMapping("/campuses")
   ResultList<LocationUnit> findCampusesByQuery(
     @RequestParam("query") String query,
@@ -45,8 +50,7 @@ public interface LocationUnitClient {
 
   @PostMapping("/libraries")
   LocationUnit createLibrary(@RequestBody LocationUnit locationUnit);
-  @GetMapping("/libraries?query=(name=={name})")
-  ResultList<LocationUnit> getLibraryByName(@PathVariable("name") String name);
+
   @GetMapping("/libraries")
   ResultList<LocationUnit> findLibrariesByQuery(
     @RequestParam("query") String query,

@@ -11,23 +11,26 @@ import java.util.Collections;
 import java.util.UUID;
 import org.folio.dcb.client.feign.CirculationItemClient;
 import org.folio.dcb.client.feign.HoldingsStorageClient.Holding;
+import org.folio.dcb.client.feign.LoanTypeClient;
 import org.folio.dcb.client.feign.LocationUnitClient;
 import org.folio.dcb.client.feign.LocationUnitClient.LocationUnit;
 import org.folio.dcb.client.feign.LocationsClient;
-import org.folio.dcb.integration.dcb.config.DcbHubProperties;
 import org.folio.dcb.domain.dto.CirculationItem;
 import org.folio.dcb.domain.dto.CirculationItemCollection;
 import org.folio.dcb.domain.dto.DcbItem;
+import org.folio.dcb.integration.dcb.config.DcbHubProperties;
+import org.folio.dcb.service.entities.DcbEntityServiceFacade;
 import org.folio.dcb.service.impl.CirculationItemServiceImpl;
-import org.folio.dcb.service.impl.HoldingsServiceImpl;
 import org.folio.dcb.utils.CqlQuery;
 import org.folio.dcb.utils.DCBConstants;
 import org.folio.spring.model.ResultList;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,13 +43,19 @@ class CirculationItemServiceImplTest {
   private static final String TEST_LENDING_LIBRARY_CODE = "TST";
   private static final String TEST_DCB_LOCATION_CODE = "TST";
 
+  @InjectMocks private CirculationItemServiceImpl circulationItemService;
   @Mock private CirculationItemClient circulationItemClient;
-  @Mock private HoldingsServiceImpl holdingsService;
   @Mock private ItemService itemService;
   @Mock private LocationsClient locationsClient;
   @Mock private DcbHubProperties dcbHubProperties;
   @Mock private LocationUnitClient locationUnitClient;
-  @InjectMocks private CirculationItemServiceImpl circulationItemService;
+  @Mock private DcbEntityServiceFacade dcbEntityServiceFacade;
+
+  @AfterEach
+  void tearDown() {
+    Mockito.verifyNoMoreInteractions(itemService, locationsClient,
+      dcbHubProperties, locationUnitClient, dcbEntityServiceFacade);
+  }
 
   @Test
   void checkIfItemExistsAndCreate_ShouldReturnExistingItem_WhenItemExists() {
@@ -69,7 +78,9 @@ class CirculationItemServiceImplTest {
 
     when(dcbHubProperties.isFetchDcbLocationsEnabled()).thenReturn(false);
     when(circulationItemClient.fetchItemByCqlQuery(any())).thenReturn(emptyCirculationItems());
-    when(holdingsService.fetchDcbHoldingOrCreateIfMissing()).thenReturn(dcbHolding());
+    when(dcbEntityServiceFacade.findOrCreateHolding()).thenReturn(dcbHolding());
+    when(dcbEntityServiceFacade.findOrCreateLocation()).thenReturn(dcbLocation());
+    when(dcbEntityServiceFacade.findOrCreateLoanType()).thenReturn(dcbLoanType());
     when(itemService.fetchItemMaterialTypeIdByMaterialTypeName(any())).thenReturn(randomUuid);
 
     var createdItem = circulationItem();
@@ -78,7 +89,7 @@ class CirculationItemServiceImplTest {
     var result = circulationItemService.checkIfItemExistsAndCreate(dcbItem(), TEST_SERVICE_POINT_ID);
 
     verify(circulationItemClient).fetchItemByCqlQuery(any());
-    verify(holdingsService).fetchDcbHoldingOrCreateIfMissing();
+    verify(dcbEntityServiceFacade).findOrCreateHolding();
     verify(circulationItemClient).createCirculationItem(any(), any());
     assertEquals(createdItem, result);
   }
@@ -92,8 +103,8 @@ class CirculationItemServiceImplTest {
     when(dcbHubProperties.isFetchDcbLocationsEnabled()).thenReturn(true);
     when(circulationItemClient.fetchItemByCqlQuery(any())).thenReturn(emptyCirculationItems());
 
-    var dcbHolding = dcbHolding();
-    when(holdingsService.fetchDcbHoldingOrCreateIfMissing()).thenReturn(dcbHolding);
+    when(dcbEntityServiceFacade.findOrCreateHolding()).thenReturn(dcbHolding());
+    when(dcbEntityServiceFacade.findOrCreateLoanType()).thenReturn(dcbLoanType());
     when(itemService.fetchItemMaterialTypeIdByMaterialTypeName(any())).thenReturn(randomUuid);
 
     var createdItem = CirculationItem.builder().id(randomUuid).barcode("barcode123").build();
@@ -120,8 +131,9 @@ class CirculationItemServiceImplTest {
     when(dcbHubProperties.isFetchDcbLocationsEnabled()).thenReturn(true);
     when(circulationItemClient.fetchItemByCqlQuery(any())).thenReturn(emptyCirculationItems());
 
-    var dcbHolding = Holding.builder().id(randomUuid).build();
-    when(holdingsService.fetchDcbHoldingOrCreateIfMissing()).thenReturn(dcbHolding);
+    when(dcbEntityServiceFacade.findOrCreateHolding()).thenReturn(dcbHolding());
+    when(dcbEntityServiceFacade.findOrCreateLocation()).thenReturn(dcbLocation());
+    when(dcbEntityServiceFacade.findOrCreateLoanType()).thenReturn(dcbLoanType());
 
     when(itemService.fetchItemMaterialTypeIdByMaterialTypeName(any())).thenReturn(randomUuid);
 
@@ -153,8 +165,9 @@ class CirculationItemServiceImplTest {
     when(dcbHubProperties.isFetchDcbLocationsEnabled()).thenReturn(true);
     when(circulationItemClient.fetchItemByCqlQuery(any())).thenReturn(emptyCirculationItems());
 
-    var dcbHolding = Holding.builder().id(randomUuid).build();
-    when(holdingsService.fetchDcbHoldingOrCreateIfMissing()).thenReturn(dcbHolding);
+    when(dcbEntityServiceFacade.findOrCreateHolding()).thenReturn(dcbHolding());
+    when(dcbEntityServiceFacade.findOrCreateLocation()).thenReturn(dcbLocation());
+    when(dcbEntityServiceFacade.findOrCreateLoanType()).thenReturn(dcbLoanType());
 
     when(itemService.fetchItemMaterialTypeIdByMaterialTypeName(any())).thenReturn(randomUuid);
 
@@ -186,8 +199,9 @@ class CirculationItemServiceImplTest {
     when(dcbHubProperties.isFetchDcbLocationsEnabled()).thenReturn(true);
     when(circulationItemClient.fetchItemByCqlQuery(any())).thenReturn(emptyCirculationItems());
 
-    var dcbHolding = Holding.builder().id(randomUuid).build();
-    when(holdingsService.fetchDcbHoldingOrCreateIfMissing()).thenReturn(dcbHolding);
+    when(dcbEntityServiceFacade.findOrCreateHolding()).thenReturn(dcbHolding());
+    when(dcbEntityServiceFacade.findOrCreateLocation()).thenReturn(dcbLocation());
+    when(dcbEntityServiceFacade.findOrCreateLoanType()).thenReturn(dcbLoanType());
 
     when(itemService.fetchItemMaterialTypeIdByMaterialTypeName(any())).thenReturn(randomUuid);
 
@@ -214,8 +228,9 @@ class CirculationItemServiceImplTest {
     when(dcbHubProperties.isFetchDcbLocationsEnabled()).thenReturn(false);
     when(circulationItemClient.fetchItemByCqlQuery(any())).thenReturn(emptyCirculationItems());
 
-    var dcbHolding = Holding.builder().id(randomUuid).build();
-    when(holdingsService.fetchDcbHoldingOrCreateIfMissing()).thenReturn(dcbHolding);
+    when(dcbEntityServiceFacade.findOrCreateHolding()).thenReturn(dcbHolding());
+    when(dcbEntityServiceFacade.findOrCreateLocation()).thenReturn(dcbLocation());
+    when(dcbEntityServiceFacade.findOrCreateLoanType()).thenReturn(dcbLoanType());
 
     when(itemService.fetchItemMaterialTypeIdByMaterialTypeName(any())).thenReturn(randomUuid);
 
@@ -239,8 +254,8 @@ class CirculationItemServiceImplTest {
     when(dcbHubProperties.isFetchDcbLocationsEnabled()).thenReturn(true);
     when(circulationItemClient.fetchItemByCqlQuery(any())).thenReturn(emptyCirculationItems());
 
-    var dcbHolding = Holding.builder().id(randomUuid).build();
-    when(holdingsService.fetchDcbHoldingOrCreateIfMissing()).thenReturn(dcbHolding);
+    when(dcbEntityServiceFacade.findOrCreateHolding()).thenReturn(dcbHolding());
+    when(dcbEntityServiceFacade.findOrCreateLoanType()).thenReturn(dcbLoanType());
 
     when(itemService.fetchItemMaterialTypeIdByMaterialTypeName(any())).thenReturn(randomUuid);
 
@@ -273,8 +288,9 @@ class CirculationItemServiceImplTest {
     when(dcbHubProperties.isFetchDcbLocationsEnabled()).thenReturn(true);
     when(circulationItemClient.fetchItemByCqlQuery(any())).thenReturn(emptyCirculationItems());
 
-    var dcbHolding = Holding.builder().id(randomUuid).build();
-    when(holdingsService.fetchDcbHoldingOrCreateIfMissing()).thenReturn(dcbHolding);
+    when(dcbEntityServiceFacade.findOrCreateHolding()).thenReturn(dcbHolding());
+    when(dcbEntityServiceFacade.findOrCreateLocation()).thenReturn(dcbLocation());
+    when(dcbEntityServiceFacade.findOrCreateLoanType()).thenReturn(dcbLoanType());
 
     when(itemService.fetchItemMaterialTypeIdByMaterialTypeName(any())).thenReturn(randomUuid);
 
@@ -302,8 +318,9 @@ class CirculationItemServiceImplTest {
     when(dcbHubProperties.isFetchDcbLocationsEnabled()).thenReturn(true);
     when(circulationItemClient.fetchItemByCqlQuery(any())).thenReturn(emptyCirculationItems());
 
-    var dcbHolding = Holding.builder().id(randomUuid).build();
-    when(holdingsService.fetchDcbHoldingOrCreateIfMissing()).thenReturn(dcbHolding);
+    when(dcbEntityServiceFacade.findOrCreateHolding()).thenReturn(dcbHolding());
+    when(dcbEntityServiceFacade.findOrCreateLocation()).thenReturn(dcbLocation());
+    when(dcbEntityServiceFacade.findOrCreateLoanType()).thenReturn(dcbLoanType());
 
     when(itemService.fetchItemMaterialTypeIdByMaterialTypeName(any())).thenReturn(randomUuid);
 
@@ -375,5 +392,17 @@ class CirculationItemServiceImplTest {
 
   private static Holding dcbHolding() {
     return Holding.builder().id(TEST_HOLDING_ID).build();
+  }
+
+  private static LocationDTO dcbLocation() {
+    return LocationDTO.builder()
+      .id(DCBConstants.LOCATION_ID)
+      .build();
+  }
+
+  private static LoanTypeClient.LoanType dcbLoanType() {
+    return LoanTypeClient.LoanType.builder()
+      .id(DCBConstants.LOAN_TYPE_ID)
+      .build();
   }
 }

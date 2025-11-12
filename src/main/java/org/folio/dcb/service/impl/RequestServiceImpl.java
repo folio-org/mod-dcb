@@ -18,6 +18,7 @@ import org.folio.dcb.exception.StatusException;
 import org.folio.dcb.service.HoldingsService;
 import org.folio.dcb.service.ItemService;
 import org.folio.dcb.service.RequestService;
+import org.folio.dcb.service.entities.DcbEntityServiceFacade;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
@@ -30,6 +31,7 @@ public class RequestServiceImpl implements RequestService {
 
   private final ItemService itemService;
   private final HoldingsService holdingsService;
+  private final DcbEntityServiceFacade dcbEntityServiceFacade;
   private final CirculationClient circulationClient;
 
   @Override
@@ -58,7 +60,7 @@ public class RequestServiceImpl implements RequestService {
   public CirculationRequest createHoldItemRequest(User user, DcbItem item, String pickupServicePointId) {
     log.debug("createHoldItemRequest:: creating a new hold request for userBarcode {} , itemBarcode {}",
       user.getBarcode(), item.getBarcode());
-    var dcbHolding = holdingsService.fetchDcbHoldingOrCreateIfMissing();
+    var dcbHolding = dcbEntityServiceFacade.findOrCreateHolding();
     var circulationRequest = createCirculationRequest(HOLD, user, item, dcbHolding.getId(), INSTANCE_ID, pickupServicePointId);
     return circulationClient.createRequest(circulationRequest);
   }
