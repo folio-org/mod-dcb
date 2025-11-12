@@ -10,11 +10,11 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import org.folio.dcb.client.feign.InventoryServicePointClient;
+import org.folio.dcb.domain.ResultList;
 import org.folio.dcb.domain.dto.HoldShelfExpiryPeriod;
 import org.folio.dcb.domain.dto.IntervalIdEnum;
 import org.folio.dcb.domain.dto.ServicePointRequest;
 import org.folio.dcb.service.ServicePointExpirationPeriodService;
-import org.folio.spring.model.ResultList;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

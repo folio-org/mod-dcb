@@ -3,7 +3,7 @@ package org.folio.dcb.service.entities;
 import java.util.List;
 import java.util.Optional;
 import org.apache.commons.collections4.CollectionUtils;
-import org.folio.spring.model.ResultList;
+import org.folio.dcb.domain.ResultList;
 
 /**
  * Service interface for managing umbrella entities.

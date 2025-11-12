@@ -1,7 +1,7 @@
 package org.folio.dcb.service;
 
 import static org.folio.dcb.client.feign.LocationsClient.LocationDTO;
-import static org.folio.spring.model.ResultList.asSinglePage;
+import static org.folio.dcb.domain.ResultList.asSinglePage;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -15,6 +15,7 @@ import org.folio.dcb.client.feign.LoanTypeClient;
 import org.folio.dcb.client.feign.LocationUnitClient;
 import org.folio.dcb.client.feign.LocationUnitClient.LocationUnit;
 import org.folio.dcb.client.feign.LocationsClient;
+import org.folio.dcb.domain.ResultList;
 import org.folio.dcb.domain.dto.CirculationItem;
 import org.folio.dcb.domain.dto.CirculationItemCollection;
 import org.folio.dcb.domain.dto.DcbItem;
@@ -23,7 +24,6 @@ import org.folio.dcb.service.entities.DcbEntityServiceFacade;
 import org.folio.dcb.service.impl.CirculationItemServiceImpl;
 import org.folio.dcb.utils.CqlQuery;
 import org.folio.dcb.utils.DCBConstants;
-import org.folio.spring.model.ResultList;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

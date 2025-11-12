@@ -14,7 +14,7 @@ import org.folio.dcb.client.feign.HoldingsStorageClient;
 import org.folio.dcb.client.feign.HoldingsStorageClient.Holding;
 import org.folio.dcb.client.feign.InstanceClient.InventoryInstanceDTO;
 import org.folio.dcb.client.feign.LocationsClient.LocationDTO;
-import org.folio.spring.model.ResultList;
+import org.folio.dcb.domain.ResultList;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

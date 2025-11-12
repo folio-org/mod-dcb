@@ -1,9 +1,9 @@
 package org.folio.dcb.service;
 
 import org.folio.dcb.client.feign.InventoryItemStorageClient;
+import org.folio.dcb.domain.ResultList;
 import org.folio.dcb.service.impl.ItemServiceImpl;
 import org.folio.spring.exception.NotFoundException;
-import org.folio.spring.model.ResultList;
 import org.folio.util.PercentCodec;
 import org.folio.util.StringUtil;
 import org.junit.jupiter.api.Test;
