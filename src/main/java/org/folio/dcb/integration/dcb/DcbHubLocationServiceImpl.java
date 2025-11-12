@@ -348,7 +348,7 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
           .build();
       }
 
-      org.folio.dcb.domain.ResultList<LocationsClient.LocationDTO> locationDTOResultList =
+      ResultList<LocationsClient.LocationDTO> locationDTOResultList =
         locationsClient.findLocationByQuery(
           CqlQuery.byNameAndCode(location.name(), location.code()), true, 10, 0);
       if (!locationDTOResultList.getResult().isEmpty()) {
