@@ -146,6 +146,40 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '500':
           $ref: '#/components/responses/InternalServerError'
+  /transactions/{dcbTransactionId}/block-renewal:
+    parameters:
+      - $ref: '#/components/parameters/dcbTransactionId'
+    put:
+      description: Set the renewal count for the item in DCB transaction to maximum allowed renewals
+      operationId: blockItemRenewalByTransactionId
+      tags:
+        - transactions
+      responses:
+        '204':
+          description: Block renewal for the item in dcb transaction
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /transactions/{dcbTransactionId}/unblock-renewal:
+    parameters:
+      - $ref: '#/components/parameters/dcbTransactionId'
+    put:
+      description: Set the renewal count for the item in DCB transaction to zero
+      operationId: unblockItemRenewalByTransactionId
+      tags:
+        - transactions
+      responses:
+        '204':
+          description: Unblock renewal for the item in DCB transaction
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 components:
   requestBodies:
     TransactionStatusBody:

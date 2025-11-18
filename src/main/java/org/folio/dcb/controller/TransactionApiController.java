@@ -89,4 +89,15 @@ public class TransactionApiController implements TransactionsApi {
       .build();
   }
 
+  @Override
+  public ResponseEntity<Void> blockItemRenewalByTransactionId(String dcbTransactionId) {
+    transactionsService.blockItemRenewalByTransactionId(dcbTransactionId);
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
+
+  @Override
+  public ResponseEntity<Void> unblockItemRenewalByTransactionId(String dcbTransactionId) {
+    transactionsService.unblockItemRenewalByTransactionId(dcbTransactionId);
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
 }

@@ -7,6 +7,8 @@ import static org.folio.dcb.utils.TransactionDetailsUtil.statusesNotEqual;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.folio.dcb.client.feign.CirculationClient;
 import org.folio.dcb.client.feign.CirculationLoanPolicyStorageClient;
 import org.folio.dcb.domain.dto.DcbItem;
@@ -31,7 +33,9 @@ import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.LibraryService;
 import org.folio.dcb.service.StatusProcessorService;
 import org.folio.dcb.service.TransactionsService;
+import org.folio.dcb.utils.CqlQuery;
 import org.folio.spring.exception.NotFoundException;
+import org.folio.spring.model.ResultList;
 import org.folio.util.PercentCodec;
 import org.folio.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
@@ -110,11 +114,11 @@ public class TransactionsServiceImpl implements TransactionsService {
     }).orElseThrow(() -> new IllegalArgumentException(String.format("Transaction with id %s not found", dcbTransactionId)));
   }
 
+  @Override
   public TransactionStatusResponse getTransactionStatusById(String dcbTransactionId) {
     log.debug("getTransactionStatusById:: id {} ", dcbTransactionId);
-    TransactionEntity transactionEntity = getTransactionEntityOrThrow(dcbTransactionId);
-
-    Optional<LoanRenewalDetails> loanRenewalDetails = getLoanRenewalDetails(transactionEntity);
+    var transactionEntity = getTransactionEntityOrThrow(dcbTransactionId);
+    var loanRenewalDetails = getLoanRenewalDetails(transactionEntity);
     return generateTransactionStatusResponseFromTransactionEntity(transactionEntity, loanRenewalDetails);
   }
 
@@ -204,6 +208,28 @@ public class TransactionsServiceImpl implements TransactionsService {
     return generateTransactionStatusResponseFromTransactionEntity(transaction, loanRenewalDetails);
   }
 
+  @Override
+  public void blockItemRenewalByTransactionId(String dcbTransactionId) {
+    var transactionEntity = getTransactionEntityOrThrow(dcbTransactionId);
+    if (!isTxnItemCheckoutAndRoleIsBorrowerOrBorrowingPickup(transactionEntity)) {
+      throw new StatusException("DCB transaction has invalid state for renewal block. "
+        + "Item must be already checked out by borrower or borrowing pickup role.");
+    }
+
+    setRenewalNumberForVirtualLoan(transactionEntity, Integer.MAX_VALUE);
+  }
+
+  @Override
+  public void unblockItemRenewalByTransactionId(String dcbTransactionId) {
+    var transactionEntity = getTransactionEntityOrThrow(dcbTransactionId);
+    if (!isTxnItemCheckoutAndRoleIsBorrowerOrBorrowingPickup(transactionEntity)) {
+      throw new StatusException("DCB transaction has invalid state for renewal unblock. "
+        + "Item must be already checked out by borrower or borrowing pickup role.");
+    }
+
+    setRenewalNumberForVirtualLoan(transactionEntity, 0);
+  }
+
   private void validateLoanPolicy(String loanPolicyId, LoanPolicy loanPolicy) {
     if (Objects.isNull(loanPolicy)) {
       log.debug("validateLoanPolicy:: Loan policy is null");
@@ -257,21 +283,12 @@ public class TransactionsServiceImpl implements TransactionsService {
     baseLibraryService.updateTransactionDetails(transactionEntity, dcbUpdateTransaction.getItem());
   }
 
-  private TransactionStatusResponse generateTransactionStatusResponseFromTransactionEntity(TransactionEntity transactionEntity, Optional<LoanRenewalDetails> loanRenewalDetails) {
-    TransactionStatus.StatusEnum transactionStatus = transactionEntity.getStatus();
-    TransactionStatusResponse.StatusEnum transactionStatusResponseStatusEnum = TransactionStatusResponse.StatusEnum.fromValue(transactionStatus.getValue());
-    DcbTransaction.RoleEnum transactionRole = transactionEntity.getRole();
-    DcbItem dcbItem = loanRenewalDetails.map(loanDetails-> DcbItem.builder()
-            .renewalInfo(RenewalInfo.builder()
-                    .renewalCount(loanDetails.loanRenewalCount())
-                    .renewalMaxCount(loanDetails.renewalMaxCount())
-                    .renewable(loanDetails.renewable())
-                    .build())
-            .build()).orElse(null);
+  private TransactionStatusResponse generateTransactionStatusResponseFromTransactionEntity(
+    TransactionEntity transactionEntity, Optional<LoanRenewalDetails> loanRenewalDetails) {
     return TransactionStatusResponse.builder()
-      .status(transactionStatusResponseStatusEnum)
-      .item(dcbItem)
-      .role((TransactionStatusResponse.RoleEnum.fromValue(transactionRole.getValue())))
+      .status(TransactionStatusResponse.StatusEnum.fromValue(transactionEntity.getStatus().getValue()))
+      .item(getDcbItemForTransactionStatus(transactionEntity, loanRenewalDetails).orElse(null))
+      .role((TransactionStatusResponse.RoleEnum.fromValue(transactionEntity.getRole().getValue())))
       .build();
   }
 
@@ -287,4 +304,53 @@ public class TransactionsServiceImpl implements TransactionsService {
     }
   }
 
+  private Optional<DcbItem> getDcbItemForTransactionStatus(
+    TransactionEntity tx, Optional<LoanRenewalDetails> loanRenewalDetails) {
+    var renewalInfo = loanRenewalDetails.map(this::createRenewalInfo).orElse(null);
+    var holdCount = getOpenHoldRequestsNumber(tx).orElse(null);
+    if (ObjectUtils.allNull(renewalInfo, holdCount)) {
+      return Optional.empty();
+    }
+
+    return Optional.of(DcbItem.builder()
+      .renewalInfo(renewalInfo)
+      .holdCount(holdCount)
+      .build());
+  }
+
+  private Optional<Integer> getOpenHoldRequestsNumber(TransactionEntity transactionEntity) {
+    if (transactionEntity.getRole() != LENDER) {
+      return Optional.empty();
+    }
+
+    var cqlQuery = CqlQuery.createForOpenHoldRequests(transactionEntity.getItemId());
+    var circulationRequests = circulationClient.findByQuery(cqlQuery, 0);
+    return Optional.ofNullable(circulationRequests).map(ResultList::getTotalRecords);
+  }
+
+  private  RenewalInfo createRenewalInfo(LoanRenewalDetails loanDetails) {
+    return RenewalInfo.builder()
+      .renewalCount(loanDetails.loanRenewalCount())
+      .renewalMaxCount(loanDetails.renewalMaxCount())
+      .renewable(loanDetails.renewable())
+      .build();
+  }
+
+  private void setRenewalNumberForVirtualLoan(TransactionEntity entity, int renewalCount) {
+    var virtualItemLoansResult = circulationClient.fetchLoanByQuery(buildLoanQuery(entity));
+    var virtualItemLoans = virtualItemLoansResult.getLoans();
+    if (CollectionUtils.isEmpty(virtualItemLoans)) {
+      throw new StatusException("Virtual loan for DCB transaction not found.");
+    }
+
+    if (virtualItemLoans.size() > 1) {
+      var id = entity.getId();
+      log.debug("Multiple virtual loans found for DCB transaction id: {}", id);
+      throw new StatusException("Multiple virtual loans found for DCB transaction.");
+    }
+
+    var virtualItemLoan = virtualItemLoans.getFirst();
+    virtualItemLoan.setRenewalCount(Integer.toString(renewalCount));
+    circulationClient.updateLoan(virtualItemLoan.getId(), virtualItemLoan);
+  }
 }
