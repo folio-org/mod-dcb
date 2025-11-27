@@ -11,6 +11,9 @@ import static org.folio.dcb.domain.dto.CirculationRequest.RequestTypeEnum.HOLD;
 import static org.folio.dcb.domain.dto.CirculationRequest.RequestTypeEnum.PAGE;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.AWAITING_PICKUP;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CANCELLED;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CLOSED;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.EXPIRED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_IN;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_OUT;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
@@ -22,23 +25,29 @@ import static org.folio.dcb.utils.EntityUtils.INSTANCE_ID;
 import static org.folio.dcb.utils.EntityUtils.ITEM_ID;
 import static org.folio.dcb.utils.EntityUtils.NOT_EXISTED_PATRON_ID;
 import static org.folio.dcb.utils.EntityUtils.PATRON_TYPE_USER_ID;
-import static org.folio.dcb.utils.EntityUtils.dcbTransactionUpdate;
-import static org.folio.dcb.utils.EntityUtils.transactionStatus;
+import static org.folio.dcb.utils.EntityUtils.TEST_TENANT;
 import static org.folio.dcb.utils.EntityUtils.dcbItem;
 import static org.folio.dcb.utils.EntityUtils.dcbPatron;
+import static org.folio.dcb.utils.EntityUtils.dcbTransactionUpdate;
 import static org.folio.dcb.utils.EntityUtils.lenderDcbTransaction;
+import static org.folio.dcb.utils.EntityUtils.transactionStatus;
+import static org.folio.dcb.utils.EventDataProvider.expiredRequestMessage;
+import static org.folio.dcb.utils.EventDataProvider.itemCheckInMessage;
+import static org.folio.dcb.utils.JsonTestUtils.asJsonString;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
+import static org.junit.jupiter.params.provider.EnumSource.Mode.EXCLUDE;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.folio.dcb.domain.dto.TransactionStatus.StatusEnum;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.it.base.BaseTenantIntegrationTest;
-import org.folio.dcb.utils.EntityUtils;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.context.jdbc.Sql;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import support.types.IntegrationTest;
 import support.wiremock.WireMockStub;
 
@@ -46,9 +55,9 @@ import support.wiremock.WireMockStub;
 class LenderTransactionIT extends BaseTenantIntegrationTest {
 
   @Test
-  @Sql("classpath:db/scripts/lender_transaction(created).sql")
   @WireMockStub("/stubs/mod-circulation/requests/200-get-by-query(hold requests empty).json")
   void getTransactionStatus_positive_createdStatus() throws Exception {
+    testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, CREATED, lenderDcbTransaction());
     getDcbTransactionStatus(DCB_TRANSACTION_ID)
       .andExpect(content().json(asJsonString(new TransactionStatusResponse()
         .status(TransactionStatusResponse.StatusEnum.CREATED)
@@ -58,9 +67,9 @@ class LenderTransactionIT extends BaseTenantIntegrationTest {
   }
 
   @Test
-  @Sql("classpath:db/scripts/lender_transaction(item_checked_out).sql")
   @WireMockStub("/stubs/mod-circulation/requests/200-get-by-query(hold requests empty).json")
   void getTransactionStatus_positive_checkoutStatus() throws Exception {
+    testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, ITEM_CHECKED_OUT, lenderDcbTransaction());
     getDcbTransactionStatus(DCB_TRANSACTION_ID)
       .andExpect(content().json(asJsonString(new TransactionStatusResponse()
         .status(TransactionStatusResponse.StatusEnum.ITEM_CHECKED_OUT)
@@ -70,9 +79,9 @@ class LenderTransactionIT extends BaseTenantIntegrationTest {
   }
 
   @Test
-  @Sql("/db/scripts/lender_transaction(awaiting_pickup).sql")
   @WireMockStub("/stubs/mod-circulation/requests/200-get-by-query(hold requests).json")
   void getTransactionStatus_positive_awaitingPickupNoRenewalInfo() throws Exception {
+    testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, AWAITING_PICKUP, lenderDcbTransaction());
     getDcbTransactionStatus(DCB_TRANSACTION_ID)
       .andExpect(content().json(asJsonString(new TransactionStatusResponse()
         .status(TransactionStatusResponse.StatusEnum.AWAITING_PICKUP)
@@ -198,7 +207,7 @@ class LenderTransactionIT extends BaseTenantIntegrationTest {
   void createTransaction_positive_newDcbPatron() throws Exception {
     var patron = dcbPatron(NOT_EXISTED_PATRON_ID);
 
-    postDcbTransaction(DCB_TRANSACTION_ID, EntityUtils.lenderDcbTransaction(patron))
+    postDcbTransaction(DCB_TRANSACTION_ID, lenderDcbTransaction(patron))
       .andExpect(jsonPath("$.status").value("CREATED"))
       .andExpect(jsonPath("$.item").value(dcbItem()))
       .andExpect(jsonPath("$.patron").value(patron));
@@ -224,7 +233,7 @@ class LenderTransactionIT extends BaseTenantIntegrationTest {
   void createTransaction_positive_newDcbPatronWithLocalNames() throws Exception {
     var patron = dcbPatron(NOT_EXISTED_PATRON_ID, "[John, Doe]");
 
-    postDcbTransaction(DCB_TRANSACTION_ID, EntityUtils.lenderDcbTransaction(patron))
+    postDcbTransaction(DCB_TRANSACTION_ID, lenderDcbTransaction(patron))
       .andExpect(jsonPath("$.status").value("CREATED"))
       .andExpect(jsonPath("$.item").value(dcbItem()))
       .andExpect(jsonPath("$.patron").value(patron));
@@ -291,50 +300,50 @@ class LenderTransactionIT extends BaseTenantIntegrationTest {
       .andExpect(status().isBadRequest())
       .andExpect(jsonPath("$.errors[0].code").value("VALIDATION_ERROR"))
       .andExpect(jsonPath("$.errors[0].message").value(
-        "User with type null is retrieved. so unable to create transaction"));
+        "User with type patron is retrieved. so unable to create transaction"));
   }
 
   @Test
-  @Sql("/db/scripts/lender_transaction(open).sql")
-  @WireMockStub("/stubs/mod-circulation/check-in-by-barcode/201-post(dcb).json")
+  @WireMockStub("/stubs/mod-circulation/check-in-by-barcode/201-post(dcb+pickup_sp).json")
   void updateTransactionStatus_positive_fromOpenToAwaitingPickup() throws Exception {
+    testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, OPEN, lenderDcbTransaction());
     putDcbTransactionStatus(DCB_TRANSACTION_ID, transactionStatus(AWAITING_PICKUP))
       .andExpect(jsonPath("$.status").value("AWAITING_PICKUP"));
   }
 
   @Test
-  @Sql("/db/scripts/lender_transaction(open).sql")
   @WireMockStub({
-    "/stubs/mod-circulation/check-in-by-barcode/201-post(dcb).json",
-    "/stubs/mod-circulation/check-out-by-barcode/201-post(dcb).json",
+    "/stubs/mod-circulation/check-in-by-barcode/201-post(dcb+pickup_sp).json",
+    "/stubs/mod-circulation/check-out-by-barcode/201-post(dcb+pickup_sp).json",
   })
   void updateTransactionStatus_positive_fromOpenToCheckedIn() throws Exception {
+    testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, OPEN, lenderDcbTransaction());
     putDcbTransactionStatus(DCB_TRANSACTION_ID, transactionStatus(ITEM_CHECKED_IN))
       .andExpect(jsonPath("$.status").value("ITEM_CHECKED_IN"));
   }
 
   @Test
-  @Sql("/db/scripts/lender_transaction(awaiting_pickup).sql")
-  @WireMockStub("/stubs/mod-circulation/check-out-by-barcode/201-post(dcb).json")
+  @WireMockStub("/stubs/mod-circulation/check-out-by-barcode/201-post(dcb+pickup_sp).json")
   void updateTransactionStatus_positive_fromAwaitingPickupToCheckedOut() throws Exception {
+    testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, AWAITING_PICKUP, lenderDcbTransaction());
     putDcbTransactionStatus(DCB_TRANSACTION_ID, transactionStatus(ITEM_CHECKED_OUT))
       .andExpect(jsonPath("$.status").value("ITEM_CHECKED_OUT"));
   }
 
   @Test
-  @Sql("/db/scripts/lender_transaction(item_checked_out).sql")
   void updateTransactionStatus_positive_fromCheckedOutToCheckedIn() throws Exception {
+    testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, ITEM_CHECKED_OUT, lenderDcbTransaction());
     putDcbTransactionStatus(DCB_TRANSACTION_ID, transactionStatus(ITEM_CHECKED_IN))
       .andExpect(jsonPath("$.status").value("ITEM_CHECKED_IN"));
   }
 
   @Test
-  @Sql("/db/scripts/lender_transaction(created).sql")
   @WireMockStub({
     "/stubs/mod-circulation-storage/request-storage/200-get-by-id(item).json",
     "/stubs/mod-circulation/requests/204-put(any).json"
   })
   void updateTransactionStatus_positive_fromCreatedToCancelled() throws Exception {
+    testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, CREATED, lenderDcbTransaction());
     putDcbTransactionStatus(DCB_TRANSACTION_ID, transactionStatus(CANCELLED))
       .andExpect(jsonPath("$.status").value("CANCELLED"));
 
@@ -349,12 +358,12 @@ class LenderTransactionIT extends BaseTenantIntegrationTest {
   }
 
   @Test
-  @Sql("/db/scripts/lender_transaction(awaiting_pickup).sql")
   @WireMockStub({
     "/stubs/mod-circulation-storage/request-storage/200-get-by-id(item).json",
     "/stubs/mod-circulation/requests/204-put(any).json"
   })
   void updateTransactionStatus_positive_fromAwaitingPickupToCancelled() throws Exception {
+    testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, AWAITING_PICKUP, lenderDcbTransaction());
     putDcbTransactionStatus(DCB_TRANSACTION_ID, transactionStatus(CANCELLED))
       .andExpect(jsonPath("$.status").value("CANCELLED"));
 
@@ -369,13 +378,39 @@ class LenderTransactionIT extends BaseTenantIntegrationTest {
   }
 
   @Test
-  @Sql("/db/scripts/lender_transaction(item_checked_in).sql")
-  void updateTransactionStatus_positive_fromItemCheckedInToCancelled() throws Exception {
+  void updateTransactionStatus_negative_fromItemCheckedInToCancelled() throws Exception {
+    testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, ITEM_CHECKED_IN, lenderDcbTransaction());
     putDcbTransactionStatusAttempt(DCB_TRANSACTION_ID, transactionStatus(CANCELLED))
       .andExpect(status().isBadRequest())
       .andExpect(jsonPath("$.errors[0].message").value(startsWith("Cannot cancel transaction dcbTransactionId")))
       .andExpect(jsonPath("$.errors[0].message").value(
         containsString("Transaction already in status: ITEM_CHECKED_IN")));
+  }
+
+  @ParameterizedTest
+  @EnumSource(value = StatusEnum.class, names = "EXPIRED", mode = EXCLUDE)
+  void updateTransactionStatus_parameterized_invalidTransitionToExpiredStatus(
+    StatusEnum sourceStatus) throws Exception {
+    testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, sourceStatus, lenderDcbTransaction());
+
+    putDcbTransactionStatusAttempt(DCB_TRANSACTION_ID, transactionStatus(EXPIRED))
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.errors[0].code").value("VALIDATION_ERROR"))
+      .andExpect(jsonPath("$.errors[0].message").value(containsString(String.format(
+        "Status transition will not be possible from %s to EXPIRED", sourceStatus))));
+  }
+
+  @ParameterizedTest
+  @EnumSource(value = StatusEnum.class, names = "EXPIRED", mode = EXCLUDE)
+  void updateTransactionStatus_parameterized_invalidTransitionFromExpiredStatus(
+    StatusEnum targetStatus) throws Exception {
+    testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, EXPIRED, lenderDcbTransaction());
+
+    putDcbTransactionStatusAttempt(DCB_TRANSACTION_ID, transactionStatus(targetStatus))
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.errors[0].code").value("VALIDATION_ERROR"))
+      .andExpect(jsonPath("$.errors[0].message").value(containsString(String.format(
+        "Status transition will not be possible from EXPIRED to %s", targetStatus))));
   }
 
   @Test
@@ -389,15 +424,15 @@ class LenderTransactionIT extends BaseTenantIntegrationTest {
   }
 
   @Test
-  @Sql("/db/scripts/lender_transaction(created).sql")
   void updateTransactionStatus_positive_fromCreatedToOpen() throws Exception {
+    testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, CREATED, lenderDcbTransaction());
     putDcbTransactionStatus(DCB_TRANSACTION_ID, transactionStatus(OPEN))
       .andExpect(jsonPath("$.status").value("OPEN"));
   }
 
   @Test
-  @Sql("/db/scripts/lender_transaction(created).sql")
-  void updateTransaction_positive_invalidRole() throws Exception {
+  void updateTransaction_negative_invalidRole() throws Exception {
+    testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, CREATED, lenderDcbTransaction());
     putDcbTransactionDetailsAttempt(DCB_TRANSACTION_ID, dcbTransactionUpdate())
       .andExpect(status().isBadRequest())
       .andExpect(jsonPath("$.errors[0].code").value("VALIDATION_ERROR"))
@@ -405,8 +440,8 @@ class LenderTransactionIT extends BaseTenantIntegrationTest {
   }
 
   @Test
-  @Sql("/db/scripts/lender_transaction(item_checked_in).sql")
-  void updateTransaction_positive_invalidState() throws Exception {
+  void updateTransaction_negativeParameterized_invalidState() throws Exception {
+    testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, ITEM_CHECKED_IN, lenderDcbTransaction());
     putDcbTransactionDetailsAttempt(DCB_TRANSACTION_ID, dcbTransactionUpdate())
       .andExpect(status().isBadRequest())
       .andExpect(jsonPath("$.errors[0].code").value("VALIDATION_ERROR"))
@@ -414,7 +449,30 @@ class LenderTransactionIT extends BaseTenantIntegrationTest {
         + "updated from ITEM_CHECKED_IN status, it can be updated only from CREATED status"));
   }
 
-  private static void  verifyPostCirculationRequestCalledOnce(String type, String requesterId) {
+  @Test
+  @WireMockStub("/stubs/mod-circulation/requests/200-get-by-query(hold requests empty).json")
+  void updateStatus_positive_awaitingPickupTransactionExpiration() {
+    testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, AWAITING_PICKUP, lenderDcbTransaction());
+    testEventHelper.sendMessage(expiredRequestMessage(TEST_TENANT));
+
+    awaitUntilAsserted(() -> getDcbTransactionStatus(DCB_TRANSACTION_ID)
+      .andExpect(jsonPath("$.status").value(EXPIRED.getValue())));
+  }
+
+  @Test
+  @WireMockStub({
+    "/stubs/mod-circulation/requests/200-get-by-query(hold requests empty).json",
+    "/stubs/mod-inventory-storage/item-storage/200-get-by-query(id+available).json",
+  })
+  void updateStatus_positive_expiredToClosedTransitionAfterCheckInMessage() {
+    testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, EXPIRED, lenderDcbTransaction());
+    testEventHelper.sendMessage(itemCheckInMessage(TEST_TENANT));
+
+    awaitUntilAsserted(() -> getDcbTransactionStatus(DCB_TRANSACTION_ID)
+      .andExpect(jsonPath("$.status").value(CLOSED.getValue())));
+  }
+
+  private static void verifyPostCirculationRequestCalledOnce(String type, String requesterId) {
     wiremock.verifyThat(1, postRequestedFor(urlPathEqualTo("/circulation/requests"))
       .withRequestBody(matchingJsonPath("$.requestType", equalTo(type)))
       .withRequestBody(matchingJsonPath("$.itemId", equalTo(ITEM_ID)))

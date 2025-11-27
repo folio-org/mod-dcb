@@ -1,6 +1,7 @@
 package org.folio.dcb.service.impl;
 
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.EXPIRED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_OUT;
 import static org.folio.dcb.utils.TransactionDetailsUtil.rolesNotEqual;
 import static org.folio.dcb.utils.TransactionDetailsUtil.statusesNotEqual;
@@ -90,6 +91,9 @@ public class TransactionsServiceImpl implements TransactionsService {
         throw new StatusException(String.format(
           "Current transaction status equal to new transaction status: dcbTransactionId: %s, status: %s", dcbTransactionId, transactionStatus.getStatus()
         ));
+      } else if (transactionStatus.getStatus() == EXPIRED || dcbTransaction.getStatus() == EXPIRED) {
+        throw new StatusException(String.format(
+          "Status transition will not be possible from %s to %s", dcbTransaction.getStatus(), transactionStatus.getStatus()));
       } else if (transactionStatus.getStatus() == TransactionStatus.StatusEnum.CANCELLED
         && (dcbTransaction.getStatus() == TransactionStatus.StatusEnum.ITEM_CHECKED_IN ||
         dcbTransaction.getStatus() == TransactionStatus.StatusEnum.ITEM_CHECKED_OUT) ||

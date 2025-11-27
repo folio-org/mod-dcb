@@ -1,0 +1,62 @@
+
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/circulation/check-in-by-barcode",
+
+    "bodyPatterns": [
+      {
+        "equalToJson": {
+          "itemBarcode": "DCB_ITEM",
+          "servicePointId": "9d1b77e8-f02e-4b7f-b296-3f2042ddac55"
+        },
+        "ignoreExtraElements": true
+      },
+      { "matchesJsonPath": "$.checkInDate" }
+    ],
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "testtenant"
+      }
+    }
+  },
+  "response": {
+    "status": 201,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "loan": {
+        "id": "cf23adf0-61ba-4887-bf82-956c4aae2260",
+        "userId": "df7f4993-8c14-4a0f-ab63-93975ab01c76",
+        "proxyUserId": "346ad017-dac1-417d-9ed8-0ac7eeb886aa",
+        "itemId": "5b95877d-86c0-4cb7-a0cd-7660b348ae5a",
+        "item": {
+          "title": "The Long Way to a Small, Angry Planet",
+          "barcode": "DCB_ITEM",
+          "status": {
+            "name": "Checked out"
+          }
+        },
+        "loanDate": "2017-03-01T23:11:00.000Z",
+        "dueDate": "2017-04-01T23:11:00.000Z",
+        "checkinServicePointId": "9d1b77e8-f02e-4b7f-b296-3f2042ddac55",
+        "status": {
+          "name": "Open"
+        },
+        "action": "checkedout",
+        "renewalCount": 0
+      },
+      "staffSlipContext": {
+        "requester": {
+          "firstName": "James",
+          "lastName": "Smith"
+        },
+        "item": {
+          "title": "The Long Way to a Small, Angry Planet",
+          "callNumber": "TK7871.15.F4 S67 1988"
+        }
+      }
+    }
+  }
+}

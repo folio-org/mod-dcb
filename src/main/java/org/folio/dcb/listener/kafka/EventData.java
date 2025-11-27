@@ -12,6 +12,6 @@ public class EventData {
   private String loanStatus;
 
   public enum EventType {
-    CHECK_IN, CHECK_OUT, IN_TRANSIT, AWAITING_PICKUP, CANCEL
+    CHECK_IN, CHECK_OUT, IN_TRANSIT, AWAITING_PICKUP, CANCEL, EXPIRED
   }
 }

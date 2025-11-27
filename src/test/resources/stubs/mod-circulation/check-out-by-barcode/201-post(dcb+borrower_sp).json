@@ -13,7 +13,7 @@
     ],
     "headers": {
       "x-okapi-tenant": {
-        "equalTo": "test_tenant"
+        "equalTo": "testtenant"
       },
       "Content-Type": {
         "equalTo": "application/json"

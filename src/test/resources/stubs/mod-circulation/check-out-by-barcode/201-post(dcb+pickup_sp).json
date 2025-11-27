@@ -1,0 +1,67 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/circulation/check-out-by-barcode",
+    "bodyPatterns": [
+      {
+        "equalToJson": {
+          "itemBarcode": "DCB_ITEM",
+          "userBarcode": "DCB_PATRON",
+          "servicePointId": "0da8c1e4-1c1f-4dd9-b189-70ba978b7d94"
+        }
+      }
+    ],
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "testtenant"
+      },
+      "Content-Type": {
+        "equalTo": "application/json"
+      }
+    }
+  },
+  "response": {
+    "status": 201,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "id": "cf23adf0-61ba-4887-bf82-956c4aae2260",
+      "userId": "284056f5-0670-4e1e-9e2f-61b9f1ee2d18",
+      "proxyUserId": "284056f5-0670-4e1e-9e2f-61b9f1ee2d18",
+      "itemId": "5b95877d-86c0-4cb7-a0cd-7660b348ae5a",
+      "item": {
+        "title": "DCB_INSTANCE",
+        "barcode": "DCB_ITEM",
+        "status": {
+          "name": "Checked out"
+        }
+      },
+      "loanPolicyId" : "e9af4ba4-6801-4722-be45-d7a49d13564d",
+      "loanPolicy": {
+        "name" : "Can Circulate Rolling"
+      },
+      "overdueFinePolicyId": "b59fe39f-efdc-4a88-993a-04fb405e5ecc",
+      "overdueFinePolicy": {
+        "name": "Overdue fine policy"
+      },
+      "lostItemPolicyId": "ea77439c-9ff5-4c37-8c92-0df02576c873",
+      "lostItemPolicy": {
+        "name": "Lost item policy"
+      },
+      "borrower" : {
+        "lastName" : "test",
+        "barcode" : "DCB_PATRON"
+      },
+      "loanDate": "2017-03-01T23:11:00.000Z",
+      "dueDate": "2017-04-01T23:11:00.000Z",
+      "checkoutServicePointId": "9d1b77e8-f02e-4b7f-b296-3f2042ddac55",
+      "checkinServicePointId": "9d1b77e8-f02e-4b7f-b296-3f2042ddac55",
+      "status": {
+        "name": "Open"
+      },
+      "action": "checkedout",
+      "renewalCount": 0
+    }
+  }
+}

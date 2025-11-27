@@ -8,7 +8,7 @@
       {
         "equalToJson": {
           "itemBarcode": "DCB_ITEM",
-          "servicePointId": "9d1b77e8-f02e-4b7f-b296-3f2042ddac55"
+          "servicePointId": "0da8c1e4-1c1f-4dd9-b189-70ba978b7d94"
         },
         "ignoreExtraElements": true
       },
@@ -16,7 +16,7 @@
     ],
     "headers": {
       "x-okapi-tenant": {
-        "equalTo": "test_tenant"
+        "equalTo": "testtenant"
       }
     }
   },
@@ -40,7 +40,7 @@
         },
         "loanDate": "2017-03-01T23:11:00.000Z",
         "dueDate": "2017-04-01T23:11:00.000Z",
-        "checkinServicePointId": "9d1b77e8-f02e-4b7f-b296-3f2042ddac55",
+        "checkinServicePointId": "0da8c1e4-1c1f-4dd9-b189-70ba978b7d94",
         "status": {
           "name": "Open"
         },

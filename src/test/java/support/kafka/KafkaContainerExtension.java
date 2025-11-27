@@ -4,6 +4,7 @@ import static org.testcontainers.utility.DockerImageName.parse;
 
 import java.util.List;
 import java.util.Properties;
+import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.AdminClientConfig;
@@ -20,7 +21,6 @@ public class KafkaContainerExtension implements BeforeAllCallback, AfterAllCallb
 
   private static final String SPRING_PROPERTY_NAME = "spring.kafka.bootstrap-servers";
   private static final DockerImageName KAFKA_IMAGE = parse("apache/kafka-native:3.8.0");
-  @SuppressWarnings("resource")
   private static final KafkaContainer CONTAINER = new KafkaContainer(KAFKA_IMAGE)
     .withEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false")
     .withStartupAttempts(3);
@@ -39,7 +39,7 @@ public class KafkaContainerExtension implements BeforeAllCallback, AfterAllCallb
     System.clearProperty(SPRING_PROPERTY_NAME);
   }
 
-
+  @SneakyThrows
   public static void createTopics(List<String> topicNames) {
     var newTopics = topicNames.stream()
       .map(topicName -> new NewTopic(topicName, 1, (short) 1))
@@ -47,16 +47,13 @@ public class KafkaContainerExtension implements BeforeAllCallback, AfterAllCallb
 
     try (var adminClient = getAdminClient()) {
       adminClient.createTopics(newTopics);
-    } catch (Exception e) {
-      throw new RuntimeException("Failed to create topics: " + topicNames, e);
     }
   }
 
+  @SneakyThrows
   public static void deleteTopics(List<String> topicNames) {
     try (var adminClient = getAdminClient()) {
       adminClient.deleteTopics(topicNames);
-    } catch (Exception e) {
-      throw new RuntimeException("Failed to create topics: " + topicNames, e);
     }
   }
 

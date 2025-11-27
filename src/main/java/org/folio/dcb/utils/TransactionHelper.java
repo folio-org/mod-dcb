@@ -69,12 +69,27 @@ public class TransactionHelper {
           case OPEN_IN_TRANSIT -> eventData.setType(EventData.EventType.IN_TRANSIT);
           case OPEN_AWAITING_PICKUP, OPEN_AWAITING_DELIVERY ->
             eventData.setType(EventData.EventType.AWAITING_PICKUP);
-          case CLOSED_CANCELLED, CLOSED_UNFILLED, CLOSED_PICKUP_EXPIRED -> eventData.setType(EventData.EventType.CANCEL);
+          case CLOSED_CANCELLED, CLOSED_UNFILLED ->
+            eventData.setType(EventData.EventType.CANCEL);
+          case CLOSED_PICKUP_EXPIRED ->
+            eventData.setType(EventData.EventType.EXPIRED);
           default -> log.info("parseRequestEvent:: Request status {} is not supported", requestStatus);
         }
         eventData.setDcb(checkDcbRequest(kafkaEvent));
         return eventData;
       }
+    return null;
+  }
+
+  public static EventData parseCheckInEvent(String eventPayload) {
+    var kafkaEvent = new KafkaEvent(eventPayload);
+    if (kafkaEvent.getEventType() == KafkaEvent.EventType.CREATED && kafkaEvent.hasNewNode()) {
+      var eventData = new EventData();
+      var newNode = kafkaEvent.getNewNode();
+      eventData.setItemId(newNode.get("itemId").asText());
+      return eventData;
+    }
+
     return null;
   }
 

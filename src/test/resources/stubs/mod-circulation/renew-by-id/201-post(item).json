@@ -7,7 +7,7 @@
         "equalTo": "application/json"
       },
       "x-okapi-tenant": {
-        "equalTo": "test_tenant"
+        "equalTo": "testtenant"
       },
       "x-okapi-token": {
         "equalTo": "dGVzdF9qd3RfdG9rZW4="
@@ -17,7 +17,7 @@
       {
         "equalToJson": {
           "itemId": "5b95877d-86c0-4cb7-a0cd-7660b348ae5a",
-          "userId": "571b0a2c-9456-40b5-a449-d41fe6017082"
+          "userId": "284056f5-0670-4e1e-9e2f-61b9f1ee2d18"
         }
       }
     ]
@@ -28,8 +28,8 @@
       "Content-Type": "application/json"
     },
     "jsonBody": {
-      "userId": "571b0a2c-9456-40b5-a449-d41fe6017082",
-      "proxyUserId": "571b0a2c-9456-40b5-a449-d41fe6017082",
+      "userId": "284056f5-0670-4e1e-9e2f-61b9f1ee2d18",
+      "proxyUserId": "284056f5-0670-4e1e-9e2f-61b9f1ee2d18",
       "itemId": "5b95877d-86c0-4cb7-a0cd-7660b348ae5a",
       "item": {
         "title": "The Long Way to a Small, Angry Planet",

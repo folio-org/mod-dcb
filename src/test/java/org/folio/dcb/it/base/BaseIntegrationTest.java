@@ -1,6 +1,9 @@
 package org.folio.dcb.it.base;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.folio.dcb.utils.EntityUtils.REQUEST_USER_ID;
+import static org.folio.dcb.utils.EntityUtils.TEST_TENANT;
+import static org.folio.dcb.utils.JsonTestUtils.asJsonString;
 import static org.folio.spring.integration.XOkapiHeaders.TENANT;
 import static org.folio.spring.integration.XOkapiHeaders.TOKEN;
 import static org.folio.spring.integration.XOkapiHeaders.URL;
@@ -11,9 +14,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static support.wiremock.WiremockContainerExtension.WM_URL_PROPERTY;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import lombok.SneakyThrows;
 import org.folio.tenant.domain.dto.TenantAttributes;
@@ -41,14 +41,9 @@ import support.wiremock.WithWiremockContainer;
 public abstract class BaseIntegrationTest {
 
   protected static final String MODULE_NAME = "mod-dcb";
-  protected static final String TEST_TENANT = "test_tenant";
   protected static final String TEST_TOKEN = "dGVzdF9qd3RfdG9rZW4=";
-  protected static final String TEST_USER_ID = "08d51c7a-0f36-4f3d-9e35-d285612a23df";
 
   protected static MockMvc mockMvc;
-  protected static ObjectMapper objectMapper = new ObjectMapper()
-    .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-    .setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
   @SneakyThrows
   protected static void enableTenant() {
@@ -89,11 +84,6 @@ public abstract class BaseIntegrationTest {
       .andExpect(status().isNoContent());
   }
 
-  @SneakyThrows
-  public static String asJsonString(Object value) {
-    return objectMapper.writeValueAsString(value);
-  }
-
   protected static HttpHeaders defaultHeaders() {
     final HttpHeaders httpHeaders = new HttpHeaders();
 
@@ -101,7 +91,7 @@ public abstract class BaseIntegrationTest {
     httpHeaders.put(TENANT, List.of(TEST_TENANT));
     httpHeaders.add(URL, getWiremockUrl());
     httpHeaders.add(TOKEN, TEST_TOKEN);
-    httpHeaders.add(USER_ID, TEST_USER_ID);
+    httpHeaders.add(USER_ID, REQUEST_USER_ID);
 
     return httpHeaders;
   }

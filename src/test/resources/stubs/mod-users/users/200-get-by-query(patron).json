@@ -9,7 +9,7 @@
     },
     "headers": {
       "x-okapi-tenant": {
-        "equalTo": "test_tenant"
+        "equalTo": "testtenant"
       },
       "x-okapi-token": {
         "equalTo": "dGVzdF9qd3RfdG9rZW4="
@@ -28,6 +28,7 @@
           "id": "18c1741d-e678-4c8e-9fe7-cfaeefab5eea",
           "barcode": "DCB_PATRON",
           "active": true,
+          "type": "patron",
           "personal": {
             "lastName": "Mueller",
             "firstName": "Leopold",

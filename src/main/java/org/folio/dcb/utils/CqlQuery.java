@@ -27,11 +27,11 @@ public class CqlQuery {
   /**
    * Creates a CqlQuery that matches both the given id.
    *
-   * @param name the value to match for the "id" field
+   * @param id the value to match for the "id" field
    * @return a new CqlQuery representing the match on both name and code
    */
-  public static String exactMatchById(String name) {
-    return exactMatchQuery("id", name).toText();
+  public static String exactMatchById(String id) {
+    return exactMatchQuery("id", id).toText();
   }
 
   /**

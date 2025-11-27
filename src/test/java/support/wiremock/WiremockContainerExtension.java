@@ -27,6 +27,7 @@ public class WiremockContainerExtension implements BeforeAllCallback, AfterAllCa
   public static final String WM_NETWORK_ALIAS = UUID.randomUUID().toString();
 
   public static final String WM_URL_PROPERTY = "wm.url";
+  public static final String FOLIO_OKAPI_URL_PROPERTY = "folio.okapi-url";
   public static final String DCB_HUB_URL_PROPERTY = "application.dcb-hub.locations-url";
 
   private static final DockerImageName WM_IMAGE = DockerImageName.parse("wiremock/wiremock:3.13.1");
@@ -75,6 +76,7 @@ public class WiremockContainerExtension implements BeforeAllCallback, AfterAllCa
     runContainer();
     var wmUrl = getUrlForExposedPort();
     System.setProperty(WM_URL_PROPERTY, wmUrl);
+    System.setProperty(FOLIO_OKAPI_URL_PROPERTY, wmUrl);
     System.setProperty(DCB_HUB_URL_PROPERTY, wmUrl);
     setSystemVarsToWireMockUrl(context, wmUrl);
   }
@@ -82,6 +84,7 @@ public class WiremockContainerExtension implements BeforeAllCallback, AfterAllCa
   @Override
   public void afterAll(ExtensionContext context) {
     System.clearProperty(WM_URL_PROPERTY);
+    System.clearProperty(FOLIO_OKAPI_URL_PROPERTY);
     System.clearProperty(DCB_HUB_URL_PROPERTY);
 
     clearSystemVarsWithWireMockUrl(context);

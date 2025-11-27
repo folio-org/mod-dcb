@@ -1,9 +1,15 @@
 package org.folio.dcb.service.impl;
 
+import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.collections4.CollectionUtils;
+import org.folio.dcb.client.feign.InventoryItemStorageClient;
 import org.folio.dcb.domain.dto.CirculationRequest;
 import org.folio.dcb.domain.dto.DcbTransaction;
+import org.folio.dcb.domain.dto.InventoryItem;
+import org.folio.dcb.domain.dto.ItemStatus;
 import org.folio.dcb.domain.dto.ServicePointRequest;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
@@ -17,11 +23,14 @@ import org.folio.dcb.service.UserService;
 import org.springframework.stereotype.Service;
 
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.AWAITING_PICKUP;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CLOSED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.EXPIRED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_IN;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_OUT;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CANCELLED;
+import static org.folio.dcb.utils.CqlQuery.exactMatchById;
 
 @Service("lendingLibraryService")
 @RequiredArgsConstructor
@@ -34,6 +43,7 @@ public class LendingLibraryServiceImpl implements LibraryService {
   private final CirculationService circulationService;
   private final BaseLibraryService baseLibraryService;
   private final ServicePointService servicePointService;
+  private final InventoryItemStorageClient itemStorageClient;
 
   @Override
   public TransactionStatusResponse createCirculation(String dcbTransactionId, DcbTransaction dcbTransaction) {
@@ -73,6 +83,8 @@ public class LendingLibraryServiceImpl implements LibraryService {
       updateTransactionEntity(dcbTransaction, requestedStatus);
     } else if (ITEM_CHECKED_OUT == currentStatus && ITEM_CHECKED_IN == requestedStatus) {
       updateTransactionEntity(dcbTransaction, requestedStatus);
+    } else if(EXPIRED == currentStatus && CLOSED == requestedStatus) {
+      closeTransactionEntityIfItemIsAvailable(dcbTransaction);
     } else if(CANCELLED == requestedStatus) {
       log.info("updateTransactionStatus:: Cancelling transaction with id: {} for Lender role", dcbTransaction.getId());
       baseLibraryService.cancelTransactionRequest(dcbTransaction);
@@ -88,5 +100,27 @@ public class LendingLibraryServiceImpl implements LibraryService {
     log.info("updateTransactionEntity:: updating transaction entity from {} to {}", transactionEntity.getStatus(), transactionStatusEnum);
     transactionEntity.setStatus(transactionStatusEnum);
     transactionRepository.save(transactionEntity);
+  }
+
+  private void closeTransactionEntityIfItemIsAvailable(TransactionEntity transactionEntity) {
+    var itemId = transactionEntity.getItemId();
+    var inventoryItems = itemStorageClient.fetchItemByQuery(exactMatchById(itemId));
+    if (isItemNotAvailable(inventoryItems.getResult())) {
+      log.debug("closeTransactionEntityIfItemIsAvailable:: item is not found or available,  {}", itemId);
+      return;
+    }
+
+    log.debug("closeTransactionEntityIfItemIsAvailable:: closing expired transaction: {}", transactionEntity.getId());
+    updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.CLOSED);
+  }
+
+  private static boolean isItemNotAvailable(List<InventoryItem> items) {
+    return Optional.ofNullable(items)
+      .filter(CollectionUtils::isNotEmpty)
+      .map(List::getFirst)
+      .map(InventoryItem::getStatus)
+      .map(ItemStatus::getName)
+      .map(statusName -> ItemStatus.NameEnum.AVAILABLE != statusName)
+      .orElse(true);
   }
 }

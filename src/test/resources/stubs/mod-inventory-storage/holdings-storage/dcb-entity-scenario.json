@@ -13,7 +13,7 @@
         },
         "headers": {
           "x-okapi-tenant": {
-            "equalTo": "test_tenant"
+            "equalTo": "testtenant"
           }
         }
       },
@@ -52,7 +52,7 @@
         ],
         "headers": {
           "x-okapi-tenant": {
-            "equalTo": "test_tenant"
+            "equalTo": "testtenant"
           }
         }
       },
@@ -90,7 +90,7 @@
         },
         "headers": {
           "x-okapi-tenant": {
-            "equalTo": "test_tenant"
+            "equalTo": "testtenant"
           }
         }
       },
