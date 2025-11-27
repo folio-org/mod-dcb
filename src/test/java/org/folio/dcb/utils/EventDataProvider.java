@@ -24,16 +24,16 @@ public class EventDataProvider {
 
   public static ProducerRecord<String, Object> expiredRequestMessage(String tenantId) {
     var topic = circulationRequestsTopic(tenantId);
-    var record = new ProducerRecord<String, Object>(topic, REQUEST_ID, expiredRequestPayload());
-    record.headers().add(XOkapiHeaders.TENANT, tenantId.getBytes(UTF_8));
-    return record;
+    var producerRecord = new ProducerRecord<String, Object>(topic, REQUEST_ID, expiredRequestPayload());
+    producerRecord.headers().add(XOkapiHeaders.TENANT, tenantId.getBytes(UTF_8));
+    return producerRecord;
   }
 
   public static ProducerRecord<String, Object> itemCheckInMessage(String tenantId) {
     var topic = circulationCheckInTopic(tenantId);
-    var record = new ProducerRecord<String, Object>(topic, ITEM_ID, itemCheckInPayload());
-    record.headers().add(XOkapiHeaders.TENANT, tenantId.getBytes(UTF_8));
-    return record;
+    var producerRecord = new ProducerRecord<String, Object>(topic, ITEM_ID, itemCheckInPayload());
+    producerRecord.headers().add(XOkapiHeaders.TENANT, tenantId.getBytes(UTF_8));
+    return producerRecord;
   }
 
   private static JsonNode expiredRequestPayload() {
@@ -59,7 +59,7 @@ public class EventDataProvider {
     objectNode.put("timestamp", System.currentTimeMillis());
 
     var dataNode = objectMapper.createObjectNode();
-    dataNode.set("new", toJsonNode(circulationRequest(CLOSED_PICKUP_EXPIRED)));
+    dataNode.set("new", toJsonNode(checkInRequest()));
 
     objectNode.set("data", dataNode);
     return objectNode;

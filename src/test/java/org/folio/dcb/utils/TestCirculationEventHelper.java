@@ -12,7 +12,7 @@ public class TestCirculationEventHelper {
   private final KafkaTemplate<String, Object> kafkaTemplate;
 
   @SneakyThrows
-  public void sendMessage(ProducerRecord<String, Object> record) {
-    kafkaTemplate.send(record).get(5, TimeUnit.SECONDS);
+  public void sendMessage(ProducerRecord<String, Object> producerRecord) {
+    kafkaTemplate.send(producerRecord).get(5, TimeUnit.SECONDS);
   }
 }
