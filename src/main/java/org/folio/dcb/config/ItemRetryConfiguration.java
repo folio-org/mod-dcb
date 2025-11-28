@@ -12,10 +12,10 @@ public class ItemRetryConfiguration {
   /**
    * The maximum number of retry attempts for item-related operations.
    */
-  private int maxRetries = 5;
+  private int maxRetries = 10;
 
   /**
    * The interval duration between retry attempts.
    */
-  private long delayMilliseconds = 250;
+  private long delayMilliseconds = 500;
 }
