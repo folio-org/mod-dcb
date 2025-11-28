@@ -93,8 +93,8 @@ management:
 application:
   retry:
     item:
-      max-retries: ${RETRY_ITEM_MAX_RETRIES:5}
-      delay-milliseconds: ${RETRY_ITEM_DELAY_MILLISECONDS:250}
+      max-retries: ${RETRY_ITEM_MAX_RETRIES:10}
+      delay-milliseconds: ${RETRY_ITEM_DELAY_MILLISECONDS:500}
   dcb-entities:
     runtime-verification-enabled: ${DCB_ENTITIES_RUNTIME_VERIFICATION_ENABLED:true}
   dcb-hub:
