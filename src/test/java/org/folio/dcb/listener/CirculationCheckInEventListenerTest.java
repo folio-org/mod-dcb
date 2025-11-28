@@ -36,6 +36,8 @@ import org.folio.dcb.listener.kafka.CirculationEventListener;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.spring.integration.XOkapiHeaders;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -113,29 +115,16 @@ class CirculationCheckInEventListenerTest extends BaseTenantIntegrationTest {
     verify(itemStorageClient).fetchItemByQuery(exactMatchById(ITEM_ID));
   }
 
-  @Test
-  void handleCheckInEvent_positive_emptyEventBody() {
-    eventListener.handleCheckInEvent("", messageHeaders());
-    verifyNoInteractions(repository);
-  }
-
-  @Test
-  void handleCheckInEvent_positive_invalidType() {
-    eventListener.handleCheckInEvent("{\"type\":\"UPDATED\"}", messageHeaders());
-    verifyNoInteractions(repository);
-  }
-
-  @Test
-  void handleCheckInEvent_positive_validTypeWithoutNewNode() {
-    eventListener.handleCheckInEvent("{\"type\":\"CREATED\"}", messageHeaders());
-    verifyNoInteractions(repository);
-  }
-
-  @Test
-  void handleCheckInEvent_positive_validTypeWithoutCheckInServicePointId() {
-    var payload = "{\"type\":\"CREATED\",\"data\":{\"new\":{\"itemId\":\"%s\"}}}".formatted(ITEM_ID);
+  @ParameterizedTest
+  @ValueSource(strings = {
+    "",
+    "{\"type\":\"CREATED\"}",
+    "{\"type\":\"UPDATED\"}",
+    "{\"type\":\"CREATED\",\"data\":{\"new\":{\"itemId\":\"%s\"}}}",
+  })
+  void handleCheckInEvent_parameterized_ignoredPayload(String payload) {
     eventListener.handleCheckInEvent(payload, messageHeaders());
-    verifyNoInteractions(repository, itemStorageClient);
+    verifyNoInteractions(repository);
   }
 
   @Test

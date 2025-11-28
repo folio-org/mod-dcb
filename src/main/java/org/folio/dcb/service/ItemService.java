@@ -1,6 +1,5 @@
 package org.folio.dcb.service;
 
-import org.apache.kafka.common.protocol.types.Field;
 import org.folio.dcb.domain.ResultList;
 import org.folio.dcb.domain.dto.InventoryItem;
 import org.folio.dcb.exception.ServiceException;
