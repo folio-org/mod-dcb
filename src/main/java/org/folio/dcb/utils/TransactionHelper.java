@@ -1,6 +1,7 @@
 package org.folio.dcb.utils;
 
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.folio.dcb.listener.kafka.EventData;
 import org.springframework.messaging.MessageHeaders;
 
@@ -9,6 +10,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+import static org.apache.commons.lang3.StringUtils.trimToNull;
 import static org.folio.dcb.utils.KafkaEvent.ACTION;
 import static org.folio.dcb.utils.KafkaEvent.STATUS;
 import static org.folio.dcb.utils.KafkaEvent.STATUS_NAME;
@@ -86,7 +88,8 @@ public class TransactionHelper {
     if (kafkaEvent.getEventType() == KafkaEvent.EventType.CREATED && kafkaEvent.hasNewNode()) {
       var eventData = new EventData();
       var newNode = kafkaEvent.getNewNode();
-      eventData.setItemId(newNode.get("itemId").asText());
+      eventData.setItemId(trimToNull(newNode.path("itemId").asText()));
+      eventData.setCheckInServicePointId(trimToNull(newNode.path("servicePointId").asText()));
       return eventData;
     }
 

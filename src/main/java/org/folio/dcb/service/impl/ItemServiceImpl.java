@@ -1,15 +1,25 @@
 package org.folio.dcb.service.impl;
 
+import static org.folio.dcb.utils.CqlQuery.exactMatchById;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.collections4.CollectionUtils;
 import org.folio.dcb.client.feign.InventoryItemStorageClient;
 import org.folio.dcb.client.feign.MaterialTypeClient;
 import org.folio.dcb.domain.ResultList;
 import org.folio.dcb.domain.dto.InventoryItem;
+import org.folio.dcb.exception.InventoryItemNotFound;
+import org.folio.dcb.exception.ServiceException;
 import org.folio.dcb.service.ItemService;
 import org.folio.spring.exception.NotFoundException;
 import org.folio.util.PercentCodec;
 import org.folio.util.StringUtil;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -51,4 +61,23 @@ public class ItemServiceImpl implements ItemService {
       .orElseThrow(() -> new NotFoundException(String.format("Unable to find existing item with id %s and barcode %s.", id, barcode)));
   }
 
+  @Retryable(
+    retryFor = InventoryItemNotFound.class,
+    maxAttemptsExpression = "#{@itemRetryConfiguration.maxRetries}",
+    backoff = @Backoff(delayExpression = "#{@itemRetryConfiguration.delayMilliseconds}"))
+  public InventoryItem findItemByIdAfterCheckIn(String id, String expectedServicePointId) {
+    var foundItems = inventoryItemStorageClient.fetchItemByQuery(exactMatchById(id));
+    return Optional.ofNullable(foundItems)
+      .map(ResultList::getResult)
+      .filter(CollectionUtils::isNotEmpty)
+      .map(List::getFirst)
+      .filter(item -> hasExpectedServicePointId(expectedServicePointId, item))
+      .orElseThrow(() -> new InventoryItemNotFound(String.format(
+        "Matched item not found: %s, %s", id, expectedServicePointId)));
+  }
+
+  private static boolean hasExpectedServicePointId(String servicePointId, InventoryItem item) {
+    return item.getLastCheckIn() != null
+      && Objects.equals(item.getLastCheckIn().getServicePointId(), servicePointId);
+  }
 }

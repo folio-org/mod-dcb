@@ -82,7 +82,6 @@ public class EventDataProvider {
     checkInBody.put("requestQueueSize", 0);
     checkInBody.put("itemLocationId", UUID.randomUUID().toString());
     checkInBody.put("servicePointId", PICKUP_SERVICE_POINT_ID);
-    checkInBody.put("973fcb0e-2b4a-4c60-bc8c-8d74de7bc1c6", PICKUP_SERVICE_POINT_ID);
 
     return checkInBody;
   }

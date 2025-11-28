@@ -10,6 +10,7 @@ import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.LibraryService;
 import org.folio.dcb.service.impl.BaseLibraryService;
+import org.folio.dcb.service.impl.LendingLibraryServiceImpl;
 import org.folio.dcb.utils.TransactionHelper;
 import org.folio.spring.integration.XOkapiHeaders;
 import org.folio.spring.service.SystemUserScopedExecutionService;
@@ -118,11 +119,15 @@ public class CirculationEventListener {
   }
 
   private void handleCirculationCheckInEvent(String tenantId, EventData eventData) {
+    if (eventData.getCheckInServicePointId() == null) {
+      return;
+    }
+
     systemUserScopedExecutionService.executeAsyncSystemUserScoped(tenantId, () -> {
       var itemUuid = UUID.fromString(eventData.getItemId());
       transactionRepository.findExpiredLenderTransactionsByItemId(itemUuid).forEach(entity ->
-        lendingLibraryService.updateTransactionStatus(entity,
-        new TransactionStatus().status(TransactionStatus.StatusEnum.CLOSED)));
+        ((LendingLibraryServiceImpl) lendingLibraryService)
+          .closeExpiredTransactionEntity(entity, eventData.getCheckInServicePointId()));
     });
   }
 

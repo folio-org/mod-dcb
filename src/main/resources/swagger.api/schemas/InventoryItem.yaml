@@ -13,4 +13,20 @@ InventoryItem:
       $ref: "uuid.yaml"
     status:
       $ref: "ItemStatus.yaml#/ItemStatus"
+    lastCheckIn:
+      $ref: "#/itemLastCheckIn"
 
+itemLastCheckIn:
+  description: Information about when an item was last scanned in the Inventory app.
+  type: object
+  properties:
+    dateTime:
+      type: string
+      description: Date and time of the last check in of the item.
+      format: date-time
+    servicePointId:
+      description: Service point ID being used by a staff member when item was scanned in Check in app.
+      $ref: "uuid.yaml"
+    staffMemberId:
+      description: ID a staff member who scanned the item
+      $ref: "uuid.yaml"

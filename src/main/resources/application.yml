@@ -91,6 +91,10 @@ management:
       access: unrestricted
 
 application:
+  retry:
+    item:
+      max-retries: ${RETRY_ITEM_MAX_RETRIES:5}
+      delay-milliseconds: ${RETRY_ITEM_DELAY_MILLISECONDS:250}
   dcb-entities:
     runtime-verification-enabled: ${DCB_ENTITIES_RUNTIME_VERIFICATION_ENABLED:true}
   dcb-hub:
