@@ -9,6 +9,7 @@ import org.folio.dcb.domain.dto.ServicePointRequest;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.entity.TransactionEntity;
+import org.folio.dcb.exception.InventoryItemNotFound;
 import org.folio.dcb.exception.ServiceException;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.CirculationService;
@@ -89,12 +90,6 @@ public class LendingLibraryServiceImpl implements LibraryService {
     }
   }
 
-  private void updateTransactionEntity (TransactionEntity transactionEntity, TransactionStatus.StatusEnum transactionStatusEnum) {
-    log.info("updateTransactionEntity:: updating transaction entity from {} to {}", transactionEntity.getStatus(), transactionStatusEnum);
-    transactionEntity.setStatus(transactionStatusEnum);
-    transactionRepository.save(transactionEntity);
-  }
-
   /**
    * Closes the expired transaction entity if the associated item is available.
    *
@@ -110,8 +105,14 @@ public class LendingLibraryServiceImpl implements LibraryService {
         log.debug("closeTransactionEntityIfItemIsAvailable:: closing expired transaction: {}", dcbTransaction.getId());
         updateTransactionEntity(dcbTransaction, TransactionStatus.StatusEnum.CLOSED);
       }
-    } catch (ServiceException e) {
+    } catch (InventoryItemNotFound e) {
       log.warn("Failed to fetch item with id {} from inventory after check-in: {}", itemId, expectedServicePointId, e);
     }
+  }
+
+  private void updateTransactionEntity (TransactionEntity transactionEntity, TransactionStatus.StatusEnum transactionStatusEnum) {
+    log.info("updateTransactionEntity:: updating transaction entity from {} to {}", transactionEntity.getStatus(), transactionStatusEnum);
+    transactionEntity.setStatus(transactionStatusEnum);
+    transactionRepository.save(transactionEntity);
   }
 }
