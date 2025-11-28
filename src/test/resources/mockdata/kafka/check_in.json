@@ -1,19 +1,18 @@
 {
-  "id": "091a277f-db39-4f3d-bed8-a43e145bb1c6",
-  "type": "UPDATED",
-  "tenant": "diku",
-  "timestamp": 1695390940007,
+  "id": "be6f69b1-f1fc-4346-8697-154b5ff43688",
+  "type": "CREATED",
+  "tenant": "college",
+  "timestamp": 1764247021040,
   "data": {
     "new": {
-      "id": "8f77e07f-217f-4dec-bb95-cee23575d712",
-      "requestLevel": "Item",
-      "requestType": "Hold",
-      "requestDate": "2023-11-27T10:47:18.976+00:00",
-      "requesterId": "5d2625ef-81eb-4e61-a8a9-87c94ba3764e",
-      "instanceId": "9d1b77e4-f02e-4b7f-b296-3f2042ddac54",
-      "holdingsRecordId": "10cd3a5a-d36f-4c7a-bc4f-e1ae3cf820c9",
-      "itemId": "5d2625ef-81eb-4e61-a8a9-87c94ba3764e",
-      "status": "Open - Awaiting pickup"
+      "id": "e4a5fda8-f58f-40be-9717-ea6a132232e6",
+      "occurredDateTime": "2025-11-27T12:37:01.027+00:00",
+      "itemId": "5b95877d-86c0-4cb7-a0cd-7660b348ae5a",
+      "itemStatusPriorToCheckIn": "Awaiting pickup",
+      "requestQueueSize": 0,
+      "itemLocationId": "a30bed72-584c-435a-8c10-f62a3c5d25a2",
+      "servicePointId": "9d1b77e8-f02e-4b7f-b296-3f2042ddac55",
+      "performedByUserId": "284056f5-0670-4e1e-9e2f-61b9f1ee2d18"
     }
   }
 }

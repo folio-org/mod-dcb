@@ -28,6 +28,7 @@
           "id": "18c1741d-e678-4c8e-9fe7-cfaeefab5eea",
           "barcode": "DCB_PATRON",
           "active": true,
+          "type": "patron",
           "personal": {
             "lastName": "Mueller",
             "firstName": "Leopold",

@@ -11,4 +11,3 @@ END;
 
 SELECT truncate_dcb_tables();
 DROP FUNCTION IF EXISTS truncate_dcb_tables();
-
