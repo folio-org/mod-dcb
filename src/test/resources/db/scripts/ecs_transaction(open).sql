@@ -1,4 +1,4 @@
-INSERT INTO testtenant_mod_dcb.transactions (id, item_id, item_title, item_barcode, service_point_id,
+INSERT INTO test_tenant_mod_dcb.transactions (id, item_id, item_title, item_barcode, service_point_id,
                                               service_point_name, pickup_library_code, material_type,
                                               lending_library_code, patron_id, patron_group, patron_barcode, status,
                                               role, created_by, created_date, updated_by, updated_date, request_id,

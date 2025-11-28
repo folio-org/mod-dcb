@@ -9,7 +9,7 @@
     },
     "headers": {
       "x-okapi-tenant": {
-        "equalTo": "testtenant"
+        "equalTo": "test_tenant"
       }
     }
   },

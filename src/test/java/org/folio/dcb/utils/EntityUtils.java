@@ -44,7 +44,7 @@ import static org.folio.dcb.service.impl.ServicePointServiceImpl.HOLD_SHELF_CLOS
 public class EntityUtils {
 
   public static String ITEM_ID = "5b95877d-86c0-4cb7-a0cd-7660b348ae5a";
-  public static final String TEST_TENANT = "testtenant";
+  public static final String TEST_TENANT = "test_tenant";
   public static final String REQUEST_USER_ID = "8c5ad61c-891a-43c5-a398-fa9515c8d9c5";
   public static final String ITEM_ID_STATUS_NOT_AVAILABLE = "60f57427-b071-42b2-97ba-145bbcf1d32b";
   public static final String NOT_EXISTED_ITEM_ID = "de18d1cd-8312-449c-8db6-c2491467ab76";

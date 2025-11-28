@@ -46,7 +46,7 @@ class FlexibleEffectiveLocationIT extends BaseTenantIntegrationTest {
     registry.add("application.dcb-hub.fetch-dcb-locations-enabled", () -> true);
     registry.add("application.dcb-hub.locations-url", BaseIntegrationTest::getWiremockUrl);
     registry.add("application.dcb-hub.batch-size", () -> 5);
-    registry.add("application.secret-store.ephemeral.content.folio_testtenant_dcb-hub-credentials",
+    registry.add("application.secret-store.ephemeral.content.folio_test_tenant_dcb-hub-credentials",
       () -> String.format("""
         {
           "client_id": "test_client_id",

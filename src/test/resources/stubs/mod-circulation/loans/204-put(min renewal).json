@@ -72,7 +72,7 @@
     ],
     "headers": {
       "x-okapi-tenant": {
-        "equalTo": "testtenant"
+        "equalTo": "test_tenant"
       },
       "x-okapi-token": {
         "equalTo": "dGVzdF9qd3RfdG9rZW4="

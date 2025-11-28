@@ -4,7 +4,7 @@
     "urlPath": "/circulation/loans/d217d4d5-8b2b-496b-8aa5-7e60d530e124",
     "headers": {
       "x-okapi-tenant": {
-        "equalTo": "testtenant"
+        "equalTo": "test_tenant"
       },
       "x-okapi-token": {
         "equalTo": "dGVzdF9qd3RfdG9rZW4="
