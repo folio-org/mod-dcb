@@ -16,6 +16,7 @@ import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
 import static org.folio.dcb.utils.EntityUtils.EXISTED_PATRON_ID;
 import static org.folio.dcb.utils.EntityUtils.ITEM_ID;
 import static org.folio.dcb.utils.EntityUtils.NOT_EXISTED_PATRON_ID;
+import static org.folio.dcb.utils.EntityUtils.PATRON_GROUP_ID;
 import static org.folio.dcb.utils.EntityUtils.PATRON_TYPE_USER_ID;
 import static org.folio.dcb.utils.EntityUtils.PICKUP_SERVICE_POINT_ID;
 import static org.folio.dcb.utils.EntityUtils.dcbItem;
@@ -47,7 +48,7 @@ class PickupTransactionIT extends BaseTenantIntegrationTest {
   @Test
   @WireMockStub({
     "/stubs/mod-users/users/200-get-by-query(new_user empty).json",
-    "/stubs/mod-users/users/201-post-user(dcb user).json",
+    "/stubs/mod-users/users/201-post-user(any).json",
     "/stubs/mod-inventory-storage/item-storage/200-get-by-query(barcode empty).json",
     "/stubs/mod-inventory-storage/material-types/200-get-by-query(book).json",
     "/stubs/mod-circulation-item/200-get-by-query(barcode empty).json",
@@ -73,7 +74,7 @@ class PickupTransactionIT extends BaseTenantIntegrationTest {
   @Test
   @WireMockStub({
     "/stubs/mod-users/users/200-get-by-query(new_user empty).json",
-    "/stubs/mod-users/users/201-post-user(dcb user+local names).json",
+    "/stubs/mod-users/users/201-post-user(any).json",
     "/stubs/mod-inventory-storage/item-storage/200-get-by-query(barcode empty).json",
     "/stubs/mod-circulation-item/200-get-by-query(barcode).json",
     "/stubs/mod-users/groups/200-get-by-query(staff).json",
@@ -97,8 +98,33 @@ class PickupTransactionIT extends BaseTenantIntegrationTest {
 
   @Test
   @WireMockStub({
+    "/stubs/mod-users/users/200-get-by-query(user id+barcode).json",
+    "/stubs/mod-users/users/204-put(any).json",
+    "/stubs/mod-inventory-storage/item-storage/200-get-by-query(barcode empty).json",
+    "/stubs/mod-circulation-item/200-get-by-query(barcode).json",
+    "/stubs/mod-users/groups/200-get-by-query(staff).json",
+    "/stubs/mod-circulation/requests/201-post(any).json",
+  })
+  void createTransaction_positive_userUpdateWithLocalNames() throws Exception {
+    var patron = dcbPatron(EXISTED_PATRON_ID, "[John, Doe]");
+    var dcbTransaction = pickupDcbTransaction(patron);
+    postDcbTransaction(DCB_TRANSACTION_ID, dcbTransaction)
+      .andExpect(jsonPath("$.status").value("CREATED"))
+      .andExpect(jsonPath("$.item").value(dcbItem()))
+      .andExpect(jsonPath("$.patron").value(patron));
+
+    wiremock.verifyThat(1, putRequestedFor(urlPathEqualTo("/users/" + EXISTED_PATRON_ID))
+      .withRequestBody(matchingJsonPath("$.personal.lastName", equalTo("Doe")))
+      .withRequestBody(matchingJsonPath("$.personal.firstName", equalTo("John"))));
+
+    auditEntityVerifier.assertThatLatestEntityIsNotDuplicate(DCB_TRANSACTION_ID);
+    verifyPostCirculationRequestCalledOnce(EXISTED_PATRON_ID);
+  }
+
+  @Test
+  @WireMockStub({
     "/stubs/mod-users/users/200-get-by-query(new_user empty).json",
-    "/stubs/mod-users/users/201-post-user(dcb user).json",
+    "/stubs/mod-users/users/201-post-user(any).json",
     "/stubs/mod-inventory-storage/item-storage/200-get-by-query(barcode empty).json",
     "/stubs/mod-circulation-item/200-get-by-query(barcode).json",
     "/stubs/mod-users/groups/200-get-by-query(staff).json",
@@ -125,7 +151,7 @@ class PickupTransactionIT extends BaseTenantIntegrationTest {
     "/stubs/mod-inventory-storage/item-storage/200-get-by-query(barcode empty).json",
     "/stubs/mod-circulation-item/200-get-by-query(barcode).json",
     "/stubs/mod-users/groups/200-get-by-query(staff).json",
-    "/stubs/mod-users/users/204-put(dcb user+group).json",
+    "/stubs/mod-users/users/204-put(any).json",
     "/stubs/mod-circulation/requests/201-post(any).json",
   })
   void createTransaction_positive_dcbUserFoundWithoutGroup() throws Exception {
@@ -136,6 +162,8 @@ class PickupTransactionIT extends BaseTenantIntegrationTest {
       .andExpect(jsonPath("$.item").value(dcbItem()))
       .andExpect(jsonPath("$.patron").value(patron));
 
+    wiremock.verifyThat(1, putRequestedFor(urlPathEqualTo("/users/" + EXISTED_PATRON_ID))
+      .withRequestBody(matchingJsonPath("$.patronGroup", equalTo(PATRON_GROUP_ID))));
     auditEntityVerifier.assertThatLatestEntityIsNotDuplicate(DCB_TRANSACTION_ID);
     verifyPostCirculationRequestCalledOnce(EXISTED_PATRON_ID);
   }
