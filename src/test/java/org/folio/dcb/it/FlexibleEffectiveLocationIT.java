@@ -68,6 +68,7 @@ class FlexibleEffectiveLocationIT extends BaseTenantIntegrationTest {
       .withRequestBody(matchingJsonPath("$.effectiveLocationId", equalTo(effectiveLocationId))));
   }
 
+  @SuppressWarnings("SameParameterValue")
   private static void verifyPostCirculationRequestCalledOnce(String requesterId, String servicePointId) {
     wiremock.verifyThat(1, postRequestedFor(urlPathEqualTo("/circulation/requests"))
       .withRequestBody(matchingJsonPath("$.requestType", equalTo("Hold")))

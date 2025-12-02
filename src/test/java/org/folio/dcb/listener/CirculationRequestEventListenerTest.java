@@ -1,5 +1,6 @@
 package org.folio.dcb.listener;
 
+import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWER;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWING_PICKUP;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.PICKUP;
@@ -7,8 +8,10 @@ import static org.folio.dcb.utils.EntityUtils.createCirculationItem;
 import static org.folio.dcb.utils.EntityUtils.createTransactionEntity;
 import static org.folio.dcb.utils.EntityUtils.getMockDataAsString;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
@@ -19,6 +22,7 @@ import java.util.UUID;
 import java.util.stream.Stream;
 import org.folio.dcb.domain.dto.ItemStatus;
 import org.folio.dcb.domain.dto.TransactionStatus;
+import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.it.base.BaseTenantIntegrationTest;
 import org.folio.dcb.listener.kafka.CirculationEventListener;
 import org.folio.dcb.repository.TransactionRepository;
@@ -28,6 +32,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.MessageHeaders;
@@ -47,6 +52,7 @@ class CirculationRequestEventListenerTest extends BaseTenantIntegrationTest {
   private static final String CHECK_IN_UNDEFINED_EVENT_SAMPLE = getMockDataAsString("mockdata/kafka/request_undefined.json");
   private static final String REQUEST_CANCEL_EVENT_SAMPLE = getMockDataAsString("mockdata/kafka/cancel_request.json");
   private static final String REQUEST_CANCEL_EVENT_FOR_DCB_SAMPLE = getMockDataAsString("mockdata/kafka/cancel_request_dcb.json");
+  private static final String REQUEST_EXPIRED_EVENT_FOR_DCB_SAMPLE = getMockDataAsString("mockdata/kafka/expired_request_dcb.json");
   private static final String CANCELLATION_DCB_REREQUEST_TRUE_SAMPLE = getMockDataAsString(
     "mockdata/kafka/cancellation_dcb_rerequest_true.json");
   private static final String CANCELLATION_DCB_REREQUEST_FALSE_SAMPLE = getMockDataAsString(
@@ -204,6 +210,46 @@ class CirculationRequestEventListenerTest extends BaseTenantIntegrationTest {
     when(circulationItemService.fetchItemById(anyString())).thenReturn(circulationItem);
     eventListener.handleRequestEvent(CHECK_IN_UNDEFINED_EVENT_SAMPLE, messageHeaders);
     Mockito.verify(transactionRepository, times(0)).save(any());
+  }
+
+  @Test
+  void handleExpiredRequestEventTest() {
+    var transactionEntity = createTransactionEntity();
+    transactionEntity.setItemId("5b95877e-86c0-4cb7-a0cd-7660b348ae5d");
+    transactionEntity.setStatus(TransactionStatus.StatusEnum.AWAITING_PICKUP);
+    transactionEntity.setRole(LENDER);
+    var transactionEntityCaptor = ArgumentCaptor.<TransactionEntity>captor();
+
+    var circulationItem = createCirculationItem();
+    circulationItem.setStatus(ItemStatus.builder().name(ItemStatus.NameEnum.IN_TRANSIT).build());
+    when(transactionRepository.save(transactionEntityCaptor.capture())).then(v -> v.getArgument(0));
+
+    MessageHeaders messageHeaders = getMessageHeaders();
+    when(transactionRepository.findTransactionByRequestIdAndStatusNotInClosed(any())).thenReturn(Optional.of(transactionEntity));
+    when(circulationItemService.fetchItemById(anyString())).thenReturn(circulationItem);
+    eventListener.handleRequestEvent(REQUEST_EXPIRED_EVENT_FOR_DCB_SAMPLE, messageHeaders);
+
+    Mockito.verify(transactionRepository).save(any());
+    var savedValue = transactionEntityCaptor.getValue();
+    assertEquals(TransactionStatus.StatusEnum.EXPIRED, savedValue.getStatus());
+  }
+
+  @Test
+  void handleExpiredRequestEventForNonLenderRoleTest() {
+    var transactionEntity = createTransactionEntity();
+    transactionEntity.setItemId("5b95877e-86c0-4cb7-a0cd-7660b348ae5d");
+    transactionEntity.setStatus(TransactionStatus.StatusEnum.AWAITING_PICKUP);
+    transactionEntity.setRole(BORROWER);
+
+    var circulationItem = createCirculationItem();
+    circulationItem.setStatus(ItemStatus.builder().name(ItemStatus.NameEnum.IN_TRANSIT).build());
+
+    MessageHeaders messageHeaders = getMessageHeaders();
+    when(transactionRepository.findTransactionByRequestIdAndStatusNotInClosed(any())).thenReturn(Optional.of(transactionEntity));
+    when(circulationItemService.fetchItemById(anyString())).thenReturn(circulationItem);
+    eventListener.handleRequestEvent(REQUEST_EXPIRED_EVENT_FOR_DCB_SAMPLE, messageHeaders);
+
+    Mockito.verify(transactionRepository, never()).save(any());
   }
 
   @Test

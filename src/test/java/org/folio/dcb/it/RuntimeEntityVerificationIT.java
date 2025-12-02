@@ -2,6 +2,7 @@ package org.folio.dcb.it;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
 import static org.folio.dcb.utils.EntityUtils.EXISTED_PATRON_ID;
 import static org.folio.dcb.utils.EntityUtils.borrowerDcbTransaction;
@@ -18,7 +19,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.jdbc.Sql;
 import support.types.IntegrationTest;
 import support.wiremock.WireMockStub;
 
@@ -108,8 +108,8 @@ class RuntimeEntityVerificationIT extends BaseTenantIntegrationTest {
       "/stubs/mod-circulation-storage/cancellation-reason-storage/200-get-by-query(dcb empty).json",
       "/stubs/mod-circulation-storage/cancellation-reason-storage/201-post(dcb).json",
     })
-    @Sql("/db/scripts/borrower_transaction(created).sql")
     void updateTransaction_positive_cancellationReasonNotFound() throws Exception {
+      testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, CREATED, borrowerDcbTransaction());
       putDcbTransactionDetailsAttempt(DCB_TRANSACTION_ID, dcbTransactionUpdate())
         .andExpect(status().isNoContent());
 

@@ -13,6 +13,7 @@ import static org.folio.dcb.utils.EntityUtils.createBorrowingEcsRequestTransacti
 import static org.folio.dcb.utils.EntityUtils.createBorrowingPickupEcsRequestTransactionByRole;
 import static org.folio.dcb.utils.EntityUtils.createLendingEcsRequestTransactionByRole;
 import static org.folio.dcb.utils.EntityUtils.createPickupEcsRequestTransactionByRole;
+import static org.folio.dcb.utils.JsonTestUtils.asJsonString;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;

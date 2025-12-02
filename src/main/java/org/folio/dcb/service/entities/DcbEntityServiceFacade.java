@@ -3,7 +3,6 @@ package org.folio.dcb.service.entities;
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.folio.dcb.client.feign.CancellationReasonClient;
 import org.folio.dcb.client.feign.CancellationReasonClient.CancellationReason;
 import org.folio.dcb.client.feign.HoldingsStorageClient.Holding;
 import org.folio.dcb.client.feign.LoanTypeClient.LoanType;

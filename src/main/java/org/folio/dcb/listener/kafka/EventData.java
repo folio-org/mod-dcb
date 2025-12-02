@@ -10,8 +10,9 @@ public class EventData {
   private boolean isDcb;
   private boolean isDcbReRequestCancellation;
   private String loanStatus;
+  private String checkInServicePointId;
 
   public enum EventType {
-    CHECK_IN, CHECK_OUT, IN_TRANSIT, AWAITING_PICKUP, CANCEL
+    CHECK_IN, CHECK_OUT, IN_TRANSIT, AWAITING_PICKUP, CANCEL, EXPIRED
   }
 }

@@ -11,31 +11,41 @@ import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CANCELLED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CLOSED;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.EXPIRED;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_IN;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_OUT;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
 import static org.folio.dcb.utils.EntityUtils.BORROWER_SERVICE_POINT_ID;
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
 import static org.folio.dcb.utils.EntityUtils.EXISTED_PATRON_ID;
 import static org.folio.dcb.utils.EntityUtils.ITEM_ID;
+import static org.folio.dcb.utils.EntityUtils.LOAN_ID;
 import static org.folio.dcb.utils.EntityUtils.NOT_EXISTED_PATRON_ID;
 import static org.folio.dcb.utils.EntityUtils.PATRON_TYPE_USER_ID;
 import static org.folio.dcb.utils.EntityUtils.PICKUP_SERVICE_POINT_ID;
+import static org.folio.dcb.utils.EntityUtils.borrowerDcbTransaction;
 import static org.folio.dcb.utils.EntityUtils.borrowingPickupDcbTransaction;
 import static org.folio.dcb.utils.EntityUtils.dcbItem;
 import static org.folio.dcb.utils.EntityUtils.dcbTransactionUpdate;
 import static org.folio.dcb.utils.EntityUtils.transactionStatus;
 import static org.folio.dcb.utils.EntityUtils.dcbPatron;
+import static org.folio.dcb.utils.JsonTestUtils.asJsonString;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
+import static org.junit.jupiter.params.provider.EnumSource.Mode.EXCLUDE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.it.base.BaseTenantIntegrationTest;
 import org.folio.dcb.utils.DCBConstants;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.jdbc.Sql;
 import support.types.IntegrationTest;
 import support.wiremock.WireMockStub;
 
@@ -143,23 +153,23 @@ class BorrowingPickupTransactionIT extends BaseTenantIntegrationTest {
   }
 
   @Test
-  @Sql("/db/scripts/borrowing_pickup_transaction(created).sql")
   @WireMockStub("/stubs/mod-circulation/check-in-by-barcode/201-post(random SP).json")
   void updateTransactionStatus_positive_fromCreatedToOpen() throws Exception {
+    testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, CREATED, borrowingPickupDcbTransaction());
     putDcbTransactionStatus(DCB_TRANSACTION_ID, transactionStatus(OPEN))
       .andExpect(jsonPath("$.status").value("OPEN"));
   }
 
   @Test
-  @Sql("/db/scripts/borrowing_pickup_transaction(item_checked_in).sql")
   void updateTransactionStatus_positive_fromCheckedInToClosed() throws Exception {
+    testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, ITEM_CHECKED_IN, borrowingPickupDcbTransaction());
     putDcbTransactionStatus(DCB_TRANSACTION_ID, transactionStatus(CLOSED))
       .andExpect(jsonPath("$.status").value("CLOSED"));
   }
 
   @Test
-  @Sql("/db/scripts/borrowing_pickup_transaction(item_checked_in).sql")
   void updateTransactionStatus_negative_fromCheckedInToCancelled() throws Exception {
+    testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, ITEM_CHECKED_IN, borrowingPickupDcbTransaction());
     putDcbTransactionStatusAttempt(DCB_TRANSACTION_ID, transactionStatus(CANCELLED))
       .andExpect(status().isBadRequest())
       .andExpect(jsonPath("$.errors[0].message", startsWith("Cannot cancel transaction dcbTransactionId")))
@@ -171,8 +181,8 @@ class BorrowingPickupTransactionIT extends BaseTenantIntegrationTest {
     "/stubs/mod-circulation/loans/200-get-by-query(dcb loans).json",
     "/stubs/mod-circulation/loans/204-put(max renewal).json"
   })
-  @Sql("/db/scripts/borrowing_pickup_transaction(item_checked_out).sql")
   void blockRenewal_positive() throws Exception {
+    testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, ITEM_CHECKED_OUT, borrowingPickupDcbTransaction());
     mockMvc.perform(
         put("/transactions/{id}/block-renewal", DCB_TRANSACTION_ID)
           .headers(defaultHeaders())
@@ -180,14 +190,13 @@ class BorrowingPickupTransactionIT extends BaseTenantIntegrationTest {
           .accept(MediaType.APPLICATION_JSON))
       .andExpect(status().isNoContent());
 
-    var loanId = "d217d4d5-8b2b-496b-8aa5-7e60d530e124";
-    wiremock.verifyThat(1, putRequestedFor(urlPathEqualTo("/circulation/loans/" + loanId))
+    wiremock.verifyThat(1, putRequestedFor(urlPathEqualTo("/circulation/loans/" + LOAN_ID))
       .withRequestBody(matchingJsonPath("$.renewalCount", equalTo("2147483647"))));
   }
 
   @Test
-  @Sql("/db/scripts/borrowing_pickup_transaction(item_checked_in).sql")
   void blockRenewal_negative_invalidState() throws Exception {
+    testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, ITEM_CHECKED_IN, borrowingPickupDcbTransaction());
     mockMvc.perform(
         put("/transactions/{id}/block-renewal", DCB_TRANSACTION_ID)
           .headers(defaultHeaders())
@@ -204,22 +213,21 @@ class BorrowingPickupTransactionIT extends BaseTenantIntegrationTest {
     "/stubs/mod-circulation/loans/200-get-by-query(dcb loans).json",
     "/stubs/mod-circulation/loans/204-put(min renewal).json"
   })
-  @Sql("/db/scripts/borrowing_pickup_transaction(item_checked_out).sql")
   void unblockRenewal_positive() throws Exception {
+    testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, ITEM_CHECKED_OUT, borrowingPickupDcbTransaction());
     mockMvc.perform(put("/transactions/{id}/unblock-renewal", DCB_TRANSACTION_ID)
         .headers(defaultHeaders())
         .contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON))
       .andExpect(status().isNoContent());
 
-    var loanId = "d217d4d5-8b2b-496b-8aa5-7e60d530e124";
-    wiremock.verifyThat(1, putRequestedFor(urlPathEqualTo("/circulation/loans/" + loanId))
+    wiremock.verifyThat(1, putRequestedFor(urlPathEqualTo("/circulation/loans/" + LOAN_ID))
       .withRequestBody(matchingJsonPath("$.renewalCount", equalTo("0"))));
   }
 
   @Test
-  @Sql("/db/scripts/borrowing_pickup_transaction(item_checked_in).sql")
   void unblockRenewal_negative_invalidState() throws Exception {
+    testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, ITEM_CHECKED_IN, borrowingPickupDcbTransaction());
     mockMvc.perform(
         put("/transactions/{id}/unblock-renewal", DCB_TRANSACTION_ID)
           .headers(defaultHeaders())
@@ -253,8 +261,10 @@ class BorrowingPickupTransactionIT extends BaseTenantIntegrationTest {
     "/stubs/mod-circulation/requests/201-post(any).json",
     "/stubs/mod-circulation/requests/204-put(any).json",
   })
-  @Sql("/db/scripts/borrowing_pickup_transaction(created).sql")
   void updateTransaction_positive_newDcbItemProvidedAsReplacement() throws Exception {
+    var dcbTransaction = borrowingPickupDcbTransaction(dcbPatron(PATRON_TYPE_USER_ID));
+    testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, CREATED, dcbTransaction);
+
     var updateTransaction = dcbTransactionUpdate();
     var newItemId = "27c1a543-c833-4669-8131-9dd344fc46ae";
     mockMvc.perform(
@@ -279,13 +289,26 @@ class BorrowingPickupTransactionIT extends BaseTenantIntegrationTest {
   }
 
   @Test
-  @Sql("/db/scripts/borrowing_pickup_transaction(item_checked_out).sql")
   void updateTransaction_positive_invalidState() throws Exception {
+    testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, ITEM_CHECKED_OUT, borrowingPickupDcbTransaction());
     putDcbTransactionDetailsAttempt(DCB_TRANSACTION_ID, dcbTransactionUpdate())
       .andExpect(status().isBadRequest())
       .andExpect(jsonPath("$.errors[0].code").value("VALIDATION_ERROR"))
       .andExpect(jsonPath("$.errors[0].message").value("Transaction details should not be "
         + "updated from ITEM_CHECKED_OUT status, it can be updated only from CREATED status"));
+  }
+
+  @ParameterizedTest
+  @EnumSource(value = TransactionStatus.StatusEnum.class, names = "EXPIRED", mode = EXCLUDE)
+  void updateTransactionStatus_parameterized_invalidTransitionToExpiredStatus(
+    TransactionStatus.StatusEnum sourceStatus) throws Exception {
+    testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, sourceStatus, borrowerDcbTransaction());
+
+    putDcbTransactionStatusAttempt(DCB_TRANSACTION_ID, transactionStatus(EXPIRED))
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.errors[0].code").value("VALIDATION_ERROR"))
+      .andExpect(jsonPath("$.errors[0].message").value(containsString(String.format(
+        "Status transition will not be possible from %s to EXPIRED", sourceStatus))));
   }
 
   private static void verifyPostCirculationRequestCalledOnce(String requesterId) {

@@ -6,17 +6,37 @@ spring:
       hibernate:
         format_sql: false
     show-sql: true
+  kafka:
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
 folio:
   system-user:
     enabled: false
+  kafka:
+    numberOfPartitions: 1
+    replicationFactor: 1
+    listener:
+      check-in:
+        concurrency: 1
+      loan:
+        concurrency: 1
+      request:
+        concurrency: 1
 
 application:
   dcb-entities:
     runtime-verification-enabled: false
+  retry:
+    item:
+      max-retries: 3
+      delay-milliseconds: 50
 
 logging:
   level:
     org.folio.dcb: debug
+    org.apache.kafka: warn
+    org.springframework.kafka: warn
     org.springframework.test.context.jdbc: warn
     org.springframework.jdbc.datasource.init: warn
