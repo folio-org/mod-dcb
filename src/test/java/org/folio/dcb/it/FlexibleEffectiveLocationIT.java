@@ -22,10 +22,13 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.startsWith;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 import org.folio.dcb.domain.dto.DcbAgency;
 import org.folio.dcb.domain.dto.DcbLocation;
 import org.folio.dcb.domain.dto.ShadowLocationRefreshBody;
@@ -35,6 +38,9 @@ import org.folio.dcb.utils.DCBConstants;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -523,6 +529,26 @@ class FlexibleEffectiveLocationIT extends BaseTenantIntegrationTest {
 
     @Test
     @WireMockStub({
+      "/stubs/mod-inventory-storage/locations/200-get-all(shadow+empty_by_codes).json",
+      "/stubs/mod-inventory-storage/location-units/institutions/200-get-by-query(shadow+name+code empty).json",
+      "/stubs/mod-inventory-storage/location-units/campuses/200-get-by-query(shadow+name+code empty).json",
+      "/stubs/mod-inventory-storage/location-units/libraries/200-get-by-query(shadow+name+code empty).json",
+      "/stubs/mod-inventory-storage/location-units/institutions/201-post(any shadow).json",
+      "/stubs/mod-inventory-storage/location-units/campuses/201-post(any shadow).json",
+      "/stubs/mod-inventory-storage/location-units/libraries/201-post(any shadow).json",
+      "/stubs/mod-inventory-storage/locations/201-post(any shadow).json",
+    })
+    void refreshShadowLocations_positive_onlyAgency() throws Exception {
+      var agency = dcbAgency("AG-002", "Agency-Two");
+      refreshShadowLocations(refreshBody(emptyList(), List.of(agency)))
+        .andExpect(jsonPath("$.locations[?(@.code=='AG-002')].status").value("SUCCESS"))
+        .andExpect(jsonPath("$.location-units.institutions[?(@.code=='AG-002')].status").value("SUCCESS"))
+        .andExpect(jsonPath("$.location-units.campuses[?(@.code=='AG-002')].status").value("SUCCESS"))
+        .andExpect(jsonPath("$.location-units.libraries[?(@.code=='AG-002')].status").value("SUCCESS"));
+    }
+
+    @Test
+    @WireMockStub({
       "/stubs/mod-inventory-storage/location-units/institutions/200-get-by-query(shadow+name+code empty).json",
       "/stubs/mod-inventory-storage/location-units/institutions/400-post(AG-2).json",
     })
@@ -604,6 +630,15 @@ class FlexibleEffectiveLocationIT extends BaseTenantIntegrationTest {
         .andExpect(jsonPath("$.location-units").doesNotExist());
     }
 
+    @ParameterizedTest(name = "[{index}] {0}")
+    @MethodSource("invalidRefreshBodyProviders")
+    void refreshShadowLocations_negativeParameterized_invalidInputValues(
+      @SuppressWarnings("unused") String name, ShadowLocationRefreshBody requestBody) throws Exception {
+      refreshShadowLocationsAttempt(requestBody)
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.errors[0].code").value("VALIDATION_ERROR"));;
+    }
+
     private static ShadowLocationRefreshBody defaultRefreshBody() {
       return new ShadowLocationRefreshBody()
         .addLocationsItem(dcbLocation("LOC-1", "Location-1", dcbAgency("AG-001", "Agency-One")))
@@ -626,6 +661,23 @@ class FlexibleEffectiveLocationIT extends BaseTenantIntegrationTest {
 
     private static DcbAgency dcbAgency(String code, String name) {
       return new DcbAgency().name(name).code(code);
+    }
+
+    private static Stream<Arguments> invalidRefreshBodyProviders() {
+      return Stream.of(
+        arguments("Empty location code", refreshBody(
+          List.of(dcbLocation(null, "Loc", dcbAgency("AG1", "test"))), emptyList())),
+        arguments("Empty location name", refreshBody(
+          List.of(dcbLocation("LC", null, dcbAgency("AG1", "test"))), emptyList())),
+        arguments("Null agency in location", refreshBody(
+          List.of(dcbLocation("LC", "Loc", null)), emptyList())),
+        arguments("Empty agency code in location", refreshBody(
+          List.of(dcbLocation("LC", "Loc", dcbAgency(null, "test"))), emptyList())),
+        arguments("Empty agency name in location", refreshBody(
+          List.of(dcbLocation("LC", "Loc", dcbAgency("AG1", null))), emptyList())),
+        arguments("Empty agency code", refreshBody(emptyList(), List.of(dcbAgency(null, "test")))),
+        arguments("Empty agency name", refreshBody(emptyList(), List.of(dcbAgency("AG1", null))))
+      );
     }
   }
 }

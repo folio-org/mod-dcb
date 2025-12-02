@@ -9,7 +9,8 @@
           { "equalTo": "(name==\"Location-2\" AND code==\"LOC-2\")" },
           { "equalTo": "(name==\"Location-4\" AND code==\"LOC-4\")" },
           { "equalTo": "(name==\"Location-6\" AND code==\"LOC-6\")" },
-          { "equalTo": "(name==\"Location-8\" AND code==\"LOC-8\")" }
+          { "equalTo": "(name==\"Location-8\" AND code==\"LOC-8\")" },
+          { "equalTo": "(name==\"Agency-Two\" AND code==\"AG-002\")" }
         ]
       }
     },
