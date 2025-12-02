@@ -72,27 +72,28 @@ requires and provides, the permissions, and the additional module metadata.
 
 ### Environment variables
 
-| Name                   |    Default value    | Description                                                                                                                                                           |
-|:-----------------------|:-------------------:|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| DB_HOST                |      postgres       | Postgres hostname                                                                                                                                                     |
-| DB_PORT                |        5432         | Postgres port                                                                                                                                                         |
-| DB_USERNAME            |     folio_admin     | Postgres username                                                                                                                                                     |
-| DB_PASSWORD            |          -          | Postgres username password                                                                                                                                            |
-| DB_DATABASE            |    okapi_modules    | Postgres database name                                                                                                                                                |
-| KAFKA_HOST             |        kafka        | Kafka broker hostname                                                                                                                                                 |
-| KAFKA_PORT             |        9092         | Kafka broker port                                                                                                                                                     |
-| KAFKA_SECURITY_PROTOCOL       |      PLAINTEXT      | Kafka security protocol used to communicate with brokers (SSL or PLAINTEXT)                                                                                           |
-| KAFKA_SSL_KEYSTORE_LOCATION   |          -          | The location of the Kafka key store file. This is optional for client and can be used for two-way authentication for client.                                          |
-| KAFKA_SSL_KEYSTORE_PASSWORD   |          -          | The store password for the Kafka key store file. This is optional for client and only needed if 'ssl.keystore.location' is configured.                                |
-| KAFKA_SSL_TRUSTSTORE_LOCATION |          -          | The location of the Kafka trust store file.                                                                                                                           |
-| KAFKA_SSL_TRUSTSTORE_PASSWORD |          -          | The password for the Kafka trust store file. If a password is not set, trust store file configured will still be used, but integrity checking is disabled.            |
-| ENV                    |        folio        | Environment. Logical name of the deployment, must be set if Kafka/Elasticsearch are shared for environments, `a-z (any case)`, `0-9`, `-`, `_` symbols only allowed   |
-| SYSTEM\_USER\_NAME     |   dcb-system-user   | Username of the system user                                                                                                                                           |
-| SYSTEM\_USER\_PASSWORD |          -          | Password of the system user                                                                                                                                           |
-| SYSTEM\_USER\_ENABLED  |        true         | Defines if system user must be created at service tenant initialization or used for egress service requests                                                           |
-| ACTUATOR\_EXPOSURE     | health,info,loggers | Back End Module Health Check Protocol                                                                                                                                 |
-| FETCH_DCB_LOCATIONS_ENABLED     |        false        | To enable the dcb-hub shadow location lookup to populate effectiveLocationId based on locationCode in dcb txn for BORROWER, BORROWING_PICKUP and PICKUP roles         |
-| DCB_LOCATIONS_BASE_URL     |          -          | DCB-HUB locations base URL before `/locations`, It must required only if FETCH_DCB_LOCATIONS_ENABLED is true. Check below "DCB-HUB Configuration" section for more info |
+| Name                                      |    Default value    | Description                                                                                                                                                         |
+|:------------------------------------------|:-------------------:|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| DB_HOST                                   |      postgres       | Postgres hostname                                                                                                                                                   |
+| DB_PORT                                   |        5432         | Postgres port                                                                                                                                                       |
+| DB_USERNAME                               |     folio_admin     | Postgres username                                                                                                                                                   |
+| DB_PASSWORD                               |          -          | Postgres username password                                                                                                                                          |
+| DB_DATABASE                               |    okapi_modules    | Postgres database name                                                                                                                                              |
+| KAFKA_HOST                                |        kafka        | Kafka broker hostname                                                                                                                                               |
+| KAFKA_PORT                                |        9092         | Kafka broker port                                                                                                                                                   |
+| KAFKA_SECURITY_PROTOCOL                   |      PLAINTEXT      | Kafka security protocol used to communicate with brokers (SSL or PLAINTEXT)                                                                                         |
+| KAFKA_SSL_KEYSTORE_LOCATION               |          -          | The location of the Kafka key store file. This is optional for client and can be used for two-way authentication for client.                                        |
+| KAFKA_SSL_KEYSTORE_PASSWORD               |          -          | The store password for the Kafka key store file. This is optional for client and only needed if 'ssl.keystore.location' is configured.                              |
+| KAFKA_SSL_TRUSTSTORE_LOCATION             |          -          | The location of the Kafka trust store file.                                                                                                                         |
+| KAFKA_SSL_TRUSTSTORE_PASSWORD             |          -          | The password for the Kafka trust store file. If a password is not set, trust store file configured will still be used, but integrity checking is disabled.          |
+| ENV                                       |        folio        | Environment. Logical name of the deployment, must be set if Kafka/Elasticsearch are shared for environments, `a-z (any case)`, `0-9`, `-`, `_` symbols only allowed |
+| SYSTEM\_USER\_NAME                        |   dcb-system-user   | Username of the system user                                                                                                                                         |
+| SYSTEM\_USER\_PASSWORD                    |          -          | Password of the system user                                                                                                                                         |
+| SYSTEM\_USER\_ENABLED                     |        true         | Defines if system user must be created at service tenant initialization or used for egress service requests                                                         |
+| ACTUATOR\_EXPOSURE                        | health,info,loggers | Back End Module Health Check Protocol                                                                                                                               |
+| FLEXIBLE_CIRCULATION_RULES_ENABLED        |        true         | If enabled, new virtual items will be attempted to assign with a shadow location based on `item.lendingLibraryCode` or `item.locationCode`                          |
+| DCB_ENTITIES_RUNTIME_VERIFICATION_ENABLED |        true         | If enabled, all DCB-controlled entities (virtual service point, instance, holding, etc.) will be verified before using them                                         |
+
 ## Additional information
 
 ### System user configuration
