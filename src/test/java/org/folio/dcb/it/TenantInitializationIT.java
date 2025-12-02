@@ -2,11 +2,8 @@ package org.folio.dcb.it;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.requestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
-import static org.hamcrest.Matchers.containsString;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static support.wiremock.WiremockContainerExtension.getWireMockClient;
 
 import org.folio.dcb.it.base.BaseIntegrationTest;
