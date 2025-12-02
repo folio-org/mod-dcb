@@ -630,7 +630,7 @@ class FlexibleEffectiveLocationIT extends BaseTenantIntegrationTest {
       @SuppressWarnings("unused") String name, ShadowLocationRefreshBody requestBody) throws Exception {
       refreshShadowLocationsAttempt(requestBody)
         .andExpect(status().isBadRequest())
-        .andExpect(jsonPath("$.errors[0].code").value("VALIDATION_ERROR"));;
+        .andExpect(jsonPath("$.errors[0].code").value("VALIDATION_ERROR"));
     }
 
     private static ShadowLocationRefreshBody defaultRefreshBody() {
