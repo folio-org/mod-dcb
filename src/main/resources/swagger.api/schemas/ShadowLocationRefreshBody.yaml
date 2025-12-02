@@ -9,7 +9,6 @@ ShadowLocationRefreshBody:
       type: array
       items:
         $ref: '#/DcbLocation'
-  required:
 
 DcbAgency:
   type: object
