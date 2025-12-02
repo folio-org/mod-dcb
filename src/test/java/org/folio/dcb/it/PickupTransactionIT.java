@@ -8,6 +8,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CANCELLED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.EXPIRED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_IN;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
 import static org.folio.dcb.utils.EntityUtils.BORROWER_SERVICE_POINT_ID;
@@ -26,15 +27,19 @@ import static org.folio.dcb.utils.EntityUtils.transactionStatus;
 import static org.folio.dcb.utils.JsonTestUtils.asJsonString;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.params.provider.EnumSource.Mode.EXCLUDE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.folio.dcb.domain.dto.TransactionStatus.StatusEnum;
 import org.folio.dcb.it.base.BaseTenantIntegrationTest;
 import org.folio.dcb.support.types.IntegrationTest;
 import org.folio.dcb.support.wiremock.WireMockStub;
 import org.folio.dcb.utils.DCBConstants;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.http.MediaType;
 
 @IntegrationTest
@@ -249,6 +254,19 @@ class PickupTransactionIT extends BaseTenantIntegrationTest {
       .andExpect(jsonPath("$.errors[0].code").value("VALIDATION_ERROR"))
       .andExpect(jsonPath("$.errors[0].message").value("Transaction details should not be "
         + "updated from ITEM_CHECKED_IN status, it can be updated only from CREATED status"));
+  }
+
+  @ParameterizedTest
+  @EnumSource(value = StatusEnum.class, names = "EXPIRED", mode = EXCLUDE)
+  void updateTransactionStatus_parameterized_invalidTransitionToExpiredStatus(
+    StatusEnum sourceStatus) throws Exception {
+    testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, sourceStatus, pickupDcbTransaction());
+
+    putDcbTransactionStatusAttempt(DCB_TRANSACTION_ID, transactionStatus(EXPIRED))
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.errors[0].code").value("VALIDATION_ERROR"))
+      .andExpect(jsonPath("$.errors[0].message").value(containsString(String.format(
+        "Status transition will not be possible from %s to EXPIRED", sourceStatus))));
   }
 
   private static void verifyPostCirculationRequestCalledOnce(String requesterId) {

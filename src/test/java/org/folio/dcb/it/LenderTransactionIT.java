@@ -11,7 +11,9 @@ import static org.folio.dcb.domain.dto.CirculationRequest.RequestTypeEnum.HOLD;
 import static org.folio.dcb.domain.dto.CirculationRequest.RequestTypeEnum.PAGE;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.AWAITING_PICKUP;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CANCELLED;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CLOSED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.EXPIRED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_IN;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_OUT;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
@@ -23,24 +25,31 @@ import static org.folio.dcb.utils.EntityUtils.INSTANCE_ID;
 import static org.folio.dcb.utils.EntityUtils.ITEM_ID;
 import static org.folio.dcb.utils.EntityUtils.NOT_EXISTED_PATRON_ID;
 import static org.folio.dcb.utils.EntityUtils.PATRON_TYPE_USER_ID;
+import static org.folio.dcb.utils.EntityUtils.TEST_TENANT;
 import static org.folio.dcb.utils.EntityUtils.dcbItem;
 import static org.folio.dcb.utils.EntityUtils.dcbPatron;
 import static org.folio.dcb.utils.EntityUtils.dcbTransactionUpdate;
 import static org.folio.dcb.utils.EntityUtils.lenderDcbTransaction;
 import static org.folio.dcb.utils.EntityUtils.transactionStatus;
+import static org.folio.dcb.utils.EventDataProvider.expiredRequestMessage;
+import static org.folio.dcb.utils.EventDataProvider.itemCheckInMessage;
 import static org.folio.dcb.utils.JsonTestUtils.asJsonString;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
+import static org.junit.jupiter.params.provider.EnumSource.Mode.EXCLUDE;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.folio.dcb.domain.dto.TransactionStatus.StatusEnum;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.it.base.BaseTenantIntegrationTest;
 import org.folio.dcb.support.types.IntegrationTest;
 import org.folio.dcb.support.wiremock.WireMockStub;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
 @IntegrationTest
 class LenderTransactionIT extends BaseTenantIntegrationTest {
@@ -354,6 +363,32 @@ class LenderTransactionIT extends BaseTenantIntegrationTest {
         containsString("Transaction already in status: ITEM_CHECKED_IN")));
   }
 
+  @ParameterizedTest
+  @EnumSource(value = StatusEnum.class, names = "EXPIRED", mode = EXCLUDE)
+  void updateTransactionStatus_parameterized_invalidTransitionToExpiredStatus(
+    StatusEnum sourceStatus) throws Exception {
+    testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, sourceStatus, lenderDcbTransaction());
+
+    putDcbTransactionStatusAttempt(DCB_TRANSACTION_ID, transactionStatus(EXPIRED))
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.errors[0].code").value("VALIDATION_ERROR"))
+      .andExpect(jsonPath("$.errors[0].message").value(containsString(String.format(
+        "Status transition will not be possible from %s to EXPIRED", sourceStatus))));
+  }
+
+  @ParameterizedTest
+  @EnumSource(value = StatusEnum.class, names = "EXPIRED", mode = EXCLUDE)
+  void updateTransactionStatus_parameterized_invalidTransitionFromExpiredStatus(
+    StatusEnum targetStatus) throws Exception {
+    testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, EXPIRED, lenderDcbTransaction());
+
+    putDcbTransactionStatusAttempt(DCB_TRANSACTION_ID, transactionStatus(targetStatus))
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.errors[0].code").value("VALIDATION_ERROR"))
+      .andExpect(jsonPath("$.errors[0].message").value(containsString(String.format(
+        "Status transition will not be possible from EXPIRED to %s", targetStatus))));
+  }
+
   @Test
   void createTransaction_negative_invalidItemId() throws Exception {
     var dcbTransaction = lenderDcbTransaction().item(dcbItem().id("1234"));
@@ -388,6 +423,34 @@ class LenderTransactionIT extends BaseTenantIntegrationTest {
       .andExpect(jsonPath("$.errors[0].code").value("VALIDATION_ERROR"))
       .andExpect(jsonPath("$.errors[0].message").value("Transaction details should not be "
         + "updated from ITEM_CHECKED_IN status, it can be updated only from CREATED status"));
+  }
+
+  @Test
+  @WireMockStub("/stubs/mod-circulation/requests/200-get-by-query(hold requests empty).json")
+  void updateStatus_positive_awaitingPickupTransactionExpiration() throws Exception {
+    testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, AWAITING_PICKUP, lenderDcbTransaction());
+    getDcbTransactionStatus(DCB_TRANSACTION_ID)
+      .andExpect(jsonPath("$.status").value(AWAITING_PICKUP.getValue()));
+
+    testEventHelper.sendMessage(expiredRequestMessage(TEST_TENANT));
+    awaitUntilAsserted(() -> getDcbTransactionStatus(DCB_TRANSACTION_ID)
+      .andExpect(jsonPath("$.status").value(EXPIRED.getValue())));
+  }
+
+  @Test
+  @WireMockStub({
+    "/stubs/mod-circulation/requests/200-get-by-query(hold requests empty).json",
+    "/stubs/mod-inventory-storage/item-storage/200-get-by-query(id+available).json",
+  })
+  void updateStatus_positive_expiredToClosedTransitionAfterCheckInMessage() throws Exception {
+    testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, EXPIRED, lenderDcbTransaction());
+    getDcbTransactionStatus(DCB_TRANSACTION_ID)
+      .andExpect(jsonPath("$.status").value(EXPIRED.getValue()));
+
+    testEventHelper.sendMessage(itemCheckInMessage(TEST_TENANT));
+
+    awaitUntilAsserted(() -> getDcbTransactionStatus(DCB_TRANSACTION_ID)
+      .andExpect(jsonPath("$.status").value(CLOSED.getValue())));
   }
 
   private static void verifyPostCirculationRequestCalledOnce(String type, String requesterId) {

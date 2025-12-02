@@ -1,6 +1,7 @@
 package org.folio.dcb.service;
 
 import org.folio.dcb.domain.dto.InventoryItem;
+import org.folio.dcb.exception.InventoryItemNotFound;
 import org.folio.spring.model.ResultList;
 
 public interface ItemService {
@@ -25,4 +26,14 @@ public interface ItemService {
    * @return InventoryItem
    */
   InventoryItem fetchItemByIdAndBarcode(String id, String itemBarcode);
+
+  /**
+   * Finds the inventory item by its ID after a check-in operation, ensuring it has the expected service point ID.
+   *
+   * @param id the unique identifier of the inventory item
+   * @param expectedServicePointId the expected service point ID from the last check-in
+   * @return the inventory item if found and matching the service point
+   * @throws InventoryItemNotFound if the item is not found or does not have the expected service point ID
+   */
+  InventoryItem findItemByIdAfterCheckIn(String id, String expectedServicePointId);
 }

@@ -1,6 +1,8 @@
 package org.folio.dcb.it.base;
 
 import static org.assertj.core.api.Assertions.entry;
+import static org.awaitility.Durations.TEN_SECONDS;
+import static org.awaitility.Durations.TWO_HUNDRED_MILLISECONDS;
 import static org.folio.dcb.support.kafka.KafkaContainerExtension.createTopics;
 import static org.folio.dcb.support.kafka.KafkaContainerExtension.deleteTopics;
 import static org.folio.dcb.support.wiremock.WiremockContainerExtension.getWireMockClient;
@@ -20,6 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import lombok.SneakyThrows;
+import org.awaitility.Awaitility;
+import org.awaitility.core.ThrowingRunnable;
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.DcbUpdateTransaction;
 import org.folio.dcb.domain.dto.TransactionStatus;
@@ -34,12 +38,10 @@ import org.junit.jupiter.api.BeforeAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.util.LinkedMultiValueMap;
 
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @Import({TestJdbcHelper.class, TestCirculationEventHelper.class})
 @Sql(value = "/db/scripts/cleanup_dcb_tables.sql", executionPhase = AFTER_TEST_METHOD)
 public abstract class BaseTenantIntegrationTest extends BaseIntegrationTest {
@@ -186,13 +188,20 @@ public abstract class BaseTenantIntegrationTest extends BaseIntegrationTest {
         .accept(MediaType.APPLICATION_JSON));
   }
 
-  @SuppressWarnings("SameParameterValue")
   @SneakyThrows
+  @SuppressWarnings("SameParameterValue")
   protected static ResultActions putDcbTransactionDetailsAttempt(String id, DcbUpdateTransaction body) {
     return mockMvc.perform(put("/transactions/{id}", id)
       .content(asJsonString(body))
       .headers(defaultHeaders())
       .contentType(MediaType.APPLICATION_JSON)
       .accept(MediaType.APPLICATION_JSON));
+  }
+
+  protected static void awaitUntilAsserted(ThrowingRunnable throwingRunnable) {
+    Awaitility.await()
+      .atMost(TEN_SECONDS)
+      .pollInterval(TWO_HUNDRED_MILLISECONDS)
+      .untilAsserted(throwingRunnable);
   }
 }

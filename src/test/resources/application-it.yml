@@ -27,9 +27,6 @@ folio:
         concurrency: 1
 
 application:
-  features:
-    flexible-circulation-rules-enabled: false
-    dcb-entities-runtime-verification-enabled: false
   retry:
     item:
       max-retries: 3

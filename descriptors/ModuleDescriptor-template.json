@@ -82,7 +82,7 @@
   "provides": [
     {
       "id": "transactions",
-      "version": "1.5",
+      "version": "1.6",
       "handlers": [
         {
           "methods": [
@@ -230,7 +230,7 @@
     },
     {
       "id": "ecs-request-transactions",
-      "version": "1.1",
+      "version": "1.2",
       "handlers": [
         {
           "methods": [

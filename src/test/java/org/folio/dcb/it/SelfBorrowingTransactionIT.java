@@ -7,6 +7,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.folio.dcb.domain.dto.CirculationRequest.RequestTypeEnum.HOLD;
 import static org.folio.dcb.domain.dto.CirculationRequest.RequestTypeEnum.PAGE;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.EXPIRED;
 import static org.folio.dcb.support.wiremock.WiremockContainerExtension.getWireMockClient;
 import static org.folio.dcb.utils.EntityUtils.BORROWER_SERVICE_POINT_ID;
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
@@ -19,16 +20,22 @@ import static org.folio.dcb.utils.EntityUtils.PICKUP_SERVICE_POINT_ID;
 import static org.folio.dcb.utils.EntityUtils.borrowerDcbTransaction;
 import static org.folio.dcb.utils.EntityUtils.borrowingPickupDcbTransaction;
 import static org.folio.dcb.utils.EntityUtils.dcbPatron;
+import static org.folio.dcb.utils.EntityUtils.transactionStatus;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.params.provider.EnumSource.Mode.EXCLUDE;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
+import org.folio.dcb.domain.dto.TransactionStatus.StatusEnum;
 import org.folio.dcb.it.base.BaseTenantIntegrationTest;
 import org.folio.dcb.support.types.IntegrationTest;
 import org.folio.dcb.support.wiremock.WireMockStub;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
 @IntegrationTest
 class SelfBorrowingTransactionIT {
@@ -130,6 +137,19 @@ class SelfBorrowingTransactionIT {
       var auditEntity = auditEntityVerifier.getLatestAuditEntity(DCB_TRANSACTION_ID);
       assertThat(auditEntity.getAction()).isEqualTo("ERROR");
     }
+
+    @ParameterizedTest
+    @EnumSource(value = StatusEnum.class, names = "EXPIRED", mode = EXCLUDE)
+    void updateTransactionStatus_parameterized_invalidTransitionToExpiredStatus(
+      StatusEnum sourceStatus) throws Exception {
+      testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, sourceStatus, borrowerDcbTransaction(true));
+
+      putDcbTransactionStatusAttempt(DCB_TRANSACTION_ID, transactionStatus(EXPIRED))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.errors[0].code").value("VALIDATION_ERROR"))
+        .andExpect(jsonPath("$.errors[0].message").value(containsString(String.format(
+          "Status transition will not be possible from %s to EXPIRED", sourceStatus))));
+    }
   }
 
   @Nested
@@ -202,6 +222,20 @@ class SelfBorrowingTransactionIT {
 
       var auditEntity = auditEntityVerifier.getLatestAuditEntity(DCB_TRANSACTION_ID);
       assertThat(auditEntity.getAction()).isEqualTo("ERROR");
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = StatusEnum.class, names = "EXPIRED", mode = EXCLUDE)
+    void updateTransactionStatus_parameterized_invalidTransitionToExpiredStatus(
+      StatusEnum sourceStatus) throws Exception {
+      var dcbTransaction = borrowingPickupDcbTransaction(true);
+      testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, sourceStatus, dcbTransaction);
+
+      putDcbTransactionStatusAttempt(DCB_TRANSACTION_ID, transactionStatus(EXPIRED))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.errors[0].code").value("VALIDATION_ERROR"))
+        .andExpect(jsonPath("$.errors[0].message").value(containsString(String.format(
+          "Status transition will not be possible from %s to EXPIRED", sourceStatus))));
     }
   }
 }
