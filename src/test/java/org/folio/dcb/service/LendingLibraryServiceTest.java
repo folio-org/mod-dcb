@@ -151,6 +151,18 @@ class LendingLibraryServiceTest {
   }
 
   @Test
+  void closeExpiredTransactionEntityNullStatus() {
+    var entity = createTransactionEntity();
+    var item = createInventoryItem().status(null);
+    var servicePointId = UUID.randomUUID().toString();
+    when(itemService.findItemByIdAfterCheckIn(entity.getItemId(), servicePointId)).thenReturn(item);
+
+    lendingLibraryService.closeExpiredTransactionEntity(entity, servicePointId);
+
+    verify(transactionRepository, never()).save(any());
+  }
+
+  @Test
   void closeExpiredTransactionEntityMatchedItemNotFound() {
     var entity = createTransactionEntity();
     var servicePointId = UUID.randomUUID().toString();

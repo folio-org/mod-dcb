@@ -1,6 +1,7 @@
 package org.folio.dcb.listener;
 
 import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.folio.dcb.domain.ResultList.asSinglePage;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
@@ -124,6 +125,12 @@ class CirculationCheckInEventListenerTest extends BaseTenantIntegrationTest {
   })
   void handleCheckInEvent_parameterized_ignoredPayload(String payload) {
     eventListener.handleCheckInEvent(payload, messageHeaders());
+    verifyNoInteractions(repository);
+  }
+
+  @Test
+  void handleCheckInEvent_parameterized_emptyMessageHeaders() {
+    eventListener.handleCheckInEvent(CHECK_IN_EVENT_SAMPLE, new MessageHeaders(emptyMap()));
     verifyNoInteractions(repository);
   }
 
