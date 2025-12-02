@@ -1,4 +1,4 @@
-package support.types;
+package org.folio.dcb.support.types;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

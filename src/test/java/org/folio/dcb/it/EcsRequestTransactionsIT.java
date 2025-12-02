@@ -25,13 +25,13 @@ import lombok.SneakyThrows;
 import org.folio.dcb.domain.dto.DcbItem;
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.it.base.BaseTenantIntegrationTest;
+import org.folio.dcb.support.types.IntegrationTest;
+import org.folio.dcb.support.wiremock.WireMockStub;
 import org.folio.dcb.utils.DCBConstants;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.ResultActions;
-import support.types.IntegrationTest;
-import support.wiremock.WireMockStub;
 
 @IntegrationTest
 class EcsRequestTransactionsIT extends BaseTenantIntegrationTest {

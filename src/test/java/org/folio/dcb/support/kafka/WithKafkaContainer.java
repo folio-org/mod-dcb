@@ -1,4 +1,4 @@
-package support.wiremock;
+package org.folio.dcb.support.kafka;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -8,5 +8,5 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@ExtendWith({ WiremockContainerExtension.class, WiremockStubExtension.class})
-public @interface WithWiremockContainer {}
+@ExtendWith(KafkaContainerExtension.class)
+public @interface WithKafkaContainer {}

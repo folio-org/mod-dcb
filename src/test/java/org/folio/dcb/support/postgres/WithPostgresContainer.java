@@ -1,4 +1,4 @@
-package support.postgres;
+package org.folio.dcb.support.postgres;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

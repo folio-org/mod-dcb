@@ -1,4 +1,4 @@
-package support.postgres;
+package org.folio.dcb.support.postgres;
 
 import java.util.Map;
 import org.junit.jupiter.api.extension.AfterAllCallback;

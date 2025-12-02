@@ -1,6 +1,7 @@
 package org.folio.dcb.it.base;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.folio.dcb.support.wiremock.WiremockContainerExtension.WM_URL_PROPERTY;
 import static org.folio.dcb.utils.EntityUtils.REQUEST_USER_ID;
 import static org.folio.dcb.utils.EntityUtils.TEST_TENANT;
 import static org.folio.dcb.utils.JsonTestUtils.asJsonString;
@@ -12,11 +13,13 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.context.jdbc.SqlMergeMode.MergeMode.MERGE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static support.wiremock.WiremockContainerExtension.WM_URL_PROPERTY;
 
 import java.util.List;
 import lombok.SneakyThrows;
 import org.folio.dcb.domain.dto.ShadowLocationRefreshBody;
+import org.folio.dcb.support.kafka.WithKafkaContainer;
+import org.folio.dcb.support.postgres.WithPostgresContainer;
+import org.folio.dcb.support.wiremock.WithWiremockContainer;
 import org.folio.tenant.domain.dto.TenantAttributes;
 import org.junit.jupiter.api.BeforeAll;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,9 +31,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.SqlMergeMode;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import support.kafka.WithKafkaContainer;
-import support.postgres.WithPostgresContainer;
-import support.wiremock.WithWiremockContainer;
 
 @SpringBootTest
 @ActiveProfiles("it")

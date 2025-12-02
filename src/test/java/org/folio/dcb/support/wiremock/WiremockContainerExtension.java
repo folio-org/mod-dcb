@@ -1,4 +1,4 @@
-package support.wiremock;
+package org.folio.dcb.support.wiremock;
 
 import com.github.tomakehurst.wiremock.client.HttpAdminClient;
 import com.github.tomakehurst.wiremock.client.WireMock;

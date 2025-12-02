@@ -1,4 +1,4 @@
-package support;
+package org.folio.dcb.support;
 
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;

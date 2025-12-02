@@ -8,6 +8,7 @@ import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
 import java.nio.file.Path;
+import org.folio.dcb.support.postgres.PostgresContainerExtension;
 import org.folio.spring.integration.XOkapiHeaders;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,7 +26,6 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.kafka.KafkaContainer;
 import org.testcontainers.utility.DockerImageName;
-import support.postgres.PostgresContainerExtension;
 
 @Testcontainers
 class FolioDcbApplicationIT {

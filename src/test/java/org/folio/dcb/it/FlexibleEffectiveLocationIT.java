@@ -31,6 +31,8 @@ import org.folio.dcb.domain.dto.DcbAgency;
 import org.folio.dcb.domain.dto.DcbLocation;
 import org.folio.dcb.domain.dto.ShadowLocationRefreshBody;
 import org.folio.dcb.it.base.BaseTenantIntegrationTest;
+import org.folio.dcb.support.types.IntegrationTest;
+import org.folio.dcb.support.wiremock.WireMockStub;
 import org.folio.dcb.utils.DCBConstants;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -39,8 +41,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.test.context.TestPropertySource;
-import support.types.IntegrationTest;
-import support.wiremock.WireMockStub;
 
 @IntegrationTest
 @TestPropertySource(properties = { "application.features.flexible-circulation-rules-enabled=true" })

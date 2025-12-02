@@ -1,4 +1,4 @@
-package support.kafka;
+package org.folio.dcb.support.kafka;
 
 import static org.testcontainers.utility.DockerImageName.parse;
 

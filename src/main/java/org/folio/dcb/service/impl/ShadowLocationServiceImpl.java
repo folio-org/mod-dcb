@@ -27,8 +27,7 @@ import org.folio.dcb.domain.dto.RefreshShadowLocationResponse;
 import org.folio.dcb.domain.dto.ServicePointRequest;
 import org.folio.dcb.domain.dto.ShadowLocationRefreshBody;
 import org.folio.dcb.exception.ServiceException;
-import org.folio.dcb.integration.dcb.model.AgencyKey;
-import org.folio.dcb.integration.dcb.model.LocationAgenciesIds;
+import org.folio.dcb.domain.DcbAgencyKey;
 import org.folio.dcb.service.ShadowLocationService;
 import org.folio.dcb.service.entities.DcbEntityServiceFacade;
 import org.springframework.stereotype.Service;
@@ -85,9 +84,9 @@ public class ShadowLocationServiceImpl implements ShadowLocationService {
     return response;
   }
 
-  private LocationUnitsResult createLocationUnits(Set<AgencyKey> agencies) {
+  private LocationUnitsResult createLocationUnits(Set<DcbAgencyKey> agencies) {
     RefreshLocationUnitsStatus locationUnits = new RefreshLocationUnitsStatus();
-    Map<AgencyKey, LocationAgenciesIds> agencyLocationUnitMapping = new HashMap<>();
+    Map<DcbAgencyKey, LocationAgenciesIds> agencyLocationUnitMapping = new HashMap<>();
 
     agencies.forEach(agencyKey -> {
       log.debug("createLocationUnits:: Creating units for agency: {} - {}",
@@ -112,7 +111,7 @@ public class ShadowLocationServiceImpl implements ShadowLocationService {
     return new LocationUnitsResult(locationUnits, agencyLocationUnitMapping);
   }
 
-  private InstitutionResult createInstitution(AgencyKey agencyKey) {
+  private InstitutionResult createInstitution(DcbAgencyKey agencyKey) {
     try {
       var query = exactMatchByNameAndCode(agencyKey.agencyName(), agencyKey.agencyCode());
       var locationUnitResultList = locationUnitClient.findInstitutionsByQuery(query, true, 10, 0);
@@ -159,7 +158,7 @@ public class ShadowLocationServiceImpl implements ShadowLocationService {
     }
   }
 
-  private CampusResult createCampus(AgencyKey agencyKey, LocationUnit institution) {
+  private CampusResult createCampus(DcbAgencyKey agencyKey, LocationUnit institution) {
     try {
       if (institution == null) {
         log.error("createCampus:: Institution is null for agency: {} - {}, cannot create campus",
@@ -220,7 +219,7 @@ public class ShadowLocationServiceImpl implements ShadowLocationService {
     }
   }
 
-  private LibraryResult createLibrary(AgencyKey agencyKey, LocationUnit campus) {
+  private LibraryResult createLibrary(DcbAgencyKey agencyKey, LocationUnit campus) {
     try {
       if (campus == null) {
         log.error("createLibrary:: Campus is null for agency: {} - {}, cannot create library",
@@ -282,8 +281,8 @@ public class ShadowLocationServiceImpl implements ShadowLocationService {
   }
 
   private List<RefreshLocationStatus> createShadowLocationEntries(
-    Map<AgencyKey, List<DcbLocation>> locationsGroupedByAgency,
-    Map<AgencyKey, LocationAgenciesIds> agencyLocationUnitMapping,
+    Map<DcbAgencyKey, List<DcbLocation>> locationsGroupedByAgency,
+    Map<DcbAgencyKey, LocationAgenciesIds> agencyLocationUnitMapping,
     ServicePointRequest servicePointRequest) {
 
     var locationStatuses = new ArrayList<RefreshLocationStatus>();
@@ -384,11 +383,13 @@ public class ShadowLocationServiceImpl implements ShadowLocationService {
 
   private record LocationUnitsResult(
     RefreshLocationUnitsStatus locationUnits,
-    Map<AgencyKey, LocationAgenciesIds> agencyLocationUnitMapping) {}
+    Map<DcbAgencyKey, LocationAgenciesIds> agencyLocationUnitMapping) {}
 
   private record InstitutionResult(LocationUnit institution, RefreshLocationStatus locationUnitsStatus) {}
 
   private record CampusResult(LocationUnit campus, RefreshLocationStatus locationUnitsStatus) {}
 
   private record LibraryResult(LocationUnit library, RefreshLocationStatus locationUnitsStatus) {}
+
+  private record LocationAgenciesIds(String institutionId, String campusId, String libraryId) {}
 }

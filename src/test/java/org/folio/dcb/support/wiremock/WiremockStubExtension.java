@@ -1,11 +1,11 @@
-package support.wiremock;
+package org.folio.dcb.support.wiremock;
 
 import static com.github.tomakehurst.wiremock.admin.model.ServeEventQuery.ALL_UNMATCHED;
 import static java.util.Collections.emptyList;
 import static org.apache.commons.lang3.StringUtils.trimToNull;
+import static org.folio.dcb.support.wiremock.WiremockContainerExtension.getWireMockAdminClient;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static support.wiremock.WiremockContainerExtension.getWireMockAdminClient;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;

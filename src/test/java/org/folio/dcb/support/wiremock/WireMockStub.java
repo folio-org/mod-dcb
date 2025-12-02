@@ -1,4 +1,4 @@
-package support.wiremock;
+package org.folio.dcb.support.wiremock;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

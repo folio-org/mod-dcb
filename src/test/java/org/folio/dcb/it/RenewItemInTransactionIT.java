@@ -11,9 +11,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.folio.dcb.it.base.BaseTenantIntegrationTest;
+import org.folio.dcb.support.types.IntegrationTest;
+import org.folio.dcb.support.wiremock.WireMockStub;
 import org.junit.jupiter.api.Test;
-import support.types.IntegrationTest;
-import support.wiremock.WireMockStub;
 
 @IntegrationTest
 class RenewItemInTransactionIT extends BaseTenantIntegrationTest {
