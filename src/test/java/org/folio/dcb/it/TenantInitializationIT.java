@@ -84,22 +84,6 @@ class TenantInitializationIT extends BaseIntegrationTest {
     purgeTenant();
   }
 
-  @Test
-  @WireMockStub(value = {
-    "/stubs/mod-inventory-storage/locations/200-get-by-query(dcb).json",
-    "/stubs/mod-inventory-storage/holdings-storage/200-get-by-query(dcb+id).json",
-    "/stubs/mod-circulation-storage/cancellation-reason-storage/200-get-by-id(dcb).json",
-    "/stubs/mod-inventory-storage/loan-types/200-get-by-query(dcb).json",
-    "/stubs/mod-calendar/calendars/200-get-all.json"
-  })
-  void refreshShadowLocations_validate400WhenFetchDcbHubLocationDisabled() throws Exception {
-    enableTenant();
-    refreshShadowLocationsAttempt()
-      .andExpect(status().isBadRequest())
-      .andExpect(jsonPath("$.errors[0].message", containsString("DCB Hub locations fetching is disabled")));
-    purgeTenant();
-  }
-
   private static void assertThatApiIsCalledOnce(HttpMethod method, String urlPath) {
     var wiremock = getWireMockClient();
     wiremock.verifyThat(1, requestedFor(method.name(), urlPathEqualTo(urlPath)));

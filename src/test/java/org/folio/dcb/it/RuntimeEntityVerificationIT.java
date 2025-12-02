@@ -23,7 +23,7 @@ import support.types.IntegrationTest;
 import support.wiremock.WireMockStub;
 
 @IntegrationTest
-@TestPropertySource(properties = { "application.dcb-entities.runtime-verification-enabled=true" })
+@TestPropertySource(properties = { "application.features.dcb-entities-runtime-verification-enabled=true" })
 class RuntimeEntityVerificationIT extends BaseTenantIntegrationTest {
 
   @Nested

@@ -34,8 +34,8 @@ class CqlQueryTest {
     "'A*B','C D','(name==\"A\\*B\" AND code==\"C D\")'",
     "'(group)','^code?','(name==\"(group)\" AND code==\"\\^code\\?\")'"
   })
-  void byNameAndCode_positive_parameterized(String name, String code, String expected) {
-    var result = CqlQuery.byNameAndCode(name, code);
+  void exactMatchByNameAndCode_positive_parameterized(String name, String code, String expected) {
+    var result = CqlQuery.exactMatchByNameAndCode(name, code);
     assertEquals(expected, URLDecoder.decode(result, UTF_8));
   }
 

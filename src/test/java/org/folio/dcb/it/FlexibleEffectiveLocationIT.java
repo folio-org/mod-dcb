@@ -6,6 +6,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.matchingJsonPath;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
+import static java.util.Collections.emptyList;
 import static org.folio.dcb.utils.EntityUtils.BORROWER_SERVICE_POINT_ID;
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
 import static org.folio.dcb.utils.EntityUtils.EXISTED_PATRON_ID;
@@ -18,45 +19,37 @@ import static org.folio.dcb.utils.EntityUtils.dcbPatron;
 import static org.folio.dcb.utils.EntityUtils.pickupDcbTransaction;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.startsWith;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
+import java.util.Collections;
+import java.util.List;
+import org.folio.dcb.domain.dto.DcbAgency;
+import org.folio.dcb.domain.dto.DcbLocation;
+import org.folio.dcb.domain.dto.ShadowLocationRefreshBody;
 import org.folio.dcb.it.base.BaseIntegrationTest;
 import org.folio.dcb.it.base.BaseTenantIntegrationTest;
 import org.folio.dcb.utils.DCBConstants;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.TestPropertySource;
 import support.types.IntegrationTest;
 import support.wiremock.WireMockStub;
 
 @IntegrationTest
+@TestPropertySource(properties = { "application.features.flexible-circulation-rules-enabled=true" })
 class FlexibleEffectiveLocationIT extends BaseTenantIntegrationTest {
 
   private static final String SHADOW_LIBRARY_ID = "32188fb2-ac26-42ab-9fd0-1f027e9bf7e2";
   private static final String SHADOW_LOCATION_ID = "e78b9006-c477-4fea-b8e1-5af659948491";
   private static final String DCB_LOCATION_ID = DCBConstants.LOCATION_ID;
   private static final String QUERY_BY_SHADOW_LOCATION_CODE = "code==\"KU\"";
-
-  @DynamicPropertySource
-  static void registerProperties(DynamicPropertyRegistry registry) {
-    registry.add("application.dcb-hub.fetch-dcb-locations-enabled", () -> true);
-    registry.add("application.dcb-hub.locations-url", BaseIntegrationTest::getWiremockUrl);
-    registry.add("application.dcb-hub.batch-size", () -> 5);
-    registry.add("application.secret-store.ephemeral.content.folio_test_tenant_dcb-hub-credentials",
-      () -> String.format("""
-        {
-          "client_id": "test_client_id",
-          "client_secret": "test_client_secret",
-          "username": "test_openrs_user",
-          "password": "test_openrs_password",
-          "keycloak_url": "%s/realms/master/protocol/openid-connect/token"
-        }
-        """.formatted(getWiremockUrl())));
-  }
 
   private static void verifyGetRequestBeingCalledOnce(String exactUrlPath, String query) {
     wiremock.verifyThat(1, getRequestedFor(
@@ -488,8 +481,6 @@ class FlexibleEffectiveLocationIT extends BaseTenantIntegrationTest {
 
     @Test
     @WireMockStub({
-      "/stubs/dcb-hub/keycloak/200-get-auth-token.json",
-      "/stubs/dcb-hub/locations/200-get-all(2 pages).json",
       "/stubs/mod-inventory-storage/locations/200-get-all(shadow+found_by_codes).json",
       "/stubs/mod-inventory-storage/locations/200-get-all(shadow+empty_by_codes).json",
       "/stubs/mod-inventory-storage/location-units/institutions/200-get-by-query(shadow+name+code).json",
@@ -504,7 +495,7 @@ class FlexibleEffectiveLocationIT extends BaseTenantIntegrationTest {
       "/stubs/mod-inventory-storage/locations/201-post(any shadow).json",
     })
     void refreshShadowLocations_positive() throws Exception {
-      refreshShadowLocations()
+      refreshShadowLocations(defaultRefreshBody())
         .andExpect(jsonPath("$.locations[?(@.code=='LOC-1')].status").value("SUCCESS"))
         .andExpect(jsonPath("$.locations[?(@.code=='LOC-2')].status").value("SUCCESS"))
         .andExpect(jsonPath("$.locations[?(@.code=='LOC-3')].status").value("SKIPPED"))
@@ -532,50 +523,45 @@ class FlexibleEffectiveLocationIT extends BaseTenantIntegrationTest {
 
     @Test
     @WireMockStub({
-      "/stubs/dcb-hub/keycloak/200-get-auth-token.json",
-      "/stubs/dcb-hub/locations/200-get-all(single).json",
       "/stubs/mod-inventory-storage/location-units/institutions/200-get-by-query(shadow+name+code empty).json",
       "/stubs/mod-inventory-storage/location-units/institutions/400-post(AG-2).json",
     })
     void refreshShadowLocations_validateExceptionWhenInstitutionCreate() throws Exception {
-      refreshShadowLocations()
+      var location = dcbLocation("LOC-2", "Location-2", dcbAgency("AG-002", "Agency-Two"));
+      refreshShadowLocations(refreshBody(List.of(location), emptyList()))
         .andExpect(jsonPath("$.locations[?(@.code=='LOC-2')].status").value("SKIPPED"))
         .andExpect(jsonPath("$.location-units.institutions[?(@.code=='AG-002')].status").value("ERROR"))
         .andExpect(jsonPath("$.location-units.institutions[?(@.code=='AG-002')].cause").value(hasItem(allOf(
           startsWith("[400 Bad Request]"), containsString("Institution with code AG-004 already exists")))))
         .andExpect(jsonPath("$.location-units.campuses[?(@.code=='AG-002')].status").value("SKIPPED"))
         .andExpect(jsonPath("$.location-units.campuses[?(@.code=='AG-002')].cause").value(
-          "Institution is null and it was not created, so cannot create campus"))
+          "Parent institution is not created"))
         .andExpect(jsonPath("$.location-units.libraries[?(@.code=='AG-002')].status").value("SKIPPED"))
         .andExpect(jsonPath("$.location-units.libraries[?(@.code=='AG-002')].cause").value(
-          "Campus is null and it was not created, so cannot create library"));
+          "Parent campus is not created"));
     }
 
     @Test
     @WireMockStub({
-      "/stubs/dcb-hub/keycloak/200-get-auth-token.json",
-      "/stubs/dcb-hub/locations/200-get-all(single).json",
       "/stubs/mod-inventory-storage/location-units/institutions/200-get-by-query(shadow+name+code empty).json",
       "/stubs/mod-inventory-storage/location-units/institutions/201-post(any shadow).json",
       "/stubs/mod-inventory-storage/location-units/campuses/200-get-by-query(shadow+name+code empty).json",
       "/stubs/mod-inventory-storage/location-units/campuses/400-post(AG-2).json",
     })
     void refreshShadowLocations_validateExceptionWhenCampusCreate() throws Exception {
-      refreshShadowLocations()
+      var location = dcbLocation("LOC-2", "Location-2", dcbAgency("AG-002", "Agency-Two"));
+      refreshShadowLocations(refreshBody(List.of(location), emptyList()))
         .andExpect(jsonPath("$.locations[?(@.code=='LOC-2')].status").value("SKIPPED"))
         .andExpect(jsonPath("$.location-units.campuses[?(@.code=='AG-002')].status").value("ERROR"))
         .andExpect(jsonPath("$.location-units.campuses[?(@.code=='AG-002')].cause").value(hasItem(allOf(
           startsWith("[400 Bad Request]"), containsString("Campus with code AG-004 already exists")))))
         .andExpect(jsonPath("$.location-units.libraries[?(@.code=='AG-002')].status").value("SKIPPED"))
-        .andExpect(jsonPath("$.location-units.libraries[?(@.code=='AG-002')].cause").value(
-          "Campus is null and it was not created, so cannot create library"))
+        .andExpect(jsonPath("$.location-units.libraries[?(@.code=='AG-002')].cause").value("Parent campus is not created"))
         .andExpect(jsonPath("$.location-units.institutions[?(@.code=='AG-002')].status").value("SUCCESS"));
     }
 
     @Test
     @WireMockStub({
-      "/stubs/dcb-hub/keycloak/200-get-auth-token.json",
-      "/stubs/dcb-hub/locations/200-get-all(single).json",
       "/stubs/mod-inventory-storage/location-units/institutions/200-get-by-query(shadow+name+code empty).json",
       "/stubs/mod-inventory-storage/location-units/institutions/201-post(any shadow).json",
       "/stubs/mod-inventory-storage/location-units/campuses/200-get-by-query(shadow+name+code empty).json",
@@ -584,7 +570,8 @@ class FlexibleEffectiveLocationIT extends BaseTenantIntegrationTest {
       "/stubs/mod-inventory-storage/location-units/libraries/400-post(AG-2).json",
     })
     void refreshShadowLocations_validateExceptionWhenLibraryCreate() throws Exception {
-      refreshShadowLocations()
+      var location = dcbLocation("LOC-2", "Location-2", dcbAgency("AG-002", "Agency-Two"));
+      refreshShadowLocations(refreshBody(List.of(location), emptyList()))
         .andExpect(jsonPath("$.locations[?(@.code=='LOC-2')].status").value("SKIPPED"))
         .andExpect(jsonPath("$.location-units.libraries[?(@.code=='AG-002')].status").value("ERROR"))
         .andExpect(jsonPath("$.location-units.libraries[?(@.code=='AG-002')].cause").value(hasItem(allOf(
@@ -593,8 +580,6 @@ class FlexibleEffectiveLocationIT extends BaseTenantIntegrationTest {
 
     @Test
     @WireMockStub({
-      "/stubs/dcb-hub/keycloak/200-get-auth-token.json",
-      "/stubs/dcb-hub/locations/200-get-all(single).json",
       "/stubs/mod-inventory-storage/location-units/institutions/200-get-by-query(shadow+name+code empty).json",
       "/stubs/mod-inventory-storage/location-units/institutions/201-post(any shadow).json",
       "/stubs/mod-inventory-storage/location-units/campuses/200-get-by-query(shadow+name+code empty).json",
@@ -605,21 +590,42 @@ class FlexibleEffectiveLocationIT extends BaseTenantIntegrationTest {
       "/stubs/mod-inventory-storage/locations/400-post(AG-2).json",
     })
     void refreshShadowLocations_validateExceptionWhenLocationCreate() throws Exception {
-      refreshShadowLocationsAttempt()
+      var location = dcbLocation("LOC-2", "Location-2", dcbAgency("AG-002", "Agency-Two"));
+      refreshShadowLocationsAttempt(refreshBody(List.of(location), emptyList()))
         .andExpect(jsonPath("$.locations[?(@.code=='LOC-2')].status").value("ERROR"))
         .andExpect(jsonPath("$.locations[?(@.code=='LOC-2')].cause").value(hasItem(allOf(
           startsWith("[400 Bad Request]"), containsString("Location with code AG-004 already exists")))));
     }
 
     @Test
-    @WireMockStub({
-      "/stubs/dcb-hub/keycloak/200-get-auth-token.json",
-      "/stubs/dcb-hub/locations/200-get-all(empty).json",
-    })
-    void refreshShadowLocations_validate400WhenNoLocationsDataReceivedFromDcbHub() throws Exception {
-      refreshShadowLocations()
+    void refreshShadowLocations_positive_emptyRequestBody() throws Exception {
+      refreshShadowLocations(refreshBody(emptyList(), emptyList()))
         .andExpect(jsonPath("$.locations").exists())
         .andExpect(jsonPath("$.location-units").doesNotExist());
+    }
+
+    private static ShadowLocationRefreshBody defaultRefreshBody() {
+      return new ShadowLocationRefreshBody()
+        .addLocationsItem(dcbLocation("LOC-1", "Location-1", dcbAgency("AG-001", "Agency-One")))
+        .addLocationsItem(dcbLocation("LOC-2", "Location-2", dcbAgency("AG-002", "Agency-Two")))
+        .addLocationsItem(dcbLocation("LOC-3", "Location-3", dcbAgency("AG-003", "Agency-Three")))
+        .addLocationsItem(dcbLocation("LOC-4", "Location-4", dcbAgency("AG-004", "Agency-Four")))
+        .addLocationsItem(dcbLocation("LOC-5", "Location-5", dcbAgency("AG-005", "Agency-Five")))
+        .addLocationsItem(dcbLocation("LOC-6", "Location-6", dcbAgency("AG-001", "Agency-One")))
+        .addLocationsItem(dcbLocation("LOC-7", "Location-7", dcbAgency("AG-002", "Agency-Two")))
+        .addLocationsItem(dcbLocation("LOC-8", "Location-8", dcbAgency("AG-003", "Agency-Three")));
+    }
+
+    private static ShadowLocationRefreshBody refreshBody(List<DcbLocation> locations, List<DcbAgency> agencies) {
+      return new ShadowLocationRefreshBody().locations(locations).agencies(agencies);
+    }
+
+    private static DcbLocation dcbLocation(String code, String name, DcbAgency agency) {
+      return new DcbLocation().name(name).code(code).agency(agency);
+    }
+
+    private static DcbAgency dcbAgency(String code, String name) {
+      return new DcbAgency().name(name).code(code);
     }
   }
 }

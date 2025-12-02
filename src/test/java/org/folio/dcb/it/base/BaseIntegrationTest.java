@@ -16,6 +16,7 @@ import static support.wiremock.WiremockContainerExtension.WM_URL_PROPERTY;
 
 import java.util.List;
 import lombok.SneakyThrows;
+import org.folio.dcb.domain.dto.ShadowLocationRefreshBody;
 import org.folio.tenant.domain.dto.TenantAttributes;
 import org.junit.jupiter.api.BeforeAll;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,14 +104,15 @@ public abstract class BaseIntegrationTest {
   }
 
   @SneakyThrows
-  protected static ResultActions refreshShadowLocations() {
-    return refreshShadowLocationsAttempt().andExpect(status().isCreated());
+  protected static ResultActions refreshShadowLocations(ShadowLocationRefreshBody refreshBody) {
+    return refreshShadowLocationsAttempt(refreshBody).andExpect(status().isCreated());
   }
 
   @SneakyThrows
-  protected static ResultActions refreshShadowLocationsAttempt() {
+  protected static ResultActions refreshShadowLocationsAttempt(ShadowLocationRefreshBody refreshBody) {
     return mockMvc.perform(
       post("/dcb/shadow-locations/refresh")
+        .content(asJsonString(refreshBody))
         .headers(defaultHeaders())
         .contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON));

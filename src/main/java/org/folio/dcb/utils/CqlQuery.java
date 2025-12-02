@@ -51,7 +51,7 @@ public class CqlQuery {
    * @param code the value to match for the "code" field
    * @return a new CqlQuery representing the match on both name and code
    */
-  public static String byNameAndCode(String name, String code) {
+  public static String exactMatchByNameAndCode(String name, String code) {
     var query = String.format("(name==%s AND code==%s)", cqlEncode(name), cqlEncode(code));
     return PercentCodec.encodeAsString(query);
   }

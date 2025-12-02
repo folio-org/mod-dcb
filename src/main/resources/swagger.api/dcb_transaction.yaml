@@ -186,6 +186,8 @@ paths:
   /dcb/shadow-locations/refresh:
     description: dcb hub shadow location refresh endpoint
     post:
+      requestBody:
+        $ref: "#/components/requestBodies/ShadowLocationRefreshBody"
       tags:
         - RefreshShadowLocations
       description: Refresh shadow location
@@ -221,6 +223,13 @@ components:
         application/json:
           schema:
             $ref: "schemas/dcbUpdateTransaction.yaml#/DcbUpdateTransaction"
+    ShadowLocationRefreshBody:
+      description: DCB hub shadow location refresh request body
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: 'schemas/ShadowLocationRefreshBody.yaml#/ShadowLocationRefreshBody'
   responses:
     TransactionStatus:
       description: Transaction Status object

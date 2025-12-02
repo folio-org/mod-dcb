@@ -1,6 +1,9 @@
-package org.folio.dcb.integration.dcb;
+package org.folio.dcb.service.impl;
 
+import static java.util.Collections.singletonList;
+import static org.apache.commons.lang3.ObjectUtils.anyNull;
 import static org.folio.dcb.client.feign.LocationUnitClient.LocationUnit;
+import static org.folio.dcb.utils.CqlQuery.exactMatchByNameAndCode;
 import static org.folio.dcb.utils.DcbHubLocationsGroupingUtil.groupByAgency;
 
 import java.util.ArrayList;
@@ -10,104 +13,76 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.folio.dcb.client.feign.LocationUnitClient;
 import org.folio.dcb.client.feign.LocationsClient;
-import org.folio.dcb.domain.ResultList;
+import org.folio.dcb.config.DcbFeatureProperties;
+import org.folio.dcb.domain.dto.DcbLocation;
 import org.folio.dcb.domain.dto.RefreshLocationStatus;
 import org.folio.dcb.domain.dto.RefreshLocationStatusType;
 import org.folio.dcb.domain.dto.RefreshLocationUnitsStatus;
-import org.folio.dcb.integration.dcb.config.DcbHubProperties;
-import org.folio.dcb.integration.dcb.model.DcbLocation;
-import org.folio.dcb.service.entities.DcbEntityServiceFacade;
-import org.folio.dcb.utils.CqlQuery;
 import org.folio.dcb.domain.dto.RefreshShadowLocationResponse;
 import org.folio.dcb.domain.dto.ServicePointRequest;
-import org.folio.dcb.exception.DcbHubLocationException;
+import org.folio.dcb.domain.dto.ShadowLocationRefreshBody;
 import org.folio.dcb.exception.ServiceException;
-import org.folio.dcb.integration.keycloak.DcbHubKCCredentialSecureStore;
-import org.folio.dcb.integration.keycloak.DcbHubKCTokenService;
-import org.folio.dcb.integration.keycloak.model.DcbHubKCCredentials;
 import org.folio.dcb.integration.dcb.model.AgencyKey;
-import org.folio.dcb.integration.dcb.model.DcbHubLocationResponse;
 import org.folio.dcb.integration.dcb.model.LocationAgenciesIds;
-import org.folio.dcb.integration.dcb.model.LocationCodeNamePair;
-import org.folio.dcb.service.DcbHubLocationService;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
+import org.folio.dcb.service.ShadowLocationService;
+import org.folio.dcb.service.entities.DcbEntityServiceFacade;
 import org.springframework.stereotype.Service;
-
-import feign.FeignException;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
 
 @Service
 @Log4j2
 @RequiredArgsConstructor
-public class DcbHubLocationServiceImpl implements DcbHubLocationService {
+public class ShadowLocationServiceImpl implements ShadowLocationService {
 
-  private final DcbHubKCTokenService dcbHubKCTokenService;
-  private final DcbHubKCCredentialSecureStore dcbHubKCCredentialSecureStore;
-  private final DcbHubLocationClient dcbHubLocationClient;
+  private static final String INACTIVE_FEATURE_MESSAGE =
+    "Flexible circulation rules feature is disabled, cannot create shadow locations";
+
   private final LocationsClient locationsClient;
   private final LocationUnitClient locationUnitClient;
+  private final DcbFeatureProperties dcbFeatureProperties;
   private final DcbEntityServiceFacade dcbEntityServiceFacade;
-  private final DcbHubProperties dcbHubProperties;
 
-  @Value("${application.dcb-hub.batch-size}")
-  private Integer batchSize;
-
-  public RefreshShadowLocationResponse createShadowLocations(boolean isTenantInitRequest) {
+  public RefreshShadowLocationResponse createShadowLocations(ShadowLocationRefreshBody requestBody) {
     log.debug("createShadowLocations:: creating shadow locations");
-    if (!dcbHubProperties.isFetchDcbLocationsEnabled()) {
-      log.info("createShadowLocations:: DCB Hub locations fetching is disabled, skipping shadow location creation");
-      if (isTenantInitRequest) {
-        // skip shadow location creation during tenant init without error log message
-        return new RefreshShadowLocationResponse();
-      }
-
-      throw new DcbHubLocationException("DCB Hub locations fetching is disabled", HttpStatus.BAD_REQUEST);
+    if (!dcbFeatureProperties.isFlexibleCirculationRulesEnabled()) {
+      log.info("createShadowLocations:: {}", INACTIVE_FEATURE_MESSAGE);
+      throw new ServiceException(INACTIVE_FEATURE_MESSAGE);
     }
 
     try {
-      ServicePointRequest servicePointRequest = dcbEntityServiceFacade.findOrCreateServicePoint();
-      log.info("createShadowLocations:: fetching all locations from DCB Hub");
-
-      List<DcbLocation> locationList = fetchDcbHubAllLocations();
+      var servicePointRequest = dcbEntityServiceFacade.findOrCreateServicePoint();
+      var locationList = prepareLocationsFromRequest(requestBody);
       if (CollectionUtils.isEmpty(locationList)) {
-        log.warn("createShadowLocations:: No locations found in DCB Hub, skipping shadow location creation");
+        log.debug("createShadowLocations:: No locations found in DCB Hub, skipping shadow location creation");
         return new RefreshShadowLocationResponse();
       }
 
-      RefreshShadowLocationResponse response = createShadowLocations(servicePointRequest, locationList);
-      log.info("createShadowLocations:: shadow locations created");
-      return response;
-    } catch (FeignException e) {
-      log.error("createShadowLocations:: FeignException while fetching locations from DCB Hub", e);
-      throw new DcbHubLocationException("FeignException while fetching locations from DCB Hub", HttpStatus.resolve(e.status()), e);
-    } catch (ServiceException | DcbHubLocationException e) {
-      throw e;
+      return createShadowLocations(servicePointRequest, locationList);
     } catch (Exception e) {
-      log.error("createShadowLocations:: Exception while fetching locations from DCB Hub", e);
-      throw new DcbHubLocationException("Exception while fetching locations from DCB Hub", HttpStatus.INTERNAL_SERVER_ERROR, e);
+      log.error("createShadowLocations:: FeignException while fetching locations from DCB Hub", e);
+      throw new ServiceException("Failed to create shadow locations", e);
     }
   }
 
   private RefreshShadowLocationResponse createShadowLocations(
     ServicePointRequest servicePointRequest, List<DcbLocation> locations) {
 
-    Map<AgencyKey, List<LocationCodeNamePair>> locationsGroupedByAgency = groupByAgency(locations);
+    var locationsGroupedByAgency = groupByAgency(locations);
 
-    LocationUnitsResult locationUnitsResult = createLocationUnits(locationsGroupedByAgency.keySet());
-    List<RefreshLocationStatus> locationStatuses = createShadowLocationEntries(
-      locationsGroupedByAgency,
-      locationUnitsResult.agencyLocationUnitMapping,
-      servicePointRequest);
+    var locationUnitsResult = createLocationUnits(locationsGroupedByAgency.keySet());
+    var locationStatuses = createShadowLocationEntries(locationsGroupedByAgency,
+      locationUnitsResult.agencyLocationUnitMapping, servicePointRequest);
 
-    return new RefreshShadowLocationResponse()
+    var response = new RefreshShadowLocationResponse()
       .locationUnits(locationUnitsResult.locationUnits)
       .locations(locationStatuses);
+
+    log.info("createShadowLocations:: shadow locations created: {}", locationStatuses.size());
+    return response;
   }
 
   private LocationUnitsResult createLocationUnits(Set<AgencyKey> agencies) {
@@ -118,13 +93,13 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
       log.debug("createLocationUnits:: Creating units for agency: {} - {}",
         agencyKey.agencyCode(), agencyKey.agencyName());
 
-      InstitutionResult institutionResult = createInstitution(agencyKey);
+      var institutionResult = createInstitution(agencyKey);
       locationUnits.addInstitutionsItem(institutionResult.locationUnitsStatus);
 
-      CampusResult campusResult = createCampus(agencyKey, institutionResult.institution);
+      var campusResult = createCampus(agencyKey, institutionResult.institution);
       locationUnits.addCampusesItem(campusResult.locationUnitsStatus);
 
-      LibraryResult libraryResult = createLibrary(agencyKey, campusResult.campus);
+      var libraryResult = createLibrary(agencyKey, campusResult.campus);
       locationUnits.addLibrariesItem(libraryResult.locationUnitsStatus);
 
       agencyLocationUnitMapping.put(agencyKey, new LocationAgenciesIds(
@@ -139,9 +114,8 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
 
   private InstitutionResult createInstitution(AgencyKey agencyKey) {
     try {
-      String query = CqlQuery.byNameAndCode(agencyKey.agencyName(), agencyKey.agencyCode());
-      ResultList<LocationUnit> locationUnitResultList =
-        locationUnitClient.findInstitutionsByQuery(query, true, 10, 0);
+      var query = exactMatchByNameAndCode(agencyKey.agencyName(), agencyKey.agencyCode());
+      var locationUnitResultList = locationUnitClient.findInstitutionsByQuery(query, true, 10, 0);
 
       if (CollectionUtils.isNotEmpty(locationUnitResultList.getResult())) {
         log.info("createInstitution:: Institution already exists for agency: {} - {}",
@@ -196,13 +170,12 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
           RefreshLocationStatus.builder()
             .code(agencyKey.agencyCode())
             .status(RefreshLocationStatusType.SKIPPED)
-            .cause("Institution is null and it was not created, so cannot create campus")
+            .cause("Parent institution is not created")
             .build());
       }
 
-      ResultList<LocationUnit> locationUnitResultList =
-        locationUnitClient.findCampusesByQuery(
-          CqlQuery.byNameAndCode(agencyKey.agencyName(), agencyKey.agencyCode()), true, 10, 0);
+      var searchQuery = exactMatchByNameAndCode(agencyKey.agencyName(), agencyKey.agencyCode());
+      var locationUnitResultList = locationUnitClient.findCampusesByQuery(searchQuery, true, 10, 0);
 
       if (!locationUnitResultList.getResult().isEmpty()) {
         log.info("createCampus:: campus already exists for agency: {} - {}",
@@ -258,15 +231,14 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
           RefreshLocationStatus.builder()
             .code(agencyKey.agencyCode())
             .status(RefreshLocationStatusType.SKIPPED)
-            .cause("Campus is null and it was not created, so cannot create library")
+            .cause("Parent campus is not created")
             .build());
       }
 
-      ResultList<LocationUnit> locationUnitResultList =
-        locationUnitClient.findLibrariesByQuery(
-          CqlQuery.byNameAndCode(agencyKey.agencyName(), agencyKey.agencyCode()), true, 10, 0);
+      var query = exactMatchByNameAndCode(agencyKey.agencyName(), agencyKey.agencyCode());
+      var locationUnitResultList = locationUnitClient.findLibrariesByQuery(query, true, 10, 0);
 
-      if (!locationUnitResultList.getResult().isEmpty()) {
+      if (CollectionUtils.isNotEmpty(locationUnitResultList.getResult())) {
         log.info("createLibrary:: library already exists for agency: {} - {}",
           agencyKey.agencyCode(), agencyKey.agencyName());
 
@@ -278,7 +250,7 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
             .build());
       }
 
-      LocationUnit library = LocationUnit.builder()
+      var library = LocationUnit.builder()
         .campusId(campus.getId())
         .id(UUID.randomUUID().toString())
         .name(agencyKey.agencyName())
@@ -310,17 +282,16 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
   }
 
   private List<RefreshLocationStatus> createShadowLocationEntries(
-    Map<AgencyKey, List<LocationCodeNamePair>> locationsGroupedByAgency,
+    Map<AgencyKey, List<DcbLocation>> locationsGroupedByAgency,
     Map<AgencyKey, LocationAgenciesIds> agencyLocationUnitMapping,
     ServicePointRequest servicePointRequest) {
 
-    List<RefreshLocationStatus> locationStatuses = new ArrayList<>();
-
+    var locationStatuses = new ArrayList<RefreshLocationStatus>();
     locationsGroupedByAgency.forEach((agencyKey, locationCodeNamePairs) -> {
       log.debug("createShadowLocationEntries:: Processing agency: {} - {}",
         agencyKey.agencyCode(), agencyKey.agencyName());
 
-      LocationAgenciesIds locationAgenciesIds = agencyLocationUnitMapping.get(agencyKey);
+      var locationAgenciesIds = agencyLocationUnitMapping.get(agencyKey);
       locationCodeNamePairs.forEach(location -> {
         RefreshLocationStatus status = createShadowLocation(location, locationAgenciesIds, servicePointRequest);
         locationStatuses.add(status);
@@ -330,47 +301,45 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
     return locationStatuses;
   }
 
-  private RefreshLocationStatus createShadowLocation(
-    LocationCodeNamePair location,
+  private RefreshLocationStatus createShadowLocation(DcbLocation location,
     LocationAgenciesIds locationAgenciesIds, ServicePointRequest servicePointRequest) {
+    var locationName = location.getName();
+    var locationCode = location.getCode();
     try {
-      if (locationAgenciesIds.institutionId() == null ||
-          locationAgenciesIds.libraryId() == null ||
-          locationAgenciesIds.campusId() == null) {
-        log.error("createShadowLocation:: Location agencies IDs are incomplete or null for location: {} - {}, cannot create shadow location. locationAgenciesIds are: {}",
-          location.code(), location.name(), locationAgenciesIds.toString());
+      if (anyNull(locationAgenciesIds.institutionId(), locationAgenciesIds.libraryId(), locationAgenciesIds.campusId())) {
+        log.error(
+          "createShadowLocation:: Location agencies IDs are incomplete or null for location: {} - {}, cannot create shadow location. locationAgenciesIds are: {}",
+          locationCode, locationName, locationAgenciesIds.toString());
         return RefreshLocationStatus.builder()
-          .code(location.code())
+          .code(locationCode)
           .status(RefreshLocationStatusType.SKIPPED)
-          .cause(String.format(
-            "Location agencies IDs are incomplete or null, cannot create shadow location. locationAgenciesIds are: %s",
-            locationAgenciesIds))
+          .cause("Parent location units not created")
           .build();
       }
 
-      ResultList<LocationsClient.LocationDTO> locationDTOResultList =
-        locationsClient.findLocationByQuery(
-          CqlQuery.byNameAndCode(location.name(), location.code()), true, 10, 0);
+      var searchQuery = exactMatchByNameAndCode(locationName, locationCode);
+      var locationDTOResultList = locationsClient.findLocationByQuery(searchQuery, true, 10, 0);
       if (!locationDTOResultList.getResult().isEmpty()) {
-        log.info("createShadowLocation:: Location already exists: {} - {}, skipping...", location.code(), location.name());
+        log.info("createShadowLocation:: Location already exists: {} - {}, skipping...",
+          locationCode, locationName);
         return RefreshLocationStatus.builder()
-          .code(location.code())
+          .code(locationCode)
           .status(RefreshLocationStatusType.SKIPPED)
           .build();
       }
 
       log.debug("createShadowLocation:: Creating shadow location: {} - {}",
-        location.code(), location.name());
+        locationCode, locationName);
 
-      LocationsClient.LocationDTO shadowLocation = LocationsClient.LocationDTO.builder()
+      var shadowLocation = LocationsClient.LocationDTO.builder()
         .id(UUID.randomUUID().toString())
-        .code(location.code())
-        .name(location.name())
+        .code(locationCode)
+        .name(locationName)
         .institutionId(locationAgenciesIds.institutionId())
         .campusId(locationAgenciesIds.campusId())
         .libraryId(locationAgenciesIds.libraryId())
         .primaryServicePoint(servicePointRequest.getId())
-        .servicePointIds(List.of(servicePointRequest.getId()))
+        .servicePointIds(singletonList(servicePointRequest.getId()))
         .isShadow(true)
         .build();
 
@@ -378,43 +347,32 @@ public class DcbHubLocationServiceImpl implements DcbHubLocationService {
       log.debug("createShadowLocation:: Created shadow location: {} - {}",
         shadowLocation.getCode(), shadowLocation.getName());
       return RefreshLocationStatus.builder()
-        .code(location.code())
+        .code(locationCode)
         .status(RefreshLocationStatusType.SUCCESS)
         .build();
     } catch (Exception e) {
       log.error("createShadowLocation:: Unexpected error creating shadow location: {} - {}",
-        location.code(), location.name(), e);
+        locationCode, locationName, e);
       return RefreshLocationStatus.builder()
-        .code(location.code())
+        .code(locationCode)
         .status(RefreshLocationStatusType.ERROR)
         .cause(e.getMessage())
         .build();
     }
   }
 
-  private List<DcbLocation> fetchDcbHubAllLocations() {
-    log.info("fetchDcbHubAllLocations:: fetching all locations from DCB Hub");
+  private static List<DcbLocation> prepareLocationsFromRequest(ShadowLocationRefreshBody requestBody) {
+    var agencies = requestBody.getAgencies();
+    var locationsFromAgencies = agencies.stream()
+      .map(agency -> new DcbLocation()
+        .agency(agency)
+        .code(agency.getCode())
+        .name(agency.getName()))
+      .toList();
 
-    int pageNumber = 1;
-    int pageSize = batchSize;
-    DcbHubKCCredentials dcbHubKCCredentials = dcbHubKCCredentialSecureStore.getDcbHubKCCredentials();
-    List<DcbLocation> allLocations = new ArrayList<>();
+    var allLocations = new ArrayList<>(requestBody.getLocations());
+    allLocations.addAll(locationsFromAgencies);
 
-    while (true) {
-      String bearerToken = dcbHubKCTokenService.getBearerAccessToken(dcbHubKCCredentials);
-      DcbHubLocationResponse response = dcbHubLocationClient.getLocations(pageNumber, pageSize, bearerToken);
-
-      if (CollectionUtils.isNotEmpty(response.getContent())) {
-        allLocations.addAll(response.getContent());
-      }
-      // Stop if last page reached
-      if (pageNumber >= response.getTotalPages()) {
-        break;
-      }
-
-      pageNumber++;
-    }
-    log.debug("fetchDcbHubAllLocations:: successfully fetched {} locations from DCB Hub", allLocations.size());
     return allLocations;
   }
 
