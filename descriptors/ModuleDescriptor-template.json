@@ -444,6 +444,7 @@
         "users.collection.get",
         "users.item.get",
         "source-storage.stream.marc-record-identifiers.collection.post",
+        "inventory-storage.holdings.collection.get",
         "source-storage.records.collection.get",
         "source-storage.records.item.get",
         "source-storage.records.formatted.item.get",
