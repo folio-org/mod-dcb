@@ -172,7 +172,7 @@ class UserServiceTest {
     var dcbPatron = dcbPatron(userId);
     var result = userService.fetchOrCreateUser(dcbPatron);
 
-    assertThat(result).isEqualTo(virtualUser(userId, groupId, defaultPersonalInfo()));;
+    assertThat(result).isEqualTo(virtualUser(userId, groupId, defaultPersonalInfo()));
     verify(usersClient).fetchUserByBarcodeAndId(any());
     verify(patronGroupService).fetchPatronGroupIdByName("staff");
     verify(usersClient, never()).updateUser(any(), any());
@@ -190,7 +190,7 @@ class UserServiceTest {
     var dcbPatron = dcbPatron(userId, "[John, Doe]");
     var result = userService.fetchOrCreateUser(dcbPatron);
 
-    assertThat(result).isEqualTo(virtualUser(userId, groupId, personalInfo("John", null, "Doe")));;
+    assertThat(result).isEqualTo(virtualUser(userId, groupId, personalInfo("John", null, "Doe")));
     verify(usersClient).fetchUserByBarcodeAndId(any());
     verify(patronGroupService).fetchPatronGroupIdByName("staff");
     verify(usersClient, never()).updateUser(any(), any());
@@ -208,7 +208,7 @@ class UserServiceTest {
     var dcbPatron = dcbPatron(userId);
     var result = userService.fetchOrCreateUser(dcbPatron);
 
-    assertThat(result).isEqualTo(virtualUser(userId, groupId, personalInfo("John", null, "Doe")));;
+    assertThat(result).isEqualTo(virtualUser(userId, groupId, personalInfo("John", null, "Doe")));
     verify(usersClient).fetchUserByBarcodeAndId(any());
     verify(patronGroupService).fetchPatronGroupIdByName("staff");
     verify(usersClient, never()).updateUser(any(), any());
@@ -229,7 +229,7 @@ class UserServiceTest {
     var result = userService.fetchOrCreateUser(dcbPatron);
 
     var expectedUser = virtualUser(userId, newGroupId, personalInfo("updJohn", null, "updDoe"));
-    assertThat(result).isEqualTo(expectedUser);;
+    assertThat(result).isEqualTo(expectedUser);
     assertThat(userCaptor.getValue()).isEqualTo(expectedUser);
     verify(usersClient).fetchUserByBarcodeAndId(any());
     verify(patronGroupService).fetchPatronGroupIdByName("staff");
