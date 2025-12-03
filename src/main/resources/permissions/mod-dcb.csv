@@ -39,8 +39,8 @@ circulation.loans.item.put
 circulation.loans.collection.get
 circulation-storage.loan-policies.item.get
 circulation-storage.loan-policies.collection.get
-circulation-storage.cancellation-reasons.item.get
 circulation-storage.cancellation-reasons.item.post
+circulation-storage.cancellation-reasons.collection.get
 circulation.check-in-by-barcode.post
 circulation.check-out-by-barcode.post
 circulation-item.item.get

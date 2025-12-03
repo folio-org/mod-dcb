@@ -129,7 +129,7 @@
             "inventory-storage.locations.collection.get",
             "circulation-storage.requests.item.get",
             "circulation-storage.cancellation-reasons.item.get",
-            "circulation-storage.cancellation-reasons.item.post",
+            "circulation-storage.cancellation-reasons.collection.get",
             "calendar.endpoint.calendars.get",
             "calendar.endpoint.calendars.calendarId.put"
           ]
@@ -347,7 +347,7 @@
             "inventory-storage.loan-types.collection.get",
             "inventory-storage.loan-types.item.post",
             "circulation-storage.cancellation-reasons.item.get",
-            "circulation-storage.cancellation-reasons.item.post",
+            "circulation-storage.cancellation-reasons.collection.get",
             "calendar.endpoint.calendars.get",
             "calendar.endpoint.calendars.post"
           ]
@@ -481,7 +481,7 @@
         "circulation-storage.loan-policies.item.get",
         "circulation-storage.loan-policies.collection.get",
         "circulation-storage.cancellation-reasons.item.get",
-        "circulation-storage.cancellation-reasons.item.post",
+        "circulation-storage.cancellation-reasons.collection.get",
         "circulation.check-in-by-barcode.post",
         "circulation.check-out-by-barcode.post",
         "circulation-item.item.get",
