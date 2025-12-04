@@ -113,6 +113,13 @@
             "circulation-storage.requests.item.get",
             "circulation-storage.cancellation-reasons.item.get",
             "circulation-storage.cancellation-reasons.item.post",
+            "inventory-storage.location-units.institutions.item.post",
+            "inventory-storage.location-units.institutions.collection.get",
+            "inventory-storage.location-units.campuses.item.post",
+            "inventory-storage.location-units.campuses.collection.get",
+            "inventory-storage.location-units.libraries.item.post",
+            "inventory-storage.location-units.libraries.collection.get",
+            "inventory-storage.locations.item.post",
             "calendar.endpoint.calendars.get",
             "calendar.endpoint.calendars.calendarId.put"
           ]
@@ -268,7 +275,7 @@
     },
     {
       "id": "dcb_refresh_shadow_locations",
-      "version": "1.0",
+      "version": "2.0",
       "handlers": [
         {
           "methods": [
@@ -279,6 +286,8 @@
             "dcb.shadow_locations.refresh.post"
           ],
           "modulePermissions": [
+            "inventory-storage.service-points.item.post",
+            "inventory-storage.service-points.collection.get",
             "inventory-storage.locations.collection.get",
             "inventory-storage.locations.item.post",
             "inventory-storage.location-units.institutions.collection.get",

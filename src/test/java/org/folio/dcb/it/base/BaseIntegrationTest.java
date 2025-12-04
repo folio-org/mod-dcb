@@ -101,4 +101,19 @@ public abstract class BaseIntegrationTest {
     assertThat(wiremockUrl).isNotBlank();
     return wiremockUrl;
   }
+
+  @SneakyThrows
+  protected static ResultActions refreshShadowLocations(ShadowLocationRefreshBody refreshBody) {
+    return refreshShadowLocationsAttempt(refreshBody).andExpect(status().isCreated());
+  }
+
+  @SneakyThrows
+  protected static ResultActions refreshShadowLocationsAttempt(ShadowLocationRefreshBody refreshBody) {
+    return mockMvc.perform(
+      post("/dcb/shadow-locations/refresh")
+        .content(asJsonString(refreshBody))
+        .headers(defaultHeaders())
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON));
+  }
 }

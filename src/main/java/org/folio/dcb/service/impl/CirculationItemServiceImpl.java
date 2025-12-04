@@ -19,7 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.folio.dcb.client.feign.CirculationItemClient;
 import org.folio.dcb.client.feign.LocationUnitClient;
 import org.folio.dcb.client.feign.LocationsClient;
-import org.folio.dcb.config.DcbHubProperties;
+import org.folio.dcb.config.DcbFeatureProperties;
 import org.folio.dcb.domain.dto.CirculationItem;
 import org.folio.dcb.domain.dto.DcbItem;
 import org.folio.dcb.domain.dto.ItemStatus;
@@ -48,7 +48,7 @@ public class CirculationItemServiceImpl implements CirculationItemService {
   private final CirculationItemClient circulationItemClient;
   private final LocationsClient locationsClient;
   private final LocationUnitClient locationUnitClient;
-  private final DcbHubProperties dcbHubProperties;
+  private final DcbFeatureProperties dcbFeatureProperties;
 
   @Override
   public CirculationItem checkIfItemExistsAndCreate(DcbItem dcbItem, String pickupServicePointId) {
@@ -64,7 +64,7 @@ public class CirculationItemServiceImpl implements CirculationItemService {
   }
 
   private String fetchShadowLocationForItem(DcbItem dcbItem) {
-    if (dcbHubProperties.isFetchDcbLocationsEnabled()) {
+    if (dcbFeatureProperties.isFlexibleCirculationRulesEnabled()) {
       return tryFetchLocationIdByLocationCode(dcbItem)
         .or(() -> tryFetchLocationIdByLendingLibraryCode(dcbItem))
         .orElseGet(this::getDefaultDcbLocationId);

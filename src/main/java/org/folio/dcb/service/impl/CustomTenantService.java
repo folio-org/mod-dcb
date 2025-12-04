@@ -16,15 +16,12 @@ import org.folio.dcb.domain.dto.NormalHours;
 import org.folio.dcb.domain.dto.ServicePointRequest;
 import org.folio.dcb.listener.kafka.service.KafkaService;
 import org.folio.dcb.service.CalendarService;
-import org.folio.dcb.service.DcbHubLocationService;
-import org.folio.dcb.service.HoldingsService;
 import org.folio.dcb.service.ServicePointExpirationPeriodService;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.liquibase.FolioSpringLiquibase;
 import org.folio.spring.service.PrepareSystemUserService;
 import org.folio.spring.service.TenantService;
 import org.folio.tenant.domain.dto.TenantAttributes;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -77,7 +74,6 @@ public class CustomTenantService extends TenantService {
   private final LoanTypeClient loanTypeClient;
   private final CalendarService calendarService;
   private final ServicePointExpirationPeriodService servicePointExpirationPeriodService;
-  private final DcbHubLocationService dcbHubLocationService;
 
   public CustomTenantService(JdbcTemplate jdbcTemplate, FolioExecutionContext context, FolioSpringLiquibase folioSpringLiquibase,
                              PrepareSystemUserService prepareSystemUserService, KafkaService kafkaService, InstanceClient inventoryClient,
@@ -101,7 +97,6 @@ public class CustomTenantService extends TenantService {
     this.cancellationReasonClient = cancellationReasonClient;
     this.calendarService = calendarService;
     this.servicePointExpirationPeriodService = servicePointExpirationPeriodService;
-    this.dcbHubLocationService = dcbHubLocationService;
   }
 
   @Override
@@ -120,15 +115,6 @@ public class CustomTenantService extends TenantService {
     createCancellationReason();
     createLoanType();
     createCalendarIfNotExists();
-    createShadowLocations();
-  }
-
-  private void createShadowLocations() {
-    try {
-      dcbHubLocationService.createShadowLocations();
-    } catch (Exception e) {
-      log.error("createShadowLocations:: Error creating shadow locations: {}", e.getMessage(), e);
-    }
   }
 
   private void createLoanType() {

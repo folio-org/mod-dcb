@@ -1,0 +1,42 @@
+ShadowLocationRefreshBody:
+  type: object
+  properties:
+    agencies:
+      type: array
+      items:
+        $ref: '#/DcbAgency'
+    locations:
+      type: array
+      items:
+        $ref: '#/DcbLocation'
+
+DcbAgency:
+  type: object
+  description: DCB Agency object
+  properties:
+    name:
+      type: string
+      description: Name of the agency
+    code:
+      type: string
+      description: Code of the agency
+  required:
+    - name
+    - code
+
+DcbLocation:
+  type: object
+  description: DCB Location object
+  properties:
+    name:
+      type: string
+      description: Name of the location
+    code:
+      type: string
+      description: Code of the location
+    agency:
+      $ref: '#/DcbAgency'
+  required:
+    - name
+    - code
+    - agency

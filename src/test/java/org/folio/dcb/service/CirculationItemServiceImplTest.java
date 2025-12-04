@@ -18,6 +18,8 @@ import org.folio.dcb.config.DcbHubProperties;
 import org.folio.dcb.domain.dto.CirculationItem;
 import org.folio.dcb.domain.dto.CirculationItemCollection;
 import org.folio.dcb.domain.dto.DcbItem;
+import org.folio.dcb.config.DcbFeatureProperties;
+import org.folio.dcb.service.entities.DcbEntityServiceFacade;
 import org.folio.dcb.service.impl.CirculationItemServiceImpl;
 import org.folio.dcb.service.impl.HoldingsServiceImpl;
 import org.folio.dcb.utils.DCBConstants;
@@ -43,7 +45,7 @@ class CirculationItemServiceImplTest {
   @Mock private HoldingsServiceImpl holdingsService;
   @Mock private ItemService itemService;
   @Mock private LocationsClient locationsClient;
-  @Mock private DcbHubProperties dcbHubProperties;
+  @Mock private DcbFeatureProperties dcbHubProperties;
   @Mock private LocationUnitClient locationUnitClient;
   @InjectMocks private CirculationItemServiceImpl circulationItemService;
 
@@ -66,7 +68,7 @@ class CirculationItemServiceImplTest {
   void checkIfItemExistsAndCreate_ShouldCreateNewItem_WhenItemDoesNotExist() {
     var randomUuid = randomUuid();
 
-    when(dcbHubProperties.isFetchDcbLocationsEnabled()).thenReturn(false);
+    when(dcbHubProperties.isFlexibleCirculationRulesEnabled()).thenReturn(false);
     when(circulationItemClient.fetchItemByCqlQuery(any())).thenReturn(emptyCirculationItems());
     when(holdingsService.fetchDcbHoldingOrCreateIfMissing()).thenReturn(dcbHolding());
     when(itemService.fetchItemMaterialTypeIdByMaterialTypeName(any())).thenReturn(randomUuid);
@@ -88,7 +90,7 @@ class CirculationItemServiceImplTest {
     var dcbItem = dcbItem(TEST_DCB_LOCATION_CODE, null);
     var pickupServicePointId = "pickupPointId";
 
-    when(dcbHubProperties.isFetchDcbLocationsEnabled()).thenReturn(true);
+    when(dcbHubProperties.isFlexibleCirculationRulesEnabled()).thenReturn(true);
     when(circulationItemClient.fetchItemByCqlQuery(any())).thenReturn(emptyCirculationItems());
 
     var dcbHolding = dcbHolding();
@@ -116,7 +118,7 @@ class CirculationItemServiceImplTest {
     var randomUuid = randomUuid();
     var dcbItem = dcbItem(TEST_DCB_LOCATION_CODE, null);
 
-    when(dcbHubProperties.isFetchDcbLocationsEnabled()).thenReturn(true);
+    when(dcbHubProperties.isFlexibleCirculationRulesEnabled()).thenReturn(true);
     when(circulationItemClient.fetchItemByCqlQuery(any())).thenReturn(emptyCirculationItems());
 
     var dcbHolding = Holding.builder().id(randomUuid).build();
@@ -149,7 +151,7 @@ class CirculationItemServiceImplTest {
     var dcbItem = DcbItem.builder().barcode("barcode123").title("title").id(randomUuid).locationCode(locationCode).build();
     var pickupServicePointId = "pickupPointId";
 
-    when(dcbHubProperties.isFetchDcbLocationsEnabled()).thenReturn(true);
+    when(dcbHubProperties.isFlexibleCirculationRulesEnabled()).thenReturn(true);
     when(circulationItemClient.fetchItemByCqlQuery(any())).thenReturn(emptyCirculationItems());
 
     var dcbHolding = Holding.builder().id(randomUuid).build();
@@ -181,7 +183,7 @@ class CirculationItemServiceImplTest {
     var dcbItem = DcbItem.builder().barcode("barcode123").title("title").id(randomUuid).locationCode(locationCode).build();
     var pickupServicePointId = "pickupPointId";
 
-    when(dcbHubProperties.isFetchDcbLocationsEnabled()).thenReturn(true);
+    when(dcbHubProperties.isFlexibleCirculationRulesEnabled()).thenReturn(true);
     when(circulationItemClient.fetchItemByCqlQuery(any())).thenReturn(emptyCirculationItems());
 
     var dcbHolding = Holding.builder().id(randomUuid).build();
@@ -209,7 +211,7 @@ class CirculationItemServiceImplTest {
     var dcbItem = DcbItem.builder().barcode("barcode123").title("title").id(randomUuid).locationCode(locationCode).build();
     var pickupServicePointId = "pickupPointId";
 
-    when(dcbHubProperties.isFetchDcbLocationsEnabled()).thenReturn(false);
+    when(dcbHubProperties.isFlexibleCirculationRulesEnabled()).thenReturn(false);
     when(circulationItemClient.fetchItemByCqlQuery(any())).thenReturn(emptyCirculationItems());
 
     var dcbHolding = Holding.builder().id(randomUuid).build();
@@ -234,7 +236,7 @@ class CirculationItemServiceImplTest {
     var randomUuid = randomUuid();
     var pickupServicePointId = "pickupPointId";
 
-    when(dcbHubProperties.isFetchDcbLocationsEnabled()).thenReturn(true);
+    when(dcbHubProperties.isFlexibleCirculationRulesEnabled()).thenReturn(true);
     when(circulationItemClient.fetchItemByCqlQuery(any())).thenReturn(emptyCirculationItems());
 
     var dcbHolding = Holding.builder().id(randomUuid).build();
@@ -265,7 +267,7 @@ class CirculationItemServiceImplTest {
     var randomUuid = randomUuid();
     var pickupServicePointId = "pickupPointId";
 
-    when(dcbHubProperties.isFetchDcbLocationsEnabled()).thenReturn(true);
+    when(dcbHubProperties.isFlexibleCirculationRulesEnabled()).thenReturn(true);
     when(circulationItemClient.fetchItemByCqlQuery(any())).thenReturn(emptyCirculationItems());
 
     var dcbHolding = Holding.builder().id(randomUuid).build();
@@ -293,7 +295,7 @@ class CirculationItemServiceImplTest {
     var randomUuid = randomUuid();
     var pickupServicePointId = "pickupPointId";
 
-    when(dcbHubProperties.isFetchDcbLocationsEnabled()).thenReturn(true);
+    when(dcbHubProperties.isFlexibleCirculationRulesEnabled()).thenReturn(true);
     when(circulationItemClient.fetchItemByCqlQuery(any())).thenReturn(emptyCirculationItems());
 
     var dcbHolding = Holding.builder().id(randomUuid).build();

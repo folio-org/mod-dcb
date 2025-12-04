@@ -27,6 +27,8 @@ folio:
         concurrency: 1
 
 application:
+  features:
+    flexible-circulation-rules-enabled: false
   retry:
     item:
       max-retries: 3
