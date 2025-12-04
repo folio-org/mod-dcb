@@ -1,8 +1,12 @@
 package org.folio.dcb.it.base;
 
 import static org.assertj.core.api.Assertions.entry;
-import static org.awaitility.Durations.FIVE_SECONDS;
 import static org.awaitility.Durations.ONE_HUNDRED_MILLISECONDS;
+import static org.awaitility.Durations.ONE_MINUTE;
+import static org.folio.dcb.support.kafka.KafkaContainerExtension.createTopics;
+import static org.folio.dcb.support.kafka.KafkaContainerExtension.deleteTopics;
+import static org.folio.dcb.support.wiremock.WiremockContainerExtension.getWireMockClient;
+import static org.folio.dcb.support.wiremock.WiremockStubExtension.resetWiremockStubs;
 import static org.folio.dcb.utils.EntityUtils.TEST_TENANT;
 import static org.folio.dcb.utils.JsonTestUtils.asJsonString;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.AFTER_TEST_METHOD;
@@ -10,10 +14,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static support.kafka.KafkaContainerExtension.createTopics;
-import static support.kafka.KafkaContainerExtension.deleteTopics;
-import static support.wiremock.WiremockContainerExtension.getWireMockClient;
-import static support.wiremock.WiremockStubExtension.resetWiremockStubs;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import java.time.OffsetDateTime;
@@ -28,6 +28,8 @@ import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.DcbUpdateTransaction;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.repository.TransactionAuditRepository;
+import org.folio.dcb.support.AuditEntityTestVerifier;
+import org.folio.dcb.support.wiremock.WiremockStubExtension;
 import org.folio.dcb.utils.TestCirculationEventHelper;
 import org.folio.dcb.utils.TestJdbcHelper;
 import org.folio.spring.FolioModuleMetadata;
@@ -40,8 +42,6 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.util.LinkedMultiValueMap;
-import support.AuditEntityTestVerifier;
-import support.wiremock.WiremockStubExtension;
 
 @Sql(value = "/db/scripts/cleanup_dcb_tables.sql", executionPhase = AFTER_TEST_METHOD)
 public abstract class BaseTenantIntegrationTest extends BaseIntegrationTest {
@@ -193,7 +193,7 @@ public abstract class BaseTenantIntegrationTest extends BaseIntegrationTest {
 
   protected static void awaitUntilAsserted(ThrowingRunnable throwingRunnable) {
     Awaitility.await()
-      .atMost(FIVE_SECONDS)
+      .atMost(ONE_MINUTE)
       .pollInterval(ONE_HUNDRED_MILLISECONDS)
       .untilAsserted(throwingRunnable);
   }

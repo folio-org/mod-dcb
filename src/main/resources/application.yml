@@ -95,47 +95,8 @@ application:
     item:
       max-retries: ${RETRY_ITEM_MAX_RETRIES:10}
       delay-milliseconds: ${RETRY_ITEM_DELAY_MILLISECONDS:500}
-  dcb-entities:
-    runtime-verification-enabled: ${DCB_ENTITIES_RUNTIME_VERIFICATION_ENABLED:true}
-  dcb-hub:
-    fetch-dcb-locations-enabled: ${FETCH_DCB_LOCATIONS_ENABLED:false}
-    locations-url: ${DCB_LOCATIONS_BASE_URL:}
-    batch-size: ${DCB_LOCATIONS_BATCH_SIZE:50}
-    secure-store-keyname: dcb-hub-credentials
-    tls:
-      enabled: ${DCB_HUB_CLIENT_TLS_ENABLED:false}
-      trust-store-path: ${DCB_HUB_CLIENT_TLS_TRUSTSTORE_PATH:}
-      trust-store-password: ${DCB_HUB_CLIENT_TLS_TRUSTSTORE_PASSWORD:}
-      trust-store-type: ${DCB_HUB_CLIENT_TLS_TRUSTSTORE_TYPE:}
-  dcb-keycloak:
-    tls:
-      enabled: ${DCB_KC_CLIENT_TLS_ENABLED:false}
-      trust-store-path: ${DCB_KC_CLIENT_TLS_TRUSTSTORE_PATH:}
-      trust-store-password: ${DCB_KC_CLIENT_TLS_TRUSTSTORE_PASSWORD:}
-      trust-store-type: ${DCB_KC_CLIENT_TLS_TRUSTSTORE_TYPE:}
-  secret-store:
-    type: ${SECRET_STORE_TYPE:EPHEMERAL}
-    environment: ${SECURE_STORE_ENV:${ENV:folio}}
-    ephemeral:
-    aws-ssm:
-      region: ${SECRET_STORE_AWS_SSM_REGION:}
-      use-iam: ${SECRET_STORE_AWS_SSM_USE_IAM:true}
-      ecs-credentials-endpoint: ${SECRET_STORE_AWS_SSM_ECS_CREDENTIALS_ENDPOINT:}
-      ecs-credentials-path: ${SECRET_STORE_AWS_SSM_ECS_CREDENTIALS_PATH:}
-    vault:
-      token: ${SECRET_STORE_VAULT_TOKEN:}
-      address: ${SECRET_STORE_VAULT_ADDRESS:}
-      enable-ssl: ${SECRET_STORE_VAULT_ENABLE_SSL:false}
-      pem-file-path: ${SECRET_STORE_VAULT_PEM_FILE_PATH:}
-      keystore-password: ${SECRET_STORE_VAULT_KEYSTORE_PASSWORD:}
-      keystore-file-path: ${SECRET_STORE_VAULT_KEYSTORE_FILE_PATH:}
-      truststore-file-path: ${SECRET_STORE_VAULT_TRUSTSTORE_FILE_PATH:}
-    fssp:
-      address: ${SECRET_STORE_FSSP_ADDRESS:}
-      secret-path: ${SECRET_STORE_FSSP_SECRET_PATH:secure-store/entries}
-      enable-ssl: ${SECRET_STORE_FSSP_ENABLE_SSL:false}
-      trust-store-path: ${SECRET_STORE_FSSP_TRUSTSTORE_PATH:}
-      trust-store-file-type: ${SECRET_STORE_FSSP_TRUSTSTORE_FILE_TYPE:}
-      trust-store-password: ${SECRET_STORE_FSSP_TRUSTSTORE_PASSWORD:}
+  features:
+    flexible-circulation-rules-enabled: ${FLEXIBLE_CIRCULATION_RULES_ENABLED:true}
+    dcb-entities-runtime-verification-enabled: ${DCB_ENTITIES_RUNTIME_VERIFICATION_ENABLED:true}
 
 debug: false

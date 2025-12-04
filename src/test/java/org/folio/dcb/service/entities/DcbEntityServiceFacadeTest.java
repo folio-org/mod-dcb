@@ -9,7 +9,7 @@ import static org.mockito.Mockito.when;
 import org.folio.dcb.client.feign.HoldingsStorageClient.Holding;
 import org.folio.dcb.client.feign.LoanTypeClient.LoanType;
 import org.folio.dcb.client.feign.LocationsClient.LocationDTO;
-import org.folio.dcb.config.DcbEntitiesProperties;
+import org.folio.dcb.config.DcbFeatureProperties;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,13 +29,13 @@ class DcbEntityServiceFacadeTest {
   @Mock private DcbLoanTypeService dcbLoanTypeService;
   @Mock private DcbCalendarService dcbCalendarService;
   @Mock private DcbLocationService dcbLocationService;
-  @Mock private DcbEntitiesProperties dcbEntitiesProperties;
+  @Mock private DcbFeatureProperties dcbFeatureProperties;
   @Mock private DcbCancellationReasonService dcbCancellationReasonService;
 
   @AfterEach
   void tearDown() {
     verifyNoMoreInteractions(dcbHoldingService, dcbLoanTypeService, dcbCalendarService,
-      dcbLocationService, dcbEntitiesProperties, dcbCancellationReasonService);
+      dcbLocationService, dcbFeatureProperties, dcbCancellationReasonService);
   }
 
   @Test
@@ -51,78 +51,78 @@ class DcbEntityServiceFacadeTest {
 
   @Test
   void findOrCreateHolding_positive_shouldCallRealServiceWhenSettingEnabled() {
-    when(dcbEntitiesProperties.isRuntimeVerificationEnabled()).thenReturn(true);
+    when(dcbFeatureProperties.isDcbEntitiesRuntimeVerificationEnabled()).thenReturn(true);
     when(dcbHoldingService.findOrCreateEntity()).thenReturn(dcbHolding());
 
     var result = dcbEntityServiceFacade.findOrCreateHolding();
 
     assertThat(result).isEqualTo(dcbHolding());
-    verify(dcbEntitiesProperties).isRuntimeVerificationEnabled();
+    verify(dcbFeatureProperties).isDcbEntitiesRuntimeVerificationEnabled();
     verify(dcbHoldingService).findOrCreateEntity();
     verify(dcbHoldingService, never()).getDefaultValue();
   }
 
   @Test
   void findOrCreateHolding_positive_shouldReturnDefaultValueWhenSettingDisable() {
-    when(dcbEntitiesProperties.isRuntimeVerificationEnabled()).thenReturn(false);
+    when(dcbFeatureProperties.isDcbEntitiesRuntimeVerificationEnabled()).thenReturn(false);
     when(dcbHoldingService.getDefaultValue()).thenReturn(dcbHolding());
 
     var result = dcbEntityServiceFacade.findOrCreateHolding();
 
     assertThat(result).isEqualTo(dcbHolding());
-    verify(dcbEntitiesProperties).isRuntimeVerificationEnabled();
+    verify(dcbFeatureProperties).isDcbEntitiesRuntimeVerificationEnabled();
     verify(dcbHoldingService, never()).findOrCreateEntity();
     verify(dcbHoldingService).getDefaultValue();
   }
 
   @Test
   void findOrCreateLocation_positive_shouldCallRealServiceWhenSettingEnabled() {
-    when(dcbEntitiesProperties.isRuntimeVerificationEnabled()).thenReturn(true);
+    when(dcbFeatureProperties.isDcbEntitiesRuntimeVerificationEnabled()).thenReturn(true);
     when(dcbLocationService.findOrCreateEntity()).thenReturn(dcbLocation());
 
     var result = dcbEntityServiceFacade.findOrCreateLocation();
 
     assertThat(result).isEqualTo(dcbLocation());
-    verify(dcbEntitiesProperties).isRuntimeVerificationEnabled();
+    verify(dcbFeatureProperties).isDcbEntitiesRuntimeVerificationEnabled();
     verify(dcbLocationService).findOrCreateEntity();
     verify(dcbLocationService, never()).getDefaultValue();
   }
 
   @Test
   void findOrCreateLocation_positive_shouldReturnDefaultValueWhenSettingDisable() {
-    when(dcbEntitiesProperties.isRuntimeVerificationEnabled()).thenReturn(false);
+    when(dcbFeatureProperties.isDcbEntitiesRuntimeVerificationEnabled()).thenReturn(false);
     when(dcbLocationService.getDefaultValue()).thenReturn(dcbLocation());
 
     var result = dcbEntityServiceFacade.findOrCreateLocation();
 
     assertThat(result).isEqualTo(dcbLocation());
-    verify(dcbEntitiesProperties).isRuntimeVerificationEnabled();
+    verify(dcbFeatureProperties).isDcbEntitiesRuntimeVerificationEnabled();
     verify(dcbLocationService, never()).findOrCreateEntity();
     verify(dcbLocationService).getDefaultValue();
   }
 
   @Test
   void findOrCreateLoanType_positive_shouldCallRealServiceWhenSettingEnabled() {
-    when(dcbEntitiesProperties.isRuntimeVerificationEnabled()).thenReturn(true);
+    when(dcbFeatureProperties.isDcbEntitiesRuntimeVerificationEnabled()).thenReturn(true);
     when(dcbLoanTypeService.findOrCreateEntity()).thenReturn(dcbLoanType());
 
     var result = dcbEntityServiceFacade.findOrCreateLoanType();
 
     assertThat(result).isEqualTo(dcbLoanType());
-    verify(dcbEntitiesProperties).isRuntimeVerificationEnabled();
+    verify(dcbFeatureProperties).isDcbEntitiesRuntimeVerificationEnabled();
     verify(dcbLoanTypeService).findOrCreateEntity();
     verify(dcbLoanTypeService, never()).getDefaultValue();
   }
 
   @Test
   void findOrCreateLoanType_positive_shouldReturnDefaultValueWhenSettingDisable() {
-    when(dcbEntitiesProperties.isRuntimeVerificationEnabled()).thenReturn(false);
+    when(dcbFeatureProperties.isDcbEntitiesRuntimeVerificationEnabled()).thenReturn(false);
     when(dcbLoanTypeService.getDefaultValue()).thenReturn(dcbLoanType());
 
     var result = dcbEntityServiceFacade.findOrCreateLoanType();
 
     assertThat(result).isEqualTo(dcbLoanType());
-    verify(dcbEntitiesProperties).isRuntimeVerificationEnabled();
+    verify(dcbFeatureProperties).isDcbEntitiesRuntimeVerificationEnabled();
     verify(dcbLoanTypeService, never()).findOrCreateEntity();
     verify(dcbLoanTypeService).getDefaultValue();
   }

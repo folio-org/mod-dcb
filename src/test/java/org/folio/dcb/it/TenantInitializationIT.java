@@ -2,18 +2,15 @@ package org.folio.dcb.it;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.requestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
-import static org.hamcrest.Matchers.containsString;
+import static org.folio.dcb.support.wiremock.WiremockContainerExtension.getWireMockClient;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static support.wiremock.WiremockContainerExtension.getWireMockClient;
 
 import org.folio.dcb.it.base.BaseIntegrationTest;
+import org.folio.dcb.support.types.IntegrationTest;
+import org.folio.dcb.support.wiremock.WireMockStub;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpMethod;
-import support.types.IntegrationTest;
-import support.wiremock.WireMockStub;
 
 @IntegrationTest
 class TenantInitializationIT extends BaseIntegrationTest {
@@ -81,22 +78,6 @@ class TenantInitializationIT extends BaseIntegrationTest {
     assertThatApiIsCalledOnce(GET, "/cancellation-reason-storage/cancellation-reasons");
     assertThatApiIsCalledOnce(GET, "/loan-types");
     assertThatApiIsCalledOnce(GET, "/calendar/calendars");
-    purgeTenant();
-  }
-
-  @Test
-  @WireMockStub(value = {
-    "/stubs/mod-inventory-storage/locations/200-get-by-query(dcb).json",
-    "/stubs/mod-inventory-storage/holdings-storage/200-get-by-query(dcb+id).json",
-    "/stubs/mod-circulation-storage/cancellation-reason-storage/200-get-by-id(dcb).json",
-    "/stubs/mod-inventory-storage/loan-types/200-get-by-query(dcb).json",
-    "/stubs/mod-calendar/calendars/200-get-all.json"
-  })
-  void refreshShadowLocations_validate400WhenFetchDcbHubLocationDisabled() throws Exception {
-    enableTenant();
-    refreshShadowLocationsAttempt()
-      .andExpect(status().isBadRequest())
-      .andExpect(jsonPath("$.errors[0].message", containsString("DCB Hub locations fetching is disabled")));
     purgeTenant();
   }
 

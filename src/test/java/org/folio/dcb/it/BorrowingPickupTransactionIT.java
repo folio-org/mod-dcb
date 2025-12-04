@@ -27,9 +27,9 @@ import static org.folio.dcb.utils.EntityUtils.PICKUP_SERVICE_POINT_ID;
 import static org.folio.dcb.utils.EntityUtils.borrowerDcbTransaction;
 import static org.folio.dcb.utils.EntityUtils.borrowingPickupDcbTransaction;
 import static org.folio.dcb.utils.EntityUtils.dcbItem;
+import static org.folio.dcb.utils.EntityUtils.dcbPatron;
 import static org.folio.dcb.utils.EntityUtils.dcbTransactionUpdate;
 import static org.folio.dcb.utils.EntityUtils.transactionStatus;
-import static org.folio.dcb.utils.EntityUtils.dcbPatron;
 import static org.folio.dcb.utils.JsonTestUtils.asJsonString;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
@@ -41,13 +41,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.it.base.BaseTenantIntegrationTest;
+import org.folio.dcb.support.types.IntegrationTest;
+import org.folio.dcb.support.wiremock.WireMockStub;
 import org.folio.dcb.utils.DCBConstants;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.http.MediaType;
-import support.types.IntegrationTest;
-import support.wiremock.WireMockStub;
 
 @IntegrationTest
 class BorrowingPickupTransactionIT extends BaseTenantIntegrationTest {

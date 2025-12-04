@@ -16,7 +16,8 @@
 * MODDCB-235: Add hold count field to transaction status response [MODDCB-235](https://folio-org.atlassian.net/browse/MODDCB-235)
 * MODDCB-236: Provide endpoints to toggles borrower role renewals on virtual items [MODDCB-236](https://folio-org.atlassian.net/browse/MODDCB-236)
 * MODDCB-226: Create umbrella when data when requested if not present [MODDCB-226](https://folio-org.atlassian.net/browse/MODDCB-226)
-* MODDCB-242 Add handling of expired lender requests [MODDCB-242](https://folio-org.atlassian.net/browse/MODDCB-242)
+* MODDCB-242: Add handling of expired lender requests [MODDCB-242](https://folio-org.atlassian.net/browse/MODDCB-242)
+* MODDCB-251: Add request body for /dcb/shadow-locations/refresh [MODDCB-251](https://folio-org.atlassian.net/browse/MODDCB-251)
 
 ## v1.3.0 2025-03-13
 

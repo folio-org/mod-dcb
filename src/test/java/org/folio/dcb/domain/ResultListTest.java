@@ -3,8 +3,8 @@ package org.folio.dcb.domain;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
+import org.folio.dcb.support.types.UnitTest;
 import org.junit.jupiter.api.Test;
-import support.types.UnitTest;
 
 @UnitTest
 class ResultListTest {

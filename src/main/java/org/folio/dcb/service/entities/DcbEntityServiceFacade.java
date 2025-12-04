@@ -7,7 +7,7 @@ import org.folio.dcb.client.feign.CancellationReasonClient.CancellationReason;
 import org.folio.dcb.client.feign.HoldingsStorageClient.Holding;
 import org.folio.dcb.client.feign.LoanTypeClient.LoanType;
 import org.folio.dcb.client.feign.LocationsClient.LocationDTO;
-import org.folio.dcb.config.DcbEntitiesProperties;
+import org.folio.dcb.config.DcbFeatureProperties;
 import org.folio.dcb.domain.dto.ServicePointRequest;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +20,7 @@ public class DcbEntityServiceFacade {
   private final DcbLoanTypeService dcbLoanTypeService;
   private final DcbCalendarService dcbCalendarService;
   private final DcbLocationService dcbLocationService;
-  private final DcbEntitiesProperties dcbEntitiesProperties;
+  private final DcbFeatureProperties dcbFeatureProperties;
   private final DcbServicePointService dcbServicePointService;
   private final DcbCancellationReasonService dcbCancellationReasonService;
 
@@ -117,7 +117,7 @@ public class DcbEntityServiceFacade {
    * @return the entity from the - appropriate supplier based on runtime verification configuration
    */
   private <T> T getOrCreateEntity(Supplier<T> valueSupplier, Supplier<T> defaultValueSupplier) {
-    if (dcbEntitiesProperties.isRuntimeVerificationEnabled()) {
+    if (dcbFeatureProperties.isDcbEntitiesRuntimeVerificationEnabled()) {
       return valueSupplier.get();
     }
 
