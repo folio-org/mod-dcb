@@ -5,7 +5,6 @@ import static org.awaitility.Durations.TEN_SECONDS;
 import static org.awaitility.Durations.TWO_HUNDRED_MILLISECONDS;
 import static org.folio.dcb.support.wiremock.WiremockContainerExtension.getWireMockClient;
 import static org.folio.dcb.support.wiremock.WiremockStubExtension.resetWiremockStubs;
-import static org.folio.dcb.utils.EntityUtils.TEST_TENANT;
 import static org.folio.dcb.utils.JsonTestUtils.asJsonString;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.AFTER_TEST_METHOD;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -16,7 +15,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.github.tomakehurst.wiremock.client.WireMock;
 import java.time.OffsetDateTime;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import lombok.SneakyThrows;
