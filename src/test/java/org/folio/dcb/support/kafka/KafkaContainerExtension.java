@@ -1,5 +1,6 @@
 package org.folio.dcb.support.kafka;
 
+import static org.folio.dcb.utils.EntityUtils.TEST_TENANT;
 import static org.testcontainers.utility.DockerImageName.parse;
 
 import java.util.List;
@@ -25,6 +26,12 @@ public class KafkaContainerExtension implements BeforeAllCallback, AfterAllCallb
     .withEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false")
     .withStartupAttempts(3);
 
+  protected static final List<String> TENANT_TOPICS = List.of(
+    "folio.%s.circulation.request".formatted(TEST_TENANT),
+    "folio.%s.circulation.loan".formatted(TEST_TENANT),
+    "folio.%s.circulation.check-in".formatted(TEST_TENANT)
+  );
+
   @Override
   public void beforeAll(ExtensionContext context) {
     if (!CONTAINER.isRunning()) {
@@ -32,11 +39,13 @@ public class KafkaContainerExtension implements BeforeAllCallback, AfterAllCallb
     }
 
     System.setProperty(SPRING_PROPERTY_NAME, CONTAINER.getBootstrapServers());
+    createTopics(TENANT_TOPICS);
   }
 
   @Override
   public void afterAll(ExtensionContext context) {
     System.clearProperty(SPRING_PROPERTY_NAME);
+    deleteTopics(TENANT_TOPICS);
   }
 
   @SneakyThrows

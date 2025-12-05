@@ -1,10 +1,8 @@
 package org.folio.dcb.it.base;
 
 import static org.assertj.core.api.Assertions.entry;
-import static org.awaitility.Durations.ONE_MINUTE;
+import static org.awaitility.Durations.TEN_SECONDS;
 import static org.awaitility.Durations.TWO_HUNDRED_MILLISECONDS;
-import static org.folio.dcb.support.kafka.KafkaContainerExtension.createTopics;
-import static org.folio.dcb.support.kafka.KafkaContainerExtension.deleteTopics;
 import static org.folio.dcb.support.wiremock.WiremockContainerExtension.getWireMockClient;
 import static org.folio.dcb.support.wiremock.WiremockStubExtension.resetWiremockStubs;
 import static org.folio.dcb.utils.EntityUtils.TEST_TENANT;
@@ -36,20 +34,15 @@ import org.folio.spring.FolioModuleMetadata;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.util.LinkedMultiValueMap;
 
+@Import({TestJdbcHelper.class, TestCirculationEventHelper.class})
 @Sql(value = "/db/scripts/cleanup_dcb_tables.sql", executionPhase = AFTER_TEST_METHOD)
 public abstract class BaseTenantIntegrationTest extends BaseIntegrationTest {
-
-  protected static final List<String> TENANT_TOPICS = List.of(
-    "folio.%s.circulation.request".formatted(TEST_TENANT),
-    "folio.%s.circulation.check-in".formatted(TEST_TENANT)
-  );
 
   protected static WireMock wiremock;
   protected static TestJdbcHelper testJdbcHelper;
@@ -60,25 +53,23 @@ public abstract class BaseTenantIntegrationTest extends BaseIntegrationTest {
   static void beforeAll(
     @Autowired FolioModuleMetadata folioModuleMetadata,
     @Autowired TransactionAuditRepository transactionAuditRepository,
-    @Autowired KafkaTemplate<String, Object> kafkaTemplate,
-    @Autowired NamedParameterJdbcTemplate jdbcTemplate) {
+    @Autowired TestCirculationEventHelper testCirculationEventHelper,
+    @Autowired TestJdbcHelper testJdbcHelper) {
 
-    createTopics(TENANT_TOPICS);
     setUpMockForTestTenantInit();
     enableTenant();
     resetWiremockStubs();
-    wiremock = getWireMockClient();
-    auditEntityVerifier = new AuditEntityTestVerifier(
+    BaseTenantIntegrationTest.wiremock = getWireMockClient();
+    BaseTenantIntegrationTest.auditEntityVerifier = new AuditEntityTestVerifier(
       new HashMap<>(defaultHeaders()), folioModuleMetadata, transactionAuditRepository);
-    testEventHelper = new TestCirculationEventHelper(kafkaTemplate);
-    testJdbcHelper = new TestJdbcHelper(jdbcTemplate);
+    BaseTenantIntegrationTest.testEventHelper = testCirculationEventHelper;
+    BaseTenantIntegrationTest.testJdbcHelper = testJdbcHelper;
   }
 
   @AfterAll
   static void afterAll() {
     resetWiremockStubs();
     purgeTenant();
-    deleteTopics(TENANT_TOPICS);
     wiremock = null;
     auditEntityVerifier = null;
   }
@@ -193,7 +184,7 @@ public abstract class BaseTenantIntegrationTest extends BaseIntegrationTest {
 
   protected static void awaitUntilAsserted(ThrowingRunnable throwingRunnable) {
     Awaitility.await()
-      .atMost(ONE_MINUTE)
+      .atMost(TEN_SECONDS)
       .pollInterval(TWO_HUNDRED_MILLISECONDS)
       .untilAsserted(throwingRunnable);
   }

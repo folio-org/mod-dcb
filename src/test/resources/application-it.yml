@@ -8,6 +8,7 @@ spring:
     show-sql: true
   kafka:
     producer:
+      acks: all
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 

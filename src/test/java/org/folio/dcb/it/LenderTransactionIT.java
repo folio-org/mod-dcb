@@ -42,7 +42,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.UUID;
 import org.folio.dcb.domain.dto.TransactionStatus.StatusEnum;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.it.base.BaseTenantIntegrationTest;
@@ -480,11 +479,10 @@ class LenderTransactionIT extends BaseTenantIntegrationTest {
   @Test
   @WireMockStub("/stubs/mod-circulation/requests/200-get-by-query(hold requests empty).json")
   void updateStatus_positive_awaitingPickupTransactionExpiration() {
-    var transactionId = UUID.randomUUID().toString();
-    testJdbcHelper.saveDcbTransaction(transactionId, AWAITING_PICKUP, lenderDcbTransaction());
+    testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, AWAITING_PICKUP, lenderDcbTransaction());
     testEventHelper.sendMessage(expiredRequestMessage(TEST_TENANT));
 
-    awaitUntilAsserted(() -> getDcbTransactionStatus(transactionId)
+    awaitUntilAsserted(() -> getDcbTransactionStatus(DCB_TRANSACTION_ID)
       .andExpect(jsonPath("$.status").value(EXPIRED.getValue())));
   }
 
