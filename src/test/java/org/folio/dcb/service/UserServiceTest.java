@@ -21,6 +21,7 @@ import org.folio.dcb.domain.dto.User;
 import org.folio.dcb.domain.dto.UserCollection;
 import org.folio.dcb.service.impl.PatronGroupServiceImpl;
 import org.folio.dcb.service.impl.UserServiceImpl;
+import org.folio.dcb.support.types.UnitTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,7 +30,6 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import support.types.UnitTest;
 
 @UnitTest
 @ExtendWith(MockitoExtension.class)

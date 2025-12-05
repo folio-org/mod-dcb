@@ -1,8 +1,10 @@
 package org.folio.dcb.it.base;
 
 import static org.assertj.core.api.Assertions.entry;
+import static org.awaitility.Durations.FIVE_SECONDS;
 import static org.awaitility.Durations.ONE_HUNDRED_MILLISECONDS;
 import static org.awaitility.Durations.ONE_MINUTE;
+import static org.awaitility.Durations.TWO_HUNDRED_MILLISECONDS;
 import static org.folio.dcb.support.kafka.KafkaContainerExtension.createTopics;
 import static org.folio.dcb.support.kafka.KafkaContainerExtension.deleteTopics;
 import static org.folio.dcb.support.wiremock.WiremockContainerExtension.getWireMockClient;
@@ -194,7 +196,7 @@ public abstract class BaseTenantIntegrationTest extends BaseIntegrationTest {
   protected static void awaitUntilAsserted(ThrowingRunnable throwingRunnable) {
     Awaitility.await()
       .atMost(ONE_MINUTE)
-      .pollInterval(ONE_HUNDRED_MILLISECONDS)
+      .pollInterval(TWO_HUNDRED_MILLISECONDS)
       .untilAsserted(throwingRunnable);
   }
 }
