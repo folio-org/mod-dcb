@@ -43,7 +43,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.UUID;
-import net.jpountz.util.UnsafeUtils;
 import org.folio.dcb.domain.dto.TransactionStatus.StatusEnum;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.it.base.BaseTenantIntegrationTest;
