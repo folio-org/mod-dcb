@@ -26,12 +26,6 @@ public class KafkaContainerExtension implements BeforeAllCallback, AfterAllCallb
     .withEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false")
     .withStartupAttempts(3);
 
-  protected static final List<String> TENANT_TOPICS = List.of(
-    "folio.%s.circulation.request".formatted(TEST_TENANT),
-    "folio.%s.circulation.loan".formatted(TEST_TENANT),
-    "folio.%s.circulation.check-in".formatted(TEST_TENANT)
-  );
-
   @Override
   public void beforeAll(ExtensionContext context) {
     if (!CONTAINER.isRunning()) {
@@ -39,13 +33,11 @@ public class KafkaContainerExtension implements BeforeAllCallback, AfterAllCallb
     }
 
     System.setProperty(SPRING_PROPERTY_NAME, CONTAINER.getBootstrapServers());
-    createTopics(TENANT_TOPICS);
   }
 
   @Override
   public void afterAll(ExtensionContext context) {
     System.clearProperty(SPRING_PROPERTY_NAME);
-    deleteTopics(TENANT_TOPICS);
   }
 
   @SneakyThrows
@@ -54,6 +46,7 @@ public class KafkaContainerExtension implements BeforeAllCallback, AfterAllCallb
       .map(topicName -> new NewTopic(topicName, 1, (short) 1))
       .toList();
 
+    log.info("Creating topics: {}", newTopics);
     try (var adminClient = getAdminClient()) {
       adminClient.createTopics(newTopics);
     }
@@ -62,7 +55,17 @@ public class KafkaContainerExtension implements BeforeAllCallback, AfterAllCallb
   @SneakyThrows
   public static void deleteTopics(List<String> topicNames) {
     try (var adminClient = getAdminClient()) {
-      adminClient.deleteTopics(topicNames);
+      var existingTopics = adminClient.listTopics().names().get();
+      var topicsToDelete = topicNames.stream()
+        .filter(existingTopics::contains)
+        .toList();
+
+      if (!topicsToDelete.isEmpty()) {
+        log.info("Removing Kafka topics: {}", topicsToDelete);
+        adminClient.deleteTopics(topicsToDelete);
+      } else {
+        log.debug("No Kafka topics to delete from: {}", topicNames);
+      }
     }
   }
 

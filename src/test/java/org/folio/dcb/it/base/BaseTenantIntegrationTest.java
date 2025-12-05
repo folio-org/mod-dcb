@@ -3,8 +3,11 @@ package org.folio.dcb.it.base;
 import static org.assertj.core.api.Assertions.entry;
 import static org.awaitility.Durations.TEN_SECONDS;
 import static org.awaitility.Durations.TWO_HUNDRED_MILLISECONDS;
+import static org.folio.dcb.support.kafka.KafkaContainerExtension.createTopics;
+import static org.folio.dcb.support.kafka.KafkaContainerExtension.deleteTopics;
 import static org.folio.dcb.support.wiremock.WiremockContainerExtension.getWireMockClient;
 import static org.folio.dcb.support.wiremock.WiremockStubExtension.resetWiremockStubs;
+import static org.folio.dcb.utils.EntityUtils.TEST_TENANT;
 import static org.folio.dcb.utils.JsonTestUtils.asJsonString;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.AFTER_TEST_METHOD;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -15,6 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.github.tomakehurst.wiremock.client.WireMock;
 import java.time.OffsetDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import lombok.SneakyThrows;
@@ -34,13 +38,21 @@ import org.junit.jupiter.api.BeforeAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.util.LinkedMultiValueMap;
 
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @Import({TestJdbcHelper.class, TestCirculationEventHelper.class})
 @Sql(value = "/db/scripts/cleanup_dcb_tables.sql", executionPhase = AFTER_TEST_METHOD)
 public abstract class BaseTenantIntegrationTest extends BaseIntegrationTest {
+
+  protected static final List<String> TENANT_TOPICS = List.of(
+    "folio.%s.circulation.request".formatted(TEST_TENANT),
+    "folio.%s.circulation.loan".formatted(TEST_TENANT),
+    "folio.%s.circulation.check-in".formatted(TEST_TENANT)
+  );
 
   protected static WireMock wiremock;
   protected static TestJdbcHelper testJdbcHelper;
@@ -54,6 +66,7 @@ public abstract class BaseTenantIntegrationTest extends BaseIntegrationTest {
     @Autowired TestCirculationEventHelper testCirculationEventHelper,
     @Autowired TestJdbcHelper testJdbcHelper) {
 
+    createTopics(TENANT_TOPICS);
     setUpMockForTestTenantInit();
     enableTenant();
     resetWiremockStubs();
@@ -68,8 +81,9 @@ public abstract class BaseTenantIntegrationTest extends BaseIntegrationTest {
   static void afterAll() {
     resetWiremockStubs();
     purgeTenant();
-    wiremock = null;
-    auditEntityVerifier = null;
+    deleteTopics(TENANT_TOPICS);
+    BaseTenantIntegrationTest.wiremock = null;
+    BaseTenantIntegrationTest.auditEntityVerifier = null;
   }
 
   protected static void setUpMockForTestTenantInit() {

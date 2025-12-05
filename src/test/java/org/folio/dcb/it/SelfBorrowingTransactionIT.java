@@ -8,6 +8,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.folio.dcb.domain.dto.CirculationRequest.RequestTypeEnum.HOLD;
 import static org.folio.dcb.domain.dto.CirculationRequest.RequestTypeEnum.PAGE;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.EXPIRED;
+import static org.folio.dcb.support.wiremock.WiremockContainerExtension.getWireMockClient;
 import static org.folio.dcb.utils.EntityUtils.BORROWER_SERVICE_POINT_ID;
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
 import static org.folio.dcb.utils.EntityUtils.HOLDING_RECORD_ID;
@@ -25,6 +26,7 @@ import static org.junit.jupiter.params.provider.EnumSource.Mode.EXCLUDE;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.github.tomakehurst.wiremock.client.WireMock;
 import org.folio.dcb.domain.dto.TransactionStatus.StatusEnum;
 import org.folio.dcb.it.base.BaseTenantIntegrationTest;
 import org.folio.dcb.support.types.IntegrationTest;
@@ -36,11 +38,23 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 @IntegrationTest
-class SelfBorrowingTransactionIT extends BaseTenantIntegrationTest {
+class SelfBorrowingTransactionIT {
+
+  private static final WireMock wiremock = getWireMockClient();
+
+  private static void  verifyPostCirculationRequestCalledOnce(String type, String servicePointId) {
+    wiremock.verifyThat(1, postRequestedFor(urlPathEqualTo("/circulation/requests"))
+      .withRequestBody(matchingJsonPath("$.requestType", equalTo(type)))
+      .withRequestBody(matchingJsonPath("$.itemId", equalTo(ITEM_ID)))
+      .withRequestBody(matchingJsonPath("$.instanceId", equalTo(INSTANCE_ID)))
+      .withRequestBody(matchingJsonPath("$.requesterId", equalTo(PATRON_TYPE_USER_ID)))
+      .withRequestBody(matchingJsonPath("$.pickupServicePointId", equalTo(servicePointId)))
+      .withRequestBody(matchingJsonPath("$.holdingsRecordId", equalTo(HOLDING_RECORD_ID))));
+  }
 
   @Nested
   @DisplayName("BorrowerRoleIT")
-  class BorrowerRoleIT {
+  class BorrowerRoleIT extends BaseTenantIntegrationTest {
 
     @Test
     @WireMockStub({
@@ -140,7 +154,7 @@ class SelfBorrowingTransactionIT extends BaseTenantIntegrationTest {
 
   @Nested
   @DisplayName("BorrowingPickupRoleIT")
-  class BorrowingPickupRoleIT {
+  class BorrowingPickupRoleIT extends BaseTenantIntegrationTest {
 
     @Test
     @WireMockStub({
@@ -223,15 +237,5 @@ class SelfBorrowingTransactionIT extends BaseTenantIntegrationTest {
         .andExpect(jsonPath("$.errors[0].message").value(containsString(String.format(
           "Status transition will not be possible from %s to EXPIRED", sourceStatus))));
     }
-  }
-
-  private static void  verifyPostCirculationRequestCalledOnce(String type, String servicePointId) {
-    wiremock.verifyThat(1, postRequestedFor(urlPathEqualTo("/circulation/requests"))
-      .withRequestBody(matchingJsonPath("$.requestType", equalTo(type)))
-      .withRequestBody(matchingJsonPath("$.itemId", equalTo(ITEM_ID)))
-      .withRequestBody(matchingJsonPath("$.instanceId", equalTo(INSTANCE_ID)))
-      .withRequestBody(matchingJsonPath("$.requesterId", equalTo(PATRON_TYPE_USER_ID)))
-      .withRequestBody(matchingJsonPath("$.pickupServicePointId", equalTo(servicePointId)))
-      .withRequestBody(matchingJsonPath("$.holdingsRecordId", equalTo(HOLDING_RECORD_ID))));
   }
 }

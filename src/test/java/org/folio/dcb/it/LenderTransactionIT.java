@@ -478,10 +478,12 @@ class LenderTransactionIT extends BaseTenantIntegrationTest {
 
   @Test
   @WireMockStub("/stubs/mod-circulation/requests/200-get-by-query(hold requests empty).json")
-  void updateStatus_positive_awaitingPickupTransactionExpiration() {
+  void updateStatus_positive_awaitingPickupTransactionExpiration() throws Exception {
     testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, AWAITING_PICKUP, lenderDcbTransaction());
-    testEventHelper.sendMessage(expiredRequestMessage(TEST_TENANT));
+    getDcbTransactionStatus(DCB_TRANSACTION_ID)
+      .andExpect(jsonPath("$.status").value(AWAITING_PICKUP.getValue()));
 
+    testEventHelper.sendMessage(expiredRequestMessage(TEST_TENANT));
     awaitUntilAsserted(() -> getDcbTransactionStatus(DCB_TRANSACTION_ID)
       .andExpect(jsonPath("$.status").value(EXPIRED.getValue())));
   }
@@ -491,8 +493,11 @@ class LenderTransactionIT extends BaseTenantIntegrationTest {
     "/stubs/mod-circulation/requests/200-get-by-query(hold requests empty).json",
     "/stubs/mod-inventory-storage/item-storage/200-get-by-query(id+available).json",
   })
-  void updateStatus_positive_expiredToClosedTransitionAfterCheckInMessage() {
+  void updateStatus_positive_expiredToClosedTransitionAfterCheckInMessage() throws Exception {
     testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, EXPIRED, lenderDcbTransaction());
+    getDcbTransactionStatus(DCB_TRANSACTION_ID)
+      .andExpect(jsonPath("$.status").value(EXPIRED.getValue()));
+
     testEventHelper.sendMessage(itemCheckInMessage(TEST_TENANT));
 
     awaitUntilAsserted(() -> getDcbTransactionStatus(DCB_TRANSACTION_ID)

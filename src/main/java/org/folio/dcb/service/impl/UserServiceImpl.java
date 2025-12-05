@@ -110,16 +110,18 @@ public class UserServiceImpl implements UserService {
 
   private boolean updateUserPersonal(DcbPatron patronDetails, User user) {
     var newPersonalData = DcbPersonal.parseLocalNames(patronDetails.getLocalNames());
-    if (!newPersonalData.isDefault()) {
-      var newUserPersonal = getUserPersonalInfo(newPersonalData);
-      if (!Objects.equals(user.getPersonal(), newUserPersonal)) {
-        log.info("updateUserPersonal:: updating personal data for user with barcode {}", user.getBarcode());
-        user.setPersonal(newUserPersonal);
-        return true;
-      }
+    if (newPersonalData.isDefault()) {
+      return false;
     }
 
-    return false;
+    var newUserPersonal = getUserPersonalInfo(newPersonalData);
+    if (Objects.equals(user.getPersonal(), newUserPersonal)) {
+     return false;
+    }
+
+    log.info("updateUserPersonal:: updating personal data for user with barcode {}", user.getBarcode());
+    user.setPersonal(newUserPersonal);
+    return true;
   }
 
   private void validateDcbUserType(String userType) {
