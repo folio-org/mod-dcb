@@ -10,7 +10,6 @@ import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.exception.InventoryItemNotFound;
-import org.folio.dcb.exception.ServiceException;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.CirculationService;
 import org.folio.dcb.service.ItemService;

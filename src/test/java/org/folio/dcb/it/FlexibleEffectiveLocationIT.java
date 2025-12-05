@@ -7,6 +7,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static java.util.Collections.emptyList;
+import static org.folio.dcb.support.wiremock.WiremockContainerExtension.getWireMockClient;
 import static org.folio.dcb.utils.EntityUtils.BORROWER_SERVICE_POINT_ID;
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
 import static org.folio.dcb.utils.EntityUtils.EXISTED_PATRON_ID;
@@ -25,6 +26,7 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.github.tomakehurst.wiremock.client.WireMock;
 import java.util.List;
 import java.util.stream.Stream;
 import org.folio.dcb.domain.dto.DcbAgency;
@@ -43,13 +45,13 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.test.context.TestPropertySource;
 
 @IntegrationTest
-@TestPropertySource(properties = { "application.features.flexible-circulation-rules-enabled=true" })
-class FlexibleEffectiveLocationIT extends BaseTenantIntegrationTest {
+class FlexibleEffectiveLocationIT {
 
   private static final String SHADOW_LIBRARY_ID = "32188fb2-ac26-42ab-9fd0-1f027e9bf7e2";
   private static final String SHADOW_LOCATION_ID = "e78b9006-c477-4fea-b8e1-5af659948491";
   private static final String DCB_LOCATION_ID = DCBConstants.LOCATION_ID;
   private static final String QUERY_BY_SHADOW_LOCATION_CODE = "code==\"KU\"";
+  private static final WireMock wiremock = getWireMockClient();
 
   private static void verifyGetRequestBeingCalledOnce(String exactUrlPath, String query) {
     wiremock.verifyThat(1, getRequestedFor(
@@ -74,7 +76,8 @@ class FlexibleEffectiveLocationIT extends BaseTenantIntegrationTest {
 
   @Nested
   @DisplayName("BorrowerRoleIT")
-  class BorrowerRoleIT {
+  @TestPropertySource(properties = { "application.features.flexible-circulation-rules-enabled=true" })
+  class BorrowerRoleIT extends BaseTenantIntegrationTest {
 
     @Test
     @WireMockStub({
@@ -217,7 +220,8 @@ class FlexibleEffectiveLocationIT extends BaseTenantIntegrationTest {
 
   @Nested
   @DisplayName("BorrowerPickupRoleIT")
-  class BorrowerPickupRoleIT {
+  @TestPropertySource(properties = { "application.features.flexible-circulation-rules-enabled=true" })
+  class BorrowerPickupRoleIT extends BaseTenantIntegrationTest {
 
     @Test
     @WireMockStub({
@@ -348,7 +352,8 @@ class FlexibleEffectiveLocationIT extends BaseTenantIntegrationTest {
 
   @Nested
   @DisplayName("PickupRoleIT")
-  class PickupRoleIT {
+  @TestPropertySource(properties = { "application.features.flexible-circulation-rules-enabled=true" })
+  class PickupRoleIT extends BaseTenantIntegrationTest {
 
     @Test
     @WireMockStub({
@@ -477,7 +482,8 @@ class FlexibleEffectiveLocationIT extends BaseTenantIntegrationTest {
 
   @Nested
   @DisplayName("ShadowLocationRefreshIT")
-  class ShadowLocationRefreshIT {
+  @TestPropertySource(properties = { "application.features.flexible-circulation-rules-enabled=true" })
+  class ShadowLocationRefreshIT extends BaseTenantIntegrationTest {
 
     @Test
     @WireMockStub({

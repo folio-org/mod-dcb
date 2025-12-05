@@ -1,0 +1,30 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/users",
+    "bodyPatterns": [
+      {
+        "matchesJsonPath": {
+          "expression": "$.type",
+          "matches": "dcb"
+        }
+      }
+    ],
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "test_tenant"
+      },
+      "x-okapi-token": {
+        "equalTo": "dGVzdF9qd3RfdG9rZW4="
+      }
+    }
+  },
+  "response": {
+    "status": 201,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "transformers": ["response-template"],
+    "body": "{{request.body}}"
+  }
+}

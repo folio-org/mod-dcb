@@ -18,6 +18,7 @@
 * MODDCB-226: Create umbrella when data when requested if not present [MODDCB-226](https://folio-org.atlassian.net/browse/MODDCB-226)
 * MODDCB-242: Add handling of expired lender requests [MODDCB-242](https://folio-org.atlassian.net/browse/MODDCB-242)
 * MODDCB-251: Add request body for /dcb/shadow-locations/refresh [MODDCB-251](https://folio-org.atlassian.net/browse/MODDCB-251)
+* MODDCB-252: Update existing virtual(DCB) patron records with localNames [MODDCB-252](https://folio-org.atlassian.net/browse/MODDCB-252)
 
 ## v1.3.0 2025-03-13
 

@@ -73,6 +73,7 @@ public class EntityUtils {
   public static final String EXISTED_INVENTORY_ITEM_BARCODE = "INVENTORY_ITEM";
   public static final String PATRON_TYPE_USER_ID = "18c1741d-e678-4c8e-9fe7-cfaeefab5eea";
   public static final String REQUEST_ID = "398501a2-5c97-4ba6-9ee7-d1cd6433cb98";
+  public static final String PATRON_GROUP_ID = "3684a786-6671-4268-8ed0-9db82ebca60b";
   public static final String LOAN_ID = "d217d4d5-8b2b-496b-8aa5-7e60d530e124";
   public static final String DCB_NEW_BARCODE = "398501a2-5c97-4ba6-9ee7-d1cd6433cb91";
   public static final String DCB_ITEM_NEW_BARCODE = "DCB_ITEM_NEW_BARCODE";

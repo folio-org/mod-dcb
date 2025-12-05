@@ -8,6 +8,7 @@ import static org.folio.dcb.utils.EntityUtils.REQUEST_ID;
 import static org.folio.dcb.utils.EntityUtils.REQUEST_USER_ID;
 import static org.folio.dcb.utils.EntityUtils.TEST_TENANT;
 
+import jakarta.transaction.Transactional;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.time.Instant;
@@ -17,16 +18,20 @@ import org.folio.dcb.domain.dto.TransactionStatus.StatusEnum;
 import org.intellij.lang.annotations.Language;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.stereotype.Service;
 
+@Service
 @RequiredArgsConstructor
 public class TestJdbcHelper {
 
   private final NamedParameterJdbcTemplate jdbcTemplate;
 
+  @Transactional
   public void saveDcbTransaction(String transactionId, StatusEnum status, DcbTransaction tx) {
     saveDcbTransaction(TEST_TENANT, transactionId, status, tx);
   }
 
+  @Transactional
   public void saveDcbTransaction(String tenantId,
     String transactionId, StatusEnum txStatus, DcbTransaction tx) {
     var txItem = requireNonNull(tx.getItem());

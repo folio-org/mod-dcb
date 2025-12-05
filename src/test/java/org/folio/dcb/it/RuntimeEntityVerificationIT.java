@@ -23,12 +23,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.test.context.TestPropertySource;
 
 @IntegrationTest
-@TestPropertySource(properties = { "application.features.dcb-entities-runtime-verification-enabled=true" })
-class RuntimeEntityVerificationIT extends BaseTenantIntegrationTest {
+class RuntimeEntityVerificationIT {
 
   @Nested
   @DisplayName("BorrowerRoleIT")
-  class BorrowerRoleIT {
+  @TestPropertySource(properties = { "application.features.dcb-entities-runtime-verification-enabled=true" })
+  class BorrowerRoleIT extends BaseTenantIntegrationTest {
     @Test
     @WireMockStub({
       "/stubs/mod-inventory-storage/service-points/200-get-by-name(Virtual).json",
@@ -120,7 +120,8 @@ class RuntimeEntityVerificationIT extends BaseTenantIntegrationTest {
 
   @Nested
   @DisplayName("BorrowingPickupIT")
-  class BorrowingPickupRoleIT {
+  @TestPropertySource(properties = { "application.features.dcb-entities-runtime-verification-enabled=true" })
+  class BorrowingPickupRoleIT extends BaseTenantIntegrationTest {
 
     @Test
     @WireMockStub({
@@ -197,7 +198,8 @@ class RuntimeEntityVerificationIT extends BaseTenantIntegrationTest {
 
   @Nested
   @DisplayName("PickupRoleIT")
-  class PickupRoleIT {
+  @TestPropertySource(properties = { "application.features.dcb-entities-runtime-verification-enabled=true" })
+  class PickupRoleIT extends BaseTenantIntegrationTest {
 
     @Test
     @WireMockStub({

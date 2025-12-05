@@ -196,7 +196,7 @@ class LenderTransactionIT extends BaseTenantIntegrationTest {
   @WireMockStub(value = {
     "/stubs/mod-users/users/200-get-by-query(new_user empty).json",
     "/stubs/mod-users/groups/200-get-by-query(staff).json",
-    "/stubs/mod-users/users/201-post-user(dcb user).json",
+    "/stubs/mod-users/users/201-post-user(any).json",
     "/stubs/mod-inventory-storage/service-points/200-get-by-name(Virtual).json",
     "/stubs/mod-inventory-storage/service-points/204-put(Virtual).json",
     "/stubs/mod-calendar/calendars/200-get-all.json",
@@ -222,7 +222,7 @@ class LenderTransactionIT extends BaseTenantIntegrationTest {
   @WireMockStub(value = {
     "/stubs/mod-users/users/200-get-by-query(new_user empty).json",
     "/stubs/mod-users/groups/200-get-by-query(staff).json",
-    "/stubs/mod-users/users/201-post-user(dcb user+local names).json",
+    "/stubs/mod-users/users/201-post-user(any).json",
     "/stubs/mod-inventory-storage/service-points/200-get-by-name(Virtual).json",
     "/stubs/mod-inventory-storage/service-points/204-put(Virtual).json",
     "/stubs/mod-calendar/calendars/200-get-all.json",
@@ -243,6 +243,33 @@ class LenderTransactionIT extends BaseTenantIntegrationTest {
       .withRequestBody(matchingJsonPath("$.personal.firstName", equalTo("John"))));
     auditEntityVerifier.assertThatLatestEntityIsNotDuplicate(DCB_TRANSACTION_ID);
     verifyPostCirculationRequestCalledOnce(PAGE.getValue(), NOT_EXISTED_PATRON_ID);
+  }
+
+  @Test
+  @WireMockStub(value = {
+    "/stubs/mod-users/users/200-get-by-query(user id+barcode).json",
+    "/stubs/mod-users/groups/200-get-by-query(staff).json",
+    "/stubs/mod-users/users/204-put(any).json",
+    "/stubs/mod-inventory-storage/service-points/200-get-by-name(Virtual).json",
+    "/stubs/mod-inventory-storage/service-points/204-put(Virtual).json",
+    "/stubs/mod-calendar/calendars/200-get-all.json",
+    "/stubs/mod-inventory-storage/item-storage/200-get-by-query(id+barcode).json",
+    "/stubs/mod-inventory-storage/holdings-storage/200-get-by-id.json",
+    "/stubs/mod-circulation/requests/201-post(any).json"
+  })
+  void createTransaction_positive_dcbUserUpdateWithLocalNames() throws Exception {
+    var patron = dcbPatron(EXISTED_PATRON_ID, "[John, Doe]");
+
+    postDcbTransaction(DCB_TRANSACTION_ID, lenderDcbTransaction(patron))
+      .andExpect(jsonPath("$.status").value("CREATED"))
+      .andExpect(jsonPath("$.item").value(dcbItem()))
+      .andExpect(jsonPath("$.patron").value(patron));
+
+    wiremock.verifyThat(1, putRequestedFor(urlPathEqualTo("/users/" + EXISTED_PATRON_ID))
+      .withRequestBody(matchingJsonPath("$.personal.lastName", equalTo("Doe")))
+      .withRequestBody(matchingJsonPath("$.personal.firstName", equalTo("John"))));
+    auditEntityVerifier.assertThatLatestEntityIsNotDuplicate(DCB_TRANSACTION_ID);
+    verifyPostCirculationRequestCalledOnce(PAGE.getValue(), EXISTED_PATRON_ID);
   }
 
   @Test
@@ -451,10 +478,12 @@ class LenderTransactionIT extends BaseTenantIntegrationTest {
 
   @Test
   @WireMockStub("/stubs/mod-circulation/requests/200-get-by-query(hold requests empty).json")
-  void updateStatus_positive_awaitingPickupTransactionExpiration() {
+  void updateStatus_positive_awaitingPickupTransactionExpiration() throws Exception {
     testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, AWAITING_PICKUP, lenderDcbTransaction());
-    testEventHelper.sendMessage(expiredRequestMessage(TEST_TENANT));
+    getDcbTransactionStatus(DCB_TRANSACTION_ID)
+      .andExpect(jsonPath("$.status").value(AWAITING_PICKUP.getValue()));
 
+    testEventHelper.sendMessage(expiredRequestMessage(TEST_TENANT));
     awaitUntilAsserted(() -> getDcbTransactionStatus(DCB_TRANSACTION_ID)
       .andExpect(jsonPath("$.status").value(EXPIRED.getValue())));
   }
@@ -464,8 +493,11 @@ class LenderTransactionIT extends BaseTenantIntegrationTest {
     "/stubs/mod-circulation/requests/200-get-by-query(hold requests empty).json",
     "/stubs/mod-inventory-storage/item-storage/200-get-by-query(id+available).json",
   })
-  void updateStatus_positive_expiredToClosedTransitionAfterCheckInMessage() {
+  void updateStatus_positive_expiredToClosedTransitionAfterCheckInMessage() throws Exception {
     testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, EXPIRED, lenderDcbTransaction());
+    getDcbTransactionStatus(DCB_TRANSACTION_ID)
+      .andExpect(jsonPath("$.status").value(EXPIRED.getValue()));
+
     testEventHelper.sendMessage(itemCheckInMessage(TEST_TENANT));
 
     awaitUntilAsserted(() -> getDcbTransactionStatus(DCB_TRANSACTION_ID)

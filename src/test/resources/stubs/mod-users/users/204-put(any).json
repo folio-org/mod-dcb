@@ -4,7 +4,7 @@
     "urlPathTemplate": "/users/{id}",
     "pathParameters": {
       "id": {
-        "equalTo": "284056f5-0670-4e1e-9e2f-61b9f1ee2d18"
+        "matches": "[0-9a-f-]{36}"
       }
     },
     "headers": {
@@ -17,17 +17,9 @@
     },
     "bodyPatterns": [
       {
-        "equalToJson": {
-          "id": "284056f5-0670-4e1e-9e2f-61b9f1ee2d18",
-          "barcode": "DCB_PATRON",
-          "active": true,
-          "type": "dcb",
-          "patronGroup": "3684a786-6671-4268-8ed0-9db82ebca60b",
-          "personal": {
-            "lastName": "William",
-            "firstName": "Guyer",
-            "email": "William.Guyer@folio.org"
-          }
+        "matchesJsonPath": {
+          "expression": "$.type",
+          "matches": "dcb"
         }
       }
     ]
