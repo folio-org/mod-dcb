@@ -102,6 +102,10 @@ public class DcbPersonal {
     return StringUtils.isAllBlank(firstName, middleName, lastName);
   }
 
+  public boolean isDefault() {
+    return Objects.equals(this, DEFAULT_VALUE);
+  }
+
   private static DcbPersonal parseMultiple(String[] parts) {
     var firstName = parts[0];
     var lastName = parts[parts.length - 1];

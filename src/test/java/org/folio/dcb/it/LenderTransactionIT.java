@@ -225,6 +225,33 @@ class LenderTransactionIT extends BaseTenantIntegrationTest {
   @WireMockStub(value = {
     "/stubs/mod-users/users/200-get-by-query(user id+barcode).json",
     "/stubs/mod-users/groups/200-get-by-query(staff).json",
+    "/stubs/mod-users/users/204-put(any).json",
+    "/stubs/mod-inventory-storage/service-points/200-get-by-query(Virtual).json",
+    "/stubs/mod-inventory-storage/service-points/204-put(Virtual).json",
+    "/stubs/mod-calendar/calendars/200-get-all.json",
+    "/stubs/mod-inventory-storage/item-storage/200-get-by-query(id+barcode).json",
+    "/stubs/mod-inventory-storage/holdings-storage/200-get-by-id.json",
+    "/stubs/mod-circulation/requests/201-post(any).json"
+  })
+  void createTransaction_positive_dcbUserUpdateWithLocalNames() throws Exception {
+    var patron = dcbPatron(EXISTED_PATRON_ID, "[John, Doe]");
+
+    postDcbTransaction(DCB_TRANSACTION_ID, lenderDcbTransaction(patron))
+      .andExpect(jsonPath("$.status").value("CREATED"))
+      .andExpect(jsonPath("$.item").value(dcbItem()))
+      .andExpect(jsonPath("$.patron").value(patron));
+
+    wiremock.verifyThat(1, putRequestedFor(urlPathEqualTo("/users/" + EXISTED_PATRON_ID))
+      .withRequestBody(matchingJsonPath("$.personal.lastName", equalTo("Doe")))
+      .withRequestBody(matchingJsonPath("$.personal.firstName", equalTo("John"))));
+    auditEntityVerifier.assertThatLatestEntityIsNotDuplicate(DCB_TRANSACTION_ID);
+    verifyPostCirculationRequestCalledOnce(PAGE.getValue(), EXISTED_PATRON_ID);
+  }
+
+  @Test
+  @WireMockStub(value = {
+    "/stubs/mod-users/users/200-get-by-query(user id+barcode).json",
+    "/stubs/mod-users/groups/200-get-by-query(staff).json",
     "/stubs/mod-inventory-storage/service-points/200-get-by-query(Virtual).json",
     "/stubs/mod-inventory-storage/service-points/204-put(Virtual).json",
     "/stubs/mod-calendar/calendars/200-get-all.json",
