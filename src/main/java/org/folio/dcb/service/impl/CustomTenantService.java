@@ -2,7 +2,6 @@ package org.folio.dcb.service.impl;
 
 import lombok.extern.log4j.Log4j2;
 import org.folio.dcb.listener.kafka.service.KafkaService;
-import org.folio.dcb.service.DcbHubLocationService;
 import org.folio.dcb.service.entities.DcbEntityServiceFacade;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.liquibase.FolioSpringLiquibase;
@@ -21,19 +20,17 @@ import org.springframework.stereotype.Service;
 public class CustomTenantService extends TenantService {
 
   private final KafkaService kafkaService;
-  private final DcbHubLocationService dcbHubLocationService;
   private final DcbEntityServiceFacade dcbEntityServiceFacade;
   private final PrepareSystemUserService prepareSystemUserService;
 
   public CustomTenantService(JdbcTemplate jdbcTemplate, FolioExecutionContext context, FolioSpringLiquibase folioSpringLiquibase,
                              PrepareSystemUserService prepareSystemUserService, KafkaService kafkaService,
-                             DcbEntityServiceFacade dcbEntityServiceFacade, DcbHubLocationService dcbHubLocationService) {
+                             DcbEntityServiceFacade dcbEntityServiceFacade) {
     super(jdbcTemplate, context, folioSpringLiquibase);
 
     this.prepareSystemUserService = prepareSystemUserService;
     this.kafkaService = kafkaService;
     this.dcbEntityServiceFacade = dcbEntityServiceFacade;
-    this.dcbHubLocationService = dcbHubLocationService;
   }
 
   @Override
@@ -42,14 +39,5 @@ public class CustomTenantService extends TenantService {
     prepareSystemUserService.setupSystemUser();
     kafkaService.restartEventListeners();
     dcbEntityServiceFacade.createAll();
-    createShadowLocations();
-  }
-
-  private void createShadowLocations() {
-    try {
-      dcbHubLocationService.createShadowLocations(true);
-    } catch (Exception e) {
-      log.error("createShadowLocations:: Error creating shadow locations: {}", e.getMessage(), e);
-    }
   }
 }

@@ -38,6 +38,12 @@
               { "matchesJsonPath": "$[?(@.code == 'LOC-8')]" },
               { "matchesJsonPath": "$[?(@.name == 'Location-8')]" }
             ]
+          },
+          {
+            "and": [
+              { "matchesJsonPath": "$[?(@.code == 'AG-002')]" },
+              { "matchesJsonPath": "$[?(@.name == 'Agency-Two')]" }
+            ]
           }
         ]
       }
