@@ -1,0 +1,33 @@
+{
+  "request": {
+    "method": "PUT",
+    "urlPathTemplate": "/users/{id}",
+    "pathParameters": {
+      "id": {
+        "matches": "[0-9a-f-]{36}"
+      }
+    },
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "test_tenant"
+      },
+      "x-okapi-token": {
+        "equalTo": "dGVzdF9qd3RfdG9rZW4="
+      }
+    },
+    "bodyPatterns": [
+      {
+        "matchesJsonPath": {
+          "expression": "$.type",
+          "matches": "dcb"
+        }
+      }
+    ]
+  },
+  "response": {
+    "status": 204,
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

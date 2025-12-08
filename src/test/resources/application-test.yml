@@ -73,4 +73,5 @@ management:
       access: read-only
     readinessstate:
       access: unrestricted
+
 debug: false

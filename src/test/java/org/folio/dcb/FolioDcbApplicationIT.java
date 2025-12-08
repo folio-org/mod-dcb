@@ -8,7 +8,7 @@ import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
 import java.nio.file.Path;
-import org.folio.dcb.controller.BaseIT;
+import org.folio.dcb.support.postgres.PostgresContainerExtension;
 import org.folio.spring.integration.XOkapiHeaders;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,7 +44,7 @@ class FolioDcbApplicationIT {
 
   @Container
   private static final PostgreSQLContainer<?> POSTGRES =
-    new PostgreSQLContainer<>(BaseIT.POSTGRES_IMAGE_NAME)
+    new PostgreSQLContainer<>(PostgresContainerExtension.IMAGE_NAME)
       .withNetwork(NETWORK)
       .withNetworkAliases("mypostgres")
       .withUsername("username")

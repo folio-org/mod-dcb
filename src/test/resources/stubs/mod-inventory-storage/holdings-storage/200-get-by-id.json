@@ -1,0 +1,29 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathTemplate": "/holdings-storage/holdings/{id}",
+    "pathParameters": {
+      "id": {
+        "equalTo": "fcee331d-2b50-49de-9395-a76a6ff4e385"
+      }
+    },
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "test_tenant"
+      },
+      "x-okapi-token": {
+        "equalTo": "dGVzdF9qd3RfdG9rZW4="
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "id": "fcee331d-2b50-49de-9395-a76a6ff4e385",
+      "instanceId": "a9350401-f2f2-4804-9701-ca813c70e322"
+    }
+  }
+}

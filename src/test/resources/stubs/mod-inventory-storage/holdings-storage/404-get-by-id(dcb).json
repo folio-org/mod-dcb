@@ -1,0 +1,23 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathTemplate": "/holdings-storage/holdings/{id}",
+    "pathParameters": {
+      "id": {
+        "equalTo": "10cd3a5a-d36f-4c7a-bc4f-e1ae3cf820c9"
+      }
+    },
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "test_tenant"
+      }
+    }
+  },
+  "response": {
+    "status": 404,
+    "headers": {
+      "Content-Type": "plain/text"
+    },
+    "body": "Holdings record not found: 10cd3a5a-d36f-4c7a-bc4f-e1ae3cf820c9"
+  }
+}

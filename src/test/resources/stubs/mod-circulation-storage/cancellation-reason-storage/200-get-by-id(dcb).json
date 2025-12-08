@@ -1,0 +1,38 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathTemplate": "/cancellation-reason-storage/cancellation-reasons/{id}",
+    "pathParameters": {
+      "id": {
+        "equalTo": "50ed35b2-1397-4e83-a76b-642adf91ca2a"
+      }
+    },
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "test_tenant"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "cancellationReasons": [
+        {
+          "id": "50ed35b2-1397-4e83-a76b-642adf91ca2a",
+          "name": "DCB Cancelled",
+          "description": "DCB Cancelled",
+          "metadata": {
+            "createdDate": "2025-10-24T02:07:32.542+00:00",
+            "createdByUserId": "b849e4a5-ac4f-4b4c-80a8-6c4220d04784",
+            "updatedDate": "2025-10-24T02:07:32.542+00:00",
+            "updatedByUserId": "b849e4a5-ac4f-4b4c-80a8-6c4220d04784"
+          }
+        }
+      ],
+      "totalRecords": 1
+    }
+  }
+}

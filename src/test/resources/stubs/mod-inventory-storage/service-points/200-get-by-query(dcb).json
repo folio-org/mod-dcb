@@ -1,0 +1,47 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/service-points",
+    "queryParameters": {
+      "query": {
+        "equalTo": "name==DCB"
+      }
+    },
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "test_tenant"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "servicepoints": [
+        {
+          "id": "9d1b77e8-f02e-4b7f-b296-3f2042ddac54",
+          "name": "DCB",
+          "code": "000",
+          "discoveryDisplayName": "DCB",
+          "pickupLocation": true,
+          "holdShelfExpiryPeriod": {
+            "duration": 10,
+            "intervalId": "Days"
+          },
+          "holdShelfClosedLibraryDateManagement": "Keep_the_current_due_date",
+          "staffSlips": [],
+          "ecsRequestRouting": false,
+          "metadata": {
+            "createdDate": "2025-10-24T02:07:31.751+00:00",
+            "createdByUserId": "b849e4a5-ac4f-4b4c-80a8-6c4220d04784",
+            "updatedDate": "2025-10-24T02:07:31.751+00:00",
+            "updatedByUserId": "b849e4a5-ac4f-4b4c-80a8-6c4220d04784"
+          }
+        }
+      ],
+      "totalRecords": 1
+    }
+  }
+}

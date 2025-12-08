@@ -1,0 +1,26 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/loan-types",
+    "queryParameters": {
+      "query": {
+        "equalTo": "(name==DCB Can circulate)"
+      }
+    },
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "test_tenant"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "loantypes": [],
+      "totalRecords": 0
+    }
+  }
+}
