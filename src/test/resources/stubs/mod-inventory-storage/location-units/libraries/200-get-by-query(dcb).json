@@ -1,0 +1,40 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/location-units/libraries",
+    "queryParameters": {
+      "query": {
+        "equalTo": "(name==DCB)"
+      }
+    },
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "test_tenant"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "loclibs": [
+        {
+          "id": "9d1b77e7-f02e-4b7f-b296-3f2042ddac54",
+          "name": "DCB",
+          "code": "000",
+          "campusId": "9d1b77e6-f02e-4b7f-b296-3f2042ddac54",
+          "isShadow": false,
+          "metadata": {
+            "createdDate": "2023-10-27T11:14:16.070+00:00",
+            "createdByUserId": "ec3caecb-d565-530c-937b-65a9c4ab371b",
+            "updatedDate": "2023-10-27T11:14:16.070+00:00",
+            "updatedByUserId": "ec3caecb-d565-530c-937b-65a9c4ab371b"
+          }
+        }
+      ],
+      "totalRecords": 1
+    }
+  }
+}

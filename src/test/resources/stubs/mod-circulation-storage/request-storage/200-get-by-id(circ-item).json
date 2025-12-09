@@ -1,0 +1,55 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathTemplate": "/request-storage/requests/{id}",
+    "pathParameters": {
+      "id": {
+        "equalTo": "398501a2-5c97-4ba6-9ee7-d1cd6433cb98"
+      }
+    },
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "test_tenant"
+      },
+      "x-okapi-token": {
+        "equalTo": "dGVzdF9qd3RfdG9rZW4="
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "id": "398501a2-5c97-4ba6-9ee7-d1cd6433cb98",
+      "requestType": "Hold",
+      "requestLevel": "Item",
+      "status": "Open - Not yet filled",
+      "requestDate": "2025-10-27T18:49:03.079058500+02:00",
+      "requesterId": "18c1741d-e678-4c8e-9fe7-cfaeefab5eea",
+      "instanceId": "9d1b77e4-f02e-4b7f-b296-3f2042ddac54",
+      "holdingsRecordId": "10cd3a5a-d36f-4c7a-bc4f-e1ae3cf820c9",
+      "itemId": "5b95877d-86c0-4cb7-a0cd-7660b348ae5a",
+      "fulfillmentPreference": "Hold Shelf",
+      "pickupServicePointId": "9d1b77e8-f02e-4b7f-b296-3f2042ddac55",
+      "item": {
+        "barcode": "DCB_ITEM"
+      },
+      "requester": {
+        "barcode": "DCB_PATRON",
+        "personal": {
+          "lastName": "Mueller",
+          "firstName": "Leopold",
+          "email": "Mueller.Leopold@folio.org"
+        }
+      },
+      "metadata": {
+        "createdDate": "2025-10-27T16:49:03.079+00:00",
+        "createdByUserId": "08d51c7a-0f36-4f3d-9e35-d285612a23df",
+        "updatedDate": "2025-10-27T16:49:03.079+00:00",
+        "updatedByUserId": "08d51c7a-0f36-4f3d-9e35-d285612a23df"
+      }
+    }
+  }
+}

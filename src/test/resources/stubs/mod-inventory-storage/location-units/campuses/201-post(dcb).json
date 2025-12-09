@@ -1,0 +1,39 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/location-units/campuses",
+    "bodyPatterns": [
+      {
+        "equalToJson": {
+          "id": "9d1b77e6-f02e-4b7f-b296-3f2042ddac54",
+          "name": "DCB",
+          "code": "000",
+          "institutionId": "9d1b77e5-f02e-4b7f-b296-3f2042ddac54"
+        }
+      }
+    ],
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "test_tenant"
+      }
+    }
+  },
+  "response": {
+    "status": 201,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "id": "9d1b77e6-f02e-4b7f-b296-3f2042ddac54",
+      "name": "DCB",
+      "code": "000",
+      "institutionId": "9d1b77e5-f02e-4b7f-b296-3f2042ddac54",
+      "metadata": {
+        "createdDate": "2023-10-27T11:14:15.723+00:00",
+        "createdByUserId": "ec3caecb-d565-530c-937b-65a9c4ab371b",
+        "updatedDate": "2023-10-27T11:14:15.723+00:00",
+        "updatedByUserId": "ec3caecb-d565-530c-937b-65a9c4ab371b"
+      }
+    }
+  }
+}

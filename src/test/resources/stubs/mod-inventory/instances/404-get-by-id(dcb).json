@@ -1,0 +1,23 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathTemplate": "/inventory/instances/{instanceId}",
+    "pathParameters": {
+      "instanceId": {
+        "equalTo": "9d1b77e4-f02e-4b7f-b296-3f2042ddac54"
+      }
+    },
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "test_tenant"
+      }
+    }
+  },
+  "response": {
+    "status": 404,
+    "headers": {
+      "Content-Type": "plain/text"
+    },
+    "body": "Instance not found: 9d1b77e4-f02e-4b7f-b296-3f2042ddac54"
+  }
+}

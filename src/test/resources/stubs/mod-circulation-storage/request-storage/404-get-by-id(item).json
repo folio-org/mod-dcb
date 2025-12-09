@@ -1,0 +1,36 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathTemplate": "/request-storage/requests/{id}",
+    "pathParameters": {
+      "id": {
+        "equalTo": "398501a2-5c97-4ba6-9ee7-d1cd6433cb98"
+      }
+    },
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "test_tenant"
+      }
+    }
+  },
+  "response": {
+    "status": 404,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "errors": [
+        {
+          "code": "request.not.found",
+          "message": "Request with id 398501a2-5c97-4ba6-9ee7-d1cd6433cb98 not found",
+          "parameters": [
+            {
+              "key": "id",
+              "value": "398501a2-5c97-4ba6-9ee7-d1cd6433cb98"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/cancellation-reason-storage/cancellation-reasons",
+    "queryParameters": {
+      "query": {
+        "equalTo": "id==\"50ed35b2-1397-4e83-a76b-642adf91ca2a\""
+      }
+    },
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "test_tenant"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "cancellationReasons": [],
+      "totalRecords": 0
+    }
+  }
+}

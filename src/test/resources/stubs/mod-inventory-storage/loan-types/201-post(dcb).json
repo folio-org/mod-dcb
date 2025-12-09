@@ -1,0 +1,35 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/loan-types",
+    "bodyPatterns": [
+      {
+        "equalToJson": {
+          "id": "4dec5417-0765-4767-bed6-b363a2d7d4e2",
+          "name": "DCB Can circulate"
+        }
+      }
+    ],
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "test_tenant"
+      }
+    }
+  },
+  "response": {
+    "status": 201,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "id": "4dec5417-0765-4767-bed6-b363a2d7d4e2",
+      "name": "DCB Can circulate",
+      "metadata": {
+        "createdDate": "2025-10-24T02:07:32.660+00:00",
+        "createdByUserId": "b849e4a5-ac4f-4b4c-80a8-6c4220d04784",
+        "updatedDate": "2025-10-24T02:07:32.660+00:00",
+        "updatedByUserId": "b849e4a5-ac4f-4b4c-80a8-6c4220d04784"
+      }
+    }
+  }
+}

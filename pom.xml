@@ -10,7 +10,7 @@
   <groupId>org.folio</groupId>
   <artifactId>mod-dcb</artifactId>
   <name>mod-dcb</name>
-  <version>1.3.8-SNAPSHOT</version>
+  <version>1.3.9-SNAPSHOT</version>
   <description>Manage DCB related transactions in folio</description>
   <packaging>jar</packaging>
 
@@ -34,13 +34,14 @@
     <folio-spring-support.version>9.0.0</folio-spring-support.version>
     <openapi-generator.version>7.12.0</openapi-generator.version>
     <mapstruct.version>1.6.3</mapstruct.version>
-    <kafkaclients.version>3.9.0</kafkaclients.version>
+    <kafkaclients.version>3.9.1</kafkaclients.version>
     <maven-surefire-plugin.version>3.5.2</maven-surefire-plugin.version>
     <maven-release-plugin.version>3.1.1</maven-release-plugin.version>
     <maven-enforcer-plugin.version>3.5.0</maven-enforcer-plugin.version>
 
     <!-- test dependencies -->
-    <wiremock.version>3.2.0</wiremock.version>
+    <wiremock.version>3.13.2</wiremock.version>
+    <annotations.version>26.0.2-1</annotations.version>
     <testcontainers.version>1.20.2</testcontainers.version>
   </properties>
 
@@ -60,6 +61,10 @@
     <dependency>
       <groupId>org.springframework.kafka</groupId>
       <artifactId>spring-kafka</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.retry</groupId>
+      <artifactId>spring-retry</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.kafka</groupId>
@@ -204,6 +209,12 @@
       <groupId>org.folio</groupId>
       <artifactId>util</artifactId>
       <version>${folio-util.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jetbrains</groupId>
+      <artifactId>annotations</artifactId>
+      <version>${annotations.version}</version>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
 

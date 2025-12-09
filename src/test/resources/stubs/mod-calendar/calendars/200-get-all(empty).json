@@ -1,0 +1,26 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/calendar/calendars",
+    "queryParameters": {
+      "limit": {
+        "equalTo": "2147483647"
+      }
+    },
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "test_tenant"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "calendars": [],
+      "totalRecords": 0
+    }
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/loan-policy-storage/loan-policies",
+    "queryParameters": {
+      "query": {
+        "matches": "id==\"d9cd0bed-1b49-4b5e-a7bd-064b8d177231\""
+      }
+    },
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "test_tenant"
+      },
+      "x-okapi-token": {
+        "equalTo": "dGVzdF9qd3RfdG9rZW4="
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "loanPolicies": [
+        {
+          "id": "d9cd0bed-1b49-4b5e-a7bd-064b8d177231",
+          "name": "Example Loan Policy",
+          "description": "An example loan policy",
+          "loanable": true,
+          "loansPolicy": {
+            "profileId": "Rolling",
+            "period": {
+              "duration": 1,
+              "intervalId": "Months"
+            },
+            "closedLibraryDueDateManagementId": "CURRENT_DUE_DATE",
+            "gracePeriod": {
+              "duration": 7,
+              "intervalId": "Days"
+            }
+          },
+          "renewable": false
+        }
+      ],
+      "totalRecords": 1
+    }
+  }
+}

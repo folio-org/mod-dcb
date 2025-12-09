@@ -35,11 +35,17 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWER;
+import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWING_PICKUP;
+import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
+import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.PICKUP;
 import static org.folio.dcb.service.impl.ServicePointServiceImpl.HOLD_SHELF_CLOSED_LIBRARY_DATE_MANAGEMENT;
 
 public class EntityUtils {
 
   public static String ITEM_ID = "5b95877d-86c0-4cb7-a0cd-7660b348ae5a";
+  public static final String TEST_TENANT = "test_tenant";
+  public static final String REQUEST_USER_ID = "8c5ad61c-891a-43c5-a398-fa9515c8d9c5";
   public static final String ITEM_ID_STATUS_NOT_AVAILABLE = "60f57427-b071-42b2-97ba-145bbcf1d32b";
   public static final String NOT_EXISTED_ITEM_ID = "de18d1cd-8312-449c-8db6-c2491467ab76";
 
@@ -48,25 +54,29 @@ public class EntityUtils {
    * the Mocked userClient returns empty result,
    * while requesting it by the query, including such a patron id
    * */
-  public static String NOT_EXISTED_PATRON_ID = "571b0a2c-9456-40b5-a449-d41fe6017082";
+  public static final String NOT_EXISTED_PATRON_ID = "571b0a2c-9456-40b5-a449-d41fe6017082";
 
   /**
    * EXISTED_PATRON_ID - means
    * the Mocked userClient returns result with single value,
    * while requesting it by the query, including such a patron id
    * */
-  public static String EXISTED_PATRON_ID = "284056f5-0670-4e1e-9e2f-61b9f1ee2d18";
-  public static String PICKUP_SERVICE_POINT_ID = "0da8c1e4-1c1f-4dd9-b189-70ba978b7d94";
-  public static String DCB_TRANSACTION_ID = "571b0a2c-8883-40b5-a449-d41fe6017082";
-  public static String CIRCULATION_REQUEST_ID = "571b0a2c-8883-40b5-a449-d41fe6017083";
+  public static final String EXISTED_PATRON_ID = "284056f5-0670-4e1e-9e2f-61b9f1ee2d18";
+  public static final String PICKUP_SERVICE_POINT_ID = "0da8c1e4-1c1f-4dd9-b189-70ba978b7d94";
+  public static final String BORROWER_SERVICE_POINT_ID = "9d1b77e8-f02e-4b7f-b296-3f2042ddac55";
+  public static final String DCB_TRANSACTION_ID = "571b0a2c-8883-40b5-a449-d41fe6017082";
+  public static final String CIRCULATION_REQUEST_ID = "571b0a2c-8883-40b5-a449-d41fe6017083";
 
-  public static String CIRCULATION_ITEM_REQUEST_ID = "571b0a2c-8883-40b5-a449-d41fe6017183";
-  public static String DCB_USER_TYPE = "dcb";
-  public static String DCB_TYPE_USER_ID = "910c512c-ebc5-40c6-96a5-a20bfd81e154";
-  public static String EXISTED_INVENTORY_ITEM_BARCODE = "INVENTORY_ITEM";
-  public static String PATRON_TYPE_USER_ID = "18c1741d-e678-4c8e-9fe7-cfaeefab5eea";
-  public static String REQUEST_ID = "398501a2-5c97-4ba6-9ee7-d1cd6433cb98";
+  public static final String CIRCULATION_ITEM_REQUEST_ID = "571b0a2c-8883-40b5-a449-d41fe6017183";
+  public static final String DCB_USER_TYPE = "dcb";
+  public static final String DCB_TYPE_USER_ID = "910c512c-ebc5-40c6-96a5-a20bfd81e154";
+  public static final String EXISTED_INVENTORY_ITEM_BARCODE = "INVENTORY_ITEM";
+  public static final String PATRON_TYPE_USER_ID = "18c1741d-e678-4c8e-9fe7-cfaeefab5eea";
+  public static final String REQUEST_ID = "398501a2-5c97-4ba6-9ee7-d1cd6433cb98";
+  public static final String PATRON_GROUP_ID = "3684a786-6671-4268-8ed0-9db82ebca60b";
+  public static final String LOAN_ID = "d217d4d5-8b2b-496b-8aa5-7e60d530e124";
   public static final String DCB_NEW_BARCODE = "398501a2-5c97-4ba6-9ee7-d1cd6433cb91";
+  public static final String DCB_ITEM_NEW_BARCODE = "DCB_ITEM_NEW_BARCODE";
   public static final String HOLDING_RECORD_ID = "fcee331d-2b50-49de-9395-a76a6ff4e385";
   public static final String INSTANCE_ID = "a9350401-f2f2-4804-9701-ca813c70e322";
 
@@ -148,6 +158,10 @@ public class EntityUtils {
     return TransactionStatus.builder().status(statusEnum).build();
   }
 
+  public static TransactionStatus transactionStatus(TransactionStatus.StatusEnum statusEnum){
+    return TransactionStatus.builder().status(statusEnum).build();
+  }
+
   public static DcbItem createDcbItem() {
     return DcbItem.builder()
       .id(ITEM_ID)
@@ -156,6 +170,16 @@ public class EntityUtils {
       .lendingLibraryCode("KU")
       .materialType("book")
       .holdCount(0)
+      .build();
+  }
+
+  public static DcbItem dcbItem() {
+    return DcbItem.builder()
+      .id(ITEM_ID)
+      .barcode("DCB_ITEM")
+      .title("ITEM")
+      .lendingLibraryCode("KU")
+      .materialType("book")
       .build();
   }
 
@@ -195,6 +219,14 @@ public class EntityUtils {
   }
 
   public static org.folio.dcb.domain.dto.DcbPickup createDcbPickup() {
+    return DcbPickup.builder()
+      .servicePointId(PICKUP_SERVICE_POINT_ID)
+      .servicePointName("TestServicePointCode")
+      .libraryCode("TestLibraryCode")
+      .build();
+  }
+
+  public static DcbPickup dcbPickup() {
     return DcbPickup.builder()
       .servicePointId(PICKUP_SERVICE_POINT_ID)
       .servicePointName("TestServicePointCode")
@@ -328,5 +360,104 @@ public class EntityUtils {
     calendarCollection.setCalendars(List.of(calendar));
     calendarCollection.setTotalRecords(1);
     return calendarCollection;
+  }
+
+  public static DcbTransaction lenderDcbTransaction() {
+    return lenderDcbTransaction(dcbPatron());
+  }
+
+  public static DcbTransaction lenderDcbTransaction(DcbPatron dcbPatron) {
+    return new DcbTransaction()
+      .item(dcbItem())
+      .patron(dcbPatron)
+      .role(LENDER)
+      .pickup(dcbPickup());
+  }
+
+  public static DcbTransaction borrowerDcbTransaction() {
+    return borrowerDcbTransaction(dcbPatron(PATRON_TYPE_USER_ID), null);
+  }
+
+  public static DcbTransaction borrowerDcbTransaction(Boolean selfBorrowing) {
+    return borrowerDcbTransaction(dcbPatron(PATRON_TYPE_USER_ID), selfBorrowing);
+  }
+
+  public static DcbTransaction borrowerDcbTransaction(DcbPatron dcbPatron) {
+    return borrowerDcbTransaction(dcbPatron, null);
+  }
+
+  public static DcbTransaction borrowerDcbTransaction(DcbPatron dcbPatron, Boolean selfBorrowing) {
+    return new DcbTransaction()
+      .item(dcbItem())
+      .patron(dcbPatron)
+      .role(BORROWER)
+      .pickup(dcbPickup().servicePointId(BORROWER_SERVICE_POINT_ID))
+      .selfBorrowing(selfBorrowing);
+  }
+
+  public static DcbTransaction borrowingPickupDcbTransaction() {
+    return borrowingPickupDcbTransaction(dcbPatron(PATRON_TYPE_USER_ID), null);
+  }
+
+  public static DcbTransaction borrowingPickupDcbTransaction(DcbPatron dcbPatron) {
+    return borrowingPickupDcbTransaction(dcbPatron, null);
+  }
+
+  public static DcbTransaction borrowingPickupDcbTransaction(Boolean selfBorrowing) {
+    return borrowingPickupDcbTransaction(dcbPatron(PATRON_TYPE_USER_ID), selfBorrowing);
+  }
+
+  public static DcbTransaction borrowingPickupDcbTransaction(DcbPatron patron, Boolean selfBorrowing) {
+    return new DcbTransaction()
+      .item(dcbItem())
+      .patron(patron)
+      .role(BORROWING_PICKUP)
+      .pickup(dcbPickup())
+      .selfBorrowing(selfBorrowing);
+  }
+
+  public static DcbTransaction pickupDcbTransaction() {
+    return new DcbTransaction()
+      .item(dcbItem())
+      .patron(dcbPatron())
+      .role(PICKUP)
+      .pickup(dcbPickup());
+  }
+
+  public static DcbTransaction pickupDcbTransaction(DcbPatron dcbPatron) {
+    return new DcbTransaction()
+      .item(dcbItem())
+      .patron(dcbPatron)
+      .role(PICKUP)
+      .pickup(dcbPickup());
+  }
+
+  public static DcbPatron dcbPatron() {
+    return dcbPatron(EXISTED_PATRON_ID, null);
+  }
+
+  public static DcbPatron dcbPatron(String id) {
+    return dcbPatron(id, null);
+  }
+
+  public static DcbPatron dcbPatron(String id, String localNames) {
+    return DcbPatron.builder()
+      .id(id)
+      .barcode("DCB_PATRON")
+      .group("staff")
+      .localNames(localNames)
+      .build();
+  }
+
+  public static DcbUpdateTransaction dcbTransactionUpdate() {
+    return DcbUpdateTransaction
+      .builder()
+      .item(DcbUpdateItem
+        .builder()
+        .barcode(DCB_ITEM_NEW_BARCODE)
+        .lendingLibraryCode("LEN")
+        .materialType("DVD")
+        .build())
+      .build();
   }
 }

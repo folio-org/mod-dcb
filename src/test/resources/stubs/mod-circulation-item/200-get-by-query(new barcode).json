@@ -1,0 +1,50 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/circulation-item",
+    "queryParameters": {
+      "query": {
+        "equalTo": "barcode==\"DCB_ITEM_NEW_BARCODE\""
+      }
+    },
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "test_tenant"
+      },
+      "x-okapi-token": {
+        "equalTo": "dGVzdF9qd3RfdG9rZW4="
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "items": [
+        {
+          "id": "27c1a543-c833-4669-8131-9dd344fc46ae",
+          "holdingsRecordId": "cbac0c5f-3a63-475b-8dcb-0375d982a611",
+          "status": {
+            "name": "In transit"
+          },
+          "materialTypeId": "1a54b431-2e4f-452d-9cae-9cee66c9a892",
+          "permanentLoanTypeId": "4dec5417-0765-4767-bed6-b363a2d7d4e2",
+          "instanceTitle": "DCB_INSTANCE",
+          "barcode": "DCB_ITEM_NEW_BARCODE",
+          "pickupLocation": "9d1b77e8-f02e-4b7f-b296-3f2042ddac55",
+          "lendingLibraryCode": "LEN",
+          "effectiveLocationId": "9d1b77e8-f02e-4b7f-b296-3f2042ddac54",
+          "metadata": {
+            "createdDate": "2025-10-24T02:07:32.660+00:00",
+            "createdByUserId": "b849e4a5-ac4f-4b4c-80a8-6c4220d04784",
+            "updatedDate": "2025-10-24T02:07:32.660+00:00",
+            "updatedByUserId": "b849e4a5-ac4f-4b4c-80a8-6c4220d04784"
+          }
+        }
+      ],
+      "totalRecords": 1
+    }
+  }
+}

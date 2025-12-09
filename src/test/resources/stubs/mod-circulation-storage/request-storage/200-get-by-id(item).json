@@ -1,0 +1,44 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathTemplate": "/request-storage/requests/{id}",
+    "pathParameters": {
+      "id": {
+        "equalTo": "398501a2-5c97-4ba6-9ee7-d1cd6433cb98"
+      }
+    },
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "test_tenant"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "id": "398501a2-5c97-4ba6-9ee7-d1cd6433cb98",
+      "requestType": "Page",
+      "requestLevel": "Item",
+      "status": "Open - Not yet filled",
+      "requesterId": "284056f5-0670-4e1e-9e2f-61b9f1ee2d18",
+      "requestDate": "2025-10-27T18:49:03.079058500+02:00",
+      "instanceId": "a9350401-f2f2-4804-9701-ca813c70e322",
+      "holdingsRecordId": "fcee331d-2b50-49de-9395-a76a6ff4e385",
+      "itemId": "5b95877d-86c0-4cb7-a0cd-7660b348ae5a",
+      "fulfillmentPreference": "Hold Shelf",
+      "pickupServicePointId": "9d1b77e8-f02e-4b7f-b296-3f2042ddac55",
+      "item": {
+        "barcode": "DCB_ITEM"
+      },
+      "requester": {
+        "barcode": "DCB_PATRON",
+        "personal": {
+          "firstName": "DcbSystem"
+        }
+      }
+    }
+  }
+}

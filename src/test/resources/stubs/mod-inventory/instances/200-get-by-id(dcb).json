@@ -1,0 +1,47 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathTemplate": "/inventory/instances/{instanceId}",
+    "pathParameters": {
+      "instanceId": {
+        "equalTo": "9d1b77e4-f02e-4b7f-b296-3f2042ddac54"
+      }
+    },
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "test_tenant"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "instances": [
+        {
+          "id": "9d1b77e4-f02e-4b7f-b296-3f2042ddac54",
+          "_version": 1,
+          "hrid": "in00000000001",
+          "source": "FOLIO",
+          "title": "DCB_INSTANCE",
+          "instanceTypeId": "9d1b77e0-f02e-4b7f-b296-3f2042ddac54",
+          "statusUpdatedDate": "2025-10-24T02:07:30.264+0000",
+          "metadata": {
+            "createdDate": "2025-10-24T02:07:30.264+00:00",
+            "createdByUserId": "b849e4a5-ac4f-4b4c-80a8-6c4220d04784",
+            "updatedDate": "2025-10-24T02:07:30.264+00:00",
+            "updatedByUserId": "b849e4a5-ac4f-4b4c-80a8-6c4220d04784"
+          }
+        }
+      ],
+      "totalRecords": 1,
+      "resultInfo": {
+        "totalRecords": 1,
+        "facets": [],
+        "diagnostics": []
+      }
+    }
+  }
+}
