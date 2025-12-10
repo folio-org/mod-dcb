@@ -54,6 +54,7 @@ public class TransactionEntity extends AuditableEntity implements Serializable {
   @Enumerated(EnumType.STRING)
   private DcbTransaction.RoleEnum role;
   private Boolean selfBorrowing;
+  private String itemLocationCode;
   @Transient
   protected TransactionEntity savedState;
 

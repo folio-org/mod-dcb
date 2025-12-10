@@ -1,7 +1,6 @@
 package org.folio.dcb.utils;
 
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.StringUtils;
 import org.folio.dcb.listener.kafka.EventData;
 import org.springframework.messaging.MessageHeaders;
 

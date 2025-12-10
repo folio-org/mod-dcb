@@ -1,0 +1,49 @@
+RefreshShadowLocationResponse:
+  type: object
+  description: Response for shadow location refresh
+  properties:
+    locations:
+      type: array
+      items:
+        $ref: '#/components/schemas/RefreshLocationStatus'
+    location-units:
+      type: object
+      $ref: '#/components/schemas/RefreshLocationUnitsStatus'
+
+components:
+  schemas:
+    RefreshLocationStatusType:
+      type: string
+      description: Status of refresh shadow location
+      enum:
+        - SUCCESS
+        - ERROR
+        - SKIPPED
+
+    RefreshLocationStatus:
+      type: object
+      description: LocationEntity
+      properties:
+        code:
+          type: string
+        status:
+          $ref: '#/components/schemas/RefreshLocationStatusType'
+        cause:
+          type: string
+
+    RefreshLocationUnitsStatus:
+      type: object
+      properties:
+        institutions:
+          type: array
+          items:
+            $ref: '#/components/schemas/RefreshLocationStatus'
+        campuses:
+          type: array
+          items:
+            $ref: '#/components/schemas/RefreshLocationStatus'
+        libraries:
+          type: array
+          items:
+            $ref: '#/components/schemas/RefreshLocationStatus'
+

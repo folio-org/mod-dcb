@@ -51,14 +51,20 @@ public class UserServiceImpl implements UserService {
       log.info("fetchOrCreateUser:: Unable to find existing user with barcode {} and id {}. Hence, creating new user",
         patronDetails.getBarcode(), patronDetails.getId());
       return createUser(patronDetails);
-    } else {
-      validateDcbUserType(user.getType());
-      var groupId = patronGroupService.fetchPatronGroupIdByName(patronDetails.getGroup());
-      if (!groupId.equals(user.getPatronGroup())) {
-        return updateUserGroup(user, groupId);
-      }
-      return user;
     }
+
+    return modifyAndGetExistingUser(patronDetails, user);
+  }
+
+  private User modifyAndGetExistingUser(DcbPatron patronDetails, User user) {
+    validateDcbUserType(user.getType());
+    var isUserGroupChanged =  updateUserGroup(patronDetails, user);
+    var isUserPersonalInfoChanged = updateUserPersonal(patronDetails, user);
+    if (isUserGroupChanged || isUserPersonalInfoChanged) {
+      usersClient.updateUser(user.getId(), user);
+    }
+
+    return user;
   }
 
   private User createUser(DcbPatron patronDetails) {
@@ -86,25 +92,49 @@ public class UserServiceImpl implements UserService {
       .patronGroup(groupId)
       .id(patron.getId())
       .type(DCB_TYPE)
-      .personal(Personal.builder()
-        .firstName(personalData.getFirstName())
-        .middleName(personalData.getMiddleName())
-        .lastName(personalData.getLastName())
-        .build())
+      .personal(getUserPersonalInfo(personalData))
       .build();
   }
 
-  private User updateUserGroup(User user, String patronGroupId) {
-    log.info("updatePatronGroup:: updating patron group from {} to {} for user with barcode {}",
-      user.getPatronGroup(), patronGroupId, user.getBarcode());
-    user.setPatronGroup(patronGroupId);
-    usersClient.updateUser(user.getId(), user);
-    return user;
+  private boolean updateUserGroup(DcbPatron patronDetails, User user) {
+    var groupId = patronGroupService.fetchPatronGroupIdByName(patronDetails.getGroup());
+    if (!groupId.equals(user.getPatronGroup())) {
+      log.info("updateUserGroup:: updating patron group from {} to {} for user with barcode {}",
+        user.getPatronGroup(), groupId, user.getBarcode());
+      user.setPatronGroup(groupId);
+      return true;
+    }
+
+    return false;
+  }
+
+  private boolean updateUserPersonal(DcbPatron patronDetails, User user) {
+    var newPersonalData = DcbPersonal.parseLocalNames(patronDetails.getLocalNames());
+    if (newPersonalData.isDefault()) {
+      return false;
+    }
+
+    var newUserPersonal = getUserPersonalInfo(newPersonalData);
+    if (Objects.equals(user.getPersonal(), newUserPersonal)) {
+     return false;
+    }
+
+    log.info("updateUserPersonal:: updating personal data for user with barcode {}", user.getBarcode());
+    user.setPersonal(newUserPersonal);
+    return true;
   }
 
   private void validateDcbUserType(String userType) {
     if(ObjectUtils.notEqual(userType, DCB_TYPE) && ObjectUtils.notEqual(userType, SHADOW_TYPE)) {
       throw new IllegalArgumentException(String.format("User with type %s is retrieved. so unable to create transaction", userType));
     }
+  }
+
+  private static Personal getUserPersonalInfo(DcbPersonal personalData) {
+    return Personal.builder()
+      .firstName(personalData.getFirstName())
+      .middleName(personalData.getMiddleName())
+      .lastName(personalData.getLastName())
+      .build();
   }
 }

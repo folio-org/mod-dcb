@@ -31,7 +31,9 @@ public class PickupLibraryServiceImpl implements LibraryService {
 
     var user = userService.fetchOrCreateUser(patron);
     baseLibraryService.checkItemExistsInInventoryAndThrow(itemVirtual.getBarcode());
-    CirculationItem item = circulationItemService.checkIfItemExistsAndCreate(itemVirtual, dcbTransaction.getPickup().getServicePointId());
+    CirculationItem item = circulationItemService.checkIfItemExistsAndCreate(
+      itemVirtual, dcbTransaction.getPickup().getServicePointId());
+
     dcbTransaction.getItem().setId(item.getId());
     baseLibraryService.checkOpenTransactionExistsAndThrow(item.getId());
     CirculationRequest holdRequest = requestService.createHoldItemRequest(user, itemVirtual, dcbTransaction.getPickup().getServicePointId());

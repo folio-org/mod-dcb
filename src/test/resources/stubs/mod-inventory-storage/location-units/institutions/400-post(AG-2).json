@@ -1,0 +1,36 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/location-units/institutions",
+    "bodyPatterns": [
+      { "matchesJsonPath": "$[?(@.code == 'AG-002')]" },
+      { "matchesJsonPath": "$[?(@.name == 'Agency-Two')]" },
+      { "matchesJsonPath": "$[?(@.isShadow == true)]" }
+    ],
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "test_tenant"
+      }
+    }
+  },
+  "response": {
+    "status": 400,
+    "transformers": [ "response-template" ],
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "errors": [
+        {
+          "message": "Institution with code AG-004 already exists",
+          "parameters": [
+            {
+              "key": "code",
+              "value": "AG-004"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

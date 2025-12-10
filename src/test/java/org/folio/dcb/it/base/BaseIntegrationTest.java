@@ -16,6 +16,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.List;
 import lombok.SneakyThrows;
+import org.folio.dcb.domain.dto.ShadowLocationRefreshBody;
 import org.folio.dcb.support.kafka.WithKafkaContainer;
 import org.folio.dcb.support.postgres.WithPostgresContainer;
 import org.folio.dcb.support.wiremock.WithWiremockContainer;
@@ -25,10 +26,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.SqlMergeMode;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 
 @SpringBootTest
 @ActiveProfiles("it")
@@ -100,5 +103,20 @@ public abstract class BaseIntegrationTest {
     var wiremockUrl = System.getProperty(WM_URL_PROPERTY);
     assertThat(wiremockUrl).isNotBlank();
     return wiremockUrl;
+  }
+
+  @SneakyThrows
+  protected static ResultActions refreshShadowLocations(ShadowLocationRefreshBody refreshBody) {
+    return refreshShadowLocationsAttempt(refreshBody).andExpect(status().isCreated());
+  }
+
+  @SneakyThrows
+  protected static ResultActions refreshShadowLocationsAttempt(ShadowLocationRefreshBody refreshBody) {
+    return mockMvc.perform(
+      post("/dcb/shadow-locations/refresh")
+        .content(asJsonString(refreshBody))
+        .headers(defaultHeaders())
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON));
   }
 }

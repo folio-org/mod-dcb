@@ -8,8 +8,6 @@ import org.folio.dcb.repository.TransactionAuditRepository;
 import org.folio.dcb.service.TransactionAuditService;
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
-
 @Service
 @RequiredArgsConstructor
 @Log4j2

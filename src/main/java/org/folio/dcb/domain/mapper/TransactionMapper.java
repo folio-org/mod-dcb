@@ -41,6 +41,7 @@ public class TransactionMapper {
 
       .role(dcbTransaction.getRole())
       .selfBorrowing(dcbTransaction.getSelfBorrowing())
+      .itemLocationCode(item.getLocationCode())
       .build();
   }
 
@@ -72,6 +73,7 @@ public class TransactionMapper {
       .barcode(transactionEntity.getItemBarcode())
       .materialType(transactionEntity.getMaterialType())
       .lendingLibraryCode(transactionEntity.getLendingLibraryCode())
+      .locationCode(transactionEntity.getItemLocationCode())
       .build();
   }
 
@@ -100,6 +102,7 @@ public class TransactionMapper {
       .barcode(dcbUpdateItem.getBarcode())
       .materialType(dcbUpdateItem.getMaterialType())
       .title(entity.getItemTitle())
+      .locationCode(entity.getItemLocationCode())
       .build();
   }
 

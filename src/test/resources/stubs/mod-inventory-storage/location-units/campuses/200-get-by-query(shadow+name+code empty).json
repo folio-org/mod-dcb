@@ -1,0 +1,32 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/location-units/campuses",
+    "queryParameters": {
+      "query": {
+        "or": [
+          { "equalTo": "(name==\"Agency-Two\" AND code==\"AG-002\")" },
+          { "equalTo": "(name==\"Agency-Four\" AND code==\"AG-004\")" }
+        ]
+      },
+      "includeShadow": {
+        "equalTo": "true"
+      }
+    },
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "test_tenant"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "loccamps": [],
+      "totalRecords": 0
+    }
+  }
+}

@@ -31,6 +31,7 @@ import java.util.stream.Stream;
 
 import org.folio.dcb.client.feign.CirculationClient;
 import org.folio.dcb.client.feign.CirculationLoanPolicyStorageClient;
+import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.DcbTransaction.RoleEnum;
 import org.folio.dcb.domain.dto.LoanPolicy;
 import org.folio.dcb.domain.dto.RenewByIdRequest;
@@ -56,6 +57,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -298,6 +300,23 @@ class TransactionServiceTest {
     assertEquals(10, response.getCurrentPageSize());
     assertEquals(0, response.getMaximumPageNumber());
     assertEquals(10, response.getTotalRecords());
+  }
+
+  @Test
+  void shouldVerifyLocationCodeWhenCreatingCirculationRequest() {
+    ArgumentCaptor<DcbTransaction> dcbTransactionArgumentCaptor = ArgumentCaptor.forClass(DcbTransaction.class);
+    when(lendingLibraryService.createCirculation(any(), any()))
+      .thenReturn(createTransactionResponse());
+    DcbTransaction dcbTransaction = createDcbTransactionByRole(LENDER);
+    Optional.ofNullable(dcbTransaction.getItem()).ifPresent(dcbItem -> dcbItem.setLocationCode("TEST_LOCATION_CODE"));
+    transactionsService.createCirculationRequest(DCB_TRANSACTION_ID, dcbTransaction);
+    verify(lendingLibraryService).createCirculation(DCB_TRANSACTION_ID, dcbTransaction);
+
+    verify(lendingLibraryService, times(1)).createCirculation(any(), dcbTransactionArgumentCaptor.capture());
+    DcbTransaction dcbTransactionActual = dcbTransactionArgumentCaptor.getValue();
+    assertNotNull(dcbTransactionActual.getItem());
+    assertNotNull(dcbTransactionActual.getItem().getLocationCode());
+    assertEquals("TEST_LOCATION_CODE", dcbTransactionActual.getItem().getLocationCode());
   }
 
 }

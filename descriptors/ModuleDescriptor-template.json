@@ -56,11 +56,11 @@
     },
     {
       "id": "locations",
-      "version": "3.1"
+      "version": "3.2"
     },
     {
       "id": "location-units",
-      "version": "2.0"
+      "version": "2.1"
     },
     {
       "id": "holdings-sources",
@@ -97,6 +97,7 @@
             "inventory-storage.service-points.collection.get",
             "inventory-storage.service-points.item.put",
             "users.collection.get",
+            "users.item.put",
             "users.item.post",
             "usergroups.collection.get",
             "inventory-storage.items.item.get",
@@ -109,9 +110,17 @@
             "circulation-item.item.get",
             "inventory-storage.material-types.collection.get",
             "inventory-storage.loan-types.collection.get",
+            "inventory-storage.locations.collection.get",
             "circulation-storage.requests.item.get",
             "circulation-storage.cancellation-reasons.item.get",
             "circulation-storage.cancellation-reasons.item.post",
+            "inventory-storage.location-units.institutions.item.post",
+            "inventory-storage.location-units.institutions.collection.get",
+            "inventory-storage.location-units.campuses.item.post",
+            "inventory-storage.location-units.campuses.collection.get",
+            "inventory-storage.location-units.libraries.item.post",
+            "inventory-storage.location-units.libraries.collection.get",
+            "inventory-storage.locations.item.post",
             "calendar.endpoint.calendars.get",
             "calendar.endpoint.calendars.calendarId.put"
           ]
@@ -266,6 +275,33 @@
       ]
     },
     {
+      "id": "dcb_refresh_shadow_locations",
+      "version": "2.0",
+      "handlers": [
+        {
+          "methods": [
+            "POST"
+          ],
+          "pathPattern": "/dcb/shadow-locations/refresh",
+          "permissionsRequired": [
+            "dcb.shadow_locations.refresh.post"
+          ],
+          "modulePermissions": [
+            "inventory-storage.service-points.item.post",
+            "inventory-storage.service-points.collection.get",
+            "inventory-storage.locations.collection.get",
+            "inventory-storage.locations.item.post",
+            "inventory-storage.location-units.institutions.collection.get",
+            "inventory-storage.location-units.institutions.item.post",
+            "inventory-storage.location-units.campuses.collection.get",
+            "inventory-storage.location-units.campuses.item.post",
+            "inventory-storage.location-units.libraries.collection.get",
+            "inventory-storage.location-units.libraries.item.post"
+          ]
+        }
+      ]
+    },
+    {
       "id": "_tenant",
       "version": "2.0",
       "interfaceType": "system",
@@ -275,6 +311,7 @@
           "pathPattern": "/_/tenant",
           "modulePermissions": [
             "users.collection.get",
+            "users.item.put",
             "users.item.post",
             "login.item.post",
             "login.item.delete",
@@ -286,6 +323,7 @@
             "inventory-storage.instance-types.collection.get",
             "inventory-storage.instance-types.item.post",
             "inventory-storage.location-units.institutions.item.get",
+            "inventory-storage.location-units.institutions.collection.get",
             "inventory-storage.location-units.institutions.item.post",
             "inventory-storage.location-units.campuses.item.post",
             "inventory-storage.location-units.libraries.item.get",
@@ -331,7 +369,8 @@
         "dcb.transactions.unblock-renewal.put",
         "dcb.ecs-request.transactions.post",
         "dcb.transactions.item.put",
-        "dcb.transactions.renew.put"
+        "dcb.transactions.renew.put",
+        "dcb.shadow_locations.refresh.post"
       ]
     },
     {
@@ -380,6 +419,11 @@
       "permissionName": "dcb.transactions.item.put",
       "displayName": "update transaction details",
       "description": "update transaction details"
+    },
+    {
+      "permissionName": "dcb.shadow_locations.refresh.post",
+      "displayName": "trigger refresh of shadow locations",
+      "description": "trigger refresh of shadow locations"
     }
   ],
   "metadata": {
@@ -393,6 +437,13 @@
         "inventory-storage.items.item.get",
         "inventory-storage.holdings.item.get",
         "inventory-storage.locations.collection.get",
+        "inventory-storage.locations.item.post",
+        "inventory-storage.location-units.institutions.collection.get",
+        "inventory-storage.location-units.institutions.item.post",
+        "inventory-storage.location-units.campuses.collection.get",
+        "inventory-storage.location-units.campuses.item.post",
+        "inventory-storage.location-units.libraries.collection.get",
+        "inventory-storage.location-units.libraries.item.post",
         "inventory-storage.material-types.collection.get",
         "inventory.items.item.get",
         "inventory.instances.item.get",

@@ -102,6 +102,15 @@ public class DcbPersonal {
     return StringUtils.isAllBlank(firstName, middleName, lastName);
   }
 
+  /**
+   * Checks if this instance represents the default value.
+   *
+   * @return true if this is the default {@link DcbPersonal}, false otherwise
+   */
+  public boolean isDefault() {
+    return Objects.equals(this, DEFAULT_VALUE);
+  }
+
   private static DcbPersonal parseMultiple(String[] parts) {
     var firstName = parts[0];
     var lastName = parts[parts.length - 1];

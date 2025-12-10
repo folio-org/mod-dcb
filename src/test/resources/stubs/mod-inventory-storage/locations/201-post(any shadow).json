@@ -1,0 +1,82 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/locations",
+    "bodyPatterns": [
+      { "matchesJsonPath": "$.campusId" },
+      { "matchesJsonPath": "$.libraryId" },
+      { "matchesJsonPath": "$.institutionId" },
+      { "matchesJsonPath": "$[?(@.isShadow == true)]" },
+      {
+        "or": [
+          {
+            "and": [
+              { "matchesJsonPath": "$[?(@.code == 'LOC-1')]" },
+              { "matchesJsonPath": "$[?(@.name == 'Location-1')]" }
+            ]
+          },
+          {
+            "and": [
+              { "matchesJsonPath": "$[?(@.code == 'LOC-2')]" },
+              { "matchesJsonPath": "$[?(@.name == 'Location-2')]" }
+            ]
+          },
+          {
+            "and": [
+              { "matchesJsonPath": "$[?(@.code == 'LOC-4')]" },
+              { "matchesJsonPath": "$[?(@.name == 'Location-4')]" }
+            ]
+          },
+          {
+            "and": [
+              { "matchesJsonPath": "$[?(@.code == 'LOC-6')]" },
+              { "matchesJsonPath": "$[?(@.name == 'Location-6')]" }
+            ]
+          },
+          {
+            "and": [
+              { "matchesJsonPath": "$[?(@.code == 'LOC-8')]" },
+              { "matchesJsonPath": "$[?(@.name == 'Location-8')]" }
+            ]
+          },
+          {
+            "and": [
+              { "matchesJsonPath": "$[?(@.code == 'AG-002')]" },
+              { "matchesJsonPath": "$[?(@.name == 'Agency-Two')]" }
+            ]
+          }
+        ]
+      }
+    ],
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "test_tenant"
+      }
+    }
+  },
+  "response": {
+    "status": 201,
+    "transformers": [ "response-template" ],
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "id": "{{jsonPath request.body '$.id'}}",
+      "name": "{{jsonPath request.body '$.name'}}",
+      "code": "{{jsonPath request.body '$.code'}}",
+      "institutionId": "{{jsonPath request.body '$.institutionId'}}",
+      "campusId": "{{jsonPath request.body '$.campusId'}}",
+      "libraryId": "{{jsonPath request.body '$.libraryId'}}",
+      "primaryServicePoint": "9d1b77e8-f02e-4b7f-b296-3f2042ddac54",
+      "servicePointIds": [ "9d1b77e8-f02e-4b7f-b296-3f2042ddac54" ],
+      "servicePoints": [],
+      "isShadow": false,
+      "metadata": {
+        "createdDate": "2025-10-24T02:07:32.014+00:00",
+        "createdByUserId": "b849e4a5-ac4f-4b4c-80a8-6c4220d04784",
+        "updatedDate": "2025-10-24T02:07:32.014+00:00",
+        "updatedByUserId": "b849e4a5-ac4f-4b4c-80a8-6c4220d04784"
+      }
+    }
+  }
+}

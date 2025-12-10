@@ -36,36 +36,20 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class CustomTenantServiceTest {
 
-  @Mock
-  private PrepareSystemUserService systemUserService;
-  @Mock
-  private KafkaService kafkaService;
-  @Mock
-  private InstanceClient inventoryClient;
-  @Mock
-  private InstanceTypeClient instanceTypeClient;
-  @Mock
-  private HoldingsStorageClient holdingsStorageClient;
-  @Mock
-  private LocationsClient locationsClient;
-  @Mock
-  private HoldingSourcesClient holdingSourcesClient;
-  @Mock
-  private InventoryServicePointClient servicePointClient;
-  @Mock
-  private LocationUnitClient locationUnitClient;
-  @Mock
-  private LoanTypeClient loanTypeClient;
-  @Mock
-  private CancellationReasonClient cancellationReasonClient;
-  @Mock
-  private ServicePointExpirationPeriodService servicePointExpirationPeriodService;
-
-  @Mock
-  private CalendarService calendarService;
-
-  @InjectMocks
-  private CustomTenantService service;
+  @InjectMocks private CustomTenantService service;
+  @Mock private PrepareSystemUserService systemUserService;
+  @Mock private KafkaService kafkaService;
+  @Mock private InstanceClient inventoryClient;
+  @Mock private InstanceTypeClient instanceTypeClient;
+  @Mock private HoldingsStorageClient holdingsStorageClient;
+  @Mock private LocationsClient locationsClient;
+  @Mock private HoldingSourcesClient holdingSourcesClient;
+  @Mock private InventoryServicePointClient servicePointClient;
+  @Mock private LocationUnitClient locationUnitClient;
+  @Mock private LoanTypeClient loanTypeClient;
+  @Mock private CancellationReasonClient cancellationReasonClient;
+  @Mock private ServicePointExpirationPeriodService servicePointExpirationPeriodService;
+  @Mock private CalendarService calendarService;
 
   @Test
   void shouldPrepareSystemUser() {

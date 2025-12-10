@@ -1,3 +1,12 @@
+## v1.3.9 2025-12-10
+* MODDCB-206: Populate locationCode for DCB Transaction API [MODDCB-206](https://folio-org.atlassian.net/browse/MODDCB-206)
+* MODDCB-207: Populate effective location id for circulation item [MODDCB-207](https://folio-org.atlassian.net/browse/MODDCB-207)
+* MODDCB-214: Load shadow locations from DCB-Hub [MODDCB-214](https://folio-org.atlassian.net/browse/MODDCB-214)
+* MODDCB-222: Implement an ability to trigger the shadow location refresh operation [MODDCB-222](https://folio-org.atlassian.net/browse/MODDCB-222)
+* MODDCB-233: Implement location search by lendingLibraryCode [MODDCB-233](https://folio-org.atlassian.net/browse/MODDCB-233)
+* MODDCB-251: Add request body for `POST /dcb/shadow-locations/refresh` [MODDCB-251](https://folio-org.atlassian.net/browse/MODDCB-251)
+* MODDCB-252: Update existing virtual(DCB) patron records with localNames [MODDCB-252](https://folio-org.atlassian.net/browse/MODDCB-252)
+
 ## v1.3.8 2025-12-09
 * MODDCB-242: Add handling of expired lender requests [MODDCB-242](https://folio-org.atlassian.net/browse/MODDCB-242)
 

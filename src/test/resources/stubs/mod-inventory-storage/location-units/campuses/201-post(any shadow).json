@@ -1,0 +1,51 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/location-units/campuses",
+    "bodyPatterns": [
+      { "matchesJsonPath": "$.institutionId" },
+      { "matchesJsonPath": "$[?(@.isShadow == true)]" },
+      {
+        "or": [
+          {
+            "and": [
+              { "matchesJsonPath": "$[?(@.code == 'AG-002')]" },
+              { "matchesJsonPath": "$[?(@.name == 'Agency-Two')]" }
+            ]
+          },
+          {
+            "and": [
+              { "matchesJsonPath": "$[?(@.code == 'AG-004')]" },
+              { "matchesJsonPath": "$[?(@.name == 'Agency-Four')]" }
+            ]
+          }
+        ]
+      }
+    ],
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "test_tenant"
+      }
+    }
+  },
+  "response": {
+    "status": 201,
+    "transformers": [ "response-template" ],
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "id": "{{jsonPath request.body '$.id'}}",
+      "name": "{{jsonPath request.body '$.name'}}",
+      "code": "{{jsonPath request.body '$.code'}}",
+      "institutionId": "{{jsonPath request.body '$.institutionId'}}",
+      "isShadow": true,
+      "metadata": {
+        "createdDate": "2023-10-27T11:14:15.395+00:00",
+        "createdByUserId": "ec3caecb-d565-530c-937b-65a9c4ab371b",
+        "updatedDate": "2023-10-27T11:14:15.395+00:00",
+        "updatedByUserId": "ec3caecb-d565-530c-937b-65a9c4ab371b"
+      }
+    }
+  }
+}

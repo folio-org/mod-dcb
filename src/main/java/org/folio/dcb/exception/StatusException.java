@@ -6,4 +6,7 @@ public class StatusException extends RuntimeException{
     super(errorMsg);
   }
 
+  public StatusException(String errorMsg, Throwable cause) {
+    super(errorMsg, cause);
+  }
 }

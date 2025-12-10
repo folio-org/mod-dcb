@@ -273,6 +273,7 @@ public class EntityUtils {
       .materialType("book")
       .lendingLibraryCode("LEN")
       .requestId(UUID.fromString(CIRCULATION_REQUEST_ID))
+      .itemLocationCode("TEST_ITEM_LOCATION_CODE")
       .build();
   }
 
