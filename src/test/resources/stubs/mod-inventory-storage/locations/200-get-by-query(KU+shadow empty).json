@@ -1,0 +1,29 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/locations",
+    "queryParameters": {
+      "query": {
+        "equalTo": "code==\"KU\""
+      },
+      "includeShadowLocations": {
+        "equalTo": "true"
+      }
+    },
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "test_tenant"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "locations": [],
+      "totalRecords": 0
+    }
+  }
+}

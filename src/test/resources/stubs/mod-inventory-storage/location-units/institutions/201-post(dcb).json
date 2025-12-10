@@ -7,7 +7,8 @@
         "equalToJson": {
           "id": "9d1b77e5-f02e-4b7f-b296-3f2042ddac54",
           "name": "DCB",
-          "code": "000"
+          "code": "000",
+          "isShadow": false
         }
       }
     ],
@@ -26,6 +27,7 @@
       "id": "9d1b77e5-f02e-4b7f-b296-3f2042ddac54",
       "name": "DCB",
       "code": "000",
+      "isShadow": false,
       "metadata": {
         "createdDate": "2023-10-27T11:14:15.395+00:00",
         "createdByUserId": "ec3caecb-d565-530c-937b-65a9c4ab371b",

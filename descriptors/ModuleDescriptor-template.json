@@ -97,6 +97,7 @@
             "inventory-storage.service-points.collection.get",
             "inventory-storage.service-points.item.put",
             "users.collection.get",
+            "users.item.put",
             "users.item.post",
             "usergroups.collection.get",
             "inventory-storage.items.item.get",
@@ -310,6 +311,7 @@
           "pathPattern": "/_/tenant",
           "modulePermissions": [
             "users.collection.get",
+            "users.item.put",
             "users.item.post",
             "login.item.post",
             "login.item.delete",
@@ -497,8 +499,7 @@
       { "name": "KAFKA_SSL_TRUSTSTORE_LOCATION", "value": "" },
       { "name": "KAFKA_SSL_TRUSTSTORE_PASSWORD", "value": "" },
       { "name": "OKAPI_URL",  "value": "http://okapi:9130" },
-      { "name": "ENV", "value": "folio" },
-      { "name": "FETCH_DCB_LOCATIONS_ENABLED", "value": "false" }
+      { "name": "ENV", "value": "folio" }
     ]
   }
 }

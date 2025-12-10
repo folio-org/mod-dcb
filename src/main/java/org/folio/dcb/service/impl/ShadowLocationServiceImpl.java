@@ -4,6 +4,7 @@ import static java.util.Collections.singletonList;
 import static org.apache.commons.lang3.ObjectUtils.anyNull;
 import static org.folio.dcb.client.feign.LocationUnitClient.LocationUnit;
 import static org.folio.dcb.utils.CqlQuery.exactMatchByNameAndCode;
+import static org.folio.dcb.utils.DCBConstants.NAME;
 import static org.folio.dcb.utils.DcbHubLocationsGroupingUtil.groupByAgency;
 
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
+import org.folio.dcb.client.feign.InventoryServicePointClient;
 import org.folio.dcb.client.feign.LocationUnitClient;
 import org.folio.dcb.client.feign.LocationsClient;
 import org.folio.dcb.config.DcbFeatureProperties;
@@ -26,8 +28,8 @@ import org.folio.dcb.domain.dto.RefreshLocationUnitsStatus;
 import org.folio.dcb.domain.dto.RefreshShadowLocationResponse;
 import org.folio.dcb.domain.dto.ServicePointRequest;
 import org.folio.dcb.domain.dto.ShadowLocationRefreshBody;
-import org.folio.dcb.exception.ServiceException;
 import org.folio.dcb.domain.DcbAgencyKey;
+import org.folio.dcb.exception.StatusException;
 import org.folio.dcb.service.ShadowLocationService;
 import org.springframework.stereotype.Service;
 
@@ -42,26 +44,33 @@ public class ShadowLocationServiceImpl implements ShadowLocationService {
   private final LocationsClient locationsClient;
   private final LocationUnitClient locationUnitClient;
   private final DcbFeatureProperties dcbFeatureProperties;
+  private final InventoryServicePointClient servicePointClient;
 
   public RefreshShadowLocationResponse createShadowLocations(ShadowLocationRefreshBody requestBody) {
     log.debug("createShadowLocations:: creating shadow locations");
     if (!dcbFeatureProperties.isFlexibleCirculationRulesEnabled()) {
       log.info("createShadowLocations:: {}", INACTIVE_FEATURE_MESSAGE);
-      throw new ServiceException(INACTIVE_FEATURE_MESSAGE);
+      throw new StatusException(INACTIVE_FEATURE_MESSAGE);
     }
 
     try {
-      var servicePointRequest = dcbEntityServiceFacade.findOrCreateServicePoint();
       var locationList = prepareLocationsFromRequest(requestBody);
       if (CollectionUtils.isEmpty(locationList)) {
         log.debug("createShadowLocations:: No locations found in DCB Hub, skipping shadow location creation");
         return new RefreshShadowLocationResponse();
       }
 
-      return createShadowLocations(servicePointRequest, locationList);
+      var servicePointList = servicePointClient.getServicePointByName(NAME);
+      if (CollectionUtils.isEmpty(servicePointList.getResult())) {
+        log.info("createShadowLocations:: No service points found with name {}", NAME);
+        throw new StatusException("DCB Service point is not found to create shadow locations");
+      }
+
+      var servicePoint = servicePointList.getResult().getFirst();
+      return createShadowLocations(servicePoint, locationList);
     } catch (Exception e) {
       log.error("createShadowLocations:: FeignException while fetching locations from DCB Hub", e);
-      throw new ServiceException("Failed to create shadow locations", e);
+      throw new StatusException("Failed to create shadow locations", e);
     }
   }
 

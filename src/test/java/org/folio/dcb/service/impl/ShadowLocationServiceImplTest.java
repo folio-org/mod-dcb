@@ -6,11 +6,12 @@ import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.groups.Tuple.tuple;
-import static org.folio.dcb.domain.ResultList.asSinglePage;
-import static org.folio.dcb.domain.ResultList.empty;
 import static org.folio.dcb.domain.dto.RefreshLocationStatusType.ERROR;
 import static org.folio.dcb.domain.dto.RefreshLocationStatusType.SKIPPED;
 import static org.folio.dcb.domain.dto.RefreshLocationStatusType.SUCCESS;
+import static org.folio.dcb.utils.DCBConstants.NAME;
+import static org.folio.spring.model.ResultList.asSinglePage;
+import static org.folio.spring.model.ResultList.empty;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -23,6 +24,7 @@ import feign.Request;
 import feign.Response;
 import java.util.List;
 import java.util.UUID;
+import org.folio.dcb.client.feign.InventoryServicePointClient;
 import org.folio.dcb.client.feign.LocationUnitClient;
 import org.folio.dcb.client.feign.LocationUnitClient.LocationUnit;
 import org.folio.dcb.client.feign.LocationsClient;
@@ -36,9 +38,9 @@ import org.folio.dcb.domain.dto.RefreshLocationUnitsStatus;
 import org.folio.dcb.domain.dto.RefreshShadowLocationResponse;
 import org.folio.dcb.domain.dto.ServicePointRequest;
 import org.folio.dcb.domain.dto.ShadowLocationRefreshBody;
-import org.folio.dcb.exception.ServiceException;
-import org.folio.dcb.service.entities.DcbEntityServiceFacade;
+import org.folio.dcb.exception.StatusException;
 import org.folio.dcb.utils.CqlQuery;
+import org.folio.spring.model.ResultList;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -66,19 +68,19 @@ class ShadowLocationServiceImplTest {
   @Mock private LocationsClient locationsClient;
   @Mock private LocationUnitClient locationUnitClient;
   @Mock private DcbFeatureProperties dcbFeatureProperties;
-  @Mock private DcbEntityServiceFacade dcbEntityServiceFacade;
+  @Mock private InventoryServicePointClient inventoryServicePointClient;
   @Captor private ArgumentCaptor<LocationDTO> locCaptor;
   @Captor private ArgumentCaptor<LocationUnit> luCaptor;
 
   @AfterEach
   void tearDown() {
-    verifyNoMoreInteractions(locationsClient, locationsClient, dcbEntityServiceFacade);
+    verifyNoMoreInteractions(locationsClient, locationsClient, inventoryServicePointClient);
   }
 
   @Test
   void createShadowLocations_positive_allNewEntities() {
     when(dcbFeatureProperties.isFlexibleCirculationRulesEnabled()).thenReturn(true);
-    when(dcbEntityServiceFacade.findOrCreateServicePoint()).thenReturn(servicePoint());
+    when(inventoryServicePointClient.getServicePointByName(NAME)).thenReturn(servicePoints());
     when(locationUnitClient.findInstitutionsByQuery(agencySql(), true, 10, 0)).thenReturn(empty());
     when(locationUnitClient.findCampusesByQuery(agencySql(), true, 10, 0)).thenReturn(empty());
     when(locationUnitClient.findLibrariesByQuery(agencySql(), true, 10, 0)).thenReturn(empty());
@@ -119,7 +121,7 @@ class ShadowLocationServiceImplTest {
   @Test
   void createShadowLocations_positive_allNewEntitiesWhenOnlyAgencyProvided() {
     when(dcbFeatureProperties.isFlexibleCirculationRulesEnabled()).thenReturn(true);
-    when(dcbEntityServiceFacade.findOrCreateServicePoint()).thenReturn(servicePoint());
+    when(inventoryServicePointClient.getServicePointByName(NAME)).thenReturn(servicePoints());
     when(locationUnitClient.findInstitutionsByQuery(agencySql(), true, 10, 0)).thenReturn(empty());
     when(locationUnitClient.findCampusesByQuery(agencySql(), true, 10, 0)).thenReturn(empty());
     when(locationUnitClient.findLibrariesByQuery(agencySql(), true, 10, 0)).thenReturn(empty());
@@ -160,7 +162,7 @@ class ShadowLocationServiceImplTest {
   @Test
   void createShadowLocations_positive_newEntitiesForCombinedRequest() {
     when(dcbFeatureProperties.isFlexibleCirculationRulesEnabled()).thenReturn(true);
-    when(dcbEntityServiceFacade.findOrCreateServicePoint()).thenReturn(servicePoint());
+    when(inventoryServicePointClient.getServicePointByName(NAME)).thenReturn(servicePoints());
     when(locationUnitClient.findInstitutionsByQuery(agencySql(), true, 10, 0)).thenReturn(empty());
     when(locationUnitClient.findCampusesByQuery(agencySql(), true, 10, 0)).thenReturn(empty());
     when(locationUnitClient.findLibrariesByQuery(agencySql(), true, 10, 0)).thenReturn(empty());
@@ -205,7 +207,7 @@ class ShadowLocationServiceImplTest {
   @Test
   void createShadowLocations_positive_allEntitiesExist() {
     when(dcbFeatureProperties.isFlexibleCirculationRulesEnabled()).thenReturn(true);
-    when(dcbEntityServiceFacade.findOrCreateServicePoint()).thenReturn(servicePoint());
+    when(inventoryServicePointClient.getServicePointByName(NAME)).thenReturn(servicePoints());
     when(locationUnitClient.findInstitutionsByQuery(agencySql(), true, 10, 0)).thenReturn(asSinglePage(institution()));
     when(locationUnitClient.findCampusesByQuery(agencySql(), true, 10, 0)).thenReturn(asSinglePage(campus()));
     when(locationUnitClient.findLibrariesByQuery(agencySql(), true, 10, 0)).thenReturn(asSinglePage(library()));
@@ -230,7 +232,7 @@ class ShadowLocationServiceImplTest {
   @Test
   void createShadowLocations_positive_failedToCreateInstitution() {
     when(dcbFeatureProperties.isFlexibleCirculationRulesEnabled()).thenReturn(true);
-    when(dcbEntityServiceFacade.findOrCreateServicePoint()).thenReturn(servicePoint());
+    when(inventoryServicePointClient.getServicePointByName(NAME)).thenReturn(servicePoints());
     when(locationUnitClient.findInstitutionsByQuery(agencySql(), true, 10, 0)).thenReturn(empty());
     when(locationUnitClient.createInstitution(luCaptor.capture())).thenThrow(badRequestError("/institutions"));
 
@@ -252,7 +254,7 @@ class ShadowLocationServiceImplTest {
   @Test
   void createShadowLocations_positive_failedToCreateCampus() {
     when(dcbFeatureProperties.isFlexibleCirculationRulesEnabled()).thenReturn(true);
-    when(dcbEntityServiceFacade.findOrCreateServicePoint()).thenReturn(servicePoint());
+    when(inventoryServicePointClient.getServicePointByName(NAME)).thenReturn(servicePoints());
     when(locationUnitClient.findInstitutionsByQuery(agencySql(), true, 10, 0)).thenReturn(empty());
     when(locationUnitClient.findCampusesByQuery(agencySql(), true, 10, 0)).thenReturn(empty());
     when(locationUnitClient.createInstitution(luCaptor.capture())).then(returningFirstArgument());
@@ -275,7 +277,7 @@ class ShadowLocationServiceImplTest {
   @Test
   void createShadowLocations_positive_failedToCreateLibrary() {
     when(dcbFeatureProperties.isFlexibleCirculationRulesEnabled()).thenReturn(true);
-    when(dcbEntityServiceFacade.findOrCreateServicePoint()).thenReturn(servicePoint());
+    when(inventoryServicePointClient.getServicePointByName(NAME)).thenReturn(servicePoints());
     when(locationUnitClient.findInstitutionsByQuery(agencySql(), true, 10, 0)).thenReturn(empty());
     when(locationUnitClient.findCampusesByQuery(agencySql(), true, 10, 0)).thenReturn(empty());
     when(locationUnitClient.findLibrariesByQuery(agencySql(), true, 10, 0)).thenReturn(empty());
@@ -300,7 +302,7 @@ class ShadowLocationServiceImplTest {
   @Test
   void createShadowLocations_positive_failedToCreateLocation() {
     when(dcbFeatureProperties.isFlexibleCirculationRulesEnabled()).thenReturn(true);
-    when(dcbEntityServiceFacade.findOrCreateServicePoint()).thenReturn(servicePoint());
+    when(inventoryServicePointClient.getServicePointByName(NAME)).thenReturn(servicePoints());
     when(locationUnitClient.findInstitutionsByQuery(agencySql(), true, 10, 0)).thenReturn(empty());
     when(locationUnitClient.findCampusesByQuery(agencySql(), true, 10, 0)).thenReturn(empty());
     when(locationUnitClient.findLibrariesByQuery(agencySql(), true, 10, 0)).thenReturn(empty());
@@ -330,7 +332,6 @@ class ShadowLocationServiceImplTest {
   @Test
   void createShadowLocations_positive_emptyRefreshRequest() {
     when(dcbFeatureProperties.isFlexibleCirculationRulesEnabled()).thenReturn(true);
-    when(dcbEntityServiceFacade.findOrCreateServicePoint()).thenReturn(servicePoint());
     var response = dcbHubLocationService.createShadowLocations(refreshRequest(emptyList(), emptyList()));
 
     assertThat(response).isEqualTo(new RefreshShadowLocationResponse());
@@ -346,31 +347,31 @@ class ShadowLocationServiceImplTest {
 
     var refreshRequest = refreshRequest(emptyList(), emptyList());
     assertThatThrownBy(() -> dcbHubLocationService.createShadowLocations(refreshRequest))
-      .isInstanceOf(ServiceException.class)
+      .isInstanceOf(StatusException.class)
       .hasMessage("Flexible circulation rules feature is disabled, cannot create shadow locations");
   }
 
   @Test
   void createShadowLocations_negative_feignExceptionThrown() {
     when(dcbFeatureProperties.isFlexibleCirculationRulesEnabled()).thenReturn(true);
-    when(dcbEntityServiceFacade.findOrCreateServicePoint()).thenThrow(FeignException.class);
+    when(inventoryServicePointClient.getServicePointByName(NAME)).thenThrow(FeignException.class);
 
     var location = dcbLocation("test", "test", dcbAgency("agency", "AG-1"));
     var refreshRequest = refreshRequest(List.of(location), emptyList());
     assertThatThrownBy(() -> dcbHubLocationService.createShadowLocations(refreshRequest))
-      .isInstanceOf(ServiceException.class)
+      .isInstanceOf(StatusException.class)
       .hasMessage("Failed to create shadow locations");
   }
 
   @Test
   void createShadowLocations_negative_serviceExceptionThrown() {
     when(dcbFeatureProperties.isFlexibleCirculationRulesEnabled()).thenReturn(true);
-    when(dcbEntityServiceFacade.findOrCreateServicePoint()).thenThrow(ServiceException.class);
+    when(inventoryServicePointClient.getServicePointByName(NAME)).thenThrow(StatusException.class);
 
     var location = dcbLocation("test", "test", dcbAgency("agency", "AG-1"));
     var refreshRequest = refreshRequest(List.of(location), emptyList());
     assertThatThrownBy(() -> dcbHubLocationService.createShadowLocations(refreshRequest))
-      .isInstanceOf(ServiceException.class)
+      .isInstanceOf(StatusException.class)
       .hasMessage("Failed to create shadow locations");
   }
 
@@ -398,6 +399,10 @@ class ShadowLocationServiceImplTest {
 
   private static ServicePointRequest servicePoint() {
     return new ServicePointRequest().id("test-service-point");
+  }
+
+  private static ResultList<ServicePointRequest> servicePoints() {
+    return asSinglePage(servicePoint());
   }
 
   private static String agencySql() {

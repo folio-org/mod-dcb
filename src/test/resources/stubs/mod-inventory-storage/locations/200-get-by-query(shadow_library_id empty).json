@@ -1,0 +1,35 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/locations",
+    "queryParameters": {
+      "query": {
+        "equalTo": "libraryId==\"32188fb2-ac26-42ab-9fd0-1f027e9bf7e2\""
+      },
+      "includeShadowLocations": {
+        "equalTo": "true"
+      },
+      "limit": {
+        "equalTo": "1"
+      },
+      "offset": {
+        "equalTo": "0"
+      }
+    },
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "test_tenant"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "locations": [],
+      "totalRecords": 0
+    }
+  }
+}

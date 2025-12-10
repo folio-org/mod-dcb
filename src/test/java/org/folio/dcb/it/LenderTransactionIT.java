@@ -153,6 +153,30 @@ class LenderTransactionIT extends BaseTenantIntegrationTest {
     "/stubs/mod-inventory-storage/holdings-storage/200-get-by-id.json",
     "/stubs/mod-circulation/requests/201-post(any).json"
   })
+  void createTransaction_positive_itemWithLocationCode() throws Exception {
+    var dcbItem = dcbItem().locationCode("TEST_ITEM_LOCATION_CODE");
+    var dcbTransaction = lenderDcbTransaction().item(dcbItem);
+    postDcbTransaction(DCB_TRANSACTION_ID, dcbTransaction)
+      .andExpect(jsonPath("$.status").value("CREATED"))
+      .andExpect(jsonPath("$.item").value(dcbItem))
+      .andExpect(jsonPath("$.patron").value(dcbPatron(EXISTED_PATRON_ID)))
+      .andExpect(jsonPath("$.item.locationCode").exists());
+
+    auditEntityVerifier.assertThatLatestEntityIsNotDuplicate(DCB_TRANSACTION_ID);
+    verifyPostCirculationRequestCalledOnce(PAGE.getValue(), EXISTED_PATRON_ID);
+  }
+
+  @Test
+  @WireMockStub(value = {
+    "/stubs/mod-users/users/200-get-by-query(user id+barcode).json",
+    "/stubs/mod-users/groups/200-get-by-query(staff).json",
+    "/stubs/mod-inventory-storage/service-points/200-get-by-query(Virtual).json",
+    "/stubs/mod-inventory-storage/service-points/204-put(Virtual).json",
+    "/stubs/mod-calendar/calendars/200-get-all.json",
+    "/stubs/mod-inventory-storage/item-storage/200-get-by-query(id+barcode).json",
+    "/stubs/mod-inventory-storage/holdings-storage/200-get-by-id.json",
+    "/stubs/mod-circulation/requests/201-post(any).json"
+  })
   void createTransaction_negative_attemptToCreateTransactionTwice() throws Exception {
     var dcbTransactionRequestBody = lenderDcbTransaction();
     postDcbTransaction(DCB_TRANSACTION_ID, dcbTransactionRequestBody)

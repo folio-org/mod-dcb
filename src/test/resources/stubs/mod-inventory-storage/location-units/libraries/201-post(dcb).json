@@ -8,7 +8,8 @@
           "id": "9d1b77e7-f02e-4b7f-b296-3f2042ddac54",
           "name": "DCB",
           "code": "000",
-          "campusId": "9d1b77e6-f02e-4b7f-b296-3f2042ddac54"
+          "campusId": "9d1b77e6-f02e-4b7f-b296-3f2042ddac54",
+          "isShadow": false
         }
       }
     ],

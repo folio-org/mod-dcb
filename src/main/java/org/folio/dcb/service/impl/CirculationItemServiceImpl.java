@@ -3,6 +3,7 @@ package org.folio.dcb.service.impl;
 import static org.folio.dcb.client.feign.LocationsClient.LocationDTO;
 import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.IN_TRANSIT;
 import static org.folio.dcb.utils.DCBConstants.CODE;
+import static org.folio.dcb.utils.DCBConstants.HOLDING_ID;
 import static org.folio.dcb.utils.DCBConstants.LOAN_TYPE_ID;
 import static org.folio.dcb.utils.DCBConstants.LOCATION_ID;
 import static org.folio.dcb.utils.DCBConstants.MATERIAL_TYPE_NAME_BOOK;
@@ -27,17 +28,6 @@ import org.folio.dcb.service.CirculationItemService;
 import org.folio.dcb.service.ItemService;
 import org.folio.dcb.utils.CqlQuery;
 import org.springframework.stereotype.Service;
-
-import java.util.Objects;
-import java.util.UUID;
-
-import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.IN_TRANSIT;
-import static org.folio.dcb.utils.DCBConstants.HOLDING_ID;
-import static org.folio.dcb.utils.DCBConstants.CODE;
-import static org.folio.dcb.utils.DCBConstants.LOAN_TYPE_ID;
-import static org.folio.dcb.utils.DCBConstants.LOCATION_ID;
-import static org.folio.dcb.utils.DCBConstants.MATERIAL_TYPE_NAME_BOOK;
-import static org.folio.dcb.utils.DCBConstants.NAME;
 
 @Service
 @Log4j2

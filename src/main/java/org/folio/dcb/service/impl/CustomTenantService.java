@@ -75,6 +75,7 @@ public class CustomTenantService extends TenantService {
   private final CalendarService calendarService;
   private final ServicePointExpirationPeriodService servicePointExpirationPeriodService;
 
+
   public CustomTenantService(JdbcTemplate jdbcTemplate, FolioExecutionContext context, FolioSpringLiquibase folioSpringLiquibase,
                              PrepareSystemUserService prepareSystemUserService, KafkaService kafkaService, InstanceClient inventoryClient,
                              InstanceTypeClient instanceTypeClient, HoldingsStorageClient holdingsStorageClient,

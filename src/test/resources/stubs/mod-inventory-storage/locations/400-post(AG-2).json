@@ -1,0 +1,39 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/locations",
+    "bodyPatterns": [
+      { "matchesJsonPath": "$.campusId" },
+      { "matchesJsonPath": "$.libraryId" },
+      { "matchesJsonPath": "$.institutionId" },
+      { "matchesJsonPath": "$[?(@.isShadow == true)]" },
+      { "matchesJsonPath": "$[?(@.code == 'LOC-2')]" },
+      { "matchesJsonPath": "$[?(@.name == 'Location-2')]" }
+    ],
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "test_tenant"
+      }
+    }
+  },
+  "response": {
+    "status": 400,
+    "transformers": [ "response-template" ],
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "errors": [
+        {
+          "message": "Location with code AG-004 already exists",
+          "parameters": [
+            {
+              "key": "code",
+              "value": "AG-004"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
