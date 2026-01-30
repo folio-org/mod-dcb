@@ -1,3 +1,6 @@
+## v1.3.10 2026-01-30
+* MODDCB-261: Add missing permissions for system user [MODDCB-261](https://folio-org.atlassian.net/browse/MODDCB-261)
+
 ## v1.3.9 2025-12-10
 * MODDCB-206: Populate locationCode for DCB Transaction API [MODDCB-206](https://folio-org.atlassian.net/browse/MODDCB-206)
 * MODDCB-207: Populate effective location id for circulation item [MODDCB-207](https://folio-org.atlassian.net/browse/MODDCB-207)
