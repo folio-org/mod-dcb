@@ -449,6 +449,7 @@
         "inventory.instances.item.get",
         "users.collection.get",
         "users.item.get",
+        "users.item.put",
         "source-storage.stream.marc-record-identifiers.collection.post",
         "source-storage.records.collection.get",
         "source-storage.records.item.get",
@@ -465,7 +466,9 @@
         "circulation.check-out-by-barcode.post",
         "inventory.items.item.put",
         "inventory-storage.holdings.item.put",
-        "circulation-item.item.get"
+        "circulation-item.item.get",
+        "circulation-item.item.post",
+        "circulation-item.collection.get"
       ]
     }
   },
