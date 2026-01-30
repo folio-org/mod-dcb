@@ -1,3 +1,6 @@
+## v1.2.14 2026-01-30
+* MODDCB-261: Add missing permissions: users.item.get [MODDCB-261](https://folio-org.atlassian.net/browse/MODDCB-261)
+
 ## v1.2.13 2025-08-06
 * MODDCB-223: Add missing permission for DCB transaction status API [MODDCB-223](https://folio-org.atlassian.net/browse/MODDCB-223)
 
