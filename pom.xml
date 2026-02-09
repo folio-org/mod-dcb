@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.5.7</version>
+    <version>4.0.2</version>
     <relativePath /> <!-- lookup parent from repository -->
   </parent>
   <groupId>org.folio</groupId>
@@ -27,7 +27,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <rest-assured.version>6.0.0</rest-assured.version>
     <mvn-failsafe.version>3.5.4</mvn-failsafe.version>
-    <folio-util.version>35.4.0</folio-util.version>
+    <folio-util.version>35.4.2</folio-util.version>
     <argLine/>
 
     <!-- runtime dependencies -->
