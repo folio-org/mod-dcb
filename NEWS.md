@@ -1,4 +1,4 @@
-## 2.0.0-SNAPSHOT 2025-XX-XX
+## 2.0.0-SNAPSHOT 2026-XX-XX
 * MODDCB-196: Allow patrons to request items from own library via DCB
 * MODDCB-208: Fix cql query for querying patron group by name [MODDCB-208](https://folio-org.atlassian.net/browse/MODDCB-208)
 * MODDCB-208: Bump Spring Boot from 3.4.3 to 3.5.0 and update other dependencies
@@ -19,6 +19,7 @@
 * MODDCB-242: Add handling of expired lender requests [MODDCB-242](https://folio-org.atlassian.net/browse/MODDCB-242)
 * MODDCB-251: Add request body for /dcb/shadow-locations/refresh [MODDCB-251](https://folio-org.atlassian.net/browse/MODDCB-251)
 * MODDCB-252: Update existing virtual(DCB) patron records with localNames [MODDCB-252](https://folio-org.atlassian.net/browse/MODDCB-252)
+* MODDCB-259: Use GitHub Workflows for Maven [MODDCB-259](https://folio-org.atlassian.net/browse/MODDCB-259)
 
 ## v1.3.0 2025-03-13
 
