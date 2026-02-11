@@ -7,20 +7,26 @@ Version 2.0. See the file "[LICENSE](LICENSE)" for more information.
 
 ## Table of Contents
 
-- [Introduction](#introduction)
-- [API information](#api-information)
-- [Installing and deployment](#installing-and-deployment)
-  - [Compiling](#compiling)
-  - [Running it](#running-it)
-  - [Docker](#docker)
-  - [Module descriptor](#module-descriptor)
-  - [Environment variables](#environment-variables)
-- [Additional information](#Additional-information)
-  - [Issue tracker](#issue-tracker)
-  - [API documentation](#api-documentation)
-  - [Code analysis](#code-analysis)
-  - [Service point hold shelf period expiration](#service-point-hold-shelf-period-expiration)
-  - [Other documentation](#other-documentation)
+<!-- TOC -->
+* [mod-dcb](#mod-dcb)
+  * [Table of Contents](#table-of-contents)
+  * [Introduction](#introduction)
+  * [API information](#api-information)
+  * [Installing and deployment](#installing-and-deployment)
+    * [Compiling](#compiling)
+    * [Running it](#running-it)
+    * [Docker](#docker)
+    * [Module Descriptor](#module-descriptor)
+    * [Environment variables](#environment-variables)
+  * [Additional information](#additional-information)
+    * [System user configuration](#system-user-configuration)
+    * [Issue tracker](#issue-tracker)
+    * [ModuleDescriptor](#moduledescriptor)
+    * [API documentation](#api-documentation)
+    * [Code analysis](#code-analysis)
+    * [Service Point Hold Shelf Period Expiration](#service-point-hold-shelf-period-expiration)
+  * [Other documentation](#other-documentation)
+<!-- TOC -->
 
 ## Introduction
 
@@ -100,22 +106,6 @@ requires and provides, the permissions, and the additional module metadata.
 The module uses system user to communicate with other modules.
 For production deployments you MUST specify the password for this system user via env variable:
 `SYSTEM_USER_PASSWORD=<password>`.
-
-### DCB-HUB Configuration
-DCB hub secure-store parameters is used to connect to the dcb-hub module.
-If dcb-hub FETCH_DCB_LOCATIONS_ENABLED is true, you must have the below:-
-1. DCB_LOCATIONS_BASE_URL environment variable set to the BASE_URL of the dcb-hub.
-2. `dcb-hub-credentials` key in secure-store with below JSON structure:
-```json
-{
-  "client_id": "client-id-54321",
-  "client_secret": "client_secret_54321",
-  "username": "admin54321",
-  "password": "admin54321",
-  "keycloak_url": "KC-HOST/realms/master/protocol/openid-connect/token" // Full Absolute URL to the Keycloak token endpoint
-}
-```
-
 
 ### Issue tracker
 
