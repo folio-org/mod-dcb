@@ -6,11 +6,10 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
 
-import lombok.RequiredArgsConstructor;
-
 @Service
 public class BeanUtil implements ApplicationContextAware {
 
+  @Autowired
   private ApplicationContext context;
 
   @Override

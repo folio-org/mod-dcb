@@ -37,7 +37,7 @@ class InventoryItemServiceTest {
     var barcode = "DCB_ITEM";
     var inventoryItem = createInventoryItem();
     var query = CqlQuery.exactMatch("barcode", barcode).and(exactMatchById(itemId), true).getQuery();
-    when(inventoryItemStorageClient.findByQuery(query.toString())).thenReturn(ResultList.of(1, List.of(inventoryItem)));
+    when(inventoryItemStorageClient.findByQuery(query)).thenReturn(ResultList.of(1, List.of(inventoryItem)));
 
     var response = itemService.fetchItemByIdAndBarcode(itemId, barcode);
     assertEquals(inventoryItem, response);
@@ -48,7 +48,7 @@ class InventoryItemServiceTest {
     var itemId = UUID.randomUUID().toString();
     var barcode = "DCB_ITEM";
     var query = CqlQuery.exactMatch("barcode", barcode).and(exactMatchById(itemId), true).getQuery();
-    when(inventoryItemStorageClient.findByQuery(query.toString())).thenReturn(ResultList.empty());
+    when(inventoryItemStorageClient.findByQuery(query)).thenReturn(ResultList.empty());
 
     assertThrows(NotFoundException.class, () -> itemService.fetchItemByIdAndBarcode(itemId, barcode));
   }
