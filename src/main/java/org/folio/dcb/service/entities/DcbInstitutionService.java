@@ -8,8 +8,8 @@ import static org.folio.dcb.utils.DCBConstants.NAME;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.folio.dcb.client.feign.LocationUnitClient;
-import org.folio.dcb.client.feign.LocationUnitClient.LocationUnit;
+import org.folio.dcb.integration.invstorage.LocationUnitClient;
+import org.folio.dcb.integration.invstorage.model.LocationUnit;
 import org.springframework.stereotype.Service;
 
 @Log4j2
@@ -21,7 +21,8 @@ public class DcbInstitutionService implements DcbEntityService<LocationUnit> {
 
   @Override
   public Optional<LocationUnit> findDcbEntity() {
-    var librariesByQuery = locationUnitClient.findInstitutionsByQuery(exactMatchByName(NAME));
+    var query = exactMatchByName(NAME).getQuery();
+    var librariesByQuery = locationUnitClient.findInstitutionsByQuery(query);
     return findFirstValue(librariesByQuery);
   }
 

@@ -4,7 +4,7 @@
     "urlPath": "/circulation/loans",
     "queryParameters": {
       "query": {
-        "equalTo": "itemId==\"5b95877d-86c0-4cb7-a0cd-7660b348ae5a\" AND status.name==\"OPEN\" AND isDcb==\"true\" AND userId==\"18c1741d-e678-4c8e-9fe7-cfaeefab5eea\""
+        "equalTo": "itemId==\"5b95877d-86c0-4cb7-a0cd-7660b348ae5a\" and status.name==\"OPEN\" and isDcb==\"true\" and userId==\"18c1741d-e678-4c8e-9fe7-cfaeefab5eea\""
       }
     },
     "headers": {

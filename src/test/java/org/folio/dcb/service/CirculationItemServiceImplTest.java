@@ -1,6 +1,7 @@
 package org.folio.dcb.service;
 
-import static org.folio.dcb.client.feign.LocationsClient.LocationDTO;
+import org.folio.dcb.integration.circstorage.model.LoanType;
+import org.folio.dcb.integration.invstorage.model.Location;
 import static org.folio.dcb.domain.ResultList.asSinglePage;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -9,12 +10,11 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.UUID;
-import org.folio.dcb.client.feign.CirculationItemClient;
-import org.folio.dcb.client.feign.HoldingsStorageClient.Holding;
-import org.folio.dcb.client.feign.LoanTypeClient;
-import org.folio.dcb.client.feign.LocationUnitClient;
-import org.folio.dcb.client.feign.LocationUnitClient.LocationUnit;
-import org.folio.dcb.client.feign.LocationsClient;
+import org.folio.dcb.integration.circitem.CirculationItemClient;
+import org.folio.dcb.integration.invstorage.model.InventoryHolding;
+import org.folio.dcb.integration.invstorage.LocationUnitClient;
+import org.folio.dcb.integration.invstorage.model.LocationUnit;
+import org.folio.dcb.integration.invstorage.LocationsClient;
 import org.folio.dcb.domain.ResultList;
 import org.folio.dcb.domain.dto.CirculationItem;
 import org.folio.dcb.domain.dto.CirculationItemCollection;
@@ -110,9 +110,9 @@ class CirculationItemServiceImplTest {
     var createdItem = CirculationItem.builder().id(randomUuid).barcode("barcode123").build();
     when(circulationItemClient.createCirculationItem(any(), any())).thenReturn(createdItem);
 
-    LocationDTO locationDTO = testLocation();
-    var cqlByCode = CqlQuery.exactMatch("code", "TST");
-    when(locationsClient.findLocationByQuery(cqlByCode, true, 1, 0)).thenReturn(asSinglePage(locationDTO));
+    Location location = testLocation();
+    var cqlByCode = CqlQuery.exactMatch("code", "TST").getQuery();
+    when(locationsClient.findLocationByQuery(cqlByCode, true, 1, 0)).thenReturn(asSinglePage(location));
 
     var result = circulationItemService.checkIfItemExistsAndCreate(dcbItem, pickupServicePointId);
 
@@ -140,7 +140,7 @@ class CirculationItemServiceImplTest {
     var createdItem = CirculationItem.builder().id(randomUuid).barcode("barcode123").build();
     when(circulationItemClient.createCirculationItem(any(), any())).thenReturn(createdItem);
 
-    var cqlByCode = CqlQuery.exactMatch("code", TEST_DCB_LOCATION_CODE);
+    var cqlByCode = CqlQuery.exactMatch("code", TEST_DCB_LOCATION_CODE).getQuery();
     when(locationsClient.findLocationByQuery(cqlByCode, true, 1, 0)).thenReturn(ResultList.empty());
 
     // Act
@@ -175,8 +175,7 @@ class CirculationItemServiceImplTest {
     when(circulationItemClient.createCirculationItem(any(), any())).thenReturn(createdItem);
 
     var cqlByCode = CqlQuery.exactMatch("code", "nonExistedShadowLocationCode");
-    when(locationsClient.findLocationByQuery(cqlByCode, true, 1, 0))
-      .thenReturn(ResultList.of(0, Collections.emptyList()));
+    when(locationsClient.findLocationByQuery(cqlByCode.getQuery(), true, 1, 0)).thenReturn(ResultList.empty());
 
     // Act
     var result = circulationItemService.checkIfItemExistsAndCreate(dcbItem, pickupServicePointId);
@@ -263,11 +262,11 @@ class CirculationItemServiceImplTest {
     when(circulationItemClient.createCirculationItem(any(), any())).thenReturn(createdItem);
 
     var dcbItem = dcbItem(null, TEST_LENDING_LIBRARY_CODE);
-    var cqlByCode = CqlQuery.exactMatch("code", "TST");
+    var cqlByCode = CqlQuery.exactMatchByCode("TST").getQuery();
     when(locationUnitClient.findLibrariesByQuery(cqlByCode, true, 1, 0))
       .thenReturn(asSinglePage(testLibraryUnit()));
 
-    var cqlByLibraryId = CqlQuery.exactMatch("libraryId", TEST_LOCATION_ID);
+    var cqlByLibraryId = CqlQuery.exactMatch("libraryId", TEST_LOCATION_ID).getQuery();
     when(locationsClient.findLocationByQuery(cqlByLibraryId, true, 1, 0))
       .thenReturn(asSinglePage(testLocation()));
 
@@ -298,7 +297,7 @@ class CirculationItemServiceImplTest {
     when(circulationItemClient.createCirculationItem(any(), any())).thenReturn(createdItem);
 
     var dcbItem = dcbItem(null, TEST_LENDING_LIBRARY_CODE);
-    var cqlByCode = CqlQuery.exactMatch("code", "TST");
+    var cqlByCode = CqlQuery.exactMatchByCode(TEST_DCB_LOCATION_CODE).getQuery();
     when(locationUnitClient.findLibrariesByQuery(cqlByCode, true, 1, 0)).thenReturn(ResultList.empty());
 
     var result = circulationItemService.checkIfItemExistsAndCreate(dcbItem, pickupServicePointId);
@@ -328,11 +327,11 @@ class CirculationItemServiceImplTest {
     when(circulationItemClient.createCirculationItem(any(), any())).thenReturn(createdItem);
 
     var dcbItem = dcbItem(null, TEST_LENDING_LIBRARY_CODE);
-    var expectedQueryByCode = CqlQuery.exactMatch("code", "TST");
+    var expectedQueryByCode = CqlQuery.exactMatchByCode(TEST_DCB_LOCATION_CODE).getQuery();
     when(locationUnitClient.findLibrariesByQuery(expectedQueryByCode, true, 1, 0))
       .thenReturn(asSinglePage(testLibraryUnit()));
 
-    var expectedQueryByLibId = CqlQuery.exactMatch("libraryId", TEST_LOCATION_ID);
+    var expectedQueryByLibId = CqlQuery.exactMatch("libraryId", TEST_LOCATION_ID).getQuery();
     when(locationsClient.findLocationByQuery(expectedQueryByLibId, true, 1, 0))
       .thenReturn(ResultList.empty());
 
@@ -345,8 +344,8 @@ class CirculationItemServiceImplTest {
     assertEquals(createdItem, result);
   }
 
-  private static LocationDTO testLocation() {
-    return LocationDTO.builder()
+  private static Location testLocation() {
+    return Location.builder()
       .id(TEST_LOCATION_ID)
       .name("locationName")
       .code(TEST_DCB_LOCATION_CODE)
@@ -390,18 +389,18 @@ class CirculationItemServiceImplTest {
       .build();
   }
 
-  private static Holding dcbHolding() {
-    return Holding.builder().id(TEST_HOLDING_ID).build();
+  private static InventoryHolding dcbHolding() {
+    return InventoryHolding.builder().id(TEST_HOLDING_ID).build();
   }
 
-  private static LocationDTO dcbLocation() {
-    return LocationDTO.builder()
+  private static Location dcbLocation() {
+    return Location.builder()
       .id(DCBConstants.LOCATION_ID)
       .build();
   }
 
-  private static LoanTypeClient.LoanType dcbLoanType() {
-    return LoanTypeClient.LoanType.builder()
+  private static LoanType dcbLoanType() {
+    return LoanType.builder()
       .id(DCBConstants.LOAN_TYPE_ID)
       .build();
   }

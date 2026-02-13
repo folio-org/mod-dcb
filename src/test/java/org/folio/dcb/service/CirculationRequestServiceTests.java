@@ -1,11 +1,11 @@
 package org.folio.dcb.service;
 
-import org.folio.dcb.client.feign.CancellationReasonClient;
-import org.folio.dcb.client.feign.CirculationRequestClient;
+import org.folio.dcb.integration.circstorage.CancellationReasonClient;
+import org.folio.dcb.integration.circstorage.CirculationRequestClient;
 import org.folio.dcb.domain.dto.CirculationRequest;
 import org.folio.dcb.service.entities.DcbEntityServiceFacade;
 import org.folio.dcb.service.impl.CirculationRequestServiceImpl;
-import org.folio.dcb.utils.RequestStatus;
+import org.folio.dcb.integration.circulation.model.RequestStatus;
 import org.folio.spring.FolioExecutionContext;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

@@ -1,6 +1,6 @@
 package org.folio.dcb.service;
 
-import org.folio.dcb.client.feign.HoldingsStorageClient;
+import org.folio.dcb.integration.invstorage.model.InventoryHolding;
 
 public interface HoldingsService {
   /**
@@ -8,5 +8,5 @@ public interface HoldingsService {
    * @param holdingId - id of holding
    * @return InventoryHolding
    */
-  HoldingsStorageClient.Holding fetchInventoryHoldingDetailsByHoldingId(String holdingId);
+  InventoryHolding fetchInventoryHoldingDetailsByHoldingId(String holdingId);
 }

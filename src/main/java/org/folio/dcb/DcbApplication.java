@@ -2,12 +2,10 @@ package org.folio.dcb;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cloud.openfeign.EnableFeignClients;
-import org.springframework.retry.annotation.EnableRetry;
+import org.springframework.resilience.annotation.EnableResilientMethods;
 
-@EnableRetry
 @SpringBootApplication
-@EnableFeignClients
+@EnableResilientMethods
 public class DcbApplication {
   public static void main(String[] args) {
     SpringApplication.run(DcbApplication.class, args);

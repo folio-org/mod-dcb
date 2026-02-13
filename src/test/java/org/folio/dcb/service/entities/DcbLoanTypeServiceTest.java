@@ -9,8 +9,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import org.folio.dcb.client.feign.LoanTypeClient;
-import org.folio.dcb.client.feign.LoanTypeClient.LoanType;
+import org.folio.dcb.integration.circstorage.LoanTypeClient;
+import org.folio.dcb.integration.circstorage.model.LoanType;
 import org.folio.dcb.domain.ResultList;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -36,7 +36,7 @@ class DcbLoanTypeServiceTest {
   @Test
   void findDcbEntity_positive_shouldReturnLoanTypeWhenExists() {
     var foundLoanTypes = ResultList.asSinglePage(dcbLoanType());
-    var expectedQuery = exactMatchByName(DCB_LOAN_TYPE_NAME);
+    var expectedQuery = exactMatchByName(DCB_LOAN_TYPE_NAME).getQuery();
     when(loanTypeClient.findByQuery(expectedQuery)).thenReturn(foundLoanTypes);
 
     var result = dcbLoanTypeService.findDcbEntity();
@@ -46,7 +46,7 @@ class DcbLoanTypeServiceTest {
 
   @Test
   void findDcbEntity_positive_shouldReturnEmptyWhenNotExists() {
-    var expectedQuery = exactMatchByName(DCB_LOAN_TYPE_NAME);
+    var expectedQuery = exactMatchByName(DCB_LOAN_TYPE_NAME).getQuery();
     when(loanTypeClient.findByQuery(expectedQuery)).thenReturn(ResultList.empty());
 
     var result = dcbLoanTypeService.findDcbEntity();
@@ -73,7 +73,7 @@ class DcbLoanTypeServiceTest {
 
   @Test
   void findOrCreateEntity_positive_shouldReturnExistingLoanType() {
-    var expectedQuery = exactMatchByName(DCB_LOAN_TYPE_NAME);
+    var expectedQuery = exactMatchByName(DCB_LOAN_TYPE_NAME).getQuery();
     var loanTypesResult = ResultList.asSinglePage(dcbLoanType());
     when(loanTypeClient.findByQuery(expectedQuery)).thenReturn(loanTypesResult);
 

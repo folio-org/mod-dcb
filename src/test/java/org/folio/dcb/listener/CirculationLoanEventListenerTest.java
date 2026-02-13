@@ -3,7 +3,7 @@ package org.folio.dcb.listener;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.it.base.BaseTenantIntegrationTest;
-import org.folio.dcb.listener.kafka.CirculationEventListener;
+import org.folio.dcb.integration.kafka.CirculationEventListener;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.impl.BaseLibraryService;
 import org.folio.dcb.service.impl.BorrowingPickupLibraryServiceImpl;
@@ -11,9 +11,11 @@ import org.folio.spring.client.AuthnClient;
 import org.folio.spring.integration.XOkapiHeaders;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -36,6 +38,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class CirculationLoanEventListenerTest extends BaseTenantIntegrationTest {
 
   private static final String TENANT = "diku";
@@ -47,22 +50,14 @@ class CirculationLoanEventListenerTest extends BaseTenantIntegrationTest {
   private static final String NO_ITEM_ID_EVENT_SAMPLE = getMockDataAsString("mockdata/kafka/loan_check_in_no_item_id.json");
   private static final String CHECK_IN_UNDEFINED_SAMPLE = getMockDataAsString("mockdata/kafka/loan_undefined.json");
 
-  @Captor
-  private ArgumentCaptor<TransactionEntity> transactionEntityArgumentCaptor;
-  @Captor
-  private ArgumentCaptor<TransactionStatus.StatusEnum> statusEnumArgumentCaptor;
+  @Captor private ArgumentCaptor<TransactionEntity> transactionEntityArgumentCaptor;
+  @Captor private ArgumentCaptor<TransactionStatus.StatusEnum> statusEnumArgumentCaptor;
+  @Mock private BorrowingPickupLibraryServiceImpl libraryService;
+  @Mock private AuthnClient authnClient;
 
-  @Mock
-  private BorrowingPickupLibraryServiceImpl libraryService;
-  @Autowired
-  private CirculationEventListener eventListener ;
-  @Mock
-  private AuthnClient authnClient;
-  @MockitoBean
-  private TransactionRepository transactionRepository;
-
-  @MockitoSpyBean
-  private BaseLibraryService baseLibraryService;
+  @Autowired private CirculationEventListener eventListener ;
+  @MockitoBean private TransactionRepository transactionRepository;
+  @MockitoSpyBean private BaseLibraryService baseLibraryService;
 
   @Test
   void handleCheckingOutForNonDcbTest() {

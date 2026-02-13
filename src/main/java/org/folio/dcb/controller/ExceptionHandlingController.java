@@ -1,6 +1,5 @@
 package org.folio.dcb.controller;
 
-import feign.FeignException;
 import lombok.extern.log4j.Log4j2;
 
 import org.folio.dcb.exception.DcbHubLocationException;
@@ -25,6 +24,8 @@ import static org.folio.dcb.utils.ErrorHelper.createExternalError;
 import static org.folio.dcb.utils.ErrorHelper.createInternalError;
 
 import org.folio.dcb.domain.dto.Errors;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @RestControllerAdvice
@@ -41,7 +42,7 @@ public class ExceptionHandlingController {
   @ResponseStatus(HttpStatus.NOT_FOUND)
   @ExceptionHandler({
     NotFoundException.class,
-    FeignException.NotFound.class
+    HttpClientErrorException.NotFound.class
   })
   public Errors handleNotFoundException(Exception ex) {
     logExceptionMessage(ex);
@@ -51,23 +52,23 @@ public class ExceptionHandlingController {
   @ResponseStatus(HttpStatus.CONFLICT)
   @ExceptionHandler({
     ResourceAlreadyExistException.class,
-    FeignException.Conflict.class
+    HttpClientErrorException.Conflict.class
   })
   public Errors handleAlreadyExistException(Exception ex) {
     logExceptionMessage(ex);
     return createExternalError(ex.getMessage(), DUPLICATE_ERROR);
   }
 
-  @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
-  @ExceptionHandler(FeignException.UnprocessableEntity.class)
+  @ResponseStatus(HttpStatus.UNPROCESSABLE_CONTENT)
+  @ExceptionHandler(HttpClientErrorException.UnprocessableContent.class)
   public Errors handleUnProcessableEntityErrors(Exception ex) {
     logExceptionMessage(ex);
     return createExternalError(ex.getMessage(), VALIDATION_ERROR);
   }
 
   @ResponseStatus(HttpStatus.BAD_GATEWAY)
-  @ExceptionHandler(FeignException.BadGateway.class)
-  public Errors handleBadGatewayException(FeignException.BadGateway ex) {
+  @ExceptionHandler(HttpServerErrorException.BadGateway.class)
+  public Errors handleBadGatewayException(HttpServerErrorException.BadGateway ex) {
     logExceptionMessage(ex);
     return createInternalError(ex.getMessage(), BAD_GATEWAY);
   }
@@ -79,7 +80,7 @@ public class ExceptionHandlingController {
     HttpMessageNotReadableException.class,
     IllegalArgumentException.class,
     StatusException.class,
-    FeignException.BadRequest.class,
+    HttpClientErrorException.BadRequest.class,
     MethodArgumentNotValidException.class
   })
   public Errors handleValidationErrors(Exception ex) {

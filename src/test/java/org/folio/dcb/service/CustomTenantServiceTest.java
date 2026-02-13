@@ -3,7 +3,7 @@ package org.folio.dcb.service;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 
-import org.folio.dcb.listener.kafka.service.KafkaService;
+import org.folio.dcb.integration.kafka.KafkaService;
 import org.folio.dcb.service.entities.DcbEntityServiceFacade;
 import org.folio.dcb.service.impl.CustomTenantService;
 import org.folio.spring.service.PrepareSystemUserService;

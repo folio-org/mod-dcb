@@ -558,7 +558,7 @@ class FlexibleEffectiveLocationIT {
         .andExpect(jsonPath("$.locations[?(@.code=='LOC-2')].status").value("SKIPPED"))
         .andExpect(jsonPath("$.location-units.institutions[?(@.code=='AG-002')].status").value("ERROR"))
         .andExpect(jsonPath("$.location-units.institutions[?(@.code=='AG-002')].cause").value(hasItem(allOf(
-          startsWith("[400 Bad Request]"), containsString("Institution with code AG-004 already exists")))))
+          startsWith("400 Bad Request:"), containsString("Institution with code AG-004 already exists")))))
         .andExpect(jsonPath("$.location-units.campuses[?(@.code=='AG-002')].status").value("SKIPPED"))
         .andExpect(jsonPath("$.location-units.campuses[?(@.code=='AG-002')].cause").value(
           "Parent institution is not created"))
@@ -580,7 +580,7 @@ class FlexibleEffectiveLocationIT {
         .andExpect(jsonPath("$.locations[?(@.code=='LOC-2')].status").value("SKIPPED"))
         .andExpect(jsonPath("$.location-units.campuses[?(@.code=='AG-002')].status").value("ERROR"))
         .andExpect(jsonPath("$.location-units.campuses[?(@.code=='AG-002')].cause").value(hasItem(allOf(
-          startsWith("[400 Bad Request]"), containsString("Campus with code AG-004 already exists")))))
+          startsWith("400 Bad Request:"), containsString("Campus with code AG-004 already exists")))))
         .andExpect(jsonPath("$.location-units.libraries[?(@.code=='AG-002')].status").value("SKIPPED"))
         .andExpect(jsonPath("$.location-units.libraries[?(@.code=='AG-002')].cause").value("Parent campus is not created"))
         .andExpect(jsonPath("$.location-units.institutions[?(@.code=='AG-002')].status").value("SUCCESS"));
@@ -601,7 +601,7 @@ class FlexibleEffectiveLocationIT {
         .andExpect(jsonPath("$.locations[?(@.code=='LOC-2')].status").value("SKIPPED"))
         .andExpect(jsonPath("$.location-units.libraries[?(@.code=='AG-002')].status").value("ERROR"))
         .andExpect(jsonPath("$.location-units.libraries[?(@.code=='AG-002')].cause").value(hasItem(allOf(
-          startsWith("[400 Bad Request]"), containsString("Library with code AG-004 already exists")))));
+          startsWith("400 Bad Request:"), containsString("Library with code AG-004 already exists")))));
     }
 
     @Test
@@ -620,7 +620,7 @@ class FlexibleEffectiveLocationIT {
       refreshShadowLocationsAttempt(refreshBody(List.of(location), emptyList()))
         .andExpect(jsonPath("$.locations[?(@.code=='LOC-2')].status").value("ERROR"))
         .andExpect(jsonPath("$.locations[?(@.code=='LOC-2')].cause").value(hasItem(allOf(
-          startsWith("[400 Bad Request]"), containsString("Location with code AG-004 already exists")))));
+          startsWith("400 Bad Request:"), containsString("Location with code AG-004 already exists")))));
     }
 
     @Test

@@ -4,7 +4,7 @@
     "urlPath": "/item-storage/items",
     "queryParameters": {
       "query": {
-        "equalTo": "barcode==\"!@#$%\\^\\^&&\\*()_=+`~|\\\\]{}DCB_ITEM/'''\" AND id==\"5b95877d-86c0-4cb7-a0cd-7660b348ae5a\""
+        "equalTo": "barcode==\"!@#$%\\^\\^&&\\*()_=+`~|\\\\]{}DCB_ITEM/'''\" and id==\"5b95877d-86c0-4cb7-a0cd-7660b348ae5a\""
       }
     },
     "headers": {

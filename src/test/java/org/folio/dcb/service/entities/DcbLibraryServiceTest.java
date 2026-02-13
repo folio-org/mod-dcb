@@ -8,8 +8,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import org.folio.dcb.client.feign.LocationUnitClient;
-import org.folio.dcb.client.feign.LocationUnitClient.LocationUnit;
+import org.folio.dcb.integration.invstorage.LocationUnitClient;
+import org.folio.dcb.integration.invstorage.model.LocationUnit;
 import org.folio.dcb.domain.ResultList;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -38,7 +38,7 @@ class DcbLibraryServiceTest {
   @Test
   void findDcbEntity_positive_shouldReturnLibraryWhenExists() {
     var foundLibraries = ResultList.asSinglePage(dcbLibrary());
-    var expectedQuery = exactMatchByName(TEST_NAME);
+    var expectedQuery = exactMatchByName(TEST_NAME).getQuery();
     when(locationUnitClient.findLibrariesByQuery(expectedQuery)).thenReturn(foundLibraries);
 
     var result = dcbLibraryService.findDcbEntity();
@@ -48,7 +48,7 @@ class DcbLibraryServiceTest {
 
   @Test
   void findDcbEntity_positive_shouldReturnEmptyWhenNotExists() {
-    var expectedQuery = exactMatchByName(TEST_NAME);
+    var expectedQuery = exactMatchByName(TEST_NAME).getQuery();
     when(locationUnitClient.findLibrariesByQuery(expectedQuery)).thenReturn(ResultList.empty());
     var result = dcbLibraryService.findDcbEntity();
     assertThat(result).isEmpty();
@@ -76,7 +76,7 @@ class DcbLibraryServiceTest {
 
   @Test
   void findOrCreateEntity_positive_shouldReturnExistingLibrary() {
-    var expectedQuery = exactMatchByName(TEST_NAME);
+    var expectedQuery = exactMatchByName(TEST_NAME).getQuery();
     var librariesResult = ResultList.asSinglePage(dcbLibrary());
     when(locationUnitClient.findLibrariesByQuery(expectedQuery)).thenReturn(librariesResult);
 

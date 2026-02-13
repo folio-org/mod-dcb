@@ -1,8 +1,9 @@
 package org.folio.dcb.utils;
 
 import lombok.SneakyThrows;
+import org.apache.commons.io.IOUtils;
 import org.folio.dcb.DcbApplication;
-import org.folio.dcb.client.feign.HoldingsStorageClient;
+import org.folio.dcb.integration.invstorage.model.InventoryHolding;
 import org.folio.dcb.domain.dto.Calendar;
 import org.folio.dcb.domain.dto.CalendarCollection;
 import org.folio.dcb.domain.dto.CirculationItem;
@@ -23,7 +24,6 @@ import org.folio.dcb.domain.dto.InventoryItem;
 import org.folio.dcb.domain.dto.UserGroupCollection;
 import org.folio.dcb.domain.dto.UserGroup;
 import org.folio.dcb.domain.dto.UserCollection;
-import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -277,8 +277,8 @@ public class EntityUtils {
       .build();
   }
 
-  public static HoldingsStorageClient.Holding createInventoryHolding() {
-    return HoldingsStorageClient.Holding.builder()
+  public static InventoryHolding createInventoryHolding() {
+    return InventoryHolding.builder()
       .id(UUID.randomUUID().toString())
       .instanceId(UUID.randomUUID().toString())
       .build();

@@ -1,23 +1,24 @@
 package org.folio.dcb.utils;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.folio.dcb.integration.circulation.model.RequestStatus.CLOSED_PICKUP_EXPIRED;
+import static org.folio.dcb.integration.circulation.model.RequestStatus.OPEN_AWAITING_PICKUP;
 import static org.folio.dcb.utils.EntityUtils.ITEM_ID;
 import static org.folio.dcb.utils.EntityUtils.PICKUP_SERVICE_POINT_ID;
 import static org.folio.dcb.utils.EntityUtils.REQUEST_ID;
 import static org.folio.dcb.utils.EntityUtils.TEST_TENANT;
 import static org.folio.dcb.utils.JsonTestUtils.objectMapper;
 import static org.folio.dcb.utils.JsonTestUtils.toJsonNode;
-import static org.folio.dcb.utils.RequestStatus.CLOSED_PICKUP_EXPIRED;
-import static org.folio.dcb.utils.RequestStatus.OPEN_AWAITING_PICKUP;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.folio.dcb.domain.dto.CirculationRequest;
+import org.folio.dcb.integration.circulation.model.RequestStatus;
 import org.folio.spring.integration.XOkapiHeaders;
+import tools.jackson.databind.JsonNode;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class EventDataProvider {

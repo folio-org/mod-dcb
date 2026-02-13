@@ -9,11 +9,11 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.UUID;
-import org.folio.dcb.client.feign.HoldingSourcesClient.HoldingSource;
-import org.folio.dcb.client.feign.HoldingsStorageClient;
-import org.folio.dcb.client.feign.HoldingsStorageClient.Holding;
-import org.folio.dcb.client.feign.InstanceClient.InventoryInstanceDTO;
-import org.folio.dcb.client.feign.LocationsClient.LocationDTO;
+import org.folio.dcb.integration.invstorage.model.HoldingSource;
+import org.folio.dcb.integration.invstorage.HoldingsStorageClient;
+import org.folio.dcb.integration.invstorage.model.InventoryHolding;
+import org.folio.dcb.integration.inventory.model.InventoryInstance;
+import org.folio.dcb.integration.invstorage.model.Location;
 import org.folio.dcb.domain.ResultList;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -45,7 +45,7 @@ class DcbHoldingServiceTest {
   @Test
   void findDcbEntity_positive_shouldReturnHoldingWhenExists() {
     var foundHoldings = ResultList.asSinglePage(dcbHolding());
-    var expectedQuery = exactMatchById(TEST_HOLDING_ID);
+    var expectedQuery = exactMatchById(TEST_HOLDING_ID).getQuery();
     when(holdingsStorageClient.findByQuery(expectedQuery)).thenReturn(foundHoldings);
 
     var result = dcbHoldingService.findDcbEntity();
@@ -55,7 +55,7 @@ class DcbHoldingServiceTest {
 
   @Test
   void findDcbEntity_positive_shouldReturnEmptyWhenNotExists() {
-    var expectedQuery = exactMatchById(TEST_HOLDING_ID);
+    var expectedQuery = exactMatchById(TEST_HOLDING_ID).getQuery();
     when(holdingsStorageClient.findByQuery(expectedQuery)).thenReturn(ResultList.empty());
     var result = dcbHoldingService.findDcbEntity();
     assertThat(result).isEmpty();
@@ -86,7 +86,7 @@ class DcbHoldingServiceTest {
 
   @Test
   void findOrCreateEntity_positive_shouldReturnExistingHolding() {
-    var expectedQuery = exactMatchById(TEST_HOLDING_ID);
+    var expectedQuery = exactMatchById(TEST_HOLDING_ID).getQuery();
     var holdingsResult = ResultList.asSinglePage(dcbHolding());
     when(holdingsStorageClient.findByQuery(expectedQuery)).thenReturn(holdingsResult);
     var result = dcbHoldingService.findOrCreateEntity();
@@ -98,12 +98,12 @@ class DcbHoldingServiceTest {
     verify(holdingsStorageClient, never()).createHolding(any());
   }
 
-  private static Holding dcbHolding() {
+  private static InventoryHolding dcbHolding() {
     return dcbHolding(TEST_HOLDING_SOURCE_ID);
   }
 
-  private static Holding dcbHolding(String sourceId) {
-    return Holding.builder()
+  private static InventoryHolding dcbHolding(String sourceId) {
+    return InventoryHolding.builder()
       .id(TEST_HOLDING_ID)
       .instanceId(TEST_INSTANCE_ID)
       .permanentLocationId(TEST_LOCATION_ID)
@@ -111,8 +111,8 @@ class DcbHoldingServiceTest {
       .build();
   }
 
-  private static InventoryInstanceDTO dcbInstance() {
-    return InventoryInstanceDTO.builder()
+  private static InventoryInstance dcbInstance() {
+    return InventoryInstance.builder()
       .id(TEST_INSTANCE_ID)
       .build();
   }
@@ -123,8 +123,8 @@ class DcbHoldingServiceTest {
       .build();
   }
 
-  private static LocationDTO dcbLocation() {
-    return LocationDTO.builder()
+  private static Location dcbLocation() {
+    return Location.builder()
       .id(TEST_LOCATION_ID)
       .build();
   }

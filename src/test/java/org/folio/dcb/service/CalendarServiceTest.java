@@ -1,6 +1,6 @@
 package org.folio.dcb.service;
 
-import org.folio.dcb.client.feign.CalendarClient;
+import org.folio.dcb.integration.calendar.CalendarClient;
 import org.folio.dcb.domain.dto.Calendar;
 import org.folio.dcb.service.impl.CalendarServiceImpl;
 import org.junit.jupiter.api.Test;

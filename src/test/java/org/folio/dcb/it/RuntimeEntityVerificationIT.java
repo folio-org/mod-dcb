@@ -243,7 +243,6 @@ class RuntimeEntityVerificationIT {
       "/stubs/mod-inventory-storage/holdings-sources/200-get-by-query(dcb empty).json",
 
       // POST DCB entity mappings
-
       "/stubs/mod-inventory-storage/location-units/libraries/201-post(dcb).json",
       "/stubs/mod-inventory-storage/locations/201-post(dcb).json",
       "/stubs/mod-inventory-storage/service-points/201-post(dcb).json",

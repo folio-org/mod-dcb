@@ -3,14 +3,14 @@ package org.folio.dcb.service.impl;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.folio.dcb.client.feign.InventoryServicePointClient;
+import org.folio.dcb.integration.invstorage.ServicePointClient;
 import org.folio.dcb.domain.dto.DcbPickup;
 import org.folio.dcb.domain.dto.HoldShelfExpiryPeriod;
 import org.folio.dcb.domain.dto.ServicePointRequest;
 import org.folio.dcb.service.CalendarService;
 import org.folio.dcb.service.ServicePointExpirationPeriodService;
 import org.folio.dcb.service.ServicePointService;
-import org.folio.util.StringUtil;
+import org.folio.dcb.utils.CqlQuery;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class ServicePointServiceImpl implements ServicePointService {
 
-  private final InventoryServicePointClient servicePointClient;
+  private final ServicePointClient servicePointClient;
   private final CalendarService calendarService;
   private final ServicePointExpirationPeriodService servicePointExpirationPeriodService;
   public static final String HOLD_SHELF_CLOSED_LIBRARY_DATE_MANAGEMENT = "Keep_the_current_due_date";
@@ -28,8 +28,8 @@ public class ServicePointServiceImpl implements ServicePointService {
     log.debug("createServicePoint:: automate service point creation {} ", pickupServicePoint);
     String servicePointName = getServicePointName(pickupServicePoint.getLibraryCode(),
       pickupServicePoint.getServicePointName());
-    var servicePointRequestList = servicePointClient
-      .getServicePointByName(StringUtil.cqlEncode(servicePointName)).getResult();
+    var query = CqlQuery.exactMatchByName(servicePointName).getQuery();
+    var servicePointRequestList = servicePointClient.findByQuery(query).getResult();
     var shelfExpiryPeriod = servicePointExpirationPeriodService.getShelfExpiryPeriod();
     if (servicePointRequestList.isEmpty()) {
       String servicePointId = UUID.randomUUID().toString();

@@ -1,6 +1,6 @@
 package org.folio.dcb.service;
 
-import org.folio.dcb.client.feign.CirculationClient;
+import org.folio.dcb.integration.circulation.CirculationClient;
 import org.folio.dcb.domain.dto.CirculationRequest;
 import org.folio.dcb.domain.dto.ItemStatus;
 import org.folio.dcb.exception.StatusException;

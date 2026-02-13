@@ -1,13 +1,12 @@
 package org.folio.dcb.service;
 
-import org.folio.dcb.client.feign.InventoryItemStorageClient;
+import org.folio.dcb.integration.invstorage.InventoryItemStorageClient;
 import org.folio.dcb.domain.ResultList;
 import org.folio.dcb.domain.dto.ItemLastCheckIn;
 import org.folio.dcb.exception.InventoryItemNotFound;
 import org.folio.dcb.service.impl.ItemServiceImpl;
+import org.folio.dcb.utils.CqlQuery;
 import org.folio.spring.exception.NotFoundException;
-import org.folio.util.PercentCodec;
-import org.folio.util.StringUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -29,20 +28,16 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class InventoryItemServiceTest {
 
-  @InjectMocks
-  private ItemServiceImpl itemService;
-  @Mock
-  private InventoryItemStorageClient inventoryItemStorageClient;
+  @InjectMocks private ItemServiceImpl itemService;
+  @Mock private InventoryItemStorageClient inventoryItemStorageClient;
 
   @Test
   void fetchItemDetailsByIdAndBarcodeTest() {
     var itemId = UUID.randomUUID().toString();
     var barcode = "DCB_ITEM";
     var inventoryItem = createInventoryItem();
-    Appendable queryBarcode = StringUtil.appendCqlEncoded(new StringBuilder("barcode=="), barcode);
-    Appendable queryId = StringUtil.appendCqlEncoded(new StringBuilder("id=="), itemId);
-    CharSequence query = PercentCodec.encode(queryBarcode + " AND " + queryId);
-    when(inventoryItemStorageClient.fetchItemByQuery(query.toString())).thenReturn(ResultList.of(1, List.of(inventoryItem)));
+    var query = CqlQuery.exactMatch("barcode", barcode).and(exactMatchById(itemId), true).getQuery();
+    when(inventoryItemStorageClient.findByQuery(query.toString())).thenReturn(ResultList.of(1, List.of(inventoryItem)));
 
     var response = itemService.fetchItemByIdAndBarcode(itemId, barcode);
     assertEquals(inventoryItem, response);
@@ -52,10 +47,8 @@ class InventoryItemServiceTest {
   void fetchItemByIdAndInvalidBarcode() {
     var itemId = UUID.randomUUID().toString();
     var barcode = "DCB_ITEM";
-    Appendable queryBarcode = StringUtil.appendCqlEncoded(new StringBuilder("barcode=="), barcode);
-    Appendable queryId = StringUtil.appendCqlEncoded(new StringBuilder("id=="), itemId);
-    CharSequence query = PercentCodec.encode(queryBarcode + " AND " + queryId);
-    when(inventoryItemStorageClient.fetchItemByQuery(query.toString())).thenReturn(ResultList.of(0, List.of()));
+    var query = CqlQuery.exactMatch("barcode", barcode).and(exactMatchById(itemId), true).getQuery();
+    when(inventoryItemStorageClient.findByQuery(query.toString())).thenReturn(ResultList.empty());
 
     assertThrows(NotFoundException.class, () -> itemService.fetchItemByIdAndBarcode(itemId, barcode));
   }
@@ -64,8 +57,8 @@ class InventoryItemServiceTest {
   void fetchItemByBarcode() {
     var item = createDcbItem();
     var inventoryItem = createInventoryItem();
-    String query = "barcode==" + StringUtil.cqlEncode(item.getBarcode());
-    when(inventoryItemStorageClient.fetchItemByQuery(PercentCodec.encode(query).toString())).thenReturn(ResultList.of(1, List.of(inventoryItem)));
+    var query = CqlQuery.exactMatch("barcode", item.getBarcode()).getQuery();
+    when(inventoryItemStorageClient.findByQuery(query)).thenReturn(ResultList.of(1, List.of(inventoryItem)));
 
     var response = itemService.fetchItemByBarcode(item.getBarcode());
     assertEquals(1, response.getTotalRecords());
@@ -78,7 +71,8 @@ class InventoryItemServiceTest {
     var item = createInventoryItem().lastCheckIn(lastCheckIn);
     var itemId = item.getId();
 
-    when(inventoryItemStorageClient.fetchItemByQuery(exactMatchById(itemId))).thenReturn(asSinglePage(item));
+    var query = exactMatchById(itemId).getQuery();
+    when(inventoryItemStorageClient.findByQuery(query)).thenReturn(asSinglePage(item));
 
     var result = itemService.findItemByIdAfterCheckIn(itemId, expectedServicePointId);
     assertEquals(item, result);
@@ -88,7 +82,8 @@ class InventoryItemServiceTest {
   void findItemByIdAfterCheckInWhenEmptyResultReturned() {
     var itemId = UUID.randomUUID().toString();
     var servicePointId = UUID.randomUUID().toString();
-    when(inventoryItemStorageClient.fetchItemByQuery(exactMatchById(itemId))).thenReturn(empty());
+    var expectedQuery = exactMatchById(itemId).getQuery();
+    when(inventoryItemStorageClient.findByQuery(expectedQuery)).thenReturn(empty());
 
     var exception = assertThrows(InventoryItemNotFound.class,
       () -> itemService.findItemByIdAfterCheckIn(itemId, servicePointId));
@@ -103,7 +98,8 @@ class InventoryItemServiceTest {
     var item = createInventoryItem();
     var itemId = item.getId();
 
-    when(inventoryItemStorageClient.fetchItemByQuery(exactMatchById(itemId))).thenReturn(asSinglePage(item));
+    var query = exactMatchById(itemId).getQuery();
+    when(inventoryItemStorageClient.findByQuery(query)).thenReturn(asSinglePage(item));
 
     var exception = assertThrows(InventoryItemNotFound.class,
       () -> itemService.findItemByIdAfterCheckIn(itemId, servicePointId));
@@ -119,7 +115,8 @@ class InventoryItemServiceTest {
     var item = createInventoryItem().lastCheckIn(lastCheckIn);
     var itemId = item.getId();
 
-    when(inventoryItemStorageClient.fetchItemByQuery(exactMatchById(itemId))).thenReturn(asSinglePage(item));
+    var query = exactMatchById(itemId).getQuery();
+    when(inventoryItemStorageClient.findByQuery(query)).thenReturn(asSinglePage(item));
 
     var exception = assertThrows(InventoryItemNotFound.class,
       () -> itemService.findItemByIdAfterCheckIn(itemId, expectedServicePointId));

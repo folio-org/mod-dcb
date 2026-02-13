@@ -7,8 +7,8 @@ import static org.folio.dcb.utils.DCBConstants.DCB_CANCELLATION_REASON_NAME;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.folio.dcb.client.feign.CancellationReasonClient;
-import org.folio.dcb.client.feign.CancellationReasonClient.CancellationReason;
+import org.folio.dcb.integration.circstorage.CancellationReasonClient;
+import org.folio.dcb.integration.circstorage.CancellationReasonClient.CancellationReason;
 import org.springframework.stereotype.Service;
 
 @Log4j2
@@ -20,7 +20,7 @@ public class DcbCancellationReasonService implements DcbEntityService<Cancellati
 
   @Override
   public Optional<CancellationReason> findDcbEntity() {
-    var query = exactMatchById(CANCELLATION_REASON_ID);
+    var query = exactMatchById(CANCELLATION_REASON_ID).getQuery();
     var cancellationReasonsByQuery = cancellationReasonClient.findByQuery(query);
     return findFirstValue(cancellationReasonsByQuery);
   }

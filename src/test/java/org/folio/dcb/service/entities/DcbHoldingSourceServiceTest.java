@@ -9,8 +9,8 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.UUID;
-import org.folio.dcb.client.feign.HoldingSourcesClient;
-import org.folio.dcb.client.feign.HoldingSourcesClient.HoldingSource;
+import org.folio.dcb.integration.invstorage.HoldingSourcesClient;
+import org.folio.dcb.integration.invstorage.model.HoldingSource;
 import org.folio.dcb.domain.ResultList;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -39,7 +39,7 @@ class DcbHoldingSourceServiceTest {
   @Test
   void findDcbEntity_positive_shouldReturnHoldingSourceWhenExists() {
     var foundSources = ResultList.asSinglePage(dcbHoldingSource());
-    var expectedQuery = exactMatchByName(TEST_SOURCE);
+    var expectedQuery = exactMatchByName(TEST_SOURCE).getQuery();
     when(holdingSourcesClient.findByQuery(expectedQuery)).thenReturn(foundSources);
 
     var result = dcbHoldingSourceService.findDcbEntity();
@@ -53,7 +53,7 @@ class DcbHoldingSourceServiceTest {
 
   @Test
   void findDcbEntity_positive_shouldReturnEmptyWhenNotExists() {
-    var expectedQuery = exactMatchByName(TEST_SOURCE);
+    var expectedQuery = exactMatchByName(TEST_SOURCE).getQuery();
     when(holdingSourcesClient.findByQuery(expectedQuery)).thenReturn(ResultList.empty());
 
     var result = dcbHoldingSourceService.findDcbEntity();
@@ -96,7 +96,7 @@ class DcbHoldingSourceServiceTest {
 
   @Test
   void findOrCreateEntity_positive_shouldReturnExistingHoldingSource() {
-    var expectedQuery = exactMatchByName(TEST_SOURCE);
+    var expectedQuery = exactMatchByName(TEST_SOURCE).getQuery();
     var sourcesResult = ResultList.asSinglePage(dcbHoldingSource());
     when(holdingSourcesClient.findByQuery(expectedQuery)).thenReturn(sourcesResult);
 

@@ -10,11 +10,18 @@ spring:
     producer:
       acks: all
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JacksonJsonSerializer
 
 folio:
   system-user:
     enabled: false
+  logging:
+    request:
+      enabled: false
+      level: BASIC
+    exchange:
+      enabled: false
+      level: BASIC
   kafka:
     numberOfPartitions: 1
     replicationFactor: 1
@@ -42,3 +49,5 @@ logging:
     org.springframework.kafka: warn
     org.springframework.test.context.jdbc: warn
     org.springframework.jdbc.datasource.init: warn
+    org.folio.spring.filter.ExchangeLoggingInterceptor: info
+    org.folio.spring.filter.IncomingRequestLoggingFilter: info

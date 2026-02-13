@@ -21,7 +21,7 @@ import org.folio.dcb.service.CirculationItemService;
 import org.folio.dcb.service.CirculationRequestService;
 import org.folio.dcb.service.EcsRequestTransactionsService;
 import org.folio.dcb.service.RequestService;
-import org.folio.dcb.utils.RequestStatus;
+import org.folio.dcb.integration.circulation.model.RequestStatus;
 import org.folio.spring.exception.NotFoundException;
 import org.springframework.stereotype.Service;
 

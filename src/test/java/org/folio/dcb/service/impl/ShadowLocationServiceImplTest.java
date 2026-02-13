@@ -1,8 +1,7 @@
 package org.folio.dcb.service.impl;
 
-import static feign.Request.HttpMethod.POST;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.groups.Tuple.tuple;
@@ -17,16 +16,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
-import feign.FeignException;
-import feign.Request;
-import feign.Response;
 import java.util.List;
 import java.util.UUID;
-import org.folio.dcb.client.feign.LocationUnitClient;
-import org.folio.dcb.client.feign.LocationUnitClient.LocationUnit;
-import org.folio.dcb.client.feign.LocationsClient;
-import org.folio.dcb.client.feign.LocationsClient.LocationDTO;
 import org.folio.dcb.config.DcbFeatureProperties;
 import org.folio.dcb.domain.dto.DcbAgency;
 import org.folio.dcb.domain.dto.DcbLocation;
@@ -37,6 +30,10 @@ import org.folio.dcb.domain.dto.RefreshShadowLocationResponse;
 import org.folio.dcb.domain.dto.ServicePointRequest;
 import org.folio.dcb.domain.dto.ShadowLocationRefreshBody;
 import org.folio.dcb.exception.ServiceException;
+import org.folio.dcb.integration.invstorage.LocationUnitClient;
+import org.folio.dcb.integration.invstorage.LocationsClient;
+import org.folio.dcb.integration.invstorage.model.Location;
+import org.folio.dcb.integration.invstorage.model.LocationUnit;
 import org.folio.dcb.service.entities.DcbEntityServiceFacade;
 import org.folio.dcb.utils.CqlQuery;
 import org.junit.jupiter.api.AfterEach;
@@ -48,6 +45,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
+import org.springframework.http.HttpHeaders;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException.InternalServerError;
 
 @ExtendWith(MockitoExtension.class)
 class ShadowLocationServiceImplTest {
@@ -67,7 +67,7 @@ class ShadowLocationServiceImplTest {
   @Mock private LocationUnitClient locationUnitClient;
   @Mock private DcbFeatureProperties dcbFeatureProperties;
   @Mock private DcbEntityServiceFacade dcbEntityServiceFacade;
-  @Captor private ArgumentCaptor<LocationDTO> locCaptor;
+  @Captor private ArgumentCaptor<Location> locCaptor;
   @Captor private ArgumentCaptor<LocationUnit> luCaptor;
 
   @AfterEach
@@ -107,7 +107,7 @@ class ShadowLocationServiceImplTest {
         tuple(AGENCY_NAME, AGENCY_CODE, true));
 
     assertThat(locCaptor.getAllValues())
-      .extracting(LocationDTO::getCode, LocationDTO::getName, LocationDTO::isShadow)
+      .extracting(Location::getCode, Location::getName, Location::isShadow)
       .containsExactly(tuple(LOCATION_CODE, LOCATION_NAME, true));
 
     verify(locationUnitClient).createInstitution(any());
@@ -148,7 +148,7 @@ class ShadowLocationServiceImplTest {
         tuple(AGENCY_CODE, AGENCY_NAME, true));
 
     assertThat(locCaptor.getAllValues())
-      .extracting(LocationDTO::getCode, LocationDTO::getName, LocationDTO::isShadow)
+      .extracting(Location::getCode, Location::getName, Location::isShadow)
       .containsExactly(tuple(AGENCY_CODE, AGENCY_NAME, true));
 
     verify(locationUnitClient).createInstitution(any());
@@ -191,7 +191,7 @@ class ShadowLocationServiceImplTest {
         tuple(AGENCY_CODE, AGENCY_NAME, true));
 
     assertThat(locCaptor.getAllValues())
-      .extracting(LocationDTO::getCode, LocationDTO::getName, LocationDTO::isShadow)
+      .extracting(Location::getCode, Location::getName, Location::isShadow)
       .containsExactly(
         tuple(LOCATION_CODE, LOCATION_NAME, true),
         tuple(AGENCY_CODE, AGENCY_NAME, true));
@@ -240,7 +240,7 @@ class ShadowLocationServiceImplTest {
     assertThat(result).isEqualTo(new RefreshShadowLocationResponse()
       .addLocationsItem(refreshLocationStatus(SKIPPED).cause("Parent location units not created"))
       .locationUnits(new RefreshLocationUnitsStatus()
-        .addInstitutionsItem(refreshAgencyStatus(ERROR).cause("[400] during [POST] to [/institutions] [POST]: []"))
+        .addInstitutionsItem(refreshAgencyStatus(ERROR).cause("400 during [POST] to [/institutions] [POST]: []"))
         .addCampusesItem(refreshAgencyStatus(SKIPPED).cause("Parent institution is not created"))
         .addLibrariesItem(refreshAgencyStatus(SKIPPED).cause("Parent campus is not created"))));
 
@@ -265,7 +265,7 @@ class ShadowLocationServiceImplTest {
       .addLocationsItem(refreshLocationStatus(SKIPPED).cause("Parent location units not created"))
       .locationUnits(new RefreshLocationUnitsStatus()
         .addInstitutionsItem(refreshAgencyStatus(SUCCESS))
-        .addCampusesItem(refreshAgencyStatus(ERROR).cause("[400] during [POST] to [/campuses] [POST]: []"))
+        .addCampusesItem(refreshAgencyStatus(ERROR).cause("400 during [POST] to [/campuses] [POST]: []"))
         .addLibrariesItem(refreshAgencyStatus(SKIPPED).cause("Parent campus is not created"))));
 
     verify(locationUnitClient, never()).createLibrary(any());
@@ -292,7 +292,7 @@ class ShadowLocationServiceImplTest {
       .locationUnits(new RefreshLocationUnitsStatus()
         .addInstitutionsItem(refreshAgencyStatus(SUCCESS))
         .addCampusesItem(refreshAgencyStatus(SUCCESS))
-        .addLibrariesItem(refreshAgencyStatus(ERROR).cause("[400] during [POST] to [/libraries] [POST]: []"))));
+        .addLibrariesItem(refreshAgencyStatus(ERROR).cause("400 during [POST] to [/libraries] [POST]: []"))));
 
     verify(locationsClient, never()).createLocation(any());
   }
@@ -315,7 +315,7 @@ class ShadowLocationServiceImplTest {
     var result = dcbHubLocationService.createShadowLocations(refreshRequest);
 
     assertThat(result).isEqualTo(new RefreshShadowLocationResponse()
-      .addLocationsItem(refreshLocationStatus(ERROR).cause("[400] during [POST] to [/locations] [POST]: []"))
+      .addLocationsItem(refreshLocationStatus(ERROR).cause("400 during [POST] to [/locations] [POST]: []"))
       .locationUnits(new RefreshLocationUnitsStatus()
         .addInstitutionsItem(refreshAgencyStatus(SUCCESS))
         .addCampusesItem(refreshAgencyStatus(SUCCESS))
@@ -353,7 +353,7 @@ class ShadowLocationServiceImplTest {
   @Test
   void createShadowLocations_negative_feignExceptionThrown() {
     when(dcbFeatureProperties.isFlexibleCirculationRulesEnabled()).thenReturn(true);
-    when(dcbEntityServiceFacade.findOrCreateServicePoint()).thenThrow(FeignException.class);
+    when(dcbEntityServiceFacade.findOrCreateServicePoint()).thenThrow(InternalServerError.class);
 
     var location = dcbLocation("test", "test", dcbAgency("agency", "AG-1"));
     var refreshRequest = refreshRequest(List.of(location), emptyList());
@@ -401,11 +401,11 @@ class ShadowLocationServiceImplTest {
   }
 
   private static String agencySql() {
-    return CqlQuery.exactMatchByNameAndCode(AGENCY_NAME, AGENCY_CODE);
+    return CqlQuery.exactMatchByNameAndCode(AGENCY_NAME, AGENCY_CODE).getQuery();
   }
 
   private static String locationSql() {
-    return CqlQuery.exactMatchByNameAndCode(LOCATION_NAME, LOCATION_CODE);
+    return CqlQuery.exactMatchByNameAndCode(LOCATION_NAME, LOCATION_CODE).getQuery();
   }
 
   private static <T> Answer<T> returningFirstArgument() {
@@ -447,8 +447,8 @@ class ShadowLocationServiceImplTest {
     return locationUnit;
   }
 
-  private static LocationDTO location() {
-    var location = new LocationDTO();
+  private static Location location() {
+    var location = new Location();
     location.setId(LOCATION_ID);
     location.setCode(LOCATION_CODE);
     location.setName(LOCATION_NAME);
@@ -458,11 +458,8 @@ class ShadowLocationServiceImplTest {
     return location;
   }
 
-  private static FeignException badRequestError(String url) {
-    var request = Response.builder()
-      .status(400)
-      .request(Request.create(POST, url, emptyMap(), null, null, null))
-      .build();
-    return FeignException.errorStatus("POST", request);
+  private static HttpClientErrorException badRequestError(String url) {
+    var statusText = "during [POST] to [%s] [POST]: []".formatted(url);
+    return HttpClientErrorException.create(BAD_REQUEST, statusText, HttpHeaders.EMPTY, null, UTF_8);
   }
 }

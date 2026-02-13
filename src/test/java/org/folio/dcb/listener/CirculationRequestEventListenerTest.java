@@ -24,7 +24,7 @@ import org.folio.dcb.domain.dto.ItemStatus;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.it.base.BaseTenantIntegrationTest;
-import org.folio.dcb.listener.kafka.CirculationEventListener;
+import org.folio.dcb.integration.kafka.CirculationEventListener;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.CirculationItemService;
 import org.folio.spring.integration.XOkapiHeaders;

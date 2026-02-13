@@ -43,7 +43,10 @@ spring:
     openfeign:
       okhttp:
         enabled: true
+
 folio:
+  exchange:
+    enabled: true
   tenant:
     validation:
       enabled: true

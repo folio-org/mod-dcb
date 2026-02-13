@@ -8,8 +8,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import org.folio.dcb.client.feign.InstanceTypeClient;
-import org.folio.dcb.client.feign.InstanceTypeClient.InstanceType;
+import org.folio.dcb.integration.invstorage.InstanceTypeClient;
+import org.folio.dcb.integration.invstorage.model.InstanceType;
 import org.folio.dcb.domain.ResultList;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -37,7 +37,7 @@ class DcbInstanceTypeServiceTest {
   @Test
   void findDcbEntity_positive_shouldReturnInstanceTypeWhenExists() {
     var foundInstanceTypes = ResultList.asSinglePage(dcbInstanceType());
-    var expectedQuery = exactMatchByName(TEST_NAME);
+    var expectedQuery = exactMatchByName(TEST_NAME).getQuery();
     when(instanceTypeClient.findByQuery(expectedQuery)).thenReturn(foundInstanceTypes);
 
     var result = dcbInstanceTypeService.findDcbEntity();
@@ -47,7 +47,7 @@ class DcbInstanceTypeServiceTest {
 
   @Test
   void findDcbEntity_positive_shouldReturnEmptyWhenNotExists() {
-    var expectedQuery = exactMatchByName(TEST_NAME);
+    var expectedQuery = exactMatchByName(TEST_NAME).getQuery();
     when(instanceTypeClient.findByQuery(expectedQuery)).thenReturn(ResultList.empty());
     var result = dcbInstanceTypeService.findDcbEntity();
     assertThat(result).isEmpty();
@@ -71,7 +71,7 @@ class DcbInstanceTypeServiceTest {
 
   @Test
   void findOrCreateEntity_positive_shouldReturnExistingInstanceType() {
-    var expectedQuery = exactMatchByName(TEST_NAME);
+    var expectedQuery = exactMatchByName(TEST_NAME).getQuery();
     var instanceTypesResult = ResultList.asSinglePage(dcbInstanceType());
     when(instanceTypeClient.findByQuery(expectedQuery)).thenReturn(instanceTypesResult);
 

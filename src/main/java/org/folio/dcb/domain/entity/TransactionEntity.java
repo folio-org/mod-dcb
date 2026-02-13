@@ -18,7 +18,7 @@ import org.folio.dcb.domain.converter.UUIDConverter;
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.entity.base.AuditableEntity;
 import org.folio.dcb.domain.dto.TransactionStatus.StatusEnum;
-import org.folio.dcb.listener.entity.TransactionAuditEntityListener;
+import org.folio.dcb.repository.listener.TransactionAuditEntityListener;
 
 import java.io.Serializable;
 import java.util.UUID;

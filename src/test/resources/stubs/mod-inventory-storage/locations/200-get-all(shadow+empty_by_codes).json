@@ -5,12 +5,12 @@
     "queryParameters": {
       "query": {
         "or": [
-          { "equalTo": "(name==\"Location-1\" AND code==\"LOC-1\")" },
-          { "equalTo": "(name==\"Location-2\" AND code==\"LOC-2\")" },
-          { "equalTo": "(name==\"Location-4\" AND code==\"LOC-4\")" },
-          { "equalTo": "(name==\"Location-6\" AND code==\"LOC-6\")" },
-          { "equalTo": "(name==\"Location-8\" AND code==\"LOC-8\")" },
-          { "equalTo": "(name==\"Agency-Two\" AND code==\"AG-002\")" }
+          { "equalTo": "name==\"Location-1\" and code==\"LOC-1\"" },
+          { "equalTo": "name==\"Location-2\" and code==\"LOC-2\"" },
+          { "equalTo": "name==\"Location-4\" and code==\"LOC-4\"" },
+          { "equalTo": "name==\"Location-6\" and code==\"LOC-6\"" },
+          { "equalTo": "name==\"Location-8\" and code==\"LOC-8\"" },
+          { "equalTo": "name==\"Agency-Two\" and code==\"AG-002\"" }
         ]
       }
     },

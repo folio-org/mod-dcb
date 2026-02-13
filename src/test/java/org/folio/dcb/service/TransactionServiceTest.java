@@ -12,9 +12,9 @@ import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
 import static org.folio.dcb.utils.EntityUtils.createDcbTransactionByRole;
 import static org.folio.dcb.utils.EntityUtils.createTransactionEntity;
 import static org.folio.dcb.utils.EntityUtils.createTransactionResponse;
-import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
@@ -29,8 +29,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import org.folio.dcb.client.feign.CirculationClient;
-import org.folio.dcb.client.feign.CirculationLoanPolicyStorageClient;
+import org.folio.dcb.integration.circulation.CirculationClient;
+import org.folio.dcb.integration.circstorage.CirculationLoanPolicyStorageClient;
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.DcbTransaction.RoleEnum;
 import org.folio.dcb.domain.dto.LoanPolicy;
@@ -88,15 +88,15 @@ class TransactionServiceTest {
     when(transactionRepository.findById(anyString())).thenReturn(Optional.ofNullable(
       buildTransactionToRenew(ITEM_CHECKED_OUT, LENDER)));
     when(circulationClient.renewById(any())).thenReturn(buildTestRenewBleResponse());
-    when(circulationLoanPolicyStorageClient.fetchLoanPolicyById(anyString())).thenReturn(
+    when(circulationLoanPolicyStorageClient.getById(anyString())).thenReturn(
       buildTestLoanPolicy());
     when(circulationClient.renewById(any())).thenReturn(buildTestRenewBleResponse());
-    when(circulationLoanPolicyStorageClient.fetchLoanPolicyById(anyString())).thenReturn(
+    when(circulationLoanPolicyStorageClient.getById(anyString())).thenReturn(
       buildTestLoanPolicy());
 
     transactionsService.renewLoanByTransactionId(DCB_TRANSACTION_ID);
     verify(circulationClient, times(1)).renewById(any());
-    verify(circulationLoanPolicyStorageClient, times(1)).fetchLoanPolicyById(any());
+    verify(circulationLoanPolicyStorageClient, times(1)).getById(any());
   }
 
   @Test
@@ -113,7 +113,7 @@ class TransactionServiceTest {
     when(transactionRepository.findById(anyString())).thenReturn(Optional.ofNullable(
       buildTransactionToRenew(ITEM_CHECKED_OUT, LENDER)));
     when(circulationClient.renewById(any())).thenReturn(buildTestRenewBleResponse());
-    when(circulationLoanPolicyStorageClient.fetchLoanPolicyById(anyString())).thenReturn(null);
+    when(circulationLoanPolicyStorageClient.getById(anyString())).thenReturn(null);
     assertThrows(NotFoundException.class, () -> transactionsService.renewLoanByTransactionId(
       DCB_TRANSACTION_ID));
   }

@@ -13,7 +13,7 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import org.folio.dcb.client.feign.CirculationClient;
+import org.folio.dcb.integration.circulation.CirculationClient;
 import org.folio.dcb.domain.dto.DcbTransaction.RoleEnum;
 import org.folio.dcb.domain.dto.Loan;
 import org.folio.dcb.domain.dto.LoanCollection;

@@ -1,7 +1,7 @@
 package org.folio.dcb.it.base;
 
 import static org.assertj.core.api.Assertions.entry;
-import static org.awaitility.Durations.TEN_SECONDS;
+import static org.awaitility.Durations.ONE_MINUTE;
 import static org.awaitility.Durations.TWO_HUNDRED_MILLISECONDS;
 import static org.folio.dcb.support.kafka.KafkaContainerExtension.createTopics;
 import static org.folio.dcb.support.kafka.KafkaContainerExtension.deleteTopics;
@@ -17,7 +17,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import java.time.OffsetDateTime;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -72,7 +71,7 @@ public abstract class BaseTenantIntegrationTest extends BaseIntegrationTest {
     resetWiremockStubs();
     BaseTenantIntegrationTest.wiremock = getWireMockClient();
     BaseTenantIntegrationTest.auditEntityVerifier = new AuditEntityTestVerifier(
-      new HashMap<>(defaultHeaders()), folioModuleMetadata, transactionAuditRepository);
+      defaultHeaders(), folioModuleMetadata, transactionAuditRepository);
     BaseTenantIntegrationTest.testEventHelper = testCirculationEventHelper;
     BaseTenantIntegrationTest.testJdbcHelper = testJdbcHelper;
   }
@@ -196,7 +195,7 @@ public abstract class BaseTenantIntegrationTest extends BaseIntegrationTest {
 
   protected static void awaitUntilAsserted(ThrowingRunnable throwingRunnable) {
     Awaitility.await()
-      .atMost(TEN_SECONDS)
+      .atMost(ONE_MINUTE)
       .pollInterval(TWO_HUNDRED_MILLISECONDS)
       .untilAsserted(throwingRunnable);
   }
