@@ -1,0 +1,40 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/users",
+    "bodyPatterns": [
+      {
+        "equalToJson": {
+          "username": "dcb-system-user",
+          "type": "system",
+          "active": true,
+          "personal": {
+            "lastName": "System"
+          }
+        },
+        "ignoreExtraElements": true
+      },
+      { "matchesJsonPath": "$.id" }
+    ],
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "test_tenant"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": {
+      "id": "{{request.body['id']}}",
+      "username": "dcb-system-user",
+      "type": "system",
+      "active": true,
+      "personal": {
+        "lastName": "System"
+      }
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

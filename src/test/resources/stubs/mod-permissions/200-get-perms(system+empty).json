@@ -1,0 +1,31 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathTemplate": "/perms/users/{id}/permissions",
+    "queryParameters": {
+      "indexField": {
+        "equalTo": "userId"
+      }
+    },
+    "pathParameters": {
+      "id": {
+        "matches": "[0-9a-f-]{36}"
+      }
+    },
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "test_tenant"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": {
+      "permissions": [ ],
+      "totalRecords": 0
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

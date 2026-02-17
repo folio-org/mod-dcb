@@ -1,0 +1,31 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/users",
+    "queryParameters": {
+      "query": {
+        "equalTo": "username==\"dcb-system-user\""
+      }
+    },
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "test_tenant"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": {
+      "users": [ ],
+      "totalRecords": 0,
+      "resultInfo": {
+        "totalRecords": 0,
+        "facets": [ ],
+        "diagnostics": [ ]
+      }
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}
