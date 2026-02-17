@@ -34,9 +34,9 @@ public class CirculationRequestServiceImpl implements CirculationRequestService 
   }
 
   @Override
-  public CirculationRequest getCancellationRequestIfOpenOrNull(String requestId){
+  public CirculationRequest getCancellationRequestIfOpenOrNull(String requestId) {
     CirculationRequest request = fetchRequestById(requestId);
-    if(request != null && RequestStatus.isRequestOpen(RequestStatus.from(request.getStatus()))){
+    if (request != null && RequestStatus.isRequestOpen(RequestStatus.from(request.getStatus()))) {
       var cancellationReason = dcbEntityServiceFacade.findOrCreateCancellationReason();
       request.setStatus(RequestStatus.CLOSED_CANCELLED.getValue());
       request.setCancelledDate(OffsetDateTime.now().toString());

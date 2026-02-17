@@ -15,13 +15,18 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.UUID;
+import org.springframework.web.client.HttpClientErrorException;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.folio.dcb.utils.EntityUtils.createCirculationRequest;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class CirculationRequestServiceTests {
+
+  private static final String REQUEST_ID = UUID.randomUUID().toString();
 
   @InjectMocks private CirculationRequestServiceImpl circulationRequestService;
   @Mock private CirculationRequestClient circulationStorageClient;
@@ -39,5 +44,33 @@ class CirculationRequestServiceTests {
     when(dcbEntityServiceFacade.findOrCreateCancellationReason()).thenReturn(defaultCancellationReasont);
     var cancelRequest = circulationRequestService.getCancellationRequestIfOpenOrNull(anyString());
     Assertions.assertEquals(RequestStatus.CLOSED_CANCELLED, RequestStatus.from(cancelRequest.getStatus()));
+  }
+
+  @Test
+  void getCancellationRequestIfOpenOrNull_positive_notOpenRequestStatus() {
+    var circulationRequest = mock(CirculationRequest.class);
+    when(circulationRequest.getStatus()).thenReturn(RequestStatus.CLOSED_UNFILLED.getValue());
+    when(circulationStorageClient.fetchRequestById(REQUEST_ID)).thenReturn(circulationRequest);
+
+    var result = circulationRequestService.getCancellationRequestIfOpenOrNull(REQUEST_ID);
+
+    assertThat(result).isNull();
+  }
+
+  @Test
+  void fetchRequestById_positive() {
+    var circulationRequest = createCirculationRequest();
+    when(circulationStorageClient.fetchRequestById(REQUEST_ID)).thenReturn(circulationRequest);
+    var result = circulationRequestService.fetchRequestById(REQUEST_ID);
+
+    assertThat(result).isSameAs(circulationRequest);
+  }
+
+  @Test
+  void fetchRequestById_negative_notFound() {
+    when(circulationStorageClient.fetchRequestById(REQUEST_ID)).thenThrow(HttpClientErrorException.NotFound.class);
+    var result = circulationRequestService.fetchRequestById(REQUEST_ID);
+
+    assertThat(result).isNull();
   }
 }
