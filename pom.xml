@@ -46,7 +46,7 @@
     <maven-surefire-plugin.version>3.5.4</maven-surefire-plugin.version>
     <maven-release-plugin.version>3.3.1</maven-release-plugin.version>
     <maven-enforcer-plugin.version>3.6.2</maven-enforcer-plugin.version>
-    <openapi-generator-maven-plugin.version>7.18.0</openapi-generator-maven-plugin.version>
+    <openapi-generator-maven-plugin.version>7.20.0</openapi-generator-maven-plugin.version>
     <folio-module-descriptor-validator.version>1.0.1</folio-module-descriptor-validator.version>
   </properties>
 
