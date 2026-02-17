@@ -151,7 +151,7 @@ public class HttpExchangeConfiguration {
   /**
    * Creates a {@link HoldingSourcesClient} bean.
    *
-   * @param factory the {@link HttpServiceProxyFactory} beam
+   * @param factory the {@link HttpServiceProxyFactory} bean
    * @return the {@link HoldingSourcesClient} instance
    */
   @Bean
