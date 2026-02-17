@@ -8,8 +8,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import org.folio.dcb.client.feign.LocationUnitClient;
-import org.folio.dcb.client.feign.LocationUnitClient.LocationUnit;
+import org.folio.dcb.integration.invstorage.LocationUnitClient;
+import org.folio.dcb.integration.invstorage.model.LocationUnit;
 import org.folio.dcb.domain.ResultList;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -37,7 +37,7 @@ class DcbCampusServiceTest {
   @Test
   void findDcbEntity_positive_shouldReturnCampusWhenExists() {
     var foundCampuses = ResultList.asSinglePage(dcbCampus());
-    var expectedQuery = exactMatchByName(TEST_CAMPUS_NAME);
+    var expectedQuery = exactMatchByName(TEST_CAMPUS_NAME).getQuery();
     when(locationUnitClient.findCampusesByQuery(expectedQuery)).thenReturn(foundCampuses);
 
     var result = dcbCampusService.findDcbEntity();
@@ -47,7 +47,7 @@ class DcbCampusServiceTest {
 
   @Test
   void findDcbEntity_positive_shouldReturnEmptyWhenNotExists() {
-    var expectedQuery = exactMatchByName(TEST_CAMPUS_NAME);
+    var expectedQuery = exactMatchByName(TEST_CAMPUS_NAME).getQuery();
     when(locationUnitClient.findCampusesByQuery(expectedQuery)).thenReturn(ResultList.empty());
     var result = dcbCampusService.findDcbEntity();
     assertThat(result).isEmpty();
@@ -74,7 +74,7 @@ class DcbCampusServiceTest {
 
   @Test
   void findOrCreateEntity_positive_shouldReturnExistingCampus() {
-    var expectedQuery = exactMatchByName(TEST_CAMPUS_NAME);
+    var expectedQuery = exactMatchByName(TEST_CAMPUS_NAME).getQuery();
     var campusesResult = ResultList.asSinglePage(dcbCampus());
     when(locationUnitClient.findCampusesByQuery(expectedQuery)).thenReturn(campusesResult);
 

@@ -5,8 +5,8 @@
     "queryParameters": {
       "query": {
         "or": [
-          { "equalTo": "(name==\"Agency-Two\" AND code==\"AG-002\")" },
-          { "equalTo": "(name==\"Agency-Four\" AND code==\"AG-004\")" }
+          { "equalTo": "name==\"Agency-Two\" and code==\"AG-002\"" },
+          { "equalTo": "name==\"Agency-Four\" and code==\"AG-004\"" }
         ]
       },
       "includeShadow": {

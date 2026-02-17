@@ -8,18 +8,15 @@ import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
-import org.folio.dcb.client.feign.InventoryItemStorageClient;
-import org.folio.dcb.client.feign.MaterialTypeClient;
+import org.folio.dcb.integration.invstorage.InventoryItemStorageClient;
+import org.folio.dcb.integration.invstorage.MaterialTypeClient;
 import org.folio.dcb.domain.ResultList;
 import org.folio.dcb.domain.dto.InventoryItem;
 import org.folio.dcb.exception.InventoryItemNotFound;
-import org.folio.dcb.exception.ServiceException;
 import org.folio.dcb.service.ItemService;
+import org.folio.dcb.utils.CqlQuery;
 import org.folio.spring.exception.NotFoundException;
-import org.folio.util.PercentCodec;
-import org.folio.util.StringUtil;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
+import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -44,17 +41,14 @@ public class ItemServiceImpl implements ItemService {
   @Override
   public ResultList<InventoryItem> fetchItemByBarcode(String itemBarcode) {
     log.debug("fetchItemByBarcode:: fetching item details for barcode {} ", itemBarcode);
-    String query = "barcode==" + StringUtil.cqlEncode(itemBarcode);
-    return inventoryItemStorageClient.fetchItemByQuery(PercentCodec.encode(query).toString());
+    return inventoryItemStorageClient.findByQuery(CqlQuery.exactMatch("barcode", itemBarcode).getQuery());
   }
 
   @Override
   public InventoryItem fetchItemByIdAndBarcode(String id, String barcode) {
     log.debug("fetchItemByBarcode:: fetching item details for id {} , barcode {} ", id, barcode);
-    Appendable queryBarcode = StringUtil.appendCqlEncoded(new StringBuilder("barcode=="), barcode);
-    Appendable queryId = StringUtil.appendCqlEncoded(new StringBuilder("id=="), id);
-    CharSequence query = PercentCodec.encode(queryBarcode + " AND " + queryId);
-    return inventoryItemStorageClient.fetchItemByQuery(query.toString())
+    var query = CqlQuery.exactMatch("barcode", barcode).and(exactMatchById(id), true).getQuery();
+    return inventoryItemStorageClient.findByQuery(query)
       .getResult()
       .stream()
       .findFirst()
@@ -62,11 +56,11 @@ public class ItemServiceImpl implements ItemService {
   }
 
   @Retryable(
-    retryFor = InventoryItemNotFound.class,
-    maxAttemptsExpression = "#{@itemRetryConfiguration.maxRetries}",
-    backoff = @Backoff(delayExpression = "#{@itemRetryConfiguration.delayMilliseconds}"))
+    includes = { InventoryItemNotFound.class },
+    maxRetriesString = "#{@itemRetryConfiguration.maxRetries}",
+    delayString = "#{@itemRetryConfiguration.delayMilliseconds}")
   public InventoryItem findItemByIdAfterCheckIn(String id, String expectedServicePointId) {
-    var foundItems = inventoryItemStorageClient.fetchItemByQuery(exactMatchById(id));
+    var foundItems = inventoryItemStorageClient.findByQuery(exactMatchById(id).getQuery());
     return Optional.ofNullable(foundItems)
       .map(ResultList::getResult)
       .filter(CollectionUtils::isNotEmpty)

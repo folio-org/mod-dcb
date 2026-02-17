@@ -5,9 +5,9 @@
     "queryParameters": {
       "query": {
         "or": [
-          { "equalTo": "(name==\"Location-3\" AND code==\"LOC-3\")" },
-          { "equalTo": "(name==\"Location-5\" AND code==\"LOC-5\")" },
-          { "equalTo": "(name==\"Location-7\" AND code==\"LOC-7\")" }
+          { "equalTo": "name==\"Location-3\" and code==\"LOC-3\"" },
+          { "equalTo": "name==\"Location-5\" and code==\"LOC-5\"" },
+          { "equalTo": "name==\"Location-7\" and code==\"LOC-7\"" }
         ]
       }
     },

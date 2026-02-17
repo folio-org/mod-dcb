@@ -1,9 +1,8 @@
 package org.folio.dcb.service.impl;
 
-import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.folio.dcb.client.feign.CirculationClient;
+import org.folio.dcb.integration.circulation.CirculationClient;
 import org.folio.dcb.domain.dto.CheckInRequest;
 import org.folio.dcb.domain.dto.CheckOutRequest;
 import org.folio.dcb.domain.dto.CirculationRequest;
@@ -13,6 +12,7 @@ import org.folio.dcb.service.CirculationService;
 import org.folio.dcb.service.CirculationRequestService;
 import org.springframework.stereotype.Service;
 import java.time.OffsetDateTime;
+import org.springframework.web.client.HttpClientErrorException;
 
 @Service
 @Log4j2
@@ -50,7 +50,7 @@ public class CirculationServiceImpl implements CirculationService {
           request.setIsDcbReRequestCancellation(true);
         }
         circulationClient.updateRequest(request.getId(), request);
-      } catch (FeignException e) {
+      } catch (HttpClientErrorException e) {
         log.warn("cancelRequest:: error cancelling request using request id {} ", dcbTransaction.getRequestId(), e);
         throw new CirculationRequestException(String.format("Error cancelling request using request id %s", dcbTransaction.getRequestId()));
       }

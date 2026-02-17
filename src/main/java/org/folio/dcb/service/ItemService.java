@@ -19,6 +19,7 @@ public interface ItemService {
    * @return InventoryItem
    */
   ResultList<InventoryItem> fetchItemByBarcode(String itemBarcode);
+
   /**
    * Get item details of an inventory by item id and Barcode
    * @param itemBarcode - barcode of an item

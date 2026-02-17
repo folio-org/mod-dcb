@@ -1,5 +1,6 @@
 package org.folio.dcb.utils;
 
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -12,7 +13,7 @@ public class BeanUtil implements ApplicationContextAware {
   private ApplicationContext context;
 
   @Override
-  public void setApplicationContext(ApplicationContext applicationContext) {
+  public void setApplicationContext(@NonNull ApplicationContext applicationContext) {
     this.context = applicationContext;
   }
 

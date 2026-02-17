@@ -9,8 +9,8 @@ import static org.folio.dcb.utils.DCBConstants.NAME;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.folio.dcb.client.feign.InstanceTypeClient;
-import org.folio.dcb.client.feign.InstanceTypeClient.InstanceType;
+import org.folio.dcb.integration.invstorage.InstanceTypeClient;
+import org.folio.dcb.integration.invstorage.model.InstanceType;
 import org.springframework.stereotype.Service;
 
 @Log4j2
@@ -22,7 +22,8 @@ public class DcbInstanceTypeService implements DcbEntityService<InstanceType> {
 
   @Override
   public Optional<InstanceType> findDcbEntity() {
-    var instancesByQuery = instanceTypeClient.findByQuery(exactMatchByName(NAME));
+    var query = exactMatchByName(NAME).getQuery();
+    var instancesByQuery = instanceTypeClient.findByQuery(query);
     return findFirstValue(instancesByQuery);
   }
 

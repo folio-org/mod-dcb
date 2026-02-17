@@ -1,6 +1,6 @@
 package org.folio.dcb.service.impl;
 
-import static org.folio.dcb.client.feign.LocationsClient.LocationDTO;
+import org.folio.dcb.integration.invstorage.model.Location;
 import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.IN_TRANSIT;
 import static org.folio.dcb.utils.DCBConstants.CODE;
 import static org.folio.dcb.utils.DCBConstants.MATERIAL_TYPE_NAME_BOOK;
@@ -13,9 +13,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.folio.dcb.client.feign.CirculationItemClient;
-import org.folio.dcb.client.feign.LocationUnitClient;
-import org.folio.dcb.client.feign.LocationsClient;
+import org.folio.dcb.integration.circitem.CirculationItemClient;
+import org.folio.dcb.integration.invstorage.LocationUnitClient;
+import org.folio.dcb.integration.invstorage.LocationsClient;
 import org.folio.dcb.config.DcbFeatureProperties;
 import org.folio.dcb.domain.dto.CirculationItem;
 import org.folio.dcb.domain.dto.DcbItem;
@@ -63,7 +63,8 @@ public class CirculationItemServiceImpl implements CirculationItemService {
   }
 
   private CirculationItem fetchCirculationItemByBarcode(String barcode) {
-    return circulationItemClient.fetchItemByCqlQuery(CqlQuery.exactMatch("barcode", barcode))
+    var query = CqlQuery.exactMatch("barcode", barcode).getQuery();
+    return circulationItemClient.fetchItemByCqlQuery(query)
       .getItems()
       .stream()
       .findFirst()
@@ -109,7 +110,7 @@ public class CirculationItemServiceImpl implements CirculationItemService {
     }
 
     log.debug("tryFetchLocationIdByLocationCode:: Fetching shadow location id by location code: {}", locationCode);
-    var query = CqlQuery.exactMatch("code", locationCode);
+    var query = CqlQuery.exactMatchByCode(locationCode).getQuery();
     var locationDTOResult = locationsClient.findLocationByQuery(query, true, 1, 0);
     if(locationDTOResult.getResult().isEmpty()) {
       log.debug("tryFetchLocationIdByLocationCode:: No shadow location found for code: {}.", locationCode);
@@ -137,7 +138,7 @@ public class CirculationItemServiceImpl implements CirculationItemService {
 
   private Optional<String> findLibraryLocationId(String lendingLibraryCode) {
     log.debug("findLibraryLocationId:: Fetching library by code: {}.", lendingLibraryCode);
-    var libraryQuery = CqlQuery.exactMatch("code", lendingLibraryCode);
+    var libraryQuery = CqlQuery.exactMatchByCode(lendingLibraryCode).getQuery();
     var librariesResultByQuery = locationUnitClient.findLibrariesByQuery(libraryQuery, true, 1, 0);
     var librariesByCode = librariesResultByQuery.getResult();
     if (CollectionUtils.isEmpty(librariesByCode)) {
@@ -151,7 +152,7 @@ public class CirculationItemServiceImpl implements CirculationItemService {
 
   private Optional<String> findLocationCodeByLibraryId(String libraryId) {
     log.debug("findLocationCodeByLibraryId:: Fetching location by lending library id: {}.", libraryId);
-    var libraryQuery = CqlQuery.exactMatch("libraryId", libraryId);
+    var libraryQuery = CqlQuery.exactMatch("libraryId", libraryId).getQuery();
     var locationsResultByQuery = locationsClient.findLocationByQuery(libraryQuery, true, 1, 0);
     var locationsByQuery = locationsResultByQuery.getResult();
     if (CollectionUtils.isEmpty(locationsByQuery)) {
@@ -159,7 +160,7 @@ public class CirculationItemServiceImpl implements CirculationItemService {
       return Optional.empty();
     }
 
-    return Optional.ofNullable(locationsByQuery.getFirst()).map(LocationDTO::getId);
+    return Optional.ofNullable(locationsByQuery.getFirst()).map(Location::getId);
   }
 
   private String getDefaultDcbLocationId() {

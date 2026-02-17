@@ -7,8 +7,8 @@ import static org.folio.dcb.utils.DCBConstants.LOAN_TYPE_ID;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.folio.dcb.client.feign.LoanTypeClient;
-import org.folio.dcb.client.feign.LoanTypeClient.LoanType;
+import org.folio.dcb.integration.circstorage.LoanTypeClient;
+import org.folio.dcb.integration.circstorage.model.LoanType;
 import org.springframework.stereotype.Service;
 
 @Log4j2
@@ -20,7 +20,7 @@ public class DcbLoanTypeService implements DcbEntityService<LoanType> {
 
   @Override
   public Optional<LoanType> findDcbEntity() {
-    var cqlQuery = exactMatchByName(DCB_LOAN_TYPE_NAME);
+    var cqlQuery = exactMatchByName(DCB_LOAN_TYPE_NAME).getQuery();
     var librariesByQuery = loanTypeClient.findByQuery(cqlQuery);
     return findFirstValue(librariesByQuery);
   }

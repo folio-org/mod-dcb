@@ -12,15 +12,15 @@ import static org.folio.dcb.utils.DCBConstants.SERVICE_POINT_ID;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.folio.dcb.client.feign.LocationsClient;
-import org.folio.dcb.client.feign.LocationsClient.LocationDTO;
+import org.folio.dcb.integration.invstorage.LocationsClient;
+import org.folio.dcb.integration.invstorage.model.Location;
 import org.folio.dcb.utils.CqlQuery;
 import org.springframework.stereotype.Service;
 
 @Log4j2
 @Service
 @RequiredArgsConstructor
-public class DcbLocationService implements DcbEntityService<LocationDTO> {
+public class DcbLocationService implements DcbEntityService<Location> {
 
   private final LocationsClient locationsClient;
   private final DcbCampusService dcbCampusService;
@@ -29,13 +29,14 @@ public class DcbLocationService implements DcbEntityService<LocationDTO> {
   private final DcbServicePointService dcbServicePointService;
 
   @Override
-  public Optional<LocationDTO> findDcbEntity() {
-    var locationsByQuery = locationsClient.findByQuery(CqlQuery.exactMatchByName(NAME));
+  public Optional<Location> findDcbEntity() {
+    var query = CqlQuery.exactMatchByName(NAME).getQuery();
+    var locationsByQuery = locationsClient.findByQuery(query);
     return findFirstValue(locationsByQuery);
   }
 
   @Override
-  public LocationDTO createDcbEntity() {
+  public Location createDcbEntity() {
     var institutionId = dcbInstitutionService.findOrCreateEntity().getId();
     var campusId = dcbCampusService.findOrCreateEntity().getId();
     var libraryId = dcbLibraryService.findOrCreateEntity().getId();
@@ -44,11 +45,11 @@ public class DcbLocationService implements DcbEntityService<LocationDTO> {
   }
 
   @Override
-  public LocationDTO getDefaultValue() {
+  public Location getDefaultValue() {
     return getDcbLocation(LIBRARY_ID, CAMPUS_ID, INSTITUTION_ID, SERVICE_POINT_ID);
   }
 
-  private LocationDTO createLocation(String libraryId, String campusId,
+  private Location createLocation(String libraryId, String campusId,
     String institutionId, String servicePointId) {
     log.debug("createLocation:: creating a new DCB Location");
     var dcbLocation = getDcbLocation(libraryId, campusId, institutionId, servicePointId);
@@ -58,9 +59,9 @@ public class DcbLocationService implements DcbEntityService<LocationDTO> {
     return createdLocation;
   }
 
-  private static LocationDTO getDcbLocation(String libraryId, String campusId,
+  private static Location getDcbLocation(String libraryId, String campusId,
     String institutionId, String servicePointId) {
-    return LocationDTO.builder()
+    return Location.builder()
       .id(LOCATION_ID)
       .campusId(campusId)
       .libraryId(libraryId)

@@ -3,10 +3,10 @@ package org.folio.dcb.service.entities;
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.folio.dcb.client.feign.CancellationReasonClient.CancellationReason;
-import org.folio.dcb.client.feign.HoldingsStorageClient.Holding;
-import org.folio.dcb.client.feign.LoanTypeClient.LoanType;
-import org.folio.dcb.client.feign.LocationsClient.LocationDTO;
+import org.folio.dcb.integration.circstorage.CancellationReasonClient.CancellationReason;
+import org.folio.dcb.integration.invstorage.model.InventoryHolding;
+import org.folio.dcb.integration.circstorage.model.LoanType;
+import org.folio.dcb.integration.invstorage.model.Location;
 import org.folio.dcb.config.DcbFeatureProperties;
 import org.folio.dcb.domain.dto.ServicePointRequest;
 import org.springframework.stereotype.Service;
@@ -53,7 +53,7 @@ public class DcbEntityServiceFacade {
    *
    * @return the DCB holding entity
    */
-  public Holding findOrCreateHolding() {
+  public InventoryHolding findOrCreateHolding() {
     return getOrCreateEntity(
       dcbHoldingService::findOrCreateEntity,
       dcbHoldingService::getDefaultValue
@@ -65,7 +65,7 @@ public class DcbEntityServiceFacade {
    *
    * @return the DCB location DTO
    */
-  public LocationDTO findOrCreateLocation() {
+  public Location findOrCreateLocation() {
     return getOrCreateEntity(
       dcbLocationService::findOrCreateEntity,
       dcbLocationService::getDefaultValue

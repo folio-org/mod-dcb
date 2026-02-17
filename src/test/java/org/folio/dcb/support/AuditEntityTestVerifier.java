@@ -5,14 +5,14 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
-import lombok.RequiredArgsConstructor;
 import org.folio.dcb.domain.entity.TransactionAuditEntity;
 import org.folio.dcb.repository.TransactionAuditRepository;
 import org.folio.spring.FolioModuleMetadata;
 import org.folio.spring.scope.FolioExecutionContextSetter;
+import org.springframework.http.HttpHeaders;
 
-@RequiredArgsConstructor
 public class AuditEntityTestVerifier {
 
   private static final String TRANSACTION_AUDIT_DUPLICATE_ERROR_ACTION = "DUPLICATE_ERROR";
@@ -21,6 +21,14 @@ public class AuditEntityTestVerifier {
   private final Map<String, Collection<String>> headers;
   private final FolioModuleMetadata folioModuleMetadata;
   private final TransactionAuditRepository repository;
+
+  public AuditEntityTestVerifier(HttpHeaders headers, FolioModuleMetadata folioModuleMetadata,
+    TransactionAuditRepository repository) {
+    this.headers = new HashMap<>();
+    headers.forEach(this.headers::put);
+    this.folioModuleMetadata = folioModuleMetadata;
+    this.repository = repository;
+  }
 
   public void assertThatLatestEntityIsNotDuplicate(String id) {
     try (var ignored = new FolioExecutionContextSetter(folioModuleMetadata, headers)) {

@@ -1,7 +1,6 @@
 package org.folio.dcb.service;
 
-import feign.FeignException;
-import org.folio.dcb.client.feign.HoldingsStorageClient;
+import org.folio.dcb.integration.invstorage.HoldingsStorageClient;
 import org.folio.dcb.service.impl.HoldingsServiceImpl;
 import org.folio.spring.exception.NotFoundException;
 import org.junit.jupiter.api.Test;
@@ -11,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.UUID;
+import org.springframework.web.client.HttpClientErrorException;
 
 import static org.folio.dcb.utils.EntityUtils.createInventoryHolding;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -41,7 +41,7 @@ class InventoryHoldingsServiceTest {
   @Test
   void fetchInventoryHoldingDetailsByInvalidIdTest() {
     var holdingId = UUID.randomUUID().toString();
-    doThrow(FeignException.NotFound.class).when(holdingsStorageClient).findHolding(holdingId);
+    doThrow(HttpClientErrorException.NotFound.class).when(holdingsStorageClient).findHolding(holdingId);
     assertThrows(NotFoundException.class, () -> holdingsService.fetchInventoryHoldingDetailsByHoldingId(holdingId));
   }
 

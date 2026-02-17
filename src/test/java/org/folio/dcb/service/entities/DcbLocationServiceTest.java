@@ -9,9 +9,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import org.folio.dcb.client.feign.LocationUnitClient.LocationUnit;
-import org.folio.dcb.client.feign.LocationsClient;
-import org.folio.dcb.client.feign.LocationsClient.LocationDTO;
+import org.folio.dcb.integration.invstorage.model.LocationUnit;
+import org.folio.dcb.integration.invstorage.LocationsClient;
+import org.folio.dcb.integration.invstorage.model.Location;
 import org.folio.dcb.domain.ResultList;
 import org.folio.dcb.domain.dto.ServicePointRequest;
 import org.junit.jupiter.api.AfterEach;
@@ -48,7 +48,7 @@ class DcbLocationServiceTest {
   @Test
   void findDcbEntity_positive_shouldReturnLocationWhenExists() {
     var foundLocations = ResultList.asSinglePage(dcbLocation());
-    var expectedQuery = exactMatchByName(TEST_NAME);
+    var expectedQuery = exactMatchByName(TEST_NAME).getQuery();
     when(locationsClient.findByQuery(expectedQuery)).thenReturn(foundLocations);
 
     var result = dcbLocationService.findDcbEntity();
@@ -58,7 +58,7 @@ class DcbLocationServiceTest {
 
   @Test
   void findDcbEntity_positive_shouldReturnEmptyWhenNotExists() {
-    var expectedQuery = exactMatchByName(TEST_NAME);
+    var expectedQuery = exactMatchByName(TEST_NAME).getQuery();
     when(locationsClient.findByQuery(expectedQuery)).thenReturn(ResultList.empty());
 
     var result = dcbLocationService.findDcbEntity();
@@ -92,7 +92,7 @@ class DcbLocationServiceTest {
 
   @Test
   void findOrCreateEntity_positive_shouldReturnExistingLocation() {
-    var expectedQuery = exactMatchByName(TEST_NAME);
+    var expectedQuery = exactMatchByName(TEST_NAME).getQuery();
     var locationsResult = ResultList.asSinglePage(dcbLocation());
     when(locationsClient.findByQuery(expectedQuery)).thenReturn(locationsResult);
 
@@ -104,8 +104,8 @@ class DcbLocationServiceTest {
     verify(locationsClient, never()).createLocation(any());
   }
 
-  private static LocationDTO dcbLocation() {
-    return LocationDTO.builder()
+  private static Location dcbLocation() {
+    return Location.builder()
       .id(TEST_LOCATION_ID)
       .institutionId(TEST_INSTITUTION_ID)
       .campusId(TEST_CAMPUS_ID)

@@ -1,6 +1,6 @@
 package org.folio.dcb.service;
 
-import org.folio.dcb.client.feign.UsersClient;
+import org.folio.dcb.integration.users.UsersClient;
 import org.folio.dcb.domain.dto.Personal;
 import org.folio.dcb.domain.dto.User;
 import org.folio.dcb.domain.dto.UserCollection;

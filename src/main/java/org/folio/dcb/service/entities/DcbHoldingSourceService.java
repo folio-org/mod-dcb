@@ -8,8 +8,8 @@ import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.folio.dcb.client.feign.HoldingSourcesClient;
-import org.folio.dcb.client.feign.HoldingSourcesClient.HoldingSource;
+import org.folio.dcb.integration.invstorage.HoldingSourcesClient;
+import org.folio.dcb.integration.invstorage.model.HoldingSource;
 import org.springframework.stereotype.Service;
 
 @Log4j2
@@ -21,7 +21,7 @@ public class DcbHoldingSourceService implements DcbEntityService<HoldingSource> 
 
   @Override
   public Optional<HoldingSource> findDcbEntity() {
-    var query = exactMatchByName(SOURCE);
+    var query = exactMatchByName(SOURCE).getQuery();
     var holdingSourcesClientByQuery = holdingSourcesClient.findByQuery(query);
     return findFirstValue(holdingSourcesClientByQuery);
   }

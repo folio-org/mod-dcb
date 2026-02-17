@@ -10,7 +10,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.UUID;
 
-import org.folio.dcb.client.feign.CirculationClient;
+import org.folio.dcb.integration.circulation.CirculationClient;
 import org.folio.dcb.domain.dto.CirculationRequest;
 import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.exception.CirculationRequestException;
@@ -20,8 +20,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import feign.FeignException;
+import org.springframework.web.client.HttpClientErrorException;
 
 @ExtendWith(MockitoExtension.class)
 class CirculationServiceTest {
@@ -69,7 +68,7 @@ class CirculationServiceTest {
   void shouldThrowExceptionWhenRequestIsNotUpdated() {
     TransactionEntity transactionEntity = createTransactionEntity();
     when(circulationRequestService.getCancellationRequestIfOpenOrNull(anyString())).thenReturn(createCirculationRequest());
-    when(circulationClient.updateRequest(anyString(), any())).thenThrow(FeignException.BadRequest.class);
+    when(circulationClient.updateRequest(anyString(), any())).thenThrow(HttpClientErrorException.BadRequest.class);
     assertThrows(CirculationRequestException.class, () -> {
       circulationService.cancelRequest(transactionEntity, false);
     });

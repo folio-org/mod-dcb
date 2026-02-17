@@ -10,8 +10,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.collections4.CollectionUtils;
-import org.folio.dcb.client.feign.CirculationClient;
-import org.folio.dcb.client.feign.CirculationLoanPolicyStorageClient;
+import org.folio.dcb.integration.circulation.CirculationClient;
+import org.folio.dcb.integration.circstorage.CirculationLoanPolicyStorageClient;
 import org.folio.dcb.domain.ResultList;
 import org.folio.dcb.domain.dto.DcbItem;
 import org.folio.dcb.domain.dto.DcbTransaction;
@@ -53,7 +53,6 @@ import java.util.Optional;
 @Log4j2
 public class TransactionsServiceImpl implements TransactionsService {
 
-  private static final String CQL_AND = " AND ";
   private static final int UNLIMITED = -1;
   @Qualifier("lendingLibraryService")
   private final LibraryService lendingLibraryService;
@@ -132,14 +131,13 @@ public class TransactionsServiceImpl implements TransactionsService {
       if (loanCollection.getLoans().isEmpty()) {
         return Optional.empty();
       }
-      Loan firstLoan = loanCollection.getLoans().get(0);
+      Loan firstLoan = loanCollection.getLoans().getFirst();
       Integer loanRenewalCount =
               Integer.valueOf(Optional.ofNullable(firstLoan.getRenewalCount()).orElse("0"));
 
-      String loanPolicyIdQuery = "id==" + StringUtil.cqlEncode(firstLoan.getLoanPolicyId());
-      LoanPolicyCollection loanPolicyCollection =
-              circulationLoanPolicyStorageClient.fetchLoanPolicyByQuery(PercentCodec.encode(loanPolicyIdQuery).toString());
-      LoanPolicy firstLoanPolicy = loanPolicyCollection.getLoanPolicies().get(0);
+      String loanPolicyIdQuery = CqlQuery.exactMatchById(firstLoan.getLoanPolicyId()).getQuery();
+      LoanPolicyCollection loanPolicyCollection = circulationLoanPolicyStorageClient.findByQuery(loanPolicyIdQuery);
+      LoanPolicy firstLoanPolicy = loanPolicyCollection.getLoanPolicies().getFirst();
       Boolean renewable = firstLoanPolicy.getRenewable();
 
       if (Boolean.FALSE.equals(firstLoanPolicy.getRenewable())) {
@@ -164,11 +162,11 @@ public class TransactionsServiceImpl implements TransactionsService {
   }
 
   private static String buildLoanQuery(TransactionEntity transactionEntity) {
-    String itemId = "itemId==" + StringUtil.cqlEncode(transactionEntity.getItemId());
-    String statusOpen = "status.name==" + StringUtil.cqlEncode("OPEN");
-    String isDCB = "isDcb==" + StringUtil.cqlEncode("true");
-    String userId = "userId==" + StringUtil.cqlEncode(transactionEntity.getPatronId());
-    return PercentCodec.encode(itemId + CQL_AND + statusOpen + CQL_AND + isDCB + CQL_AND + userId).toString();
+    return CqlQuery.exactMatch("itemId", transactionEntity.getItemId())
+      .and(CqlQuery.exactMatch("status.name", "OPEN"), true)
+      .and(CqlQuery.exactMatch("isDcb", "true"), true)
+      .and(CqlQuery.exactMatch("userId", transactionEntity.getPatronId()), true)
+      .getQuery();
   }
 
   private record LoanRenewalDetails(Integer loanRenewalCount, Integer renewalMaxCount, Boolean renewable) {}
@@ -202,7 +200,7 @@ public class TransactionsServiceImpl implements TransactionsService {
     var renewalResponse = circulationClient.renewById(buildRenewRequest(itemId, patronId));
     log.debug("renewLoanByTransactionId:: Renew response {}", renewalResponse);
     validateRenewalResponse(dcbTransactionId, renewalResponse, itemId);
-    var loanPolicy = circulationLoanPolicyStorageClient.fetchLoanPolicyById(
+    var loanPolicy = circulationLoanPolicyStorageClient.getById(
       renewalResponse.getLoanPolicyId());
     log.info("renewLoanByTransactionId:: Loan policy response {}", loanPolicy);
     validateLoanPolicy(renewalResponse.getLoanPolicyId(), loanPolicy);
@@ -326,7 +324,7 @@ public class TransactionsServiceImpl implements TransactionsService {
       return Optional.empty();
     }
 
-    var cqlQuery = CqlQuery.createForOpenHoldRequests(transactionEntity.getItemId());
+    var cqlQuery = CqlQuery.openHoldRequestsQuery(transactionEntity.getItemId()).getQuery();
     var circulationRequests = circulationClient.findByQuery(cqlQuery, 0);
     return Optional.ofNullable(circulationRequests).map(ResultList::getTotalRecords);
   }

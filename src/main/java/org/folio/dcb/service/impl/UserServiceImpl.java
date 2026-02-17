@@ -3,7 +3,7 @@ package org.folio.dcb.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.ObjectUtils;
-import org.folio.dcb.client.feign.UsersClient;
+import org.folio.dcb.integration.users.UsersClient;
 import org.folio.dcb.domain.DcbPersonal;
 import org.folio.dcb.domain.dto.DcbPatron;
 import org.folio.dcb.domain.dto.Personal;

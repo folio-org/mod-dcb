@@ -8,9 +8,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import org.folio.dcb.client.feign.InstanceClient;
-import org.folio.dcb.client.feign.InstanceClient.InventoryInstanceDTO;
-import org.folio.dcb.client.feign.InstanceTypeClient.InstanceType;
+import org.folio.dcb.integration.inventory.InstanceClient;
+import org.folio.dcb.integration.inventory.model.InventoryInstance;
+import org.folio.dcb.integration.invstorage.model.InstanceType;
 import org.folio.dcb.domain.ResultList;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -39,7 +39,7 @@ class DcbInstanceServiceTest {
   @Test
   void findDcbEntity_positive_shouldReturnInstanceWhenExists() {
     var foundInstances = ResultList.asSinglePage(dcbInstance());
-    var expectedQuery = exactMatchById(TEST_INSTANCE_ID);
+    var expectedQuery = exactMatchById(TEST_INSTANCE_ID).getQuery();
     when(instanceClient.findByQuery(expectedQuery)).thenReturn(foundInstances);
 
     var result = dcbInstanceService.findDcbEntity();
@@ -49,7 +49,7 @@ class DcbInstanceServiceTest {
 
   @Test
   void findDcbEntity_positive_shouldReturnEmptyWhenNotExists() {
-    var expectedQuery = exactMatchById(TEST_INSTANCE_ID);
+    var expectedQuery = exactMatchById(TEST_INSTANCE_ID).getQuery();
     when(instanceClient.findByQuery(expectedQuery)).thenReturn(ResultList.empty());
 
     var result = dcbInstanceService.findDcbEntity();
@@ -67,7 +67,7 @@ class DcbInstanceServiceTest {
 
     assertThat(result).isEqualTo(dcbInstance());
     verify(dcbInstanceTypeService).findOrCreateEntity();
-    verify(instanceClient).createInstance(any(InventoryInstanceDTO.class));
+    verify(instanceClient).createInstance(any(InventoryInstance.class));
   }
 
   @Test
@@ -79,7 +79,7 @@ class DcbInstanceServiceTest {
 
   @Test
   void findOrCreateEntity_positive_shouldReturnExistingInstance() {
-    var expectedQuery = exactMatchById(TEST_INSTANCE_ID);
+    var expectedQuery = exactMatchById(TEST_INSTANCE_ID).getQuery();
     var instancesResult = ResultList.asSinglePage(dcbInstance());
     when(instanceClient.findByQuery(expectedQuery)).thenReturn(instancesResult);
 
@@ -90,8 +90,8 @@ class DcbInstanceServiceTest {
     verify(instanceClient, never()).createInstance(any());
   }
 
-  private static InventoryInstanceDTO dcbInstance() {
-    return InventoryInstanceDTO.builder()
+  private static InventoryInstance dcbInstance() {
+    return InventoryInstance.builder()
       .id(TEST_INSTANCE_ID)
       .instanceTypeId(TEST_INSTANCE_TYPE_ID)
       .title(TEST_INSTANCE_TITLE)

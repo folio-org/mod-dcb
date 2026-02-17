@@ -1,6 +1,6 @@
 package org.folio.dcb.service;
 
-import org.folio.dcb.client.feign.GroupClient;
+import org.folio.dcb.integration.users.GroupClient;
 import org.folio.dcb.service.impl.PatronGroupServiceImpl;
 import org.folio.spring.exception.NotFoundException;
 import org.junit.jupiter.api.Test;

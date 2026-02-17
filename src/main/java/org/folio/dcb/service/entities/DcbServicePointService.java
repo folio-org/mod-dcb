@@ -10,7 +10,7 @@ import static org.folio.dcb.utils.DCBConstants.SERVICE_POINT_ID;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.folio.dcb.client.feign.InventoryServicePointClient;
+import org.folio.dcb.integration.invstorage.ServicePointClient;
 import org.folio.dcb.domain.dto.HoldShelfExpiryPeriod;
 import org.folio.dcb.domain.dto.ServicePointRequest;
 import org.folio.dcb.service.ServicePointExpirationPeriodService;
@@ -21,12 +21,12 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class DcbServicePointService implements DcbEntityService<ServicePointRequest> {
 
-  private final InventoryServicePointClient servicePointClient;
+  private final ServicePointClient servicePointClient;
   private final ServicePointExpirationPeriodService servicePointExpirationPeriodService;
 
   @Override
   public Optional<ServicePointRequest> findDcbEntity() {
-    var servicePointsByQuery = servicePointClient.findByQuery(exactMatchByName(NAME));
+    var servicePointsByQuery = servicePointClient.findByQuery(exactMatchByName(NAME).getQuery());
     return findFirstValue(servicePointsByQuery);
   }
 

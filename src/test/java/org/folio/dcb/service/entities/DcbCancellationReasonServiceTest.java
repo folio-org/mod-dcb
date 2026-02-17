@@ -8,8 +8,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import org.folio.dcb.client.feign.CancellationReasonClient;
-import org.folio.dcb.client.feign.CancellationReasonClient.CancellationReason;
+import org.folio.dcb.integration.circstorage.CancellationReasonClient;
+import org.folio.dcb.integration.circstorage.CancellationReasonClient.CancellationReason;
 import org.folio.dcb.domain.ResultList;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -35,7 +35,7 @@ class DcbCancellationReasonServiceTest {
   @Test
   void findDcbEntity_positive_shouldReturnCancellationReasonWhenExists() {
     var foundReasons = ResultList.asSinglePage(dcbCancellationReason());
-    var expectedQuery = exactMatchById(TEST_CANCELLATION_REASON_ID);
+    var expectedQuery = exactMatchById(TEST_CANCELLATION_REASON_ID).getQuery();
     when(cancellationReasonClient.findByQuery(expectedQuery)).thenReturn(foundReasons);
 
     var result = dcbCancellationReasonService.findDcbEntity();
@@ -45,7 +45,7 @@ class DcbCancellationReasonServiceTest {
 
   @Test
   void findDcbEntity_positive_shouldReturnEmptyWhenNotExists() {
-    var expectedQuery = exactMatchById(TEST_CANCELLATION_REASON_ID);
+    var expectedQuery = exactMatchById(TEST_CANCELLATION_REASON_ID).getQuery();
     when(cancellationReasonClient.findByQuery(expectedQuery)).thenReturn(ResultList.empty());
     var result = dcbCancellationReasonService.findDcbEntity();
     assertThat(result).isEmpty();
@@ -67,7 +67,7 @@ class DcbCancellationReasonServiceTest {
 
   @Test
   void findOrCreateEntity_positive_shouldReturnExistingCancellationReason() {
-    var expectedQuery = exactMatchById(TEST_CANCELLATION_REASON_ID);
+    var expectedQuery = exactMatchById(TEST_CANCELLATION_REASON_ID).getQuery();
     var reasonsResult = ResultList.asSinglePage(dcbCancellationReason());
     when(cancellationReasonClient.findByQuery(expectedQuery)).thenReturn(reasonsResult);
 

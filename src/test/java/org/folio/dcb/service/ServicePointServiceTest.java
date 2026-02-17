@@ -12,7 +12,7 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.UUID;
 
-import org.folio.dcb.client.feign.InventoryServicePointClient;
+import org.folio.dcb.integration.invstorage.ServicePointClient;
 import org.folio.dcb.domain.ResultList;
 import org.folio.dcb.domain.dto.HoldShelfExpiryPeriod;
 import org.folio.dcb.domain.dto.IntervalIdEnum;
@@ -31,7 +31,7 @@ class ServicePointServiceTest {
   private ServicePointServiceImpl servicePointService;
 
   @Mock
-  private InventoryServicePointClient inventoryServicePointClient;
+  private ServicePointClient servicePointClient;
 
   @Mock
   private CalendarService calendarService;
@@ -41,14 +41,13 @@ class ServicePointServiceTest {
 
   @Test
   void createServicePointIfNotExistsTest() {
-    when(inventoryServicePointClient.getServicePointByName(any()))
-      .thenReturn(ResultList.of(0, List.of()));
-    when(inventoryServicePointClient.createServicePoint(any()))
+    when(servicePointClient.findByQuery(any())).thenReturn(ResultList.of(0, List.of()));
+    when(servicePointClient.createServicePoint(any()))
       .thenReturn(createServicePointRequest());
     when(servicePointExpirationPeriodService.getShelfExpiryPeriod()).thenReturn(DCBConstants.DEFAULT_PERIOD);
     var response = servicePointService.createServicePointIfNotExists(createDcbPickup());
-    verify(inventoryServicePointClient).createServicePoint(any());
-    verify(inventoryServicePointClient).getServicePointByName(any());
+    verify(servicePointClient).createServicePoint(any());
+    verify(servicePointClient).findByQuery(any());
     verify(calendarService).addServicePointIdToDefaultCalendar(UUID.fromString(response.getId()));
     verify(calendarService, never()).associateServicePointIdWithDefaultCalendarIfAbsent(any());
   }
@@ -58,8 +57,7 @@ class ServicePointServiceTest {
     var servicePointRequest = createServicePointRequest();
     var servicePointId = UUID.randomUUID().toString();
     servicePointRequest.setId(servicePointId);
-    when(inventoryServicePointClient.getServicePointByName(any()))
-      .thenReturn(ResultList.of(0, List.of(servicePointRequest)));
+    when(servicePointClient.findByQuery(any())).thenReturn(ResultList.of(0, List.of(servicePointRequest)));
     when(servicePointExpirationPeriodService.getShelfExpiryPeriod()).thenReturn(
       HoldShelfExpiryPeriod.builder()
         .duration(2)
@@ -70,8 +68,8 @@ class ServicePointServiceTest {
     assertEquals(servicePointId, response.getId());
     assertEquals(2, response.getHoldShelfExpiryPeriod().getDuration());
     assertEquals(IntervalIdEnum.MONTHS, response.getHoldShelfExpiryPeriod().getIntervalId());
-    verify(inventoryServicePointClient, times(1)).updateServicePointById(any(), any());
-    verify(inventoryServicePointClient).getServicePointByName(any());
+    verify(servicePointClient, times(1)).updateServicePointById(any(), any());
+    verify(servicePointClient).findByQuery(any());
     verify(calendarService).associateServicePointIdWithDefaultCalendarIfAbsent(
       UUID.fromString(response.getId()));
     verify(calendarService, never()).addServicePointIdToDefaultCalendar(any());

@@ -2,7 +2,7 @@ package org.folio.dcb.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.folio.dcb.client.feign.CalendarClient;
+import org.folio.dcb.integration.calendar.CalendarClient;
 import org.folio.dcb.domain.dto.Calendar;
 import org.folio.dcb.service.CalendarService;
 import org.springframework.stereotype.Service;

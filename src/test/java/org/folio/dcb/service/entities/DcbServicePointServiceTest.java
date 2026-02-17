@@ -9,7 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import org.folio.dcb.client.feign.InventoryServicePointClient;
+import org.folio.dcb.integration.invstorage.ServicePointClient;
 import org.folio.dcb.domain.ResultList;
 import org.folio.dcb.domain.dto.HoldShelfExpiryPeriod;
 import org.folio.dcb.domain.dto.IntervalIdEnum;
@@ -30,7 +30,7 @@ class DcbServicePointServiceTest {
   private static final String TEST_CODE = "000";
 
   @InjectMocks private DcbServicePointService dcbServicePointService;
-  @Mock private InventoryServicePointClient servicePointClient;
+  @Mock private ServicePointClient servicePointClient;
   @Mock private ServicePointExpirationPeriodService servicePointExpirationPeriodService;
 
   @AfterEach
@@ -41,7 +41,7 @@ class DcbServicePointServiceTest {
   @Test
   void findDcbEntity_positive_shouldReturnServicePointWhenExists() {
     var foundServicePoints = ResultList.asSinglePage(dcbServicePoint());
-    var expectedQuery = exactMatchByName(TEST_NAME);
+    var expectedQuery = exactMatchByName(TEST_NAME).getQuery();
     when(servicePointClient.findByQuery(expectedQuery)).thenReturn(foundServicePoints);
 
     var result = dcbServicePointService.findDcbEntity();
@@ -51,7 +51,7 @@ class DcbServicePointServiceTest {
 
   @Test
   void findDcbEntity_positive_shouldReturnEmptyWhenNotExists() {
-    var expectedQuery = exactMatchByName(TEST_NAME);
+    var expectedQuery = exactMatchByName(TEST_NAME).getQuery();
     when(servicePointClient.findByQuery(expectedQuery)).thenReturn(ResultList.empty());
     var result = dcbServicePointService.findDcbEntity();
     assertThat(result).isEmpty();
@@ -80,7 +80,7 @@ class DcbServicePointServiceTest {
 
   @Test
   void findOrCreateEntity_positive_shouldReturnExistingServicePoint() {
-    var expectedQuery = exactMatchByName(TEST_NAME);
+    var expectedQuery = exactMatchByName(TEST_NAME).getQuery();
     var servicePointsResult = ResultList.asSinglePage(dcbServicePoint());
     when(servicePointClient.findByQuery(expectedQuery)).thenReturn(servicePointsResult);
 

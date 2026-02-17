@@ -8,7 +8,7 @@ import static org.folio.dcb.utils.DCBConstants.holdItemStatus;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.folio.dcb.client.feign.CirculationClient;
+import org.folio.dcb.integration.circulation.CirculationClient;
 import org.folio.dcb.domain.dto.CirculationRequest;
 import org.folio.dcb.domain.dto.DcbItem;
 import org.folio.dcb.domain.dto.Item;

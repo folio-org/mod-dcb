@@ -6,9 +6,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import org.folio.dcb.client.feign.HoldingsStorageClient.Holding;
-import org.folio.dcb.client.feign.LoanTypeClient.LoanType;
-import org.folio.dcb.client.feign.LocationsClient.LocationDTO;
+import org.folio.dcb.integration.invstorage.model.InventoryHolding;
+import org.folio.dcb.integration.circstorage.model.LoanType;
+import org.folio.dcb.integration.invstorage.model.Location;
 import org.folio.dcb.config.DcbFeatureProperties;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -127,14 +127,14 @@ class DcbEntityServiceFacadeTest {
     verify(dcbLoanTypeService).getDefaultValue();
   }
 
-  private static Holding dcbHolding() {
-    return Holding.builder()
+  private static InventoryHolding dcbHolding() {
+    return InventoryHolding.builder()
       .id(TEST_HOLDING_ID)
       .build();
   }
 
-  private static LocationDTO dcbLocation() {
-    return LocationDTO.builder()
+  private static Location dcbLocation() {
+    return Location.builder()
       .id(TEST_LOCATION_ID)
       .build();
   }

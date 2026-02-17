@@ -6,8 +6,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.UUID;
-import org.folio.dcb.client.feign.CirculationClient;
-import org.folio.dcb.client.feign.HoldingsStorageClient;
+import org.folio.dcb.integration.circulation.CirculationClient;
+import org.folio.dcb.integration.invstorage.model.InventoryHolding;
 import org.folio.dcb.domain.dto.CirculationRequest;
 import org.folio.dcb.domain.dto.DcbItem;
 import org.folio.dcb.domain.dto.User;
@@ -35,7 +35,7 @@ class RequestServiceImplTest {
     var item = DcbItem.builder().title ("title").id(randomUuid).build();
     var pickupServicePointId = "pickupPointId";
 
-    var dcbHolding = HoldingsStorageClient.Holding.builder().id(randomUuid).build();
+    var dcbHolding = InventoryHolding.builder().id(randomUuid).build();
     when(dcbEntityServiceFacade.findOrCreateHolding()).thenReturn(dcbHolding);
 
     var expectedRequest = CirculationRequest.builder().id("requestId").build();
