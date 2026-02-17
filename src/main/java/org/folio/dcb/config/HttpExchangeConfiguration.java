@@ -1,6 +1,5 @@
 package org.folio.dcb.config;
 
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dcb.integration.calendar.CalendarClient;
 import org.folio.dcb.integration.inventory.InstanceClient;
@@ -20,58 +19,13 @@ import org.folio.dcb.integration.circstorage.CirculationLoanPolicyStorageClient;
 import org.folio.dcb.integration.circstorage.CirculationRequestClient;
 import org.folio.dcb.integration.circitem.CirculationItemClient;
 import org.folio.dcb.integration.circstorage.LoanTypeClient;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
-import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
-import org.springframework.web.client.RestClient;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
-import tools.jackson.databind.DeserializationFeature;
-import tools.jackson.databind.json.JsonMapper;
 
-/**
- * Configuration class for HTTP exchange clients.
- * This class configures various REST clients for integration with FOLIO modules
- * such as calendar, inventory, users, circulation, etc., using Spring's HttpServiceProxyFactory.
- */
 @Log4j2
 @Configuration
 public class HttpExchangeConfiguration {
-
-  /**
-   * Creates a JsonMapper bean configured for HTTP exchanges.
-   * The mapper includes non-null values, disables failure on unknown properties,
-   * disables failure on null for primitives, and enables accepting single value as array.
-   *
-   * @return the configured JsonMapper instance
-   */
-  @Bean
-  public JsonMapper exchangeJsonMapper() {
-    return JsonMapper.builder()
-      .changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(Include.NON_NULL))
-      .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-      .disable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
-      .enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
-      .build();
-  }
-
-  /**
-   * Creates a primary RestClient.Builder bean for DCB.
-   * Configures the builder with a custom JacksonJsonHttpMessageConverter using the exchange JsonMapper.
-   *
-   * @param restClientBuilder the base RestClient.Builder
-   * @param mapper the JsonMapper to use for JSON conversion
-   * @return the configured RestClient.Builder instance
-   */
-  @Bean
-  @Primary
-  public RestClient.Builder dcbRestClientBuilder(RestClient.Builder restClientBuilder,
-    @Qualifier("exchangeJsonMapper") JsonMapper mapper) {
-    restClientBuilder.configureMessageConverters(configurer ->
-      configurer.addCustomConverter(new JacksonJsonHttpMessageConverter(mapper)));
-    return restClientBuilder;
-  }
 
   /**
    * Creates a {@link CalendarClient} bean.
