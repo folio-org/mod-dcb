@@ -67,7 +67,7 @@ public class HttpExchangeConfiguration {
    * @return the {@link UsersClient} instance
    */
   @Bean
-  public UsersClient usersClient(HttpServiceProxyFactory factory) {
+  public UsersClient dcbUsersClient(HttpServiceProxyFactory factory) {
     return factory.createClient(UsersClient.class);
   }
 
