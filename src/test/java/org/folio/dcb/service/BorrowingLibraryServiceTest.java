@@ -84,7 +84,7 @@ class BorrowingLibraryServiceTest {
     var servicePointRequest = createServicePointRequest();
     var dcbTransaction = createDcbTransactionByRole(BORROWER);
     servicePointRequest.setId(UUID.randomUUID().toString());
-    when(servicePointService.createServicePointIfNotExists(createDcbPickup())).thenReturn(servicePointRequest);
+    when(servicePointService.createServicePointIfNotExists(dcbTransaction)).thenReturn(servicePointRequest);
     borrowingLibraryService.createCirculation(DCB_TRANSACTION_ID, dcbTransaction);
     assertEquals(servicePointRequest.getId(), dcbTransaction.getPickup().getServicePointId());
     verify(baseLibraryService).createBorrowingLibraryTransaction(DCB_TRANSACTION_ID, dcbTransaction, servicePointRequest.getId());

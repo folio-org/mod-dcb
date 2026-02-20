@@ -13,6 +13,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
@@ -20,6 +21,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
+import org.folio.dcb.domain.dto.DcbTransaction.RoleEnum;
 import org.folio.dcb.domain.dto.ItemStatus;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.entity.TransactionEntity;
@@ -31,6 +33,7 @@ import org.folio.spring.integration.XOkapiHeaders;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -232,22 +235,24 @@ class CirculationRequestEventListenerTest extends BaseTenantIntegrationTest {
     assertEquals(TransactionStatus.StatusEnum.EXPIRED, savedValue.getStatus());
   }
 
-  @Test
-  void handleExpiredRequestEventForNonLenderRoleTest() {
+  @ParameterizedTest
+  @EnumSource(value = RoleEnum.class, names = {"LENDER"}, mode = EnumSource.Mode.EXCLUDE)
+  void handleExpiredRequestEventForNonLenderRoleTest(RoleEnum role) {
     var transactionEntity = createTransactionEntity();
+    transactionEntity.setRole(role);
     transactionEntity.setItemId("5b95877e-86c0-4cb7-a0cd-7660b348ae5d");
     transactionEntity.setStatus(TransactionStatus.StatusEnum.AWAITING_PICKUP);
-    transactionEntity.setRole(BORROWER);
-
-    var circulationItem = createCirculationItem();
-    circulationItem.setStatus(ItemStatus.builder().name(ItemStatus.NameEnum.IN_TRANSIT).build());
+    var transactionEntityCaptor = ArgumentCaptor.<TransactionEntity>captor();
 
     MessageHeaders messageHeaders = getMessageHeaders();
     when(transactionRepository.findTransactionByRequestIdAndStatusNotInClosed(any())).thenReturn(Optional.of(transactionEntity));
-    when(circulationItemService.fetchItemById(anyString())).thenReturn(circulationItem);
+    when(transactionRepository.save(transactionEntityCaptor.capture())).then(v -> v.getArgument(0));
     eventListener.handleRequestEvent(REQUEST_EXPIRED_EVENT_FOR_DCB_SAMPLE, messageHeaders);
 
-    Mockito.verify(transactionRepository, never()).save(any());
+    Mockito.verify(transactionRepository).save(any());
+    var savedValue = transactionEntityCaptor.getValue();
+    assertEquals(TransactionStatus.StatusEnum.EXPIRED, savedValue.getStatus());
+    verify(circulationItemService, never()).fetchItemById(anyString());
   }
 
   @Test

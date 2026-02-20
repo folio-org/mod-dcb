@@ -1,6 +1,7 @@
 package org.folio.dcb.service;
 
 import static org.folio.dcb.utils.EntityUtils.createDcbPickup;
+import static org.folio.dcb.utils.EntityUtils.createDcbTransactionByRole;
 import static org.folio.dcb.utils.EntityUtils.createServicePointRequest;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -12,6 +13,8 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.UUID;
 
+import org.folio.dcb.domain.dto.DcbTransaction;
+import org.folio.dcb.domain.dto.DcbTransaction.RoleEnum;
 import org.folio.dcb.integration.invstorage.ServicePointClient;
 import org.folio.dcb.domain.ResultList;
 import org.folio.dcb.domain.dto.HoldShelfExpiryPeriod;
@@ -27,25 +30,19 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class ServicePointServiceTest {
 
-  @InjectMocks
-  private ServicePointServiceImpl servicePointService;
+  private static final String SETTING_KEY = "lender.hold-shelf-expiry-period";
 
-  @Mock
-  private ServicePointClient servicePointClient;
-
-  @Mock
-  private CalendarService calendarService;
-
-  @Mock
-  private static ServicePointExpirationPeriodService servicePointExpirationPeriodService;
+  @InjectMocks private ServicePointServiceImpl servicePointService;
+  @Mock private ServicePointClient servicePointClient;
+  @Mock private CalendarService calendarService;
+  @Mock private static ServicePointExpirationPeriodService servicePointExpirationPeriodService;
 
   @Test
   void createServicePointIfNotExistsTest() {
-    when(servicePointClient.findByQuery(any())).thenReturn(ResultList.of(0, List.of()));
-    when(servicePointClient.createServicePoint(any()))
-      .thenReturn(createServicePointRequest());
-    when(servicePointExpirationPeriodService.getShelfExpiryPeriod()).thenReturn(DCBConstants.DEFAULT_PERIOD);
-    var response = servicePointService.createServicePointIfNotExists(createDcbPickup());
+    when(servicePointClient.findByQuery(any())).thenReturn(ResultList.empty());
+    when(servicePointClient.createServicePoint(any())).thenReturn(createServicePointRequest());
+    when(servicePointExpirationPeriodService.getShelfExpiryPeriod(SETTING_KEY)).thenReturn(DCBConstants.DEFAULT_PERIOD);
+    var response = servicePointService.createServicePointIfNotExists(createDcbTransactionByRole(RoleEnum.LENDER));
     verify(servicePointClient).createServicePoint(any());
     verify(servicePointClient).findByQuery(any());
     verify(calendarService).addServicePointIdToDefaultCalendar(UUID.fromString(response.getId()));
@@ -58,13 +55,13 @@ class ServicePointServiceTest {
     var servicePointId = UUID.randomUUID().toString();
     servicePointRequest.setId(servicePointId);
     when(servicePointClient.findByQuery(any())).thenReturn(ResultList.of(0, List.of(servicePointRequest)));
-    when(servicePointExpirationPeriodService.getShelfExpiryPeriod()).thenReturn(
+    when(servicePointExpirationPeriodService.getShelfExpiryPeriod(SETTING_KEY)).thenReturn(
       HoldShelfExpiryPeriod.builder()
         .duration(2)
         .intervalId(IntervalIdEnum.MONTHS)
         .build()
     );
-    var response = servicePointService.createServicePointIfNotExists(createDcbPickup());
+    var response = servicePointService.createServicePointIfNotExists(createDcbTransactionByRole(RoleEnum.LENDER));
     assertEquals(servicePointId, response.getId());
     assertEquals(2, response.getHoldShelfExpiryPeriod().getDuration());
     assertEquals(IntervalIdEnum.MONTHS, response.getHoldShelfExpiryPeriod().getIntervalId());

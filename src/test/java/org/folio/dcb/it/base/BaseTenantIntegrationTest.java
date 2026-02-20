@@ -29,6 +29,7 @@ import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.repository.TransactionAuditRepository;
 import org.folio.dcb.support.AuditEntityTestVerifier;
 import org.folio.dcb.support.wiremock.WiremockStubExtension;
+import org.folio.dcb.utils.SettingsApiHelper;
 import org.folio.dcb.utils.TestCirculationEventHelper;
 import org.folio.dcb.utils.TestJdbcHelper;
 import org.folio.spring.FolioModuleMetadata;

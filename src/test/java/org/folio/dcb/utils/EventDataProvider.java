@@ -7,7 +7,7 @@ import static org.folio.dcb.utils.EntityUtils.ITEM_ID;
 import static org.folio.dcb.utils.EntityUtils.PICKUP_SERVICE_POINT_ID;
 import static org.folio.dcb.utils.EntityUtils.REQUEST_ID;
 import static org.folio.dcb.utils.EntityUtils.TEST_TENANT;
-import static org.folio.dcb.utils.JsonTestUtils.objectMapper;
+import static org.folio.dcb.utils.JsonTestUtils.JSON_MAPPER;
 import static org.folio.dcb.utils.JsonTestUtils.toJsonNode;
 
 import java.time.OffsetDateTime;
@@ -38,13 +38,13 @@ public class EventDataProvider {
   }
 
   private static JsonNode expiredRequestPayload() {
-    var objectNode = objectMapper.createObjectNode();
+    var objectNode = JSON_MAPPER.createObjectNode();
     objectNode.put("id", REQUEST_ID);
     objectNode.put("type", "UPDATED");
     objectNode.put("tenant", TEST_TENANT);
     objectNode.put("timestamp", System.currentTimeMillis());
 
-    var dataNode = objectMapper.createObjectNode();
+    var dataNode = JSON_MAPPER.createObjectNode();
     dataNode.set("new", toJsonNode(circulationRequest(CLOSED_PICKUP_EXPIRED)));
     dataNode.set("old", toJsonNode(circulationRequest(OPEN_AWAITING_PICKUP)));
 
@@ -53,13 +53,13 @@ public class EventDataProvider {
   }
 
   private static JsonNode itemCheckInPayload() {
-    var objectNode = objectMapper.createObjectNode();
+    var objectNode = JSON_MAPPER.createObjectNode();
     objectNode.put("id", UUID.randomUUID().toString());
     objectNode.put("type", "CREATED");
     objectNode.put("tenant", TEST_TENANT);
     objectNode.put("timestamp", System.currentTimeMillis());
 
-    var dataNode = objectMapper.createObjectNode();
+    var dataNode = JSON_MAPPER.createObjectNode();
     dataNode.set("new", toJsonNode(checkInRequest()));
 
     objectNode.set("data", dataNode);
@@ -75,7 +75,7 @@ public class EventDataProvider {
   }
 
   private static JsonNode checkInRequest() {
-    var checkInBody = objectMapper.createObjectNode();
+    var checkInBody = JSON_MAPPER.createObjectNode();
     checkInBody.put("id", UUID.randomUUID().toString());
     checkInBody.put("occurredDateTime", OffsetDateTime.now().toString());
     checkInBody.put("itemId", ITEM_ID);
