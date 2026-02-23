@@ -1,6 +1,5 @@
 package org.folio.dcb.listener;
 
-import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWER;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWING_PICKUP;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.PICKUP;

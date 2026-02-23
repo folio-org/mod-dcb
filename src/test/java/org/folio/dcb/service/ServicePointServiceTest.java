@@ -1,6 +1,5 @@
 package org.folio.dcb.service;
 
-import static org.folio.dcb.utils.EntityUtils.createDcbPickup;
 import static org.folio.dcb.utils.EntityUtils.createDcbTransactionByRole;
 import static org.folio.dcb.utils.EntityUtils.createServicePointRequest;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -13,7 +12,6 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.UUID;
 
-import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.DcbTransaction.RoleEnum;
 import org.folio.dcb.integration.invstorage.ServicePointClient;
 import org.folio.dcb.domain.ResultList;

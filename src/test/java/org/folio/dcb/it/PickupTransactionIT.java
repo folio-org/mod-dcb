@@ -25,7 +25,6 @@ import static org.folio.dcb.utils.EntityUtils.TEST_TENANT;
 import static org.folio.dcb.utils.EntityUtils.dcbItem;
 import static org.folio.dcb.utils.EntityUtils.dcbPatron;
 import static org.folio.dcb.utils.EntityUtils.dcbTransactionUpdate;
-import static org.folio.dcb.utils.EntityUtils.lenderDcbTransaction;
 import static org.folio.dcb.utils.EntityUtils.pickupDcbTransaction;
 import static org.folio.dcb.utils.EntityUtils.transactionStatus;
 import static org.folio.dcb.utils.EventDataProvider.expiredRequestMessage;

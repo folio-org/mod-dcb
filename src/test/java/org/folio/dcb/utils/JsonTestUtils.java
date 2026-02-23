@@ -8,7 +8,7 @@ import tools.jackson.databind.json.JsonMapper;
 
 public class JsonTestUtils {
 
-  public static JsonMapper JSON_MAPPER = JsonMapper.builder()
+  public static final JsonMapper JSON_MAPPER = JsonMapper.builder()
     .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
     .changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(JsonInclude.Include.NON_NULL))
     .build();

@@ -21,7 +21,6 @@ import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_OUT;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
-import static org.folio.dcb.utils.EntityUtils.createDcbPickup;
 import static org.folio.dcb.utils.EntityUtils.createDcbTransactionByRole;
 import static org.folio.dcb.utils.EntityUtils.createServicePointRequest;
 import static org.folio.dcb.utils.EntityUtils.createTransactionEntity;
@@ -35,18 +34,12 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class BorrowingLibraryServiceTest {
-  @InjectMocks
-  private BorrowingLibraryServiceImpl borrowingLibraryService;
-  @Mock
-  private CirculationService circulationService;
-  @Mock
-  private TransactionRepository transactionRepository;
-  @Mock
-  private BaseLibraryService baseLibraryService;
 
-  @Mock
-  private ServicePointService servicePointService;
-
+  @InjectMocks private BorrowingLibraryServiceImpl borrowingLibraryService;
+  @Mock private CirculationService circulationService;
+  @Mock private BaseLibraryService baseLibraryService;
+  @Mock private ServicePointService servicePointService;
+  @Mock private TransactionRepository transactionRepository;
 
   @Test
   void testTransactionStatusUpdateFromOpenToAwaitingPickup() {
