@@ -36,6 +36,11 @@ public abstract class SettingMapper {
     this.jsonMapper = jsonMapper;
   }
 
+  /**
+   * Parses a string value to its corresponding {@link SettingScope} enum. Returns null if no matching value is found.
+   *
+   * @param scope the string representation of the setting scope
+   */
   public static SettingScope parseSettingScopeFromString(String scope) {
     for (var value : SettingScope.values()) {
       if (Strings.CI.equals(value.getValue(), scope)) {
