@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>4.0.2</version>
+    <version>4.0.3</version>
     <relativePath />
   </parent>
 
@@ -38,12 +38,12 @@
     <!-- test dependencies -->
     <wiremock.version>3.13.2</wiremock.version>
     <rest-assured.version>6.0.0</rest-assured.version>
-    <annotations.version>26.0.2-1</annotations.version>
+    <annotations.version>26.1.0</annotations.version>
     <testcontainers.version>2.0.3</testcontainers.version>
 
     <!-- plugin version -->
-    <mvn-failsafe-plugin.version>3.5.4</mvn-failsafe-plugin.version>
-    <maven-surefire-plugin.version>3.5.4</maven-surefire-plugin.version>
+    <mvn-failsafe-plugin.version>3.5.5</mvn-failsafe-plugin.version>
+    <maven-surefire-plugin.version>3.5.5</maven-surefire-plugin.version>
     <maven-release-plugin.version>3.3.1</maven-release-plugin.version>
     <maven-enforcer-plugin.version>3.6.2</maven-enforcer-plugin.version>
     <maven-resources-plugin.version>3.4.0</maven-resources-plugin.version>
