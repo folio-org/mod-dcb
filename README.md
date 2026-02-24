@@ -188,6 +188,12 @@ Request Body:
 As a fallback, `service_point_expiration_period` table is used to determine the hold shelf expiration period for the
 service point. if it's empty, the default value of 10 days will be used.
 
+> **_NOTE:_**
+> * Duration is always an integer value.
+> * IntervalId is an enum value that can be "Minutes", "Hours", "Days", "Weeks", or "Month". </br> _The value is
+>    case-sensitive. Parsing failures will be detected and logged, and in case of error - the fallback
+>    approach will be used._
+
 #### Table: service_point_expiration_period
 
 - If the table is empty, the **hold shelf expiration period** will be set to the default value of **10 Days**.
