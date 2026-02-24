@@ -8,7 +8,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static java.util.Collections.emptyList;
 import static org.folio.dcb.support.wiremock.WiremockContainerExtension.getWireMockClient;
-import static org.folio.dcb.utils.EntityUtils.BORROWER_SERVICE_POINT_ID;
+import static org.folio.dcb.utils.EntityUtils.VIRTUAL_SERVICE_POINT_ID;
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
 import static org.folio.dcb.utils.EntityUtils.EXISTED_PATRON_ID;
 import static org.folio.dcb.utils.EntityUtils.ITEM_ID;
@@ -104,7 +104,7 @@ class FlexibleEffectiveLocationIT {
 
       verifyGetRequestBeingCalledOnce("/locations", QUERY_BY_SHADOW_LOCATION_CODE);
       verifyPostCirculationItemIsCalledOnce(SHADOW_LOCATION_ID);
-      verifyPostCirculationRequestCalledOnce(EXISTED_PATRON_ID, BORROWER_SERVICE_POINT_ID);
+      verifyPostCirculationRequestCalledOnce(EXISTED_PATRON_ID, VIRTUAL_SERVICE_POINT_ID);
     }
 
     @Test
@@ -136,7 +136,7 @@ class FlexibleEffectiveLocationIT {
       verifyGetRequestBeingCalledOnce("/locations", "libraryId==\"%s\"".formatted(SHADOW_LIBRARY_ID));
       verifyGetRequestBeingCalledOnce("/location-units/libraries", QUERY_BY_SHADOW_LOCATION_CODE);
       verifyPostCirculationItemIsCalledOnce(SHADOW_LOCATION_ID);
-      verifyPostCirculationRequestCalledOnce(EXISTED_PATRON_ID, BORROWER_SERVICE_POINT_ID);
+      verifyPostCirculationRequestCalledOnce(EXISTED_PATRON_ID, VIRTUAL_SERVICE_POINT_ID);
     }
 
     @Test
@@ -166,7 +166,7 @@ class FlexibleEffectiveLocationIT {
       verifyGetRequestBeingCalledOnce("/locations", QUERY_BY_SHADOW_LOCATION_CODE);
       verifyGetRequestBeingCalledOnce("/location-units/libraries", QUERY_BY_SHADOW_LOCATION_CODE);
       verifyPostCirculationItemIsCalledOnce(DCB_LOCATION_ID);
-      verifyPostCirculationRequestCalledOnce(EXISTED_PATRON_ID, BORROWER_SERVICE_POINT_ID);
+      verifyPostCirculationRequestCalledOnce(EXISTED_PATRON_ID, VIRTUAL_SERVICE_POINT_ID);
     }
 
     @Test
@@ -191,7 +191,7 @@ class FlexibleEffectiveLocationIT {
       verifyGetRequestBeingCalledOnce("/location-units/libraries", QUERY_BY_SHADOW_LOCATION_CODE);
       verifyGetRequestBeingCalledOnce("/locations", "libraryId==\"%s\"".formatted(SHADOW_LIBRARY_ID));
       verifyPostCirculationItemIsCalledOnce(SHADOW_LOCATION_ID);
-      verifyPostCirculationRequestCalledOnce(EXISTED_PATRON_ID, BORROWER_SERVICE_POINT_ID);
+      verifyPostCirculationRequestCalledOnce(EXISTED_PATRON_ID, VIRTUAL_SERVICE_POINT_ID);
     }
 
     @Test
@@ -214,7 +214,7 @@ class FlexibleEffectiveLocationIT {
 
       verifyGetRequestBeingCalledOnce("/location-units/libraries", QUERY_BY_SHADOW_LOCATION_CODE);
       verifyPostCirculationItemIsCalledOnce(DCB_LOCATION_ID);
-      verifyPostCirculationRequestCalledOnce(EXISTED_PATRON_ID, BORROWER_SERVICE_POINT_ID);
+      verifyPostCirculationRequestCalledOnce(EXISTED_PATRON_ID, VIRTUAL_SERVICE_POINT_ID);
     }
   }
 
@@ -323,7 +323,7 @@ class FlexibleEffectiveLocationIT {
       verifyGetRequestBeingCalledOnce("/location-units/libraries", QUERY_BY_SHADOW_LOCATION_CODE);
       verifyGetRequestBeingCalledOnce("/locations", "libraryId==\"%s\"".formatted(SHADOW_LIBRARY_ID));
       verifyPostCirculationItemIsCalledOnce(SHADOW_LOCATION_ID);
-      verifyPostCirculationRequestCalledOnce(EXISTED_PATRON_ID, BORROWER_SERVICE_POINT_ID);
+      verifyPostCirculationRequestCalledOnce(EXISTED_PATRON_ID, VIRTUAL_SERVICE_POINT_ID);
     }
 
     @Test
@@ -346,7 +346,7 @@ class FlexibleEffectiveLocationIT {
 
       verifyGetRequestBeingCalledOnce("/location-units/libraries", QUERY_BY_SHADOW_LOCATION_CODE);
       verifyPostCirculationItemIsCalledOnce(DCB_LOCATION_ID);
-      verifyPostCirculationRequestCalledOnce(EXISTED_PATRON_ID, BORROWER_SERVICE_POINT_ID);
+      verifyPostCirculationRequestCalledOnce(EXISTED_PATRON_ID, VIRTUAL_SERVICE_POINT_ID);
     }
   }
 

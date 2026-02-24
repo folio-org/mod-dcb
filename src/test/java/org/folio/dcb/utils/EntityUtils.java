@@ -2,6 +2,12 @@ package org.folio.dcb.utils;
 
 import lombok.SneakyThrows;
 import org.folio.dcb.DcbApplication;
+import org.folio.dcb.domain.dto.DcbTransaction.RoleEnum;
+import org.folio.dcb.domain.dto.HoldShelfExpiryPeriod;
+import org.folio.dcb.domain.dto.IntervalIdEnum;
+import org.folio.dcb.domain.dto.Setting;
+import org.folio.dcb.domain.dto.SettingScope;
+import org.folio.dcb.integration.invstorage.model.InventoryHolding;
 import org.folio.dcb.client.feign.HoldingsStorageClient;
 import org.folio.dcb.domain.dto.Calendar;
 import org.folio.dcb.domain.dto.CalendarCollection;
@@ -63,7 +69,7 @@ public class EntityUtils {
    * */
   public static final String EXISTED_PATRON_ID = "284056f5-0670-4e1e-9e2f-61b9f1ee2d18";
   public static final String PICKUP_SERVICE_POINT_ID = "0da8c1e4-1c1f-4dd9-b189-70ba978b7d94";
-  public static final String BORROWER_SERVICE_POINT_ID = "9d1b77e8-f02e-4b7f-b296-3f2042ddac55";
+  public static final String VIRTUAL_SERVICE_POINT_ID = "9d1b77e8-f02e-4b7f-b296-3f2042ddac55";
   public static final String DCB_TRANSACTION_ID = "571b0a2c-8883-40b5-a449-d41fe6017082";
   public static final String CIRCULATION_REQUEST_ID = "571b0a2c-8883-40b5-a449-d41fe6017083";
 
@@ -79,6 +85,8 @@ public class EntityUtils {
   public static final String DCB_ITEM_NEW_BARCODE = "DCB_ITEM_NEW_BARCODE";
   public static final String HOLDING_RECORD_ID = "fcee331d-2b50-49de-9395-a76a6ff4e385";
   public static final String INSTANCE_ID = "a9350401-f2f2-4804-9701-ca813c70e322";
+
+  public static final String LENDER_HOLD_SHELF_EXPIRATION_SETTING_ID = "d115a0b6-133d-4148-ac1a-b48c2aa57f57";
 
   public static DcbTransaction createDcbTransactionByRole(DcbTransaction.RoleEnum role) {
     return DcbTransaction.builder()
@@ -251,17 +259,15 @@ public class EntityUtils {
       .build();
   }
 
-  public static UserCollection createUserCollection() {
-    return UserCollection.builder()
-      .users(List.of(createUser()))
-      .totalRecords(1)
-      .build();
+  public static TransactionEntity createTransactionEntity() {
+    return createTransactionEntity(null);
   }
 
-  public static TransactionEntity createTransactionEntity() {
+  public static TransactionEntity createTransactionEntity(RoleEnum role) {
     return TransactionEntity.builder()
       .id(DCB_TRANSACTION_ID)
       .itemId(ITEM_ID)
+      .role(role)
       .itemTitle("ITEM TITLE")
       .itemBarcode("DCB_ITEM")
       .patronId(NOT_EXISTED_PATRON_ID)
@@ -392,7 +398,7 @@ public class EntityUtils {
       .item(dcbItem())
       .patron(dcbPatron)
       .role(BORROWER)
-      .pickup(dcbPickup().servicePointId(BORROWER_SERVICE_POINT_ID))
+      .pickup(dcbPickup().servicePointId(VIRTUAL_SERVICE_POINT_ID))
       .selfBorrowing(selfBorrowing);
   }
 
@@ -460,5 +466,18 @@ public class EntityUtils {
         .materialType("DVD")
         .build())
       .build();
+  }
+
+  public static Setting lenderHoldShelfExpirationSetting() {
+    var value = new HoldShelfExpiryPeriod().duration(10).intervalId(IntervalIdEnum.DAYS);
+    return lenderHoldShelfExpirationSetting(value);
+  }
+
+  public static Setting lenderHoldShelfExpirationSetting(HoldShelfExpiryPeriod value) {
+    return new Setting()
+      .id(UUID.fromString(LENDER_HOLD_SHELF_EXPIRATION_SETTING_ID))
+      .scope(SettingScope.MOD_DCB)
+      .key("lender.hold-shelf-expiry-period")
+      .value(value);
   }
 }

@@ -6,12 +6,14 @@ import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.AWAITING_PICKUP;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CANCELLED;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CLOSED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.EXPIRED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_IN;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
-import static org.folio.dcb.utils.EntityUtils.BORROWER_SERVICE_POINT_ID;
+import static org.folio.dcb.utils.EntityUtils.VIRTUAL_SERVICE_POINT_ID;
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
 import static org.folio.dcb.utils.EntityUtils.EXISTED_PATRON_ID;
 import static org.folio.dcb.utils.EntityUtils.ITEM_ID;
@@ -19,11 +21,14 @@ import static org.folio.dcb.utils.EntityUtils.NOT_EXISTED_PATRON_ID;
 import static org.folio.dcb.utils.EntityUtils.PATRON_GROUP_ID;
 import static org.folio.dcb.utils.EntityUtils.PATRON_TYPE_USER_ID;
 import static org.folio.dcb.utils.EntityUtils.PICKUP_SERVICE_POINT_ID;
+import static org.folio.dcb.utils.EntityUtils.TEST_TENANT;
 import static org.folio.dcb.utils.EntityUtils.dcbItem;
 import static org.folio.dcb.utils.EntityUtils.dcbPatron;
 import static org.folio.dcb.utils.EntityUtils.dcbTransactionUpdate;
 import static org.folio.dcb.utils.EntityUtils.pickupDcbTransaction;
 import static org.folio.dcb.utils.EntityUtils.transactionStatus;
+import static org.folio.dcb.utils.EventDataProvider.expiredRequestMessage;
+import static org.folio.dcb.utils.EventDataProvider.itemCheckInMessage;
 import static org.folio.dcb.utils.JsonTestUtils.asJsonString;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
@@ -55,6 +60,7 @@ class PickupTransactionIT extends BaseTenantIntegrationTest {
     "/stubs/mod-users/groups/200-get-by-query(staff).json",
     "/stubs/mod-circulation-item/201-post(pickup).json",
     "/stubs/mod-circulation/requests/201-post(any).json",
+    "/stubs/mod-circulation/check-in-by-barcode/201-post(random SP).json",
   })
   void createTransaction_positive_newDcbItemAndUser() throws Exception {
     var patron = dcbPatron(NOT_EXISTED_PATRON_ID);
@@ -69,6 +75,9 @@ class PickupTransactionIT extends BaseTenantIntegrationTest {
 
     auditEntityVerifier.assertThatLatestEntityIsNotDuplicate(DCB_TRANSACTION_ID);
     verifyPostCirculationRequestCalledOnce(NOT_EXISTED_PATRON_ID);
+
+    putDcbTransactionStatus(DCB_TRANSACTION_ID, transactionStatus(OPEN))
+      .andExpect(jsonPath("$.status").value("OPEN"));
   }
 
   @Test
@@ -266,7 +275,7 @@ class PickupTransactionIT extends BaseTenantIntegrationTest {
       .withRequestBody(matchingJsonPath("$.status", equalTo("Closed - Cancelled")))
       .withRequestBody(matchingJsonPath("$.instanceId", equalTo(DCBConstants.INSTANCE_ID)))
       .withRequestBody(matchingJsonPath("$.requesterId", equalTo(PATRON_TYPE_USER_ID)))
-      .withRequestBody(matchingJsonPath("$.pickupServicePointId", equalTo(BORROWER_SERVICE_POINT_ID)))
+      .withRequestBody(matchingJsonPath("$.pickupServicePointId", equalTo(VIRTUAL_SERVICE_POINT_ID)))
       .withRequestBody(matchingJsonPath("$.holdingsRecordId", equalTo(DCBConstants.HOLDING_ID))));
   }
 
@@ -292,6 +301,29 @@ class PickupTransactionIT extends BaseTenantIntegrationTest {
       .andExpect(jsonPath("$.errors[0].code").value("VALIDATION_ERROR"))
       .andExpect(jsonPath("$.errors[0].message").value(containsString(String.format(
         "Status transition will not be possible from %s to EXPIRED", sourceStatus))));
+  }
+
+  @Test
+  void updateStatus_positive_awaitingPickupTransactionExpiration() throws Exception {
+    testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, AWAITING_PICKUP, pickupDcbTransaction());
+    getDcbTransactionStatus(DCB_TRANSACTION_ID)
+      .andExpect(jsonPath("$.status").value(AWAITING_PICKUP.getValue()));
+
+    testEventHelper.sendMessage(expiredRequestMessage(TEST_TENANT));
+    awaitUntilAsserted(() -> getDcbTransactionStatus(DCB_TRANSACTION_ID)
+      .andExpect(jsonPath("$.status").value(EXPIRED.getValue())));
+  }
+
+  @Test
+  void updateStatus_positive_expiredToClosedTransitionAfterCheckInMessage() throws Exception {
+    testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, EXPIRED, pickupDcbTransaction());
+    getDcbTransactionStatus(DCB_TRANSACTION_ID)
+      .andExpect(jsonPath("$.status").value(EXPIRED.getValue()));
+
+    testEventHelper.sendMessage(itemCheckInMessage(TEST_TENANT));
+
+    awaitUntilAsserted(() -> getDcbTransactionStatus(DCB_TRANSACTION_ID)
+      .andExpect(jsonPath("$.status").value(CLOSED.getValue())));
   }
 
   private static void verifyPostCirculationRequestCalledOnce(String requesterId) {

@@ -199,6 +199,109 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
+  /dcb/settings:
+    description: DCB settings endpoint
+    get:
+      description: Search DCB settings by CQL query with pagination
+      operationId: findDcbSettings
+      tags:
+        - setting
+      parameters:
+        - $ref: '#/components/parameters/query'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+      responses:
+        '200':
+          description: List of DCB settings matching the query
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SettingsCollection'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      description: Create DCB setting
+      operationId: createDcbSetting
+      tags:
+        - setting
+      requestBody:
+        description: DCB setting to create
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Setting'
+      responses:
+        '201':
+          description: created DCB setting
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Setting'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /dcb/settings/{id}:
+    get:
+      description: Get DCB setting by id
+      operationId: getDcbSettingById
+      tags:
+        - setting
+      parameters:
+        - $ref: '#/components/parameters/pathId'
+      responses:
+        '200':
+          description: DCB setting with the given id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Setting'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      description: Update DCB setting by id
+      operationId: updateDcbSettingById
+      tags:
+        - setting
+      requestBody:
+        description: DCB setting to update
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Setting'
+      parameters:
+        - $ref: '#/components/parameters/pathId'
+      responses:
+        '204':
+            description: DCB setting updated successfully
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      description: Delete DCB setting by id
+      operationId: deleteDcbSettingById
+      tags:
+        - setting
+      parameters:
+        - $ref: '#/components/parameters/pathId'
+      responses:
+        '204':
+          description: DCB setting deleted successfully
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
 components:
   requestBodies:
     TransactionStatusBody:
@@ -337,6 +440,44 @@ components:
         minimum: 1
         maximum: 2147483647
       required: false
+    query:
+      in: query
+      name: query
+      description: A query string to filter records based on matching criteria in fields.
+      required: false
+      schema:
+        type: string
+        default: cql.allRecords=1
+      example: role
+    limit:
+      in: query
+      name: limit
+      description: Limit the number of elements returned in the response.
+      required: false
+      schema:
+        type: integer
+        default: 50
+        minimum: 0
+      example: 100
+    offset:
+      in: query
+      name: offset
+      description: Skip over a number of elements by specifying an offset value for the query.
+      required: false
+      schema:
+        type: integer
+        default: 0
+        minimum: 0
+      example: 0
+    pathId:
+      in: path
+      required: true
+      name: id
+      description: Record identifier
+      schema:
+        type: string
+        format: uuid
+      example: 1e111e76-1111-401c-ad8e-0d121a11111e
   schemas:
     RenewByIdRequest:
       $ref: 'schemas/RenewByIdRequest.yaml#/RenewByIdRequest'
@@ -368,3 +509,7 @@ components:
       $ref: 'schemas/MaterialType.yaml#/MaterialTypeCollection'
     CalendarCollection:
       $ref: 'schemas/Calendar.yaml#/CalendarCollection'
+    Setting:
+      $ref: 'schemas/setting.yaml#/Setting'
+    SettingsCollection:
+      $ref: 'schemas/setting.yaml#/SettingsCollection'
