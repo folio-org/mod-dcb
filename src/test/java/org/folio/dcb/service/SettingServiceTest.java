@@ -48,7 +48,7 @@ class SettingServiceTest {
   @Mock private SettingRepository settingRepository;
 
   @Test
-  void createSetting_positive() {
+  void create_positive() {
     var setting = setting();
     when(settingRepository.existsById(SETTING_ID_1)).thenReturn(false);
     when(settingRepository.existsByKey(SETTING_KEY_1)).thenReturn(false);
@@ -56,29 +56,29 @@ class SettingServiceTest {
     when(settingRepository.save(settingEntity())).thenReturn(settingEntity());
     when(settingMapper.convert(settingEntity())).thenReturn(setting());
 
-    var result = settingService.createSetting(setting);
+    var result = settingService.create(setting);
 
     assertThat(result).isEqualTo(setting());
   }
 
   @Test
-  void createSetting_negative_existsById() {
+  void create_negative_existsById() {
     var setting = setting();
     when(settingRepository.existsById(SETTING_ID_1)).thenReturn(true);
 
-    assertThatThrownBy(() -> settingService.createSetting(setting))
+    assertThatThrownBy(() -> settingService.create(setting))
       .isInstanceOf(IllegalArgumentException.class)
       .hasMessage("Setting already exists with id: " + SETTING_ID_1);
     verify(settingRepository, never()).save(any());
   }
 
   @Test
-  void createSetting_negative_existsByKey() {
+  void create_negative_existsByKey() {
     var setting = setting();
     when(settingRepository.existsById(SETTING_ID_1)).thenReturn(false);
     when(settingRepository.existsByKey(SETTING_KEY_1)).thenReturn(true);
 
-    assertThatThrownBy(() -> settingService.createSetting(setting))
+    assertThatThrownBy(() -> settingService.create(setting))
       .isInstanceOf(IllegalArgumentException.class)
       .hasMessage("Setting with key already exists: " + SETTING_KEY_1);
     verify(settingRepository, never()).save(any());
@@ -148,47 +148,55 @@ class SettingServiceTest {
   }
 
   @Test
-  void updateSetting_positive_updatesSetting() {
+  void updateSetting_positive_updates() {
     var updatedSetting = setting(SETTING_ID_1, SETTING_KEY_1, SETTING_VALUE_1);
     var updatedEntity = settingEntity(SETTING_ID_1, SETTING_KEY_1, SETTING_VALUE_1);
     when(settingRepository.findById(SETTING_ID_1)).thenReturn(Optional.of(settingEntity()));
     when(settingMapper.convert(updatedSetting)).thenReturn(updatedEntity);
 
-    settingService.updateSetting(updatedSetting);
+    settingService.update(SETTING_ID_1, updatedSetting);
 
     verify(settingRepository).save(updatedEntity);
   }
 
   @Test
-  void updateSetting_negative_settingNotFound() {
+  void updateSetting_negative_NotFound() {
     var updatedSetting = setting(SETTING_ID_1, SETTING_KEY_1, SETTING_VALUE_1);
     when(settingRepository.findById(SETTING_ID_1)).thenReturn(Optional.empty());
-    assertThatThrownBy(() -> settingService.updateSetting(updatedSetting))
+    assertThatThrownBy(() -> settingService.update(SETTING_ID_1, updatedSetting))
       .isInstanceOf(NotFoundException.class)
       .hasMessage("Setting not found by id: " + SETTING_ID_1);
   }
 
   @Test
-  void updateSetting_negative_keyModification() {
+  void update_negative_unmodifiableId() {
+    var updatedSetting = setting(SETTING_ID_1, SETTING_KEY_1, SETTING_VALUE_2);
+    assertThatThrownBy(() -> settingService.update(SETTING_ID_2, updatedSetting))
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessage("Id cannot be modified: " + SETTING_ID_2);
+  }
+
+  @Test
+  void update_negative_keyModification() {
     var updatedSetting = setting(SETTING_ID_1, SETTING_KEY_2, SETTING_VALUE_2);
     when(settingRepository.findById(SETTING_ID_1)).thenReturn(Optional.of(settingEntity()));
-    assertThatThrownBy(() -> settingService.updateSetting(updatedSetting))
+    assertThatThrownBy(() -> settingService.update(SETTING_ID_1, updatedSetting))
       .isInstanceOf(IllegalArgumentException.class)
       .hasMessage("Setting key cannot be modified: " + SETTING_KEY_1);
   }
 
   @Test
-  void deleteSettingById_positive() {
+  void deleteById_positive() {
     when(settingRepository.findById(SETTING_ID_1)).thenReturn(Optional.of(settingEntity()));
-    settingService.deleteSettingById(SETTING_ID_1);
+    settingService.deleteById(SETTING_ID_1);
     verify(settingRepository).deleteById(SETTING_ID_1);
   }
 
   @Test
-  void deleteSettingById_negative_notFoundById() {
+  void deleteById_negative_notFoundById() {
     when(settingRepository.findById(SETTING_ID_1)).thenReturn(Optional.empty());
 
-    assertThatThrownBy(() -> settingService.deleteSettingById(SETTING_ID_1))
+    assertThatThrownBy(() -> settingService.deleteById(SETTING_ID_1))
       .isInstanceOf(NotFoundException.class)
       .hasMessage("Setting not found by id: " + SETTING_ID_1);
   }

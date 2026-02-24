@@ -18,7 +18,7 @@ public class SettingsController implements SettingApi {
 
   @Override
   public ResponseEntity<Setting> createDcbSetting(Setting setting) {
-    var createdSetting = settingService.createSetting(setting);
+    var createdSetting = settingService.create(setting);
     return ResponseEntity.status(HttpStatus.CREATED).body(createdSetting);
   }
 
@@ -37,14 +37,14 @@ public class SettingsController implements SettingApi {
   }
 
   @Override
-  public ResponseEntity<Void> deleteDcbSettingById(UUID id) {
-    settingService.deleteSettingById(id);
+  public ResponseEntity<Void> updateDcbSettingById(UUID id, Setting setting) {
+    settingService.update(id, setting);
     return ResponseEntity.noContent().build();
   }
 
   @Override
-  public ResponseEntity<Void> updateDcbSettingById(UUID id, Setting setting) {
-    settingService.updateSetting(setting);
+  public ResponseEntity<Void> deleteDcbSettingById(UUID id) {
+    settingService.deleteById(id);
     return ResponseEntity.noContent().build();
   }
 }

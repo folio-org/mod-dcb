@@ -81,7 +81,7 @@ public class TestJdbcHelper {
       .addValue("scope", "mod-dcb", Types.VARCHAR)
       .addValue("key", setting.getKey(), Types.VARCHAR)
       .addValue("value", asJsonString(setting.getValue()), Types.OTHER)
-      .addValue("version", 1, Types.INTEGER)
+      .addValue("version", 0, Types.INTEGER)
       .addValue("createdBy", REQUEST_USER_ID, Types.OTHER)
       .addValue("createdDate", createdDate, Types.TIMESTAMP_WITH_TIMEZONE)
       .addValue("updatedBy", REQUEST_USER_ID, Types.OTHER)

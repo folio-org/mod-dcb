@@ -51,7 +51,7 @@ class SettingsIT extends BaseTenantIntegrationTest {
     var id = UUID.randomUUID();
     var expectedSetting = lenderHoldShelfExpirationSetting()
       .id(id)
-      .version(1)
+      .version(0)
       .metadata(new Metadata()
         .createdByUserId(REQUEST_USER_ID)
         .updatedByUserId(REQUEST_USER_ID));
@@ -60,7 +60,7 @@ class SettingsIT extends BaseTenantIntegrationTest {
 
     settingsApiHelper.getById(id.toString())
       .andExpect(content().json(asJsonString(expectedSetting), LENIENT))
-      .andExpect(jsonPath("$._version").value(1))
+      .andExpect(jsonPath("$._version").value(0))
       .andExpect(jsonPath("$.version").doesNotExist())
       .andExpect(jsonPath("$.metadata.createdByUserId").value(REQUEST_USER_ID))
       .andExpect(jsonPath("$.metadata.createdDate").exists())
@@ -94,7 +94,7 @@ class SettingsIT extends BaseTenantIntegrationTest {
   })
   void findByQuery_positive_parameterized(String query) throws Exception {
     var expectedSetting = lenderHoldShelfExpirationSetting()
-      .version(1)
+      .version(0)
       .metadata(new Metadata()
         .createdByUserId(REQUEST_USER_ID)
         .updatedByUserId(REQUEST_USER_ID));
@@ -116,7 +116,7 @@ class SettingsIT extends BaseTenantIntegrationTest {
     var setting = EntityUtils.lenderHoldShelfExpirationSetting();
     var createdSettingJson = settingsApiHelper.post(setting)
       .andExpect(content().json(asJsonString(setting), LENIENT))
-      .andExpect(jsonPath("$._version").value(1))
+      .andExpect(jsonPath("$._version").value(0))
       .andExpect(jsonPath("$.metadata.createdByUserId").value(REQUEST_USER_ID))
       .andExpect(jsonPath("$.metadata.createdDate").exists())
       .andExpect(jsonPath("$.metadata.updatedByUserId").value(REQUEST_USER_ID))
@@ -136,7 +136,7 @@ class SettingsIT extends BaseTenantIntegrationTest {
     settingsApiHelper.putById(LENDER_HOLD_SHELF_EXPIRATION_SETTING_ID, newSettingValue, otherUserId);
 
     var updatedSettingJson = settingsApiHelper.getById(LENDER_HOLD_SHELF_EXPIRATION_SETTING_ID)
-      .andExpect(jsonPath("$._version").value(2))
+      .andExpect(jsonPath("$._version").value(1))
       .andExpect(jsonPath("$.metadata.createdByUserId").value(REQUEST_USER_ID))
       .andExpect(jsonPath("$.metadata.createdDate").exists())
       .andExpect(jsonPath("$.metadata.updatedByUserId").value(otherUserId))

@@ -1,5 +1,8 @@
 package org.folio.dcb.service;
 
+import static org.springframework.beans.BeanUtils.copyProperties;
+
+import java.util.Objects;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -10,7 +13,6 @@ import org.folio.dcb.domain.mapper.SettingMapper;
 import org.folio.dcb.repository.SettingRepository;
 import org.folio.spring.data.OffsetRequest;
 import org.folio.spring.exception.NotFoundException;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,7 +31,7 @@ public class SettingService {
    * @return created setting DTO with any generated fields populated (for example id)
    */
   @Transactional
-  public Setting createSetting(Setting setting) {
+  public Setting create(Setting setting) {
     if (settingRepository.existsById(setting.getId())) {
       throw new IllegalArgumentException("Setting already exists with id: " + setting.getId());
     }
@@ -80,8 +82,12 @@ public class SettingService {
    * @throws NotFoundException when no setting with the given id exists
    */
   @Transactional
-  public void updateSetting(Setting updatedSetting) {
-    var existingEntity = settingRepository.findById(updatedSetting.getId())
+  public void update(UUID id, Setting updatedSetting) {
+    if (!Objects.equals(updatedSetting.getId(), id)) {
+      throw new IllegalArgumentException("Id cannot be modified: " + id);
+    }
+
+    var existingEntity = settingRepository.findById(id)
       .orElseThrow(() -> new NotFoundException("Setting not found by id: " + updatedSetting.getId()));
 
     if (!existingEntity.getKey().equals(updatedSetting.getKey())) {
@@ -89,7 +95,7 @@ public class SettingService {
     }
 
     var updatedEntity = settingMapper.convert(updatedSetting);
-    BeanUtils.copyProperties(updatedEntity, existingEntity, "id", "key", "metadata");
+    copyProperties(updatedEntity, existingEntity, "id", "key", "createdDate", "createdBy", "updatedDate", "updatedBy");
     settingRepository.save(existingEntity);
     log.debug("updateSetting:: Setting was updated for key: {}", updatedEntity.getKey());
   }
@@ -101,7 +107,7 @@ public class SettingService {
    * @throws NotFoundException when no setting with the given id exists
    */
   @Transactional
-  public void deleteSettingById(UUID settingId) {
+  public void deleteById(UUID settingId) {
     var entityToDelete = settingRepository.findById(settingId)
       .orElseThrow(() -> new NotFoundException("Setting not found by id: " + settingId));
 

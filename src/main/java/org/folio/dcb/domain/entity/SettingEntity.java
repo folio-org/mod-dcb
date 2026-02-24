@@ -26,7 +26,7 @@ public class SettingEntity extends AuditableEntity implements Persistable<UUID> 
   @Column(nullable = false)
   private String key;
 
-  @Column
+  @Column(nullable = false)
   private String scope;
 
   @Column(columnDefinition = "jsonb")
@@ -45,6 +45,6 @@ public class SettingEntity extends AuditableEntity implements Persistable<UUID> 
 
   @PrePersist
   private void initVersion() {
-    version = 1;
+    version = 0;
   }
 }

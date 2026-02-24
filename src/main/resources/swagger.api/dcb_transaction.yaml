@@ -237,7 +237,7 @@ paths:
             schema:
               $ref: '#/components/schemas/Setting'
       responses:
-        '200':
+        '201':
           description: created DCB setting
           content:
             application/json:
@@ -275,7 +275,7 @@ paths:
       tags:
         - setting
       requestBody:
-        description: DCB setting to create
+        description: DCB setting to update
         required: true
         content:
           application/json:
