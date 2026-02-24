@@ -187,9 +187,10 @@ class SettingServiceTest {
 
   @Test
   void deleteById_positive() {
-    when(settingRepository.findById(SETTING_ID_1)).thenReturn(Optional.of(settingEntity()));
+    var entity = settingEntity();
+    when(settingRepository.findById(SETTING_ID_1)).thenReturn(Optional.of(entity));
     settingService.deleteById(SETTING_ID_1);
-    verify(settingRepository).deleteById(SETTING_ID_1);
+    verify(settingRepository).delete(entity);
   }
 
   @Test

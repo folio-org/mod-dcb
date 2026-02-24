@@ -111,7 +111,7 @@ public class SettingService {
     var entityToDelete = settingRepository.findById(settingId)
       .orElseThrow(() -> new NotFoundException("Setting not found by id: " + settingId));
 
-    settingRepository.deleteById(settingId);
+    settingRepository.delete(entityToDelete);
     log.debug("deleteSettingById:: Setting was deleted for key: {}", entityToDelete.getKey());
   }
 }
