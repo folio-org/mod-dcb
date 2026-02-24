@@ -1,6 +1,5 @@
 package org.folio.dcb.service.impl;
 
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dcb.domain.dto.CirculationRequest;
@@ -9,17 +8,14 @@ import org.folio.dcb.domain.dto.ServicePointRequest;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.entity.TransactionEntity;
-import org.folio.dcb.exception.InventoryItemNotFound;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.CirculationService;
-import org.folio.dcb.service.ItemService;
 import org.folio.dcb.service.LibraryService;
 import org.folio.dcb.service.RequestService;
 import org.folio.dcb.service.ServicePointService;
 import org.folio.dcb.service.UserService;
 import org.springframework.stereotype.Service;
 
-import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.AVAILABLE;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.AWAITING_PICKUP;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_IN;
@@ -38,7 +34,6 @@ public class LendingLibraryServiceImpl implements LibraryService {
   private final CirculationService circulationService;
   private final BaseLibraryService baseLibraryService;
   private final ServicePointService servicePointService;
-  private final ItemService itemService;
 
   @Override
   public TransactionStatusResponse createCirculation(String dcbTransactionId, DcbTransaction dcbTransaction) {
@@ -49,7 +44,7 @@ public class LendingLibraryServiceImpl implements LibraryService {
     var patron = dcbTransaction.getPatron();
 
     var user = userService.fetchOrCreateUser(patron);
-    ServicePointRequest pickupServicePoint = servicePointService.createServicePointIfNotExists(dcbTransaction.getPickup());
+    ServicePointRequest pickupServicePoint = servicePointService.createServicePointIfNotExists(dcbTransaction);
     dcbTransaction.getPickup().setServicePointId(pickupServicePoint.getId());
     CirculationRequest pageRequest = requestService.createRequestBasedOnItemStatus(user, item, pickupServicePoint.getId());
     baseLibraryService.saveDcbTransaction(dcbTransactionId, dcbTransaction, pageRequest.getId());
@@ -86,26 +81,6 @@ public class LendingLibraryServiceImpl implements LibraryService {
         currentStatus, requestedStatus);
       log.warn(errorMessage);
       throw new IllegalArgumentException(errorMessage);
-    }
-  }
-
-  /**
-   * Closes the expired transaction entity if the associated item is available.
-   *
-   * @param dcbTransaction the DCB transaction entity to be closed
-   * @param expectedServicePointId the expected service point ID, used in logging
-   */
-  public void closeExpiredTransactionEntity(TransactionEntity dcbTransaction, String expectedServicePointId) {
-    var itemId = dcbTransaction.getItemId();
-    try {
-      var inventoryItem = itemService.findItemByIdAfterCheckIn(itemId, expectedServicePointId);
-      var itemStatus = inventoryItem.getStatus();
-      if (itemStatus != null && Objects.equals(itemStatus.getName(), AVAILABLE)) {
-        log.debug("closeTransactionEntityIfItemIsAvailable:: closing expired transaction: {}", dcbTransaction.getId());
-        updateTransactionEntity(dcbTransaction, TransactionStatus.StatusEnum.CLOSED);
-      }
-    } catch (InventoryItemNotFound e) {
-      log.warn("Failed to fetch item with id {} from inventory after check-in: {}", itemId, expectedServicePointId, e);
     }
   }
 

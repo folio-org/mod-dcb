@@ -85,14 +85,18 @@ public abstract class BaseIntegrationTest {
       .andExpect(status().isNoContent());
   }
 
-  protected static HttpHeaders defaultHeaders() {
+  public static HttpHeaders defaultHeaders() {
+    return defaultHeaders(REQUEST_USER_ID);
+  }
+
+  public static HttpHeaders defaultHeaders(String userId) {
     final HttpHeaders httpHeaders = new HttpHeaders();
 
     httpHeaders.setContentType(APPLICATION_JSON);
     httpHeaders.put(TENANT, List.of(TEST_TENANT));
     httpHeaders.add(URL, getWiremockUrl());
     httpHeaders.add(TOKEN, TEST_TOKEN);
-    httpHeaders.add(USER_ID, REQUEST_USER_ID);
+    httpHeaders.add(USER_ID, userId);
 
     return httpHeaders;
   }

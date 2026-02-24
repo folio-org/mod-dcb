@@ -1,8 +1,10 @@
 package org.folio.dcb.service.entities;
 
+import static org.folio.dcb.service.ServicePointExpirationPeriodService.getSettingsKey;
 import static org.folio.dcb.service.impl.ServicePointServiceImpl.HOLD_SHELF_CLOSED_LIBRARY_DATE_MANAGEMENT;
 import static org.folio.dcb.utils.CqlQuery.exactMatchByName;
 import static org.folio.dcb.utils.DCBConstants.CODE;
+import static org.folio.dcb.utils.DCBConstants.DCB_TYPE;
 import static org.folio.dcb.utils.DCBConstants.DEFAULT_PERIOD;
 import static org.folio.dcb.utils.DCBConstants.NAME;
 import static org.folio.dcb.utils.DCBConstants.SERVICE_POINT_ID;
@@ -33,7 +35,8 @@ public class DcbServicePointService implements DcbEntityService<ServicePointRequ
   @Override
   public ServicePointRequest createDcbEntity() {
     log.debug("createDcbEntity:: Creating a new DCB Service Point");
-    var shelfExpiryPeriod = servicePointExpirationPeriodService.getShelfExpiryPeriod();
+    var settingsKey = getSettingsKey(DCB_TYPE);
+    var shelfExpiryPeriod = servicePointExpirationPeriodService.getShelfExpiryPeriod(settingsKey);
     var dcbServicePoint = getDcbServicePoint(shelfExpiryPeriod);
     var createdServicePoint = servicePointClient.createServicePoint(dcbServicePoint);
     log.info("createDcbEntity:: DCB Service Point created");

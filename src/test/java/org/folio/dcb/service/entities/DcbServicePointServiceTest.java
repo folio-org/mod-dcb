@@ -25,6 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class DcbServicePointServiceTest {
 
+  private static final String DCB_SETTING_KEY = "dcb.hold-shelf-expiry-period";
   private static final String TEST_SERVICE_POINT_ID = "9d1b77e8-f02e-4b7f-b296-3f2042ddac54";
   private static final String TEST_NAME = "DCB";
   private static final String TEST_CODE = "000";
@@ -62,13 +63,13 @@ class DcbServicePointServiceTest {
     var expiryPeriod = dcbExpiryPeriod();
     var expectedServicePoint = dcbServicePoint();
 
-    when(servicePointExpirationPeriodService.getShelfExpiryPeriod()).thenReturn(expiryPeriod);
+    when(servicePointExpirationPeriodService.getShelfExpiryPeriod(DCB_SETTING_KEY)).thenReturn(expiryPeriod);
     when(servicePointClient.createServicePoint(expectedServicePoint)).thenReturn(expectedServicePoint);
 
     var result = dcbServicePointService.createDcbEntity();
 
     assertThat(result).isEqualTo(dcbServicePoint());
-    verify(servicePointExpirationPeriodService).getShelfExpiryPeriod();
+    verify(servicePointExpirationPeriodService).getShelfExpiryPeriod(DCB_SETTING_KEY);
     verify(servicePointClient).createServicePoint(expectedServicePoint);
   }
 
@@ -87,7 +88,7 @@ class DcbServicePointServiceTest {
     var result = dcbServicePointService.findOrCreateEntity();
 
     assertThat(result).isEqualTo(dcbServicePoint());
-    verify(servicePointExpirationPeriodService, never()).getShelfExpiryPeriod();
+    verify(servicePointExpirationPeriodService, never()).getShelfExpiryPeriod(DCB_SETTING_KEY);
     verify(servicePointClient, never()).createServicePoint(any());
   }
 
