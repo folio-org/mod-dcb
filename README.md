@@ -7,24 +7,32 @@ Version 2.0. See the file "[LICENSE](LICENSE)" for more information.
 
 ## Table of Contents
 
-- [Introduction](#introduction)
-- [API information](#api-information)
-- [Installing and deployment](#installing-and-deployment)
-  - [Compiling](#compiling)
-  - [Running it](#running-it)
-  - [Docker](#docker)
-  - [Module descriptor](#module-descriptor)
-  - [Environment variables](#environment-variables)
-- [Additional information](#Additional-information)
-  - [Issue tracker](#issue-tracker)
-  - [API documentation](#api-documentation)
-  - [Code analysis](#code-analysis)
-  - [Service point hold shelf period expiration](#service-point-hold-shelf-period-expiration)
-  - [Other documentation](#other-documentation)
+<!-- TOC -->
+* [mod-dcb](#mod-dcb)
+  * [Table of Contents](#table-of-contents)
+  * [Introduction](#introduction)
+  * [API information](#api-information)
+  * [Installing and deployment](#installing-and-deployment)
+    * [Compiling](#compiling)
+    * [Running it](#running-it)
+    * [Docker](#docker)
+    * [Module Descriptor](#module-descriptor)
+    * [Environment variables](#environment-variables)
+  * [Additional information](#additional-information)
+    * [System user configuration](#system-user-configuration)
+    * [Issue tracker](#issue-tracker)
+    * [ModuleDescriptor](#moduledescriptor)
+    * [API documentation](#api-documentation)
+    * [Code analysis](#code-analysis)
+    * [Service Point Hold Shelf Period Expiration](#service-point-hold-shelf-period-expiration)
+      * [Settings Configuration](#settings-configuration)
+      * [Table: service_point_expiration_period](#table-service_point_expiration_period)
+  * [Other documentation](#other-documentation)
+<!-- TOC -->
 
 ## Introduction
 
-APIs for managing dcb transactions in folio.
+APIs for managing DCB (direct consortial borrowing) transactions in folio.
 
 ## API information
 
@@ -118,14 +126,79 @@ This module's [API documentation](https://dev.folio.org/reference/api/#mod-dcb).
 
 ### Service Point Hold Shelf Period Expiration
 
-When creating a **DCB** transaction with the roles **LENDER** or **BORROWING-PICKUP**, 
-the creation of the **DCB** service point and its property **hold shelf expiration period** 
-depends on the values stored in the `service_point_expiration_period` table in the database.
+When creating a **DCB** transaction with the roles **LENDER** or **BORROWER**,
+the creation of the **DCB** service point and its property **hold shelf expiration period**
+depends on the values stored in the `settings` or `service_point_expiration_period` tables in the database.
+
+#### Settings Configuration
+
+The following settings are relevant for the hold shelf expiration period and the can be created using:
+```text
+POST {{gateway}}/dcb/settings
+
+Headers:
+    Content-Type: application/json
+    x-okapi-tenant: {{tenant}}
+    x-okapi-token: {{token}}
+
+Request Body:
+  {{request body (examples below)}}
+```
+
+- Lender:
+  ```json
+  {
+    "id": "0980d067-ac36-4dc7-ab78-d5c6274ef2bc",
+    "key": "lender.hold-shelf-expiry-period",
+    "scope": "mod-dcb",
+    "value": {
+      "duration": 10,
+      "intervalId": "Days"
+    }
+  }
+  ```
+
+- Borrower:
+  ```json
+  {
+    "id": "33ef5144-927f-4fd9-b53a-17815054b4e8",
+    "key": "borrower.hold-shelf-expiry-period",
+    "scope": "mod-dcb",
+    "value": {
+      "duration": 10,
+      "intervalId": "Days"
+    }
+  }
+  ```
+
+- DCB (Virtual) Service Point:
+  ```json
+  {
+    "id": "33ef5144-927f-4fd9-b53a-17815054b4e8",
+    "key": "dcb.hold-shelf-expiry-period",
+    "scope": "mod-dcb",
+    "value": {
+      "duration": 10,
+      "intervalId": "Days"
+    }
+  }
+  ```
+
+As a fallback, `service_point_expiration_period` table is used to determine the hold shelf expiration period for the
+service point. if it's empty, the default value of 10 days will be used.
+
+> **_NOTE:_**
+> * Duration is always an integer value.
+> * IntervalId is an enum value that can be "Minutes", "Hours", "Days", "Weeks", or "Month". </br> _The value is
+>    case-sensitive. Parsing failures will be detected and logged, and in case of error - the fallback
+>    approach will be used._
+
+#### Table: service_point_expiration_period
 
 - If the table is empty, the **hold shelf expiration period** will be set to the default value of **10 Days**.
 - If the table contains a value, the stored value will be used instead.
 
-The **F.S.E. team** is responsible for updating the values in this table. 
+The **F.S.E. team** is responsible for updating the values in this table.
 To update the values, the following PL/pgSQL script can be executed:
 
 ```sql
@@ -153,15 +226,15 @@ BEGIN
         -- If no record exists, insert one; otherwise, update the existing record
         IF raw_id IS NULL THEN
             sql_query := format(
-                'INSERT INTO %I.service_point_expiration_period (id, duration, interval_id) 
-                 VALUES (gen_random_uuid(), %L, %L)', 
+                'INSERT INTO %I.service_point_expiration_period (id, duration, interval_id)
+                 VALUES (gen_random_uuid(), %L, %L)',
                  schema_name, new_duration, new_interval_id
             );
         ELSE
             sql_query := format(
-                'UPDATE %I.service_point_expiration_period 
+                'UPDATE %I.service_point_expiration_period
                  SET duration = %L, interval_id = %L
-                 WHERE id = %L', 
+                 WHERE id = %L',
                  schema_name, new_duration, new_interval_id, raw_id
             );
         END IF;
@@ -173,15 +246,15 @@ END;
 $$
 LANGUAGE plpgsql;
 ```
-**Updating Values in the Table**  
-To update the values, simply modify the new_duration and new_interval_id variables in the DECLARE section 
+**Updating Values in the Table**
+To update the values, simply modify the new_duration and new_interval_id variables in the DECLARE section
 of the script to reflect the new values.
 
-**Expiration Period Handling**    
+**Expiration Period Handling**
 For Existing Service Points
-When creating a new transaction with an existing DCB service point, the hold shelf expiration period 
-will be checked.  
-If the value in the transaction payload differs from the value stored 
+When creating a new transaction with an existing DCB service point, the hold shelf expiration period
+will be checked.
+If the value in the transaction payload differs from the value stored
 in the database, it will be updated accordingly.
 
 [SonarQube analysis](https://sonarcloud.io/project/overview?id=org.folio:mod-dcb).

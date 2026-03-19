@@ -9,7 +9,7 @@ import static org.folio.dcb.domain.dto.CirculationRequest.RequestTypeEnum.HOLD;
 import static org.folio.dcb.domain.dto.CirculationRequest.RequestTypeEnum.PAGE;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.EXPIRED;
 import static org.folio.dcb.support.wiremock.WiremockContainerExtension.getWireMockClient;
-import static org.folio.dcb.utils.EntityUtils.BORROWER_SERVICE_POINT_ID;
+import static org.folio.dcb.utils.EntityUtils.VIRTUAL_SERVICE_POINT_ID;
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
 import static org.folio.dcb.utils.EntityUtils.HOLDING_RECORD_ID;
 import static org.folio.dcb.utils.EntityUtils.INSTANCE_ID;
@@ -58,7 +58,7 @@ class SelfBorrowingTransactionIT {
 
     @Test
     @WireMockStub({
-      "/stubs/mod-inventory-storage/service-points/200-get-by-query(Virtual).json",
+      "/stubs/mod-inventory-storage/service-points/200-get-by-name(Virtual).json",
       "/stubs/mod-inventory-storage/service-points/204-put(Virtual).json",
       "/stubs/mod-calendar/calendars/200-get-all.json",
       "/stubs/mod-users/users/200-get-by-query(patron).json",
@@ -72,13 +72,13 @@ class SelfBorrowingTransactionIT {
       postDcbTransaction(DCB_TRANSACTION_ID, selfBorrowingTransaction)
         .andExpect(jsonPath("$.status").value("CREATED"));
 
-      verifyPostCirculationRequestCalledOnce(PAGE.getValue(), BORROWER_SERVICE_POINT_ID);
+      verifyPostCirculationRequestCalledOnce(PAGE.getValue(), VIRTUAL_SERVICE_POINT_ID);
       auditEntityVerifier.assertThatLatestEntityIsNotDuplicate(DCB_TRANSACTION_ID);
     }
 
     @Test
     @WireMockStub({
-      "/stubs/mod-inventory-storage/service-points/200-get-by-query(Virtual).json",
+      "/stubs/mod-inventory-storage/service-points/200-get-by-name(Virtual).json",
       "/stubs/mod-inventory-storage/service-points/204-put(Virtual).json",
       "/stubs/mod-calendar/calendars/200-get-all.json",
       "/stubs/mod-users/users/200-get-by-query(patron).json",
@@ -92,13 +92,13 @@ class SelfBorrowingTransactionIT {
       postDcbTransaction(DCB_TRANSACTION_ID, selfBorrowingTransaction)
         .andExpect(jsonPath("$.status").value("CREATED"));
 
-      verifyPostCirculationRequestCalledOnce(HOLD.getValue(), BORROWER_SERVICE_POINT_ID);
+      verifyPostCirculationRequestCalledOnce(HOLD.getValue(), VIRTUAL_SERVICE_POINT_ID);
       auditEntityVerifier.assertThatLatestEntityIsNotDuplicate(DCB_TRANSACTION_ID);
     }
 
     @Test
     @WireMockStub({
-      "/stubs/mod-inventory-storage/service-points/200-get-by-query(Virtual).json",
+      "/stubs/mod-inventory-storage/service-points/200-get-by-name(Virtual).json",
       "/stubs/mod-inventory-storage/service-points/204-put(Virtual).json",
       "/stubs/mod-calendar/calendars/200-get-all.json",
       "/stubs/mod-users/users/200-get-by-query(new_user empty).json"
@@ -119,7 +119,7 @@ class SelfBorrowingTransactionIT {
 
     @Test
     @WireMockStub({
-      "/stubs/mod-inventory-storage/service-points/200-get-by-query(Virtual).json",
+      "/stubs/mod-inventory-storage/service-points/200-get-by-name(Virtual).json",
       "/stubs/mod-inventory-storage/service-points/204-put(Virtual).json",
       "/stubs/mod-calendar/calendars/200-get-all.json",
       "/stubs/mod-users/users/200-get-by-query(patron).json",

@@ -8,7 +8,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static java.util.Collections.emptyList;
 import static org.folio.dcb.support.wiremock.WiremockContainerExtension.getWireMockClient;
-import static org.folio.dcb.utils.EntityUtils.BORROWER_SERVICE_POINT_ID;
+import static org.folio.dcb.utils.EntityUtils.VIRTUAL_SERVICE_POINT_ID;
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
 import static org.folio.dcb.utils.EntityUtils.EXISTED_PATRON_ID;
 import static org.folio.dcb.utils.EntityUtils.ITEM_ID;
@@ -82,7 +82,7 @@ class FlexibleEffectiveLocationIT {
     @Test
     @WireMockStub({
       "/stubs/mod-users/users/200-get-by-query(user).json",
-      "/stubs/mod-inventory-storage/service-points/200-get-by-query(Virtual).json",
+      "/stubs/mod-inventory-storage/service-points/200-get-by-name(Virtual).json",
       "/stubs/mod-inventory-storage/service-points/204-put(Virtual).json",
       "/stubs/mod-calendar/calendars/200-get-all.json",
       "/stubs/mod-inventory-storage/item-storage/200-get-by-query(barcode empty).json",
@@ -104,13 +104,13 @@ class FlexibleEffectiveLocationIT {
 
       verifyGetRequestBeingCalledOnce("/locations", QUERY_BY_SHADOW_LOCATION_CODE);
       verifyPostCirculationItemIsCalledOnce(SHADOW_LOCATION_ID);
-      verifyPostCirculationRequestCalledOnce(EXISTED_PATRON_ID, BORROWER_SERVICE_POINT_ID);
+      verifyPostCirculationRequestCalledOnce(EXISTED_PATRON_ID, VIRTUAL_SERVICE_POINT_ID);
     }
 
     @Test
     @WireMockStub({
       "/stubs/mod-users/users/200-get-by-query(user).json",
-      "/stubs/mod-inventory-storage/service-points/200-get-by-query(Virtual).json",
+      "/stubs/mod-inventory-storage/service-points/200-get-by-name(Virtual).json",
       "/stubs/mod-inventory-storage/service-points/204-put(Virtual).json",
       "/stubs/mod-calendar/calendars/200-get-all.json",
       "/stubs/mod-inventory-storage/item-storage/200-get-by-query(barcode empty).json",
@@ -136,13 +136,13 @@ class FlexibleEffectiveLocationIT {
       verifyGetRequestBeingCalledOnce("/locations", "libraryId==\"%s\"".formatted(SHADOW_LIBRARY_ID));
       verifyGetRequestBeingCalledOnce("/location-units/libraries", QUERY_BY_SHADOW_LOCATION_CODE);
       verifyPostCirculationItemIsCalledOnce(SHADOW_LOCATION_ID);
-      verifyPostCirculationRequestCalledOnce(EXISTED_PATRON_ID, BORROWER_SERVICE_POINT_ID);
+      verifyPostCirculationRequestCalledOnce(EXISTED_PATRON_ID, VIRTUAL_SERVICE_POINT_ID);
     }
 
     @Test
     @WireMockStub({
       "/stubs/mod-users/users/200-get-by-query(user).json",
-      "/stubs/mod-inventory-storage/service-points/200-get-by-query(Virtual).json",
+      "/stubs/mod-inventory-storage/service-points/200-get-by-name(Virtual).json",
       "/stubs/mod-inventory-storage/service-points/204-put(Virtual).json",
       "/stubs/mod-inventory-storage/item-storage/200-get-by-query(barcode empty).json",
       "/stubs/mod-inventory-storage/locations/200-get-by-query(KU+shadow empty).json",
@@ -166,13 +166,13 @@ class FlexibleEffectiveLocationIT {
       verifyGetRequestBeingCalledOnce("/locations", QUERY_BY_SHADOW_LOCATION_CODE);
       verifyGetRequestBeingCalledOnce("/location-units/libraries", QUERY_BY_SHADOW_LOCATION_CODE);
       verifyPostCirculationItemIsCalledOnce(DCB_LOCATION_ID);
-      verifyPostCirculationRequestCalledOnce(EXISTED_PATRON_ID, BORROWER_SERVICE_POINT_ID);
+      verifyPostCirculationRequestCalledOnce(EXISTED_PATRON_ID, VIRTUAL_SERVICE_POINT_ID);
     }
 
     @Test
     @WireMockStub({
       "/stubs/mod-users/users/200-get-by-query(user).json",
-      "/stubs/mod-inventory-storage/service-points/200-get-by-query(Virtual).json",
+      "/stubs/mod-inventory-storage/service-points/200-get-by-name(Virtual).json",
       "/stubs/mod-inventory-storage/service-points/204-put(Virtual).json",
       "/stubs/mod-calendar/calendars/200-get-all.json",
       "/stubs/mod-inventory-storage/item-storage/200-get-by-query(barcode empty).json",
@@ -191,13 +191,13 @@ class FlexibleEffectiveLocationIT {
       verifyGetRequestBeingCalledOnce("/location-units/libraries", QUERY_BY_SHADOW_LOCATION_CODE);
       verifyGetRequestBeingCalledOnce("/locations", "libraryId==\"%s\"".formatted(SHADOW_LIBRARY_ID));
       verifyPostCirculationItemIsCalledOnce(SHADOW_LOCATION_ID);
-      verifyPostCirculationRequestCalledOnce(EXISTED_PATRON_ID, BORROWER_SERVICE_POINT_ID);
+      verifyPostCirculationRequestCalledOnce(EXISTED_PATRON_ID, VIRTUAL_SERVICE_POINT_ID);
     }
 
     @Test
     @WireMockStub({
       "/stubs/mod-users/users/200-get-by-query(user).json",
-      "/stubs/mod-inventory-storage/service-points/200-get-by-query(Virtual).json",
+      "/stubs/mod-inventory-storage/service-points/200-get-by-name(Virtual).json",
       "/stubs/mod-inventory-storage/service-points/204-put(Virtual).json",
       "/stubs/mod-calendar/calendars/200-get-all.json",
       "/stubs/mod-inventory-storage/item-storage/200-get-by-query(barcode empty).json",
@@ -214,7 +214,7 @@ class FlexibleEffectiveLocationIT {
 
       verifyGetRequestBeingCalledOnce("/location-units/libraries", QUERY_BY_SHADOW_LOCATION_CODE);
       verifyPostCirculationItemIsCalledOnce(DCB_LOCATION_ID);
-      verifyPostCirculationRequestCalledOnce(EXISTED_PATRON_ID, BORROWER_SERVICE_POINT_ID);
+      verifyPostCirculationRequestCalledOnce(EXISTED_PATRON_ID, VIRTUAL_SERVICE_POINT_ID);
     }
   }
 
@@ -304,7 +304,7 @@ class FlexibleEffectiveLocationIT {
     @Test
     @WireMockStub({
       "/stubs/mod-users/users/200-get-by-query(user).json",
-      "/stubs/mod-inventory-storage/service-points/200-get-by-query(Virtual).json",
+      "/stubs/mod-inventory-storage/service-points/200-get-by-name(Virtual).json",
       "/stubs/mod-inventory-storage/service-points/204-put(Virtual).json",
       "/stubs/mod-calendar/calendars/200-get-all.json",
       "/stubs/mod-inventory-storage/item-storage/200-get-by-query(barcode empty).json",
@@ -323,13 +323,13 @@ class FlexibleEffectiveLocationIT {
       verifyGetRequestBeingCalledOnce("/location-units/libraries", QUERY_BY_SHADOW_LOCATION_CODE);
       verifyGetRequestBeingCalledOnce("/locations", "libraryId==\"%s\"".formatted(SHADOW_LIBRARY_ID));
       verifyPostCirculationItemIsCalledOnce(SHADOW_LOCATION_ID);
-      verifyPostCirculationRequestCalledOnce(EXISTED_PATRON_ID, BORROWER_SERVICE_POINT_ID);
+      verifyPostCirculationRequestCalledOnce(EXISTED_PATRON_ID, VIRTUAL_SERVICE_POINT_ID);
     }
 
     @Test
     @WireMockStub({
       "/stubs/mod-users/users/200-get-by-query(user).json",
-      "/stubs/mod-inventory-storage/service-points/200-get-by-query(Virtual).json",
+      "/stubs/mod-inventory-storage/service-points/200-get-by-name(Virtual).json",
       "/stubs/mod-inventory-storage/service-points/204-put(Virtual).json",
       "/stubs/mod-calendar/calendars/200-get-all.json",
       "/stubs/mod-inventory-storage/item-storage/200-get-by-query(barcode empty).json",
@@ -346,7 +346,7 @@ class FlexibleEffectiveLocationIT {
 
       verifyGetRequestBeingCalledOnce("/location-units/libraries", QUERY_BY_SHADOW_LOCATION_CODE);
       verifyPostCirculationItemIsCalledOnce(DCB_LOCATION_ID);
-      verifyPostCirculationRequestCalledOnce(EXISTED_PATRON_ID, BORROWER_SERVICE_POINT_ID);
+      verifyPostCirculationRequestCalledOnce(EXISTED_PATRON_ID, VIRTUAL_SERVICE_POINT_ID);
     }
   }
 

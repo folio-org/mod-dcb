@@ -17,7 +17,7 @@ import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.EXPIRED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_IN;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_OUT;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
-import static org.folio.dcb.utils.EntityUtils.BORROWER_SERVICE_POINT_ID;
+import static org.folio.dcb.utils.EntityUtils.VIRTUAL_SERVICE_POINT_ID;
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
 import static org.folio.dcb.utils.EntityUtils.EXISTED_PATRON_ID;
 import static org.folio.dcb.utils.EntityUtils.HOLDING_RECORD_ID;
@@ -30,6 +30,7 @@ import static org.folio.dcb.utils.EntityUtils.dcbItem;
 import static org.folio.dcb.utils.EntityUtils.dcbPatron;
 import static org.folio.dcb.utils.EntityUtils.dcbTransactionUpdate;
 import static org.folio.dcb.utils.EntityUtils.lenderDcbTransaction;
+import static org.folio.dcb.utils.EntityUtils.lenderHoldShelfExpirationSetting;
 import static org.folio.dcb.utils.EntityUtils.transactionStatus;
 import static org.folio.dcb.utils.EventDataProvider.expiredRequestMessage;
 import static org.folio.dcb.utils.EventDataProvider.itemCheckInMessage;
@@ -42,6 +43,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.folio.dcb.domain.dto.HoldShelfExpiryPeriod;
+import org.folio.dcb.domain.dto.IntervalIdEnum;
 import org.folio.dcb.domain.dto.TransactionStatus.StatusEnum;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.it.base.BaseTenantIntegrationTest;
@@ -102,7 +105,7 @@ class LenderTransactionIT extends BaseTenantIntegrationTest {
   @WireMockStub(value = {
     "/stubs/mod-users/users/200-get-by-query(user id+barcode).json",
     "/stubs/mod-users/groups/200-get-by-query(staff).json",
-    "/stubs/mod-inventory-storage/service-points/200-get-by-query(Virtual).json",
+    "/stubs/mod-inventory-storage/service-points/200-get-by-name(Virtual).json",
     "/stubs/mod-inventory-storage/service-points/204-put(Virtual).json",
     "/stubs/mod-calendar/calendars/200-get-all.json",
     "/stubs/mod-inventory-storage/item-storage/200-get-by-query(id+barcode).json",
@@ -124,7 +127,35 @@ class LenderTransactionIT extends BaseTenantIntegrationTest {
   @WireMockStub(value = {
     "/stubs/mod-users/users/200-get-by-query(user id+barcode).json",
     "/stubs/mod-users/groups/200-get-by-query(staff).json",
-    "/stubs/mod-inventory-storage/service-points/200-get-by-query(Virtual).json",
+    "/stubs/mod-inventory-storage/service-points/200-get-by-name(Virtual).json",
+    "/stubs/mod-inventory-storage/service-points/204-put(Virtual+custom).json",
+    "/stubs/mod-calendar/calendars/200-get-all.json",
+    "/stubs/mod-inventory-storage/item-storage/200-get-by-query(id+barcode).json",
+    "/stubs/mod-inventory-storage/holdings-storage/200-get-by-id.json",
+    "/stubs/mod-circulation/requests/201-post(any).json"
+  })
+  void createTransaction_positive_availableItemAndCustomHoldShelfExpiration() throws Exception {
+    var holdShelfExpiryPeriod = new HoldShelfExpiryPeriod().duration(25).intervalId(IntervalIdEnum.MINUTES);
+    testJdbcHelper.saveDcbSetting(TEST_TENANT, lenderHoldShelfExpirationSetting(holdShelfExpiryPeriod));
+    postDcbTransaction(DCB_TRANSACTION_ID, lenderDcbTransaction())
+      .andExpect(jsonPath("$.status").value("CREATED"))
+      .andExpect(jsonPath("$.item").value(dcbItem()))
+      .andExpect(jsonPath("$.patron").value(dcbPatron(EXISTED_PATRON_ID)))
+      .andExpect(jsonPath("$.item.locationCode").doesNotExist());
+
+    auditEntityVerifier.assertThatLatestEntityIsNotDuplicate(DCB_TRANSACTION_ID);
+    verifyPostCirculationRequestCalledOnce(PAGE.getValue(), EXISTED_PATRON_ID);
+
+    wiremock.verifyThat(1, putRequestedFor(urlPathEqualTo("/service-points/" + VIRTUAL_SERVICE_POINT_ID))
+      .withRequestBody(matchingJsonPath("$.holdShelfExpiryPeriod.duration", equalTo("25")))
+      .withRequestBody(matchingJsonPath("$.holdShelfExpiryPeriod.intervalId", equalTo("Minutes"))));
+  }
+
+  @Test
+  @WireMockStub(value = {
+    "/stubs/mod-users/users/200-get-by-query(user id+barcode).json",
+    "/stubs/mod-users/groups/200-get-by-query(staff).json",
+    "/stubs/mod-inventory-storage/service-points/200-get-by-name(Virtual).json",
     "/stubs/mod-inventory-storage/service-points/204-put(Virtual).json",
     "/stubs/mod-calendar/calendars/200-get-all.json",
     "/stubs/mod-inventory-storage/item-storage/200-get-by-query(id+barcode+in-transit).json",
@@ -146,7 +177,7 @@ class LenderTransactionIT extends BaseTenantIntegrationTest {
   @WireMockStub(value = {
     "/stubs/mod-users/users/200-get-by-query(user id+barcode).json",
     "/stubs/mod-users/groups/200-get-by-query(staff).json",
-    "/stubs/mod-inventory-storage/service-points/200-get-by-query(Virtual).json",
+    "/stubs/mod-inventory-storage/service-points/200-get-by-name(Virtual).json",
     "/stubs/mod-inventory-storage/service-points/204-put(Virtual).json",
     "/stubs/mod-calendar/calendars/200-get-all.json",
     "/stubs/mod-inventory-storage/item-storage/200-get-by-query(id+barcode).json",
@@ -170,7 +201,7 @@ class LenderTransactionIT extends BaseTenantIntegrationTest {
   @WireMockStub(value = {
     "/stubs/mod-users/users/200-get-by-query(user id+barcode).json",
     "/stubs/mod-users/groups/200-get-by-query(staff).json",
-    "/stubs/mod-inventory-storage/service-points/200-get-by-query(Virtual).json",
+    "/stubs/mod-inventory-storage/service-points/200-get-by-name(Virtual).json",
     "/stubs/mod-inventory-storage/service-points/204-put(Virtual).json",
     "/stubs/mod-calendar/calendars/200-get-all.json",
     "/stubs/mod-inventory-storage/item-storage/200-get-by-query(id+barcode).json",
@@ -197,7 +228,7 @@ class LenderTransactionIT extends BaseTenantIntegrationTest {
     "/stubs/mod-users/users/200-get-by-query(new_user empty).json",
     "/stubs/mod-users/groups/200-get-by-query(staff).json",
     "/stubs/mod-users/users/201-post-user(any).json",
-    "/stubs/mod-inventory-storage/service-points/200-get-by-query(Virtual).json",
+    "/stubs/mod-inventory-storage/service-points/200-get-by-name(Virtual).json",
     "/stubs/mod-inventory-storage/service-points/204-put(Virtual).json",
     "/stubs/mod-calendar/calendars/200-get-all.json",
     "/stubs/mod-inventory-storage/item-storage/200-get-by-query(id+barcode).json",
@@ -223,7 +254,7 @@ class LenderTransactionIT extends BaseTenantIntegrationTest {
     "/stubs/mod-users/users/200-get-by-query(new_user empty).json",
     "/stubs/mod-users/groups/200-get-by-query(staff).json",
     "/stubs/mod-users/users/201-post-user(any).json",
-    "/stubs/mod-inventory-storage/service-points/200-get-by-query(Virtual).json",
+    "/stubs/mod-inventory-storage/service-points/200-get-by-name(Virtual).json",
     "/stubs/mod-inventory-storage/service-points/204-put(Virtual).json",
     "/stubs/mod-calendar/calendars/200-get-all.json",
     "/stubs/mod-inventory-storage/item-storage/200-get-by-query(id+barcode).json",
@@ -250,7 +281,7 @@ class LenderTransactionIT extends BaseTenantIntegrationTest {
     "/stubs/mod-users/users/200-get-by-query(user id+barcode).json",
     "/stubs/mod-users/groups/200-get-by-query(staff).json",
     "/stubs/mod-users/users/204-put(any).json",
-    "/stubs/mod-inventory-storage/service-points/200-get-by-query(Virtual).json",
+    "/stubs/mod-inventory-storage/service-points/200-get-by-name(Virtual).json",
     "/stubs/mod-inventory-storage/service-points/204-put(Virtual).json",
     "/stubs/mod-calendar/calendars/200-get-all.json",
     "/stubs/mod-inventory-storage/item-storage/200-get-by-query(id+barcode).json",
@@ -276,7 +307,7 @@ class LenderTransactionIT extends BaseTenantIntegrationTest {
   @WireMockStub(value = {
     "/stubs/mod-users/users/200-get-by-query(user id+barcode).json",
     "/stubs/mod-users/groups/200-get-by-query(staff).json",
-    "/stubs/mod-inventory-storage/service-points/200-get-by-query(Virtual).json",
+    "/stubs/mod-inventory-storage/service-points/200-get-by-name(Virtual).json",
     "/stubs/mod-inventory-storage/service-points/204-put(Virtual).json",
     "/stubs/mod-calendar/calendars/200-get-all.json",
     "/stubs/mod-inventory-storage/item-storage/200-get-by-query(id+barcode empty).json"
@@ -298,7 +329,7 @@ class LenderTransactionIT extends BaseTenantIntegrationTest {
   @WireMockStub(value = {
     "/stubs/mod-users/users/200-get-by-query(user id+barcode).json",
     "/stubs/mod-users/groups/200-get-by-query(staff).json",
-    "/stubs/mod-inventory-storage/service-points/200-get-by-query(Virtual).json",
+    "/stubs/mod-inventory-storage/service-points/200-get-by-name(Virtual).json",
     "/stubs/mod-inventory-storage/service-points/204-put(Virtual).json",
     "/stubs/mod-calendar/calendars/200-get-all.json",
     "/stubs/mod-inventory-storage/item-storage/200-get-by-query(id+barcode-special chars).json",
@@ -380,7 +411,7 @@ class LenderTransactionIT extends BaseTenantIntegrationTest {
       .withRequestBody(matchingJsonPath("$.status", equalTo("Closed - Cancelled")))
       .withRequestBody(matchingJsonPath("$.instanceId", equalTo(INSTANCE_ID)))
       .withRequestBody(matchingJsonPath("$.requesterId", equalTo(EXISTED_PATRON_ID)))
-      .withRequestBody(matchingJsonPath("$.pickupServicePointId", equalTo(BORROWER_SERVICE_POINT_ID)))
+      .withRequestBody(matchingJsonPath("$.pickupServicePointId", equalTo(VIRTUAL_SERVICE_POINT_ID)))
       .withRequestBody(matchingJsonPath("$.holdingsRecordId", equalTo(HOLDING_RECORD_ID))));
   }
 
@@ -400,7 +431,7 @@ class LenderTransactionIT extends BaseTenantIntegrationTest {
       .withRequestBody(matchingJsonPath("$.status", equalTo("Closed - Cancelled")))
       .withRequestBody(matchingJsonPath("$.instanceId", equalTo(INSTANCE_ID)))
       .withRequestBody(matchingJsonPath("$.requesterId", equalTo(EXISTED_PATRON_ID)))
-      .withRequestBody(matchingJsonPath("$.pickupServicePointId", equalTo(BORROWER_SERVICE_POINT_ID)))
+      .withRequestBody(matchingJsonPath("$.pickupServicePointId", equalTo(VIRTUAL_SERVICE_POINT_ID)))
       .withRequestBody(matchingJsonPath("$.holdingsRecordId", equalTo(HOLDING_RECORD_ID))));
   }
 
@@ -510,7 +541,7 @@ class LenderTransactionIT extends BaseTenantIntegrationTest {
       .withRequestBody(matchingJsonPath("$.itemId", equalTo(ITEM_ID)))
       .withRequestBody(matchingJsonPath("$.instanceId", equalTo(INSTANCE_ID)))
       .withRequestBody(matchingJsonPath("$.requesterId", equalTo(requesterId)))
-      .withRequestBody(matchingJsonPath("$.pickupServicePointId", equalTo(BORROWER_SERVICE_POINT_ID)))
+      .withRequestBody(matchingJsonPath("$.pickupServicePointId", equalTo(VIRTUAL_SERVICE_POINT_ID)))
       .withRequestBody(matchingJsonPath("$.holdingsRecordId", equalTo(HOLDING_RECORD_ID))));
   }
 }

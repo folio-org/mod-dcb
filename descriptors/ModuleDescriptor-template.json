@@ -302,6 +302,37 @@
       ]
     },
     {
+      "id": "dcb.settings",
+      "version": "1.0",
+      "handlers": [
+        {
+          "methods": ["GET"],
+          "pathPattern": "/dcb/settings",
+          "permissionsRequired": ["dcb.settings.collection.get"]
+        },
+        {
+          "methods": ["GET"],
+          "pathPattern": "/dcb/settings/{id}",
+          "permissionsRequired": ["dcb.settings.item.get"]
+        },
+        {
+          "methods": ["POST"],
+          "pathPattern": "/dcb/settings",
+          "permissionsRequired": ["dcb.settings.item.post"]
+        },
+        {
+          "methods": ["PUT"],
+          "pathPattern": "/dcb/settings/{id}",
+          "permissionsRequired": ["dcb.settings.item.put"]
+        },
+        {
+          "methods": ["DELETE"],
+          "pathPattern": "/dcb/settings/{id}",
+          "permissionsRequired": ["dcb.settings.item.delete"]
+        }
+      ]
+    },
+    {
       "id": "_tenant",
       "version": "2.0",
       "interfaceType": "system",
@@ -361,6 +392,7 @@
       "displayName": "DCB module - all permissions",
       "description": "All permissions for dcb module",
       "subPermissions": [
+        "dcb.settings.all",
         "dcb.transactions.post",
         "dcb.transactions.status.put",
         "dcb.transactions.status.get",
@@ -424,6 +456,43 @@
       "permissionName": "dcb.shadow_locations.refresh.post",
       "displayName": "trigger refresh of shadow locations",
       "description": "trigger refresh of shadow locations"
+    },
+    {
+      "permissionName" : "dcb.settings.collection.get",
+      "displayName" : "mod-dcb - retrieve settings by cql",
+      "description" : "Get a collection of settings"
+    },
+    {
+      "permissionName" : "dcb.settings.item.get",
+      "displayName" : "mod-dcb - retrieve a setting by id",
+      "description" : "Fetch a setting"
+    },
+    {
+      "permissionName" : "dcb.settings.item.put",
+      "displayName" : "mod-dcb - Update a setting by id",
+      "description" : "Update a setting"
+    },
+    {
+      "permissionName" : "dcb.settings.item.post",
+      "displayName" : "mod-dcb - Save a setting",
+      "description" : "Add a setting"
+    },
+    {
+      "permissionName" : "dcb.settings.item.delete",
+      "displayName" : "mod-dcb - Remove a setting by id",
+      "description" : "Delete a setting"
+    },
+    {
+      "permissionName" : "dcb.settings.all",
+      "displayName" : "mod-dcb - settings all",
+      "description" : "All permissions for setting",
+      "subPermissions" : [
+        "dcb.settings.collection.get",
+        "dcb.settings.item.get",
+        "dcb.settings.item.post",
+        "dcb.settings.item.put",
+        "dcb.settings.item.delete"
+      ]
     }
   ],
   "metadata": {

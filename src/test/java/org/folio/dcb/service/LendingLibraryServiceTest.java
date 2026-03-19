@@ -1,10 +1,8 @@
 package org.folio.dcb.service;
 
-import org.folio.dcb.domain.dto.ItemStatus;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.entity.TransactionEntity;
-import org.folio.dcb.exception.InventoryItemNotFound;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.impl.BaseLibraryService;
 import org.folio.dcb.service.impl.CirculationServiceImpl;
@@ -21,14 +19,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.UUID;
 
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
-import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.IN_TRANSIT;
 import static org.folio.dcb.utils.EntityUtils.CIRCULATION_REQUEST_ID;
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
 import static org.folio.dcb.utils.EntityUtils.createCirculationRequest;
 import static org.folio.dcb.utils.EntityUtils.createDcbItem;
 import static org.folio.dcb.utils.EntityUtils.createDefaultDcbPatron;
 import static org.folio.dcb.utils.EntityUtils.createDcbTransactionByRole;
-import static org.folio.dcb.utils.EntityUtils.createInventoryItem;
 import static org.folio.dcb.utils.EntityUtils.createServicePointRequest;
 import static org.folio.dcb.utils.EntityUtils.createTransactionEntity;
 import static org.folio.dcb.utils.EntityUtils.createTransactionStatus;
@@ -38,7 +34,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -60,13 +55,12 @@ class LendingLibraryServiceTest {
     var patron = createDefaultDcbPatron();
     var user = createUser();
     var dcbTransaction = createDcbTransactionByRole(LENDER);
-    var dcbPickup = dcbTransaction.getPickup();
     var servicePoint = createServicePointRequest();
     servicePoint.setId(UUID.randomUUID().toString());
 
     when(userService.fetchOrCreateUser(any()))
       .thenReturn(user);
-    when(servicePointService.createServicePointIfNotExists(dcbPickup)).thenReturn(servicePoint);
+    when(servicePointService.createServicePointIfNotExists(dcbTransaction)).thenReturn(servicePoint);
     when(requestService.createRequestBasedOnItemStatus(any(), any(), anyString())).thenReturn(createCirculationRequest());
     doNothing().when(baseLibraryService).saveDcbTransaction(any(), any(), any());
 
@@ -124,53 +118,5 @@ class LendingLibraryServiceTest {
     TransactionEntity transactionEntity = createTransactionEntity();
     TransactionStatus transactionStatus = createTransactionStatus(TransactionStatus.StatusEnum.AWAITING_PICKUP);
     assertThrows(IllegalArgumentException.class, () -> lendingLibraryService.updateTransactionStatus(transactionEntity, transactionStatus));
-  }
-
-  @Test
-  void closeExpiredTransactionEntityAvailableItem() {
-    var entity = createTransactionEntity();
-    var item = createInventoryItem();
-    var servicePointId = UUID.randomUUID().toString();
-    when(itemService.findItemByIdAfterCheckIn(entity.getItemId(), servicePointId)).thenReturn(item);
-
-    lendingLibraryService.closeExpiredTransactionEntity(entity, servicePointId);
-
-    verify(transactionRepository).save(any());
-  }
-
-  @Test
-  void closeExpiredTransactionEntityUnavailableItem() {
-    var entity = createTransactionEntity();
-    var item = createInventoryItem().status(new ItemStatus().name(IN_TRANSIT));
-    var servicePointId = UUID.randomUUID().toString();
-    when(itemService.findItemByIdAfterCheckIn(entity.getItemId(), servicePointId)).thenReturn(item);
-
-    lendingLibraryService.closeExpiredTransactionEntity(entity, servicePointId);
-
-    verify(transactionRepository, never()).save(any());
-  }
-
-  @Test
-  void closeExpiredTransactionEntityNullStatus() {
-    var entity = createTransactionEntity();
-    var item = createInventoryItem().status(null);
-    var servicePointId = UUID.randomUUID().toString();
-    when(itemService.findItemByIdAfterCheckIn(entity.getItemId(), servicePointId)).thenReturn(item);
-
-    lendingLibraryService.closeExpiredTransactionEntity(entity, servicePointId);
-
-    verify(transactionRepository, never()).save(any());
-  }
-
-  @Test
-  void closeExpiredTransactionEntityMatchedItemNotFound() {
-    var entity = createTransactionEntity();
-    var servicePointId = UUID.randomUUID().toString();
-    when(itemService.findItemByIdAfterCheckIn(entity.getItemId(), servicePointId))
-      .thenThrow(new InventoryItemNotFound("not found"));
-
-    lendingLibraryService.closeExpiredTransactionEntity(entity, servicePointId);
-
-    verify(transactionRepository, never()).save(any());
   }
 }

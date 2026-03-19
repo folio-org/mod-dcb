@@ -1,16 +1,18 @@
 package org.folio.dcb.service.impl;
 
+import static org.folio.dcb.service.ServicePointExpirationPeriodService.getSettingsKey;
+
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dcb.client.feign.InventoryServicePointClient;
-import org.folio.dcb.domain.dto.DcbPickup;
+import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.HoldShelfExpiryPeriod;
 import org.folio.dcb.domain.dto.ServicePointRequest;
 import org.folio.dcb.service.CalendarService;
 import org.folio.dcb.service.ServicePointExpirationPeriodService;
 import org.folio.dcb.service.ServicePointService;
-import org.folio.util.StringUtil;
+import org.folio.dcb.utils.CqlQuery;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -24,13 +26,15 @@ public class ServicePointServiceImpl implements ServicePointService {
   public static final String HOLD_SHELF_CLOSED_LIBRARY_DATE_MANAGEMENT = "Keep_the_current_due_date";
 
   @Override
-  public ServicePointRequest createServicePointIfNotExists(DcbPickup pickupServicePoint) {
+  public ServicePointRequest createServicePointIfNotExists(DcbTransaction dcbTransaction) {
+    var pickupServicePoint = dcbTransaction.getPickup();
     log.debug("createServicePoint:: automate service point creation {} ", pickupServicePoint);
     String servicePointName = getServicePointName(pickupServicePoint.getLibraryCode(),
       pickupServicePoint.getServicePointName());
-    var servicePointRequestList = servicePointClient
-      .getServicePointByName(StringUtil.cqlEncode(servicePointName)).getResult();
-    var shelfExpiryPeriod = servicePointExpirationPeriodService.getShelfExpiryPeriod();
+    var query = CqlQuery.exactMatchByName(servicePointName).getQuery();
+    var servicePointRequestList = servicePointClient.findByQuery(query).getResult();
+    var settingsKey = getSettingsKey(dcbTransaction.getRole().getValue());
+    var shelfExpiryPeriod = servicePointExpirationPeriodService.getShelfExpiryPeriod(settingsKey);
     if (servicePointRequestList.isEmpty()) {
       String servicePointId = UUID.randomUUID().toString();
       String servicePointCode = getServicePointCode(pickupServicePoint.getLibraryCode(),

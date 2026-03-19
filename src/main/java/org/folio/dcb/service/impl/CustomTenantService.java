@@ -17,6 +17,7 @@ import org.folio.dcb.domain.dto.ServicePointRequest;
 import org.folio.dcb.listener.kafka.service.KafkaService;
 import org.folio.dcb.service.CalendarService;
 import org.folio.dcb.service.ServicePointExpirationPeriodService;
+import org.folio.dcb.utils.DCBConstants;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.liquibase.FolioSpringLiquibase;
 import org.folio.spring.service.PrepareSystemUserService;
@@ -34,6 +35,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import static org.folio.dcb.service.ServicePointExpirationPeriodService.getSettingsKey;
 import static org.folio.dcb.service.impl.ServicePointServiceImpl.HOLD_SHELF_CLOSED_LIBRARY_DATE_MANAGEMENT;
 import static org.folio.dcb.utils.DCBConstants.CAMPUS_ID;
 import static org.folio.dcb.utils.DCBConstants.CANCELLATION_REASON_ID;
@@ -211,6 +213,7 @@ public class CustomTenantService extends TenantService {
 
   private void createServicePoint() {
     if (servicePointClient.getServicePointByName(NAME).getTotalRecords() == 0) {
+      var settingsKey = getSettingsKey(DCBConstants.DCB_TYPE);
       log.debug("createServicePoint:: creating service point");
       ServicePointRequest servicePointRequest = ServicePointRequest.builder()
         .id(SERVICE_POINT_ID)
@@ -218,7 +221,7 @@ public class CustomTenantService extends TenantService {
         .code(CODE)
         .discoveryDisplayName(NAME)
         .pickupLocation(true)
-        .holdShelfExpiryPeriod(servicePointExpirationPeriodService.getShelfExpiryPeriod())
+        .holdShelfExpiryPeriod(servicePointExpirationPeriodService.getShelfExpiryPeriod(settingsKey))
         .holdShelfClosedLibraryDateManagement(HOLD_SHELF_CLOSED_LIBRARY_DATE_MANAGEMENT)
         .build();
 

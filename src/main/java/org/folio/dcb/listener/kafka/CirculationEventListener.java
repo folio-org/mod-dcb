@@ -8,13 +8,11 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.repository.TransactionRepository;
-import org.folio.dcb.service.LibraryService;
 import org.folio.dcb.service.impl.BaseLibraryService;
 import org.folio.dcb.service.impl.LendingLibraryServiceImpl;
 import org.folio.dcb.utils.TransactionHelper;
 import org.folio.spring.integration.XOkapiHeaders;
 import org.folio.spring.service.SystemUserScopedExecutionService;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.stereotype.Component;
@@ -39,9 +37,6 @@ public class CirculationEventListener {
   private final TransactionRepository transactionRepository;
   private final SystemUserScopedExecutionService systemUserScopedExecutionService;
   private final BaseLibraryService baseLibraryService;
-
-  @Qualifier("lendingLibraryService")
-  private final LibraryService lendingLibraryService;
 
   @KafkaListener(
     id = CHECK_OUT_LOAN_LISTENER_ID,
@@ -125,9 +120,8 @@ public class CirculationEventListener {
 
     systemUserScopedExecutionService.executeAsyncSystemUserScoped(tenantId, () -> {
       var itemUuid = UUID.fromString(eventData.getItemId());
-      transactionRepository.findExpiredLenderTransactionsByItemId(itemUuid).forEach(entity ->
-        ((LendingLibraryServiceImpl) lendingLibraryService)
-          .closeExpiredTransactionEntity(entity, eventData.getCheckInServicePointId()));
+      transactionRepository.findExpiredTransactionsByItemId(itemUuid).forEach(entity ->
+        baseLibraryService.closeExpiredTransactionEntity(entity, eventData.getCheckInServicePointId()));
     });
   }
 
@@ -156,7 +150,7 @@ public class CirculationEventListener {
       baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.OPEN);
     } else if (type == EventData.EventType.AWAITING_PICKUP && (role == BORROWING_PICKUP || role == PICKUP)) {
       baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.AWAITING_PICKUP);
-    } else if (type == EventData.EventType.EXPIRED && role == LENDER) {
+    } else if (type == EventData.EventType.EXPIRED) {
       baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.EXPIRED);
     } else {
       log.info("handleRequestEvent:: status for event {} can not be updated", eventData);
