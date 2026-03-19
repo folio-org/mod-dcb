@@ -27,13 +27,13 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import org.folio.dcb.integration.invstorage.InventoryItemStorageClient;
+import org.folio.dcb.client.feign.InventoryItemStorageClient;
 import org.folio.dcb.domain.dto.InventoryItem;
 import org.folio.dcb.domain.dto.ItemLastCheckIn;
 import org.folio.dcb.domain.dto.ItemStatus;
 import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.it.base.BaseTenantIntegrationTest;
-import org.folio.dcb.integration.kafka.CirculationEventListener;
+import org.folio.dcb.listener.kafka.CirculationEventListener;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.spring.integration.XOkapiHeaders;
 import org.junit.jupiter.api.Test;
@@ -73,14 +73,14 @@ class CirculationCheckInEventListenerTest extends BaseTenantIntegrationTest {
 
     when(repository.findExpiredTransactionsByItemId(ITEM_UUID)).thenReturn(List.of(transactionEntity()));
     when(repository.save(transactionEntityArgumentCaptor.capture())).then(v -> v.getArgument(0));
-    when(itemStorageClient.findByQuery(exactMatchById(ITEM_ID).getQuery()))
+    when(itemStorageClient.fetchItemByQuery(exactMatchById(ITEM_ID)))
       .thenReturn(asSinglePage(prevItem))
       .thenReturn(asSinglePage(validItem));
 
     eventListener.handleCheckInEvent(CHECK_IN_EVENT_SAMPLE, messageHeaders());
 
     verify(repository).save(any());
-    verify(itemStorageClient, times(2)).findByQuery(exactMatchById(ITEM_ID).getQuery());
+    verify(itemStorageClient, times(2)).fetchItemByQuery(exactMatchById(ITEM_ID));
     var savedValue = transactionEntityArgumentCaptor.getValue();
     assertThat(savedValue.getStatus()).isEqualTo(CLOSED);
   }
@@ -93,11 +93,11 @@ class CirculationCheckInEventListenerTest extends BaseTenantIntegrationTest {
       .lastCheckIn(new ItemLastCheckIn().servicePointId(PICKUP_SERVICE_POINT_ID));
 
     when(repository.findExpiredTransactionsByItemId(ITEM_UUID)).thenReturn(List.of(transactionEntity()));
-    when(itemStorageClient.findByQuery(exactMatchById(ITEM_ID).getQuery())).thenReturn(asSinglePage(item));
+    when(itemStorageClient.fetchItemByQuery(exactMatchById(ITEM_ID))).thenReturn(asSinglePage(item));
 
     eventListener.handleCheckInEvent(CHECK_IN_EVENT_SAMPLE, messageHeaders());
 
-    verify(itemStorageClient, times(4)).findByQuery(exactMatchById(ITEM_ID).getQuery());
+    verify(itemStorageClient, times(3)).fetchItemByQuery(exactMatchById(ITEM_ID));
     verify(repository, never()).save(any());
   }
 
@@ -109,12 +109,12 @@ class CirculationCheckInEventListenerTest extends BaseTenantIntegrationTest {
 
     when(repository.findExpiredTransactionsByItemId(ITEM_UUID)).thenReturn(List.of(transactionEntity()));
     when(repository.save(transactionEntityArgumentCaptor.capture())).then(v -> v.getArgument(0));
-    when(itemStorageClient.findByQuery(exactMatchById(ITEM_ID).getQuery())).thenReturn(asSinglePage(item));
+    when(itemStorageClient.fetchItemByQuery(exactMatchById(ITEM_ID))).thenReturn(asSinglePage(item));
 
     eventListener.handleCheckInEvent(CHECK_IN_EVENT_SAMPLE, messageHeaders());
 
     verify(repository, never()).save(any());
-    verify(itemStorageClient).findByQuery(exactMatchById(ITEM_ID).getQuery());
+    verify(itemStorageClient).fetchItemByQuery(exactMatchById(ITEM_ID));
   }
 
   @ParameterizedTest
@@ -140,7 +140,7 @@ class CirculationCheckInEventListenerTest extends BaseTenantIntegrationTest {
     var item = new InventoryItem().id(ITEM_ID).status(new ItemStatus().name(AVAILABLE));
 
     when(repository.findExpiredTransactionsByItemId(ITEM_UUID)).thenReturn(emptyList());
-    when(itemStorageClient.findByQuery(exactMatchById(ITEM_ID).getQuery())).thenReturn(asSinglePage(item));
+    when(itemStorageClient.fetchItemByQuery(exactMatchById(ITEM_ID))).thenReturn(asSinglePage(item));
 
     eventListener.handleCheckInEvent(CHECK_IN_EVENT_SAMPLE, messageHeaders());
 

@@ -6,13 +6,13 @@ import java.util.Objects;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.folio.dcb.domain.ResultList;
 import org.folio.dcb.domain.dto.Setting;
 import org.folio.dcb.domain.dto.SettingsCollection;
 import org.folio.dcb.domain.mapper.SettingMapper;
 import org.folio.dcb.repository.SettingRepository;
 import org.folio.spring.data.OffsetRequest;
 import org.folio.spring.exception.NotFoundException;
+import org.folio.spring.model.ResultList;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

@@ -80,7 +80,7 @@ class BorrowerTransactionIT extends BaseTenantIntegrationTest {
 
   @Test
   @WireMockStub({
-    "/stubs/mod-inventory-storage/service-points/200-get-by-query(Virtual).json",
+    "/stubs/mod-inventory-storage/service-points/200-get-by-name(Virtual).json",
     "/stubs/mod-inventory-storage/service-points/204-put(Virtual).json",
     "/stubs/mod-calendar/calendars/200-get-all.json",
     "/stubs/mod-users/users/200-get-by-query(user).json",
@@ -106,7 +106,7 @@ class BorrowerTransactionIT extends BaseTenantIntegrationTest {
 
   @Test
   @WireMockStub({
-    "/stubs/mod-inventory-storage/service-points/200-get-by-query(Virtual).json",
+    "/stubs/mod-inventory-storage/service-points/200-get-by-name(Virtual).json",
     "/stubs/mod-inventory-storage/service-points/204-put(Virtual).json",
     "/stubs/mod-calendar/calendars/200-get-all.json",
     "/stubs/mod-users/users/200-get-by-query(patron).json",
@@ -126,7 +126,7 @@ class BorrowerTransactionIT extends BaseTenantIntegrationTest {
 
   @Test
   @WireMockStub({
-    "/stubs/mod-inventory-storage/service-points/200-get-by-query(Virtual).json",
+    "/stubs/mod-inventory-storage/service-points/200-get-by-name(Virtual).json",
     "/stubs/mod-inventory-storage/service-points/204-put(Virtual).json",
     "/stubs/mod-calendar/calendars/200-get-all.json",
     "/stubs/mod-users/users/200-get-by-query(new_user empty).json",
@@ -147,7 +147,7 @@ class BorrowerTransactionIT extends BaseTenantIntegrationTest {
 
   @Test
   @WireMockStub({
-    "/stubs/mod-inventory-storage/service-points/200-get-by-query(Virtual).json",
+    "/stubs/mod-inventory-storage/service-points/200-get-by-name(Virtual).json",
     "/stubs/mod-inventory-storage/service-points/204-put(Virtual).json",
     "/stubs/mod-calendar/calendars/200-get-all.json",
     "/stubs/mod-users/users/200-get-by-query(patron).json",
@@ -170,7 +170,7 @@ class BorrowerTransactionIT extends BaseTenantIntegrationTest {
 
   @Test
   @WireMockStub({
-    "/stubs/mod-inventory-storage/service-points/200-get-by-query(Virtual).json",
+    "/stubs/mod-inventory-storage/service-points/200-get-by-name(Virtual).json",
     "/stubs/mod-inventory-storage/service-points/204-put(Virtual).json",
     "/stubs/mod-calendar/calendars/200-get-all.json",
     "/stubs/mod-users/users/200-get-by-query(patron).json",
@@ -331,7 +331,7 @@ class BorrowerTransactionIT extends BaseTenantIntegrationTest {
 
   @Test
   @WireMockStub({
-    "/stubs/mod-inventory-storage/service-points/200-get-by-query(Virtual).json",
+    "/stubs/mod-inventory-storage/service-points/200-get-by-name(Virtual).json",
     "/stubs/mod-inventory-storage/service-points/204-put(Virtual).json",
     "/stubs/mod-calendar/calendars/200-get-all.json",
     "/stubs/mod-users/users/200-get-by-query(patron).json",
@@ -359,7 +359,7 @@ class BorrowerTransactionIT extends BaseTenantIntegrationTest {
 
   @Test
   @WireMockStub({
-    "/stubs/mod-inventory-storage/service-points/200-get-by-query(Virtual).json",
+    "/stubs/mod-inventory-storage/service-points/200-get-by-name(Virtual).json",
     "/stubs/mod-inventory-storage/service-points/204-put(Virtual).json",
     "/stubs/mod-calendar/calendars/200-get-all.json",
     "/stubs/mod-users/users/200-get-by-query(patron).json",

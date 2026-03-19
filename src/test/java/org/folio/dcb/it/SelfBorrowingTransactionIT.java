@@ -58,7 +58,7 @@ class SelfBorrowingTransactionIT {
 
     @Test
     @WireMockStub({
-      "/stubs/mod-inventory-storage/service-points/200-get-by-query(Virtual).json",
+      "/stubs/mod-inventory-storage/service-points/200-get-by-name(Virtual).json",
       "/stubs/mod-inventory-storage/service-points/204-put(Virtual).json",
       "/stubs/mod-calendar/calendars/200-get-all.json",
       "/stubs/mod-users/users/200-get-by-query(patron).json",
@@ -78,7 +78,7 @@ class SelfBorrowingTransactionIT {
 
     @Test
     @WireMockStub({
-      "/stubs/mod-inventory-storage/service-points/200-get-by-query(Virtual).json",
+      "/stubs/mod-inventory-storage/service-points/200-get-by-name(Virtual).json",
       "/stubs/mod-inventory-storage/service-points/204-put(Virtual).json",
       "/stubs/mod-calendar/calendars/200-get-all.json",
       "/stubs/mod-users/users/200-get-by-query(patron).json",
@@ -98,7 +98,7 @@ class SelfBorrowingTransactionIT {
 
     @Test
     @WireMockStub({
-      "/stubs/mod-inventory-storage/service-points/200-get-by-query(Virtual).json",
+      "/stubs/mod-inventory-storage/service-points/200-get-by-name(Virtual).json",
       "/stubs/mod-inventory-storage/service-points/204-put(Virtual).json",
       "/stubs/mod-calendar/calendars/200-get-all.json",
       "/stubs/mod-users/users/200-get-by-query(new_user empty).json"
@@ -119,7 +119,7 @@ class SelfBorrowingTransactionIT {
 
     @Test
     @WireMockStub({
-      "/stubs/mod-inventory-storage/service-points/200-get-by-query(Virtual).json",
+      "/stubs/mod-inventory-storage/service-points/200-get-by-name(Virtual).json",
       "/stubs/mod-inventory-storage/service-points/204-put(Virtual).json",
       "/stubs/mod-calendar/calendars/200-get-all.json",
       "/stubs/mod-users/users/200-get-by-query(patron).json",

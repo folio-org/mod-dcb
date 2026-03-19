@@ -7,8 +7,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dcb.client.feign.InventoryServicePointClient;
 import org.folio.dcb.domain.dto.DcbTransaction;
-import org.folio.dcb.integration.invstorage.ServicePointClient;
-import org.folio.dcb.domain.dto.DcbPickup;
 import org.folio.dcb.domain.dto.HoldShelfExpiryPeriod;
 import org.folio.dcb.domain.dto.ServicePointRequest;
 import org.folio.dcb.service.CalendarService;

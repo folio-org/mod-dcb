@@ -82,7 +82,7 @@ class FlexibleEffectiveLocationIT {
     @Test
     @WireMockStub({
       "/stubs/mod-users/users/200-get-by-query(user).json",
-      "/stubs/mod-inventory-storage/service-points/200-get-by-query(Virtual).json",
+      "/stubs/mod-inventory-storage/service-points/200-get-by-name(Virtual).json",
       "/stubs/mod-inventory-storage/service-points/204-put(Virtual).json",
       "/stubs/mod-calendar/calendars/200-get-all.json",
       "/stubs/mod-inventory-storage/item-storage/200-get-by-query(barcode empty).json",
@@ -110,7 +110,7 @@ class FlexibleEffectiveLocationIT {
     @Test
     @WireMockStub({
       "/stubs/mod-users/users/200-get-by-query(user).json",
-      "/stubs/mod-inventory-storage/service-points/200-get-by-query(Virtual).json",
+      "/stubs/mod-inventory-storage/service-points/200-get-by-name(Virtual).json",
       "/stubs/mod-inventory-storage/service-points/204-put(Virtual).json",
       "/stubs/mod-calendar/calendars/200-get-all.json",
       "/stubs/mod-inventory-storage/item-storage/200-get-by-query(barcode empty).json",
@@ -142,7 +142,7 @@ class FlexibleEffectiveLocationIT {
     @Test
     @WireMockStub({
       "/stubs/mod-users/users/200-get-by-query(user).json",
-      "/stubs/mod-inventory-storage/service-points/200-get-by-query(Virtual).json",
+      "/stubs/mod-inventory-storage/service-points/200-get-by-name(Virtual).json",
       "/stubs/mod-inventory-storage/service-points/204-put(Virtual).json",
       "/stubs/mod-inventory-storage/item-storage/200-get-by-query(barcode empty).json",
       "/stubs/mod-inventory-storage/locations/200-get-by-query(KU+shadow empty).json",
@@ -172,7 +172,7 @@ class FlexibleEffectiveLocationIT {
     @Test
     @WireMockStub({
       "/stubs/mod-users/users/200-get-by-query(user).json",
-      "/stubs/mod-inventory-storage/service-points/200-get-by-query(Virtual).json",
+      "/stubs/mod-inventory-storage/service-points/200-get-by-name(Virtual).json",
       "/stubs/mod-inventory-storage/service-points/204-put(Virtual).json",
       "/stubs/mod-calendar/calendars/200-get-all.json",
       "/stubs/mod-inventory-storage/item-storage/200-get-by-query(barcode empty).json",
@@ -197,7 +197,7 @@ class FlexibleEffectiveLocationIT {
     @Test
     @WireMockStub({
       "/stubs/mod-users/users/200-get-by-query(user).json",
-      "/stubs/mod-inventory-storage/service-points/200-get-by-query(Virtual).json",
+      "/stubs/mod-inventory-storage/service-points/200-get-by-name(Virtual).json",
       "/stubs/mod-inventory-storage/service-points/204-put(Virtual).json",
       "/stubs/mod-calendar/calendars/200-get-all.json",
       "/stubs/mod-inventory-storage/item-storage/200-get-by-query(barcode empty).json",
@@ -304,7 +304,7 @@ class FlexibleEffectiveLocationIT {
     @Test
     @WireMockStub({
       "/stubs/mod-users/users/200-get-by-query(user).json",
-      "/stubs/mod-inventory-storage/service-points/200-get-by-query(Virtual).json",
+      "/stubs/mod-inventory-storage/service-points/200-get-by-name(Virtual).json",
       "/stubs/mod-inventory-storage/service-points/204-put(Virtual).json",
       "/stubs/mod-calendar/calendars/200-get-all.json",
       "/stubs/mod-inventory-storage/item-storage/200-get-by-query(barcode empty).json",
@@ -329,7 +329,7 @@ class FlexibleEffectiveLocationIT {
     @Test
     @WireMockStub({
       "/stubs/mod-users/users/200-get-by-query(user).json",
-      "/stubs/mod-inventory-storage/service-points/200-get-by-query(Virtual).json",
+      "/stubs/mod-inventory-storage/service-points/200-get-by-name(Virtual).json",
       "/stubs/mod-inventory-storage/service-points/204-put(Virtual).json",
       "/stubs/mod-calendar/calendars/200-get-all.json",
       "/stubs/mod-inventory-storage/item-storage/200-get-by-query(barcode empty).json",

@@ -1,21 +1,22 @@
 package org.folio.dcb.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.folio.dcb.domain.ResultList.asSinglePage;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
 import static org.folio.dcb.domain.dto.IntervalIdEnum.HOURS;
 import static org.folio.dcb.domain.dto.IntervalIdEnum.MINUTES;
 import static org.folio.dcb.domain.dto.IntervalIdEnum.MONTHS;
 import static org.folio.dcb.service.ServicePointExpirationPeriodService.getSettingsKey;
+import static org.folio.spring.model.ResultList.asSinglePage;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.when;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
-import org.folio.dcb.domain.ResultList;
 import org.folio.dcb.domain.dto.HoldShelfExpiryPeriod;
 import org.folio.dcb.domain.dto.IntervalIdEnum;
 import org.folio.dcb.domain.dto.Setting;
@@ -25,6 +26,7 @@ import org.folio.dcb.repository.ServicePointExpirationPeriodRepository;
 import org.folio.dcb.service.impl.ServicePointExpirationPeriodServiceImpl;
 import org.folio.dcb.utils.DCBConstants;
 import org.folio.dcb.utils.JsonTestUtils;
+import org.folio.spring.model.ResultList;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -34,17 +36,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import tools.jackson.databind.json.JsonMapper;
-import tools.jackson.databind.node.ObjectNode;
 
 @ExtendWith(MockitoExtension.class)
 class ServicePointExpirationPeriodServiceTest {
 
   private static final String SETTING_KEY = "test.hold-shelf-expiry-period";
+
   @InjectMocks private ServicePointExpirationPeriodServiceImpl servicePointExpirationPeriodService;
   @Mock private ServicePointExpirationPeriodRepository servicePointExpirationPeriodRepository;
   @Mock private SettingService settingService;
-  @Spy private JsonMapper jsonMapper = JsonTestUtils.JSON_MAPPER;
+  @Spy private ObjectMapper jsonMapper = JsonTestUtils.objectMapper;
 
   @Test
   void getShelfExpiryPeriod_positive_settingFound() {
@@ -90,7 +91,7 @@ class ServicePointExpirationPeriodServiceTest {
   }
 
   private static Stream<Arguments> invalidSettingDataSource() {
-    var invalidContentNode = JsonTestUtils.JSON_MAPPER.createObjectNode().put("invalidKey", "invalidValue");
+    var invalidContentNode = JsonTestUtils.objectMapper.createObjectNode().put("invalidKey", "invalidValue");
     return Stream.of(
       arguments("null value", null),
       arguments("duration is null and intervalId is null", setting(holdShelfPeriodNode(null, null))),
@@ -120,7 +121,7 @@ class ServicePointExpirationPeriodServiceTest {
   }
 
   private static ObjectNode holdShelfPeriodNode(Long duration, String intervalId) {
-    return JsonTestUtils.JSON_MAPPER.createObjectNode()
+    return JsonTestUtils.objectMapper.createObjectNode()
       .put("duration", duration)
       .put("intervalId", intervalId);
   }

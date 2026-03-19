@@ -8,7 +8,7 @@ import lombok.SneakyThrows;
 
 public class JsonTestUtils {
 
-  protected static ObjectMapper objectMapper = new ObjectMapper()
+  public static ObjectMapper objectMapper = new ObjectMapper()
     .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
     .setSerializationInclusion(JsonInclude.Include.NON_NULL);
 

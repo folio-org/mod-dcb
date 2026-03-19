@@ -1,21 +1,18 @@
 package org.folio.dcb.domain.mapper;
 
-import org.apache.commons.lang3.Strings;
+import org.apache.commons.lang3.StringUtils;
 import org.folio.dcb.domain.dto.Setting;
 import org.folio.dcb.domain.dto.SettingScope;
 import org.folio.dcb.domain.entity.SettingEntity;
+import org.folio.dcb.utils.JsonUtils;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.springframework.beans.factory.annotation.Autowired;
-import tools.jackson.databind.json.JsonMapper;
 
-@Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR)
+@Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR, imports = JsonUtils.class)
 public abstract class SettingMapper {
 
-  protected JsonMapper jsonMapper;
-
-  @Mapping(target = "value", expression = "java(jsonMapper.readTree(entity.getValue()))")
+  @Mapping(target = "value", expression = "java(JsonUtils.readTree(entity.getValue()))")
   @Mapping(target = "scope", expression = "java(parseSettingScopeFromString(entity.getScope()))")
   @Mapping(target = "metadata.createdDate", source = "entity.createdDate")
   @Mapping(target = "metadata.createdByUserId", source = "entity.createdBy")
@@ -28,13 +25,8 @@ public abstract class SettingMapper {
   @Mapping(target = "updatedDate", ignore = true)
   @Mapping(target = "updatedBy", ignore = true)
   @Mapping(target = "scope", expression = "java(dto.getScope() != null ? dto.getScope().getValue() : null)")
-  @Mapping(target = "value", expression = "java(jsonMapper.writeValueAsString(dto.getValue()))")
+  @Mapping(target = "value", expression = "java(JsonUtils.writeValueAsString(dto.getValue()))")
   public abstract SettingEntity convert(Setting dto);
-
-  @Autowired
-  private void setJsonMapper(JsonMapper jsonMapper) {
-    this.jsonMapper = jsonMapper;
-  }
 
   /**
    * Parses a string value to its corresponding {@link SettingScope} enum. Returns null if no matching value is found.
@@ -43,7 +35,7 @@ public abstract class SettingMapper {
    */
   public static SettingScope parseSettingScopeFromString(String scope) {
     for (var value : SettingScope.values()) {
-      if (Strings.CI.equals(value.getValue(), scope)) {
+      if (StringUtils.equalsIgnoreCase(value.getValue(), scope)) {
         return value;
       }
     }

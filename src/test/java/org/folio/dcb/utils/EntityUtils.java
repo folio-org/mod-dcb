@@ -7,7 +7,6 @@ import org.folio.dcb.domain.dto.HoldShelfExpiryPeriod;
 import org.folio.dcb.domain.dto.IntervalIdEnum;
 import org.folio.dcb.domain.dto.Setting;
 import org.folio.dcb.domain.dto.SettingScope;
-import org.folio.dcb.integration.invstorage.model.InventoryHolding;
 import org.folio.dcb.client.feign.HoldingsStorageClient;
 import org.folio.dcb.domain.dto.Calendar;
 import org.folio.dcb.domain.dto.CalendarCollection;
@@ -28,7 +27,6 @@ import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.domain.dto.InventoryItem;
 import org.folio.dcb.domain.dto.UserGroupCollection;
 import org.folio.dcb.domain.dto.UserGroup;
-import org.folio.dcb.domain.dto.UserCollection;
 import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
 
 import java.io.InputStream;

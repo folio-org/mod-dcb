@@ -35,6 +35,16 @@ public class CqlQuery {
   }
 
   /**
+   * Creates a CqlQuery that matches the given name.
+   *
+   * @param name the value to match for the "name" field
+   * @return a new CqlQuery representing the match on name
+   */
+  public static CqlQuery exactMatchByName(String name) {
+    return exactMatchQuery("name", name);
+  }
+
+  /**
    * Creates a CqlQuery that matches both the given name and code fields.
    *
    * @param name the value to match for the "name" field

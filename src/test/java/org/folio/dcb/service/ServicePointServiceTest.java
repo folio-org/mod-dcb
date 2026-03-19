@@ -12,13 +12,13 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.UUID;
 
+import org.folio.dcb.client.feign.InventoryServicePointClient;
 import org.folio.dcb.domain.dto.DcbTransaction.RoleEnum;
-import org.folio.dcb.integration.invstorage.ServicePointClient;
-import org.folio.dcb.domain.ResultList;
 import org.folio.dcb.domain.dto.HoldShelfExpiryPeriod;
 import org.folio.dcb.domain.dto.IntervalIdEnum;
 import org.folio.dcb.service.impl.ServicePointServiceImpl;
 import org.folio.dcb.utils.DCBConstants;
+import org.folio.spring.model.ResultList;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -31,7 +31,7 @@ class ServicePointServiceTest {
   private static final String SETTING_KEY = "lender.hold-shelf-expiry-period";
 
   @InjectMocks private ServicePointServiceImpl servicePointService;
-  @Mock private ServicePointClient servicePointClient;
+  @Mock private InventoryServicePointClient servicePointClient;
   @Mock private CalendarService calendarService;
   @Mock private static ServicePointExpirationPeriodService servicePointExpirationPeriodService;
 

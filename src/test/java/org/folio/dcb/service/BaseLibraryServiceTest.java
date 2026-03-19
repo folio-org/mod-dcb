@@ -2,7 +2,6 @@
 package org.folio.dcb.service;
 
 import java.util.UUID;
-import org.folio.dcb.domain.ResultList;
 import org.folio.dcb.domain.dto.DcbTransaction.RoleEnum;
 import org.folio.dcb.domain.dto.ItemStatus;
 import org.folio.dcb.domain.dto.ItemStatus.NameEnum;

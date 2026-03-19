@@ -4,6 +4,7 @@ import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static org.apache.commons.lang3.ObjectUtils.allNotNull;
 import static org.folio.dcb.utils.DCBConstants.DEFAULT_PERIOD;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -15,25 +16,23 @@ import org.folio.dcb.domain.entity.ServicePointExpirationPeriodEntity;
 import org.folio.dcb.repository.ServicePointExpirationPeriodRepository;
 import org.folio.dcb.service.ServicePointExpirationPeriodService;
 import org.folio.dcb.service.SettingService;
-import org.folio.dcb.utils.CqlQuery;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-import tools.jackson.databind.json.JsonMapper;
 
 @Log4j2
 @Service
 @RequiredArgsConstructor
 public class ServicePointExpirationPeriodServiceImpl implements ServicePointExpirationPeriodService {
 
-  private final JsonMapper jsonMapper;
+  private final ObjectMapper objectMapper;
   private final SettingService settingService;
   private final ServicePointExpirationPeriodRepository servicePointExpirationPeriodRepository;
 
   @Override
   @Transactional(readOnly = true)
   public HoldShelfExpiryPeriod getShelfExpiryPeriod(String settingKey) {
-    var settingsByKey = settingService.findByQuery(CqlQuery.exactMatch("key", settingKey).getQuery(), 1, 0);
+    var settingsByKey = settingService.findByQuery("key==\"%s\"".formatted(settingKey), 1, 0);
     return emptyIfNull(settingsByKey.getResult()).stream()
       .filter(Objects::nonNull)
       .findFirst()
@@ -43,7 +42,7 @@ public class ServicePointExpirationPeriodServiceImpl implements ServicePointExpi
 
   private Optional<HoldShelfExpiryPeriod> extractHoldShelfExpiryPeriod(Setting setting) {
     try {
-      var convertedValue = jsonMapper.convertValue(setting.getValue(), HoldShelfExpiryPeriod.class);
+      var convertedValue = objectMapper.convertValue(setting.getValue(), HoldShelfExpiryPeriod.class);
       return Optional.ofNullable(convertedValue)
         .filter(value -> allNotNull(value.getDuration(), value.getIntervalId()));
     } catch (Exception e) {

@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.UUID;
 import org.folio.dcb.domain.dto.HoldShelfExpiryPeriod;
@@ -28,12 +29,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import tools.jackson.databind.json.JsonMapper;
 
 @IntegrationTest
 class SettingsIT extends BaseTenantIntegrationTest {
 
-  @Autowired private JsonMapper jsonMapper;
+  @Autowired private ObjectMapper jsonMapper;
   protected static SettingsApiHelper settingsApiHelper;
 
   @BeforeAll
