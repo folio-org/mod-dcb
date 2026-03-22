@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>4.0.3</version>
+    <version>4.0.4</version>
     <relativePath />
   </parent>
 
@@ -39,7 +39,7 @@
     <wiremock.version>3.13.2</wiremock.version>
     <rest-assured.version>6.0.0</rest-assured.version>
     <annotations.version>26.1.0</annotations.version>
-    <testcontainers.version>2.0.3</testcontainers.version>
+    <testcontainers.version>2.0.4</testcontainers.version>
 
     <!-- plugin version -->
     <mvn-failsafe-plugin.version>3.5.5</mvn-failsafe-plugin.version>
