@@ -36,21 +36,20 @@ public class RequestServiceImpl implements RequestService {
 
   @Override
   public CirculationRequest createRequestBasedOnItemStatus(User user, DcbItem item, String pickupServicePointId) {
-    log.debug("createRequestBasedOnItemStatus:: creating a new request for userBarcode {} , itemBarcode {}",
-      user.getBarcode(), item.getBarcode());
+    log.debug("createRequestBasedOnItemStatus:: creating a new request.");
     var inventoryItem = itemService.fetchItemByIdAndBarcode(item.getId(), item.getBarcode());
     var inventoryHolding = holdingsService.fetchInventoryHoldingDetailsByHoldingId(inventoryItem.getHoldingsRecordId());
     var inventoryItemStatus = inventoryItem.getStatus().getName();
     if (inventoryItemStatus.equals(AVAILABLE)) {
-      log.info("createRequestBasedOnItemStatus:: Creating page request for item with barcode {}", item.getBarcode());
+      log.info("createRequestBasedOnItemStatus:: Creating page request.");
       var circulationRequest = createCirculationRequest(PAGE, user, item, inventoryItem.getHoldingsRecordId(), inventoryHolding.getInstanceId(), pickupServicePointId);
       return circulationClient.createRequest(circulationRequest);
     } else if (holdItemStatus.contains(inventoryItemStatus)) {
-      log.info("createRequestBasedOnItemStatus:: Creating hold request for item with barcode {}", item.getBarcode());
+      log.info("createRequestBasedOnItemStatus:: Creating hold request.");
       var circulationRequest = createCirculationRequest(HOLD, user, item, inventoryItem.getHoldingsRecordId(), inventoryHolding.getInstanceId(), pickupServicePointId);
       return circulationClient.createRequest(circulationRequest);
     } else {
-      String errorMsg = String.format("Request will not be created for item barcode %s as it is %s", item.getBarcode(), inventoryItemStatus);
+      String errorMsg = String.format("Request will not be created because the item is %s", inventoryItemStatus);
       log.error(errorMsg);
       throw new StatusException(errorMsg);
     }
@@ -58,8 +57,7 @@ public class RequestServiceImpl implements RequestService {
 
   @Override
   public CirculationRequest createHoldItemRequest(User user, DcbItem item, String pickupServicePointId) {
-    log.debug("createHoldItemRequest:: creating a new hold request for userBarcode {} , itemBarcode {}",
-      user.getBarcode(), item.getBarcode());
+    log.debug("createHoldItemRequest:: creating a new hold request.");
     var dcbHolding = dcbEntityServiceFacade.findOrCreateHolding();
     var circulationRequest = createCirculationRequest(HOLD, user, item, dcbHolding.getId(), INSTANCE_ID, pickupServicePointId);
     return circulationClient.createRequest(circulationRequest);

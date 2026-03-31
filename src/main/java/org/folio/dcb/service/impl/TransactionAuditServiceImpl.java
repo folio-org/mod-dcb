@@ -21,7 +21,7 @@ public class TransactionAuditServiceImpl implements TransactionAuditService {
   private final TransactionAuditRepository transactionAuditRepository;
   @Override
   public void logErrorIfTransactionAuditExists(String dcbTransactionId, String errorMsg) {
-    log.debug("logTheErrorForExistedTransactionAudit:: dcbTransactionId = {}, err = {}", dcbTransactionId, errorMsg);
+    log.debug("logTheErrorForExistedTransactionAudit:: dcbTransactionId = {}", dcbTransactionId);
     TransactionAuditEntity auditExisting = transactionAuditRepository.findLatestTransactionAuditEntityByDcbTransactionId(dcbTransactionId).orElse(null);
 
     if (auditExisting != null) {
@@ -44,7 +44,7 @@ public class TransactionAuditServiceImpl implements TransactionAuditService {
     TransactionAuditEntity auditError = generateTrnAuditEntityByTrnEntityWithError(dcbTransactionId, dcbTransaction, errorMsg);
 
     if (auditExisting != null) {
-      log.debug("logTheErrorForNotExistedTransactionAudit:: dcbTransactionId = {}, dcbTransaction = {}, err = {}", dcbTransactionId, dcbTransaction, errorMsg);
+      log.debug("logTheErrorForNotExistedTransactionAudit:: dcbTransactionId = {}", dcbTransactionId);
       auditError.setTransactionId(DUPLICATE_ERROR_TRANSACTION_ID);
       auditError.setAction(DUPLICATE_ERROR_ACTION);
     }
@@ -65,7 +65,9 @@ public class TransactionAuditServiceImpl implements TransactionAuditService {
   }
 
   private TransactionAuditEntity generateTrnAuditEntityByTrnEntityWithError(String dcbTransactionId, DcbTransaction trnE, String errorMsg) {
-    String errorMessage = String.format("dcbTransactionId = %s; dcb transaction content = %s; error message = %s.", dcbTransactionId, trnE.toString(), errorMsg);
+    var role = trnE == null ? null : trnE.getRole();
+    String errorMessage = String.format("dcbTransactionId = %s; role = %s; error message = %s.",
+      dcbTransactionId, role, errorMsg);
 
     TransactionAuditEntity auditError = new TransactionAuditEntity();
     auditError.setId(null);

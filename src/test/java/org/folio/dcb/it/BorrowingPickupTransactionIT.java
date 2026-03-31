@@ -108,8 +108,7 @@ class BorrowingPickupTransactionIT extends BaseTenantIntegrationTest {
     postDcbTransactionAttempt(DCB_TRANSACTION_ID, dcbTransaction)
       .andExpect(status().is4xxClientError())
       .andExpect(jsonPath("$.errors[0].code").value("NOT_FOUND_ERROR"))
-      .andExpect(jsonPath("$.errors[0].message", is(format("Unable to find existing user "
-        + "with barcode DCB_PATRON and id %s.", NOT_EXISTED_PATRON_ID))));
+      .andExpect(jsonPath("$.errors[0].message", is("Unable to find existing user.")));
 
     var auditEntity = auditEntityVerifier.getLatestAuditEntity(DCB_TRANSACTION_ID);
     assertThat(auditEntity.getAction()).isEqualTo("ERROR");
@@ -252,7 +251,7 @@ class BorrowingPickupTransactionIT extends BaseTenantIntegrationTest {
       .andExpect(status().isConflict())
       .andExpect(jsonPath("$.errors[0].code").value("DUPLICATE_ERROR"))
       .andExpect(jsonPath("$.errors[0].message").value(containsString(
-        "Unable to create item with barcode DCB_ITEM as it exists in inventory")));
+        "Unable to create item because it already exists in inventory.")));
   }
 
   @Test

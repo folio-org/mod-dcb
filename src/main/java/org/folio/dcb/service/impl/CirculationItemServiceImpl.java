@@ -41,10 +41,10 @@ public class CirculationItemServiceImpl implements CirculationItemService {
   @Override
   public CirculationItem checkIfItemExistsAndCreate(DcbItem dcbItem, String pickupServicePointId) {
     var dcbItemBarcode = dcbItem.getBarcode();
-    log.debug("checkIfItemExistsAndCreate:: generate Circulation item with barcode {} if it doesn't exist.", dcbItemBarcode);
+    log.debug("checkIfItemExistsAndCreate:: generating a circulation item if it does not exist.");
     var circulationItem = fetchCirculationItemByBarcode(dcbItem.getBarcode());
     if(Objects.isNull(circulationItem)) {
-      log.warn("checkIfItemExistsAndCreate:: Circulation item not found by barcode={}. Creating it.", dcbItemBarcode);
+      log.warn("checkIfItemExistsAndCreate:: Circulation item not found. Creating it.");
       String effectiveLocationId = fetchShadowLocationForItem(dcbItem);
       circulationItem = createCirculationItem(dcbItem, pickupServicePointId, effectiveLocationId);
     }

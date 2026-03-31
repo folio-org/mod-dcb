@@ -318,8 +318,7 @@ class LenderTransactionIT extends BaseTenantIntegrationTest {
     postDcbTransactionAttempt(DCB_TRANSACTION_ID, dcbTransaction)
       .andExpect(status().isNotFound())
       .andExpect(jsonPath("$.errors[0].code").value("NOT_FOUND_ERROR"))
-      .andExpect(jsonPath("$.errors[0].message").value("Unable to find existing item with "
-        + "id 5b95877d-86c0-4cb7-a0cd-7660b348ae5a and barcode DCB_ITEM."));
+      .andExpect(jsonPath("$.errors[0].message").value("Unable to find existing item."));
 
     var latestAuditEntity = auditEntityVerifier.getLatestAuditEntity(DCB_TRANSACTION_ID);
     assertThat(latestAuditEntity.getAction()).isEqualTo("ERROR");
@@ -545,4 +544,3 @@ class LenderTransactionIT extends BaseTenantIntegrationTest {
       .withRequestBody(matchingJsonPath("$.holdingsRecordId", equalTo(HOLDING_RECORD_ID))));
   }
 }
-
