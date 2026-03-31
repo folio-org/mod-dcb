@@ -77,7 +77,7 @@ public class RequestServiceImpl implements RequestService {
       .id(UUID.randomUUID().toString())
       .requesterId(UUID.fromString(user.getId()))
       .itemId(UUID.fromString(item.getId()))
-      .requestDate(OffsetDateTime.now().toString())
+      .requestDate(OffsetDateTime.now())
       .instanceId(UUID.fromString(instanceId))
       .holdingsRecordId(UUID.fromString(holdingsId))
       .requestType(type)

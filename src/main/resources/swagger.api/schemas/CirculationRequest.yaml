@@ -28,7 +28,11 @@ CirculationRequest:
     requestDate:
       description: Date the request was made
       type: string
-      format: date-type
+      format: date-time
+    requestExpirationDate:
+      description: Date the request expires
+      type: string
+      format: date-time
     patronComments:
       description: Comments made by the patron
       type: string
@@ -68,7 +72,7 @@ CirculationRequest:
     cancelledDate:
       description: Date the request was cancelled
       type: string
-      format: date-type
+      format: date-time
     fulfillmentPreference:
       description: How should the request be fulfilled
       type: string
