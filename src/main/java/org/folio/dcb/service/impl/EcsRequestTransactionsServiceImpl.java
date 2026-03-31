@@ -5,23 +5,19 @@ import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWING_PICKUP;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.PICKUP;
 
-import java.util.UUID;
-
-import org.folio.dcb.domain.dto.CirculationItem;
 import org.folio.dcb.domain.dto.CirculationRequest;
 import org.folio.dcb.domain.dto.DcbItem;
 import org.folio.dcb.domain.dto.DcbPatron;
 import org.folio.dcb.domain.dto.DcbPickup;
 import org.folio.dcb.domain.dto.DcbTransaction;
-import org.folio.dcb.domain.dto.Item;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.exception.ResourceAlreadyExistException;
+import org.folio.dcb.integration.circulation.model.RequestStatus;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.CirculationItemService;
 import org.folio.dcb.service.CirculationRequestService;
 import org.folio.dcb.service.EcsRequestTransactionsService;
 import org.folio.dcb.service.RequestService;
-import org.folio.dcb.integration.circulation.model.RequestStatus;
 import org.folio.spring.exception.NotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -127,13 +123,7 @@ public class EcsRequestTransactionsServiceImpl implements EcsRequestTransactions
       throw new IllegalArgumentException("Item is required for borrower transaction");
     }
     baseLibraryService.checkItemExistsInInventoryAndThrow(itemVirtual.getBarcode());
-    CirculationItem item = circulationItemService.checkIfItemExistsAndCreate(itemVirtual, circulationRequest.getPickupServicePointId());
-    circulationRequest.setItemId(UUID.fromString(item.getId()));
-    circulationRequest.setItem(Item.builder()
-      .barcode(item.getBarcode())
-      .build());
-    circulationRequest.setHoldingsRecordId(UUID.fromString(item.getHoldingsRecordId()));
-    requestService.updateCirculationRequest(circulationRequest);
+
     dcbTransaction.setPatron(DcbPatron.builder()
       .id(String.valueOf(circulationRequest.getRequesterId()))
       .barcode(buildNonEmptyBarcode(circulationRequest.getRequester().getBarcode(), circulationRequest.getItemId().toString()))
