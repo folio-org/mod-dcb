@@ -40,12 +40,13 @@ public class BorrowingLibraryServiceImpl implements LibraryService {
 
   @Override
   public void updateTransactionStatus(TransactionEntity dcbTransaction, TransactionStatus transactionStatus) {
-    log.debug("updateTransactionStatus:: Updating dcbTransaction {} to status {} ", dcbTransaction, transactionStatus);
+    log.debug("updateTransactionStatus:: Updating transaction {} from {} to {}.",
+      dcbTransaction.getId(), dcbTransaction.getStatus(), transactionStatus.getStatus());
     var currentStatus = dcbTransaction.getStatus();
     var requestedStatus = transactionStatus.getStatus();
 
     if ((CREATED == currentStatus && OPEN == requestedStatus) || (ITEM_CHECKED_OUT == currentStatus && ITEM_CHECKED_IN == requestedStatus)) {
-      log.info("updateTransactionStatus:: Checking in item by barcode: {} ", dcbTransaction.getItemBarcode());
+      log.info("updateTransactionStatus:: Checking in item for transaction {}.", dcbTransaction.getId());
       //Random UUID for servicePointId.
       circulationService.checkInByBarcode(dcbTransaction, UUID.randomUUID().toString());
       updateTransactionEntity(dcbTransaction, requestedStatus);
@@ -53,12 +54,12 @@ public class BorrowingLibraryServiceImpl implements LibraryService {
       circulationService.checkInByBarcode(dcbTransaction);
       updateTransactionEntity(dcbTransaction, requestedStatus);
     } else if (AWAITING_PICKUP == currentStatus && ITEM_CHECKED_OUT == requestedStatus) {
-      log.info("updateTransactionStatus:: Checking out item by barcode: {} ", dcbTransaction.getPatronBarcode());
+      log.info("updateTransactionStatus:: Checking out item for transaction {}.", dcbTransaction.getId());
       circulationService.checkOutByBarcode(dcbTransaction);
       updateTransactionEntity(dcbTransaction, requestedStatus);
     } else if (ITEM_CHECKED_IN == currentStatus && CLOSED == requestedStatus) {
-      log.info("updateTransactionStatus:: transaction status transition from {} to {} for the item with barcode {} ",
-        ITEM_CHECKED_IN.getValue(), CLOSED.getValue(), dcbTransaction.getItemBarcode());
+      log.info("updateTransactionStatus:: transaction {} status transition from {} to {}.",
+        dcbTransaction.getId(), ITEM_CHECKED_IN.getValue(), CLOSED.getValue());
       updateTransactionEntity(dcbTransaction, requestedStatus);
     } else if(CANCELLED == requestedStatus) {
       log.info("updateTransactionStatus:: Cancelling transaction with id: {} for Borrower role", dcbTransaction.getId());

@@ -37,8 +37,8 @@ public class LendingLibraryServiceImpl implements LibraryService {
 
   @Override
   public TransactionStatusResponse createCirculation(String dcbTransactionId, DcbTransaction dcbTransaction) {
-    log.debug("createTransaction:: creating a new transaction with dcbTransactionId {} , dcbTransaction {}",
-      dcbTransactionId, dcbTransaction);
+    log.debug("createTransaction:: creating a new transaction {} for role {}.",
+      dcbTransactionId, dcbTransaction.getRole());
 
     var item = dcbTransaction.getItem();
     var patron = dcbTransaction.getPatron();
@@ -58,17 +58,18 @@ public class LendingLibraryServiceImpl implements LibraryService {
 
   @Override
   public void updateTransactionStatus(TransactionEntity dcbTransaction, TransactionStatus transactionStatus) {
-    log.debug("updateTransactionStatus:: Updating dcbTransaction {} to status {} ", dcbTransaction, transactionStatus);
+    log.debug("updateTransactionStatus:: Updating transaction {} from {} to {}.",
+      dcbTransaction.getId(), dcbTransaction.getStatus(), transactionStatus.getStatus());
     var currentStatus = dcbTransaction.getStatus();
     var requestedStatus = transactionStatus.getStatus();
     if (CREATED == currentStatus && OPEN == requestedStatus) {
       updateTransactionEntity(dcbTransaction, requestedStatus);
     } else if (OPEN == currentStatus && AWAITING_PICKUP == requestedStatus) {
-      log.info("updateTransactionStatus:: Checking in item by barcode: {} ", dcbTransaction.getItemBarcode());
+      log.info("updateTransactionStatus:: Checking in item for transaction {}.", dcbTransaction.getId());
       circulationService.checkInByBarcode(dcbTransaction);
       updateTransactionEntity(dcbTransaction, requestedStatus);
     } else if (AWAITING_PICKUP == currentStatus && ITEM_CHECKED_OUT == requestedStatus) {
-      log.info("updateTransactionStatus:: Checking out item by barcode: {} ", dcbTransaction.getPatronBarcode());
+      log.info("updateTransactionStatus:: Checking out item for transaction {}.", dcbTransaction.getId());
       circulationService.checkOutByBarcode(dcbTransaction);
       updateTransactionEntity(dcbTransaction, requestedStatus);
     } else if (ITEM_CHECKED_OUT == currentStatus && ITEM_CHECKED_IN == requestedStatus) {

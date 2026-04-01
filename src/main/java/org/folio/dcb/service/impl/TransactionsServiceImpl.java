@@ -198,7 +198,8 @@ public class TransactionsServiceImpl implements TransactionsService {
     var itemId = transaction.getItemId();
     var patronId = transaction.getPatronId();
     var renewalResponse = circulationClient.renewById(buildRenewRequest(itemId, patronId));
-    log.debug("renewLoanByTransactionId:: Renew response {}", renewalResponse);
+    log.debug("renewLoanByTransactionId:: Renewal completed with renewal count {}.",
+      renewalResponse == null ? null : renewalResponse.getRenewalCount());
     validateRenewalResponse(dcbTransactionId, renewalResponse, itemId);
     var loanPolicy = circulationLoanPolicyStorageClient.getById(
       renewalResponse.getLoanPolicyId());

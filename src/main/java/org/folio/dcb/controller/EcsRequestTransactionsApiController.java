@@ -23,8 +23,8 @@ public class EcsRequestTransactionsApiController implements EcsRequestTransactio
   public ResponseEntity<TransactionStatusResponse> createEcsRequestTransactions(
     String ecsRequestTransactionId, DcbTransaction dcbTransaction) {
 
-    log.info("createEcsRequestTransactions:: creating ECS Request Transaction {} with ID {}",
-      dcbTransaction, ecsRequestTransactionId);
+    log.info("createEcsRequestTransactions:: creating ECS request transaction {} for role {}",
+      ecsRequestTransactionId, dcbTransaction.getRole());
     TransactionStatusResponse transactionStatusResponse;
     try {
       transactionStatusResponse = ecsRequestTransactionsService.createEcsRequestTransactions(

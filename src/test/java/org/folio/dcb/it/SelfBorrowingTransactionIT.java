@@ -110,8 +110,7 @@ class SelfBorrowingTransactionIT {
       postDcbTransactionAttempt(DCB_TRANSACTION_ID, selfBorrowingTransaction)
         .andExpect(status().is4xxClientError())
         .andExpect(jsonPath("$.errors[0].code").value("NOT_FOUND_ERROR"))
-        .andExpect(jsonPath("$.errors[0].message").value(("Unable to find existing user with"
-          + " barcode DCB_PATRON and id %s.").formatted(NOT_EXISTED_PATRON_ID)));
+        .andExpect(jsonPath("$.errors[0].message").value("Unable to find existing user."));
 
       var auditEntity = auditEntityVerifier.getLatestAuditEntity(DCB_TRANSACTION_ID);
       assertThat(auditEntity.getAction()).isEqualTo("ERROR");
@@ -131,8 +130,7 @@ class SelfBorrowingTransactionIT {
       postDcbTransactionAttempt(DCB_TRANSACTION_ID, selfBorrowingTransaction)
         .andExpect(status().is4xxClientError())
         .andExpect(jsonPath("$.errors[0].code").value("NOT_FOUND_ERROR"))
-        .andExpect(jsonPath("$.errors[0].message").value(("Unable to find existing "
-          + "item with id %s and barcode DCB_ITEM.").formatted(ITEM_ID)));
+        .andExpect(jsonPath("$.errors[0].message").value("Unable to find existing item."));
 
       var auditEntity = auditEntityVerifier.getLatestAuditEntity(DCB_TRANSACTION_ID);
       assertThat(auditEntity.getAction()).isEqualTo("ERROR");
@@ -201,8 +199,7 @@ class SelfBorrowingTransactionIT {
       postDcbTransactionAttempt(DCB_TRANSACTION_ID, selfBorrowingTransaction)
         .andExpect(status().is4xxClientError())
         .andExpect(jsonPath("$.errors[0].code").value("NOT_FOUND_ERROR"))
-        .andExpect(jsonPath("$.errors[0].message").value(("Unable to find existing "
-          + "item with id %s and barcode DCB_ITEM.").formatted(ITEM_ID)));
+        .andExpect(jsonPath("$.errors[0].message").value("Unable to find existing item."));
 
       var auditEntity = auditEntityVerifier.getLatestAuditEntity(DCB_TRANSACTION_ID);
       assertThat(auditEntity.getAction()).isEqualTo("ERROR");
@@ -217,8 +214,7 @@ class SelfBorrowingTransactionIT {
       postDcbTransactionAttempt(DCB_TRANSACTION_ID, selfBorrowingTransaction)
         .andExpect(status().is4xxClientError())
         .andExpect(jsonPath("$.errors[0].code").value("NOT_FOUND_ERROR"))
-        .andExpect(jsonPath("$.errors[0].message").value(("Unable to find existing user with"
-          + " barcode DCB_PATRON and id %s.").formatted(NOT_EXISTED_PATRON_ID)));
+        .andExpect(jsonPath("$.errors[0].message").value("Unable to find existing user."));
 
       var auditEntity = auditEntityVerifier.getLatestAuditEntity(DCB_TRANSACTION_ID);
       assertThat(auditEntity.getAction()).isEqualTo("ERROR");

@@ -240,7 +240,7 @@ class PickupTransactionIT extends BaseTenantIntegrationTest {
       .andExpect(status().isConflict())
       .andExpect(jsonPath("$.errors[0].code").value("DUPLICATE_ERROR"))
       .andExpect(jsonPath("$.errors[0].message").value(containsString(
-        "Unable to create item with barcode DCB_ITEM as it exists in inventory")));
+        "Unable to create item because it already exists in inventory.")));
   }
 
   @Test
@@ -340,4 +340,3 @@ class PickupTransactionIT extends BaseTenantIntegrationTest {
       .withRequestBody(matchingJsonPath("$.holdingsRecordId", equalTo(DCBConstants.HOLDING_ID))));
   }
 }
-

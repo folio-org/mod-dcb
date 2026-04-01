@@ -32,24 +32,22 @@ public class UserServiceImpl implements UserService {
     var dcbPatronId = dcbPatron.getId();
     var dcbPatronBarcode = dcbPatron.getBarcode();
 
-    log.debug("fetchUser:: Fetching user by userId {}, userBarcode {}.", dcbPatronId, dcbPatronBarcode);
+    log.debug("fetchUser:: Fetching user for transaction processing.");
     var user = fetchUserByBarcodeAndId(dcbPatronBarcode, dcbPatronId);
 
     if(Objects.isNull(user)) {
-      log.error("fetchUser:: Unable to find existing user with barcode {} and id {}.", dcbPatronBarcode, dcbPatronId);
-      throw new NotFoundException(String.format("Unable to find existing user with barcode %s and id %s.", dcbPatronBarcode, dcbPatronId));
+      log.error("fetchUser:: Unable to find existing user.");
+      throw new NotFoundException("Unable to find existing user.");
     }
 
     return user;
   }
 
   public User fetchOrCreateUser(DcbPatron patronDetails) {
-    log.debug("createOrFetchUser:: Trying to create or find user for userId {}, userBarcode {}",
-      patronDetails.getId(), patronDetails.getBarcode());
+    log.debug("createOrFetchUser:: Trying to create or find user.");
     var user = fetchUserByBarcodeAndId(patronDetails.getBarcode(), patronDetails.getId());
     if(Objects.isNull(user)) {
-      log.info("fetchOrCreateUser:: Unable to find existing user with barcode {} and id {}. Hence, creating new user",
-        patronDetails.getBarcode(), patronDetails.getId());
+      log.info("fetchOrCreateUser:: Unable to find existing user. Creating a new user.");
       return createUser(patronDetails);
     }
 
@@ -68,15 +66,13 @@ public class UserServiceImpl implements UserService {
   }
 
   private User createUser(DcbPatron patronDetails) {
-    log.debug("createUser:: creating new user with id {} and barcode {}",
-      patronDetails.getId(), patronDetails.getBarcode());
+    log.debug("createUser:: creating new user record.");
     var groupId = patronGroupService.fetchPatronGroupIdByName(patronDetails.getGroup());
     return usersClient.createUser(createVirtualUser(patronDetails, groupId));
   }
 
   private User fetchUserByBarcodeAndId(String barcode, String id) {
-    log.debug("fetchUserByBarcodeAndId:: Trying to fetch existing user with barcode {} and id {}",
-      barcode, id);
+    log.debug("fetchUserByBarcodeAndId:: Trying to fetch existing user.");
     return usersClient.fetchUserByBarcodeAndId("barcode==" + StringUtil.cqlEncode(barcode) + " and id==" + StringUtil.cqlEncode(id))
       .getUsers()
       .stream()
@@ -99,8 +95,8 @@ public class UserServiceImpl implements UserService {
   private boolean updateUserGroup(DcbPatron patronDetails, User user) {
     var groupId = patronGroupService.fetchPatronGroupIdByName(patronDetails.getGroup());
     if (!groupId.equals(user.getPatronGroup())) {
-      log.info("updateUserGroup:: updating patron group from {} to {} for user with barcode {}",
-        user.getPatronGroup(), groupId, user.getBarcode());
+      log.info("updateUserGroup:: updating patron group from {} to {}.",
+        user.getPatronGroup(), groupId);
       user.setPatronGroup(groupId);
       return true;
     }
@@ -119,7 +115,7 @@ public class UserServiceImpl implements UserService {
      return false;
     }
 
-    log.info("updateUserPersonal:: updating personal data for user with barcode {}", user.getBarcode());
+    log.info("updateUserPersonal:: updating personal data for existing user.");
     user.setPersonal(newUserPersonal);
     return true;
   }

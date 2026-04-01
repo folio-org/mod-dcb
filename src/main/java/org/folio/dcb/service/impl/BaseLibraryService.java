@@ -98,17 +98,18 @@ public class BaseLibraryService {
   }
 
   public void updateTransactionStatus(TransactionEntity dcbTransaction, TransactionStatus transactionStatus) {
-    log.debug("updateTransactionStatus:: Updating dcbTransaction {} to status {} ", dcbTransaction, transactionStatus);
+    log.debug("updateTransactionStatus:: Updating transaction {} from {} to {}.",
+      dcbTransaction.getId(), dcbTransaction.getStatus(), transactionStatus.getStatus());
     var currentStatus = dcbTransaction.getStatus();
     var requestedStatus = transactionStatus.getStatus();
     if (CREATED == currentStatus && OPEN == requestedStatus) {
-      log.info("updateTransactionStatus:: Checking in item by barcode: {} ", dcbTransaction.getItemBarcode());
+      log.info("updateTransactionStatus:: Checking in item for transaction {}.", dcbTransaction.getId());
       //Random UUID for servicePointId.
       circulationService.checkInByBarcode(dcbTransaction, UUID.randomUUID().toString());
       updateTransactionEntity(dcbTransaction, requestedStatus);
     } else if (ITEM_CHECKED_IN == currentStatus && CLOSED == requestedStatus) {
-      log.info("updateTransactionStatus:: transaction status transition from {} to {} for the item with barcode {} ",
-        ITEM_CHECKED_IN.getValue(), CLOSED.getValue(), dcbTransaction.getItemBarcode());
+      log.info("updateTransactionStatus:: transaction {} status transition from {} to {}.",
+        dcbTransaction.getId(), ITEM_CHECKED_IN.getValue(), CLOSED.getValue());
       updateTransactionEntity(dcbTransaction, requestedStatus);
     } else if(CANCELLED == requestedStatus) {
       log.info("updateTransactionStatus:: Cancelling transaction with id: {} for Borrower/Pickup role", dcbTransaction.getId());
@@ -131,13 +132,13 @@ public class BaseLibraryService {
   }
 
   public void cancelTransactionEntity(TransactionEntity transactionEntity) {
-    log.info("cancelTransactionEntity:: Transaction cancelled for itemId: {}", transactionEntity.getItemId());
+    log.info("cancelTransactionEntity:: Transaction {} cancelled.", transactionEntity.getId());
     updateTransactionEntity(transactionEntity, CANCELLED);
   }
 
   public void checkItemExistsInInventoryAndThrow(String itemBarcode) {
     if(itemService.fetchItemByBarcode(itemBarcode).getTotalRecords() != 0)
-      throw new ResourceAlreadyExistException(String.format("Unable to create item with barcode %s as it exists in inventory ", itemBarcode));
+      throw new ResourceAlreadyExistException("Unable to create item because it already exists in inventory.");
   }
 
   public void checkOpenTransactionExistsAndThrow(String itemId) {

@@ -40,19 +40,19 @@ public class ItemServiceImpl implements ItemService {
 
   @Override
   public ResultList<InventoryItem> fetchItemByBarcode(String itemBarcode) {
-    log.debug("fetchItemByBarcode:: fetching item details for barcode {} ", itemBarcode);
+    log.debug("fetchItemByBarcode:: fetching item details by barcode.");
     return inventoryItemStorageClient.findByQuery(CqlQuery.exactMatch("barcode", itemBarcode).getQuery());
   }
 
   @Override
   public InventoryItem fetchItemByIdAndBarcode(String id, String barcode) {
-    log.debug("fetchItemByBarcode:: fetching item details for id {} , barcode {} ", id, barcode);
+    log.debug("fetchItemByBarcode:: fetching item details for id {}.", id);
     var query = CqlQuery.exactMatch("barcode", barcode).and(exactMatchById(id), true).getQuery();
     return inventoryItemStorageClient.findByQuery(query)
       .getResult()
       .stream()
       .findFirst()
-      .orElseThrow(() -> new NotFoundException(String.format("Unable to find existing item with id %s and barcode %s.", id, barcode)));
+      .orElseThrow(() -> new NotFoundException("Unable to find existing item."));
   }
 
   @Retryable(
