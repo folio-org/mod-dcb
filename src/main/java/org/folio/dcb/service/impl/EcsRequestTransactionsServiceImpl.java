@@ -16,12 +16,12 @@ import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.Item;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.exception.ResourceAlreadyExistException;
+import org.folio.dcb.integration.circulation.model.RequestStatus;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.CirculationItemService;
 import org.folio.dcb.service.CirculationRequestService;
 import org.folio.dcb.service.EcsRequestTransactionsService;
 import org.folio.dcb.service.RequestService;
-import org.folio.dcb.integration.circulation.model.RequestStatus;
 import org.folio.spring.exception.NotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -126,14 +126,22 @@ public class EcsRequestTransactionsServiceImpl implements EcsRequestTransactions
     if (itemVirtual == null) {
       throw new IllegalArgumentException("Item is required for borrower transaction");
     }
-    baseLibraryService.checkItemExistsInInventoryAndThrow(itemVirtual.getBarcode());
-    CirculationItem item = circulationItemService.checkIfItemExistsAndCreate(itemVirtual, circulationRequest.getPickupServicePointId());
-    circulationRequest.setItemId(UUID.fromString(item.getId()));
-    circulationRequest.setItem(Item.builder()
-      .barcode(item.getBarcode())
-      .build());
-    circulationRequest.setHoldingsRecordId(UUID.fromString(item.getHoldingsRecordId()));
-    requestService.updateCirculationRequest(circulationRequest);
+    String itemBarcode = itemVirtual.getBarcode();
+    baseLibraryService.checkItemExistsInInventoryAndThrow(itemBarcode);
+
+    if (circulationItemService.fetchCirculationItemByBarcode(itemBarcode).isEmpty()) {
+      log.warn("createBorrowerEcsRequestTransactions:: circulation item with barcode {} was not " +
+        "found", itemBarcode);
+      CirculationItem circItem = circulationItemService.createCirculationItem(itemVirtual,
+        circulationRequest.getPickupServicePointId());
+      circulationRequest.setItemId(UUID.fromString(circItem.getId()));
+      circulationRequest.setItem(Item.builder()
+        .barcode(circItem.getBarcode())
+        .build());
+      circulationRequest.setHoldingsRecordId(UUID.fromString(circItem.getHoldingsRecordId()));
+      requestService.updateCirculationRequest(circulationRequest);
+    }
+
     dcbTransaction.setPatron(DcbPatron.builder()
       .id(String.valueOf(circulationRequest.getRequesterId()))
       .barcode(buildNonEmptyBarcode(circulationRequest.getRequester().getBarcode(), circulationRequest.getItemId().toString()))

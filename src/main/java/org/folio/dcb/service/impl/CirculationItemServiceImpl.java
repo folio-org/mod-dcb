@@ -1,30 +1,31 @@
 package org.folio.dcb.service.impl;
 
-import org.folio.dcb.integration.invstorage.model.Location;
 import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.IN_TRANSIT;
 import static org.folio.dcb.utils.DCBConstants.CODE;
 import static org.folio.dcb.utils.DCBConstants.MATERIAL_TYPE_NAME_BOOK;
 import static org.folio.dcb.utils.DCBConstants.NAME;
 
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.folio.dcb.integration.circitem.CirculationItemClient;
-import org.folio.dcb.integration.invstorage.LocationUnitClient;
-import org.folio.dcb.integration.invstorage.LocationsClient;
 import org.folio.dcb.config.DcbFeatureProperties;
 import org.folio.dcb.domain.dto.CirculationItem;
 import org.folio.dcb.domain.dto.DcbItem;
 import org.folio.dcb.domain.dto.ItemStatus;
+import org.folio.dcb.integration.circitem.CirculationItemClient;
+import org.folio.dcb.integration.invstorage.LocationUnitClient;
+import org.folio.dcb.integration.invstorage.LocationsClient;
+import org.folio.dcb.integration.invstorage.model.Location;
 import org.folio.dcb.service.CirculationItemService;
 import org.folio.dcb.service.ItemService;
 import org.folio.dcb.service.entities.DcbEntityServiceFacade;
 import org.folio.dcb.utils.CqlQuery;
 import org.springframework.stereotype.Service;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
 @Service
 @Log4j2
@@ -40,15 +41,8 @@ public class CirculationItemServiceImpl implements CirculationItemService {
 
   @Override
   public CirculationItem checkIfItemExistsAndCreate(DcbItem dcbItem, String pickupServicePointId) {
-    var dcbItemBarcode = dcbItem.getBarcode();
-    log.debug("checkIfItemExistsAndCreate:: generate Circulation item with barcode {} if it doesn't exist.", dcbItemBarcode);
-    var circulationItem = fetchCirculationItemByBarcode(dcbItem.getBarcode());
-    if(Objects.isNull(circulationItem)) {
-      log.warn("checkIfItemExistsAndCreate:: Circulation item not found by barcode={}. Creating it.", dcbItemBarcode);
-      String effectiveLocationId = fetchShadowLocationForItem(dcbItem);
-      circulationItem = createCirculationItem(dcbItem, pickupServicePointId, effectiveLocationId);
-    }
-    return circulationItem;
+   return fetchCirculationItemByBarcode(dcbItem.getBarcode())
+     .orElseGet(() -> createCirculationItem(dcbItem, pickupServicePointId));
   }
 
   private String fetchShadowLocationForItem(DcbItem dcbItem) {
@@ -62,13 +56,14 @@ public class CirculationItemServiceImpl implements CirculationItemService {
     return getDefaultDcbLocationId();
   }
 
-  private CirculationItem fetchCirculationItemByBarcode(String barcode) {
+  @Override
+  public Optional<CirculationItem> fetchCirculationItemByBarcode(String barcode) {
+    log.debug("fetchCirculationItemByBarcode:: barcode: {}", barcode);
     var query = CqlQuery.exactMatch("barcode", barcode).getQuery();
     return circulationItemClient.fetchItemByCqlQuery(query)
       .getItems()
       .stream()
-      .findFirst()
-      .orElse(null);
+      .findFirst();
   }
 
   public CirculationItem fetchItemById(String itemId) {
@@ -76,13 +71,17 @@ public class CirculationItemServiceImpl implements CirculationItemService {
     return circulationItemClient.retrieveCirculationItemById(itemId);
   }
 
-  private CirculationItem createCirculationItem(DcbItem item, String pickupServicePointId, String effectiveLocationId){
+  @Override
+  public CirculationItem createCirculationItem(DcbItem item, String pickupServicePointId){
+    log.info("createCirculationItem:: creating circulation item with barcode {} ", item::getBarcode);
     //SetupDefaultMaterialTypeIfNotGiven
     String materialType = StringUtils.isBlank(item.getMaterialType()) ? MATERIAL_TYPE_NAME_BOOK : item.getMaterialType();
     var materialTypeId = itemService.fetchItemMaterialTypeIdByMaterialTypeName(materialType);
     var dcbHolding = dcbEntityService.findOrCreateHolding();
     var itemId = UUID.randomUUID().toString();
     var loanType = dcbEntityService.findOrCreateLoanType();
+    var effectiveLocationId = fetchShadowLocationForItem(item);
+
     CirculationItem circulationItem =
       CirculationItem.builder()
         .id(itemId)

@@ -67,7 +67,7 @@ public class RequestServiceImpl implements RequestService {
 
   @Override
   public void updateCirculationRequest(CirculationRequest circulationRequest) {
-    log.debug("updateCirculationRequest:: updating circulation request with id {}",
+    log.info("updateCirculationRequest:: updating circulation request with id {}",
       circulationRequest.getId());
     circulationClient.updateRequest(circulationRequest.getId(), circulationRequest);
   }
