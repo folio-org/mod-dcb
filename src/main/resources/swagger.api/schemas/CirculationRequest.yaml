@@ -33,10 +33,6 @@ CirculationRequest:
       description: Date and time the request expires
       type: string
       format: date-time
-    holdShelfExpirationDate:
-      description: Date and time hold shelf expires
-      type: string
-      format: date-time
     patronComments:
       description: Comments made by the patron
       type: string

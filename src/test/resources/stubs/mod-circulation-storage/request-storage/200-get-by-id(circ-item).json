@@ -27,6 +27,7 @@
       "requestLevel": "Item",
       "status": "Open - Not yet filled",
       "requestDate": "2025-10-27T18:49:03.079058500+02:00",
+      "requestExpirationDate": "2025-10-28T18:49:03.079058500+02:00",
       "requesterId": "18c1741d-e678-4c8e-9fe7-cfaeefab5eea",
       "instanceId": "9d1b77e4-f02e-4b7f-b296-3f2042ddac54",
       "holdingsRecordId": "10cd3a5a-d36f-4c7a-bc4f-e1ae3cf820c9",
