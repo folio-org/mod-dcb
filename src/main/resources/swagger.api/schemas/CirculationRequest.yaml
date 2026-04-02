@@ -26,7 +26,7 @@ CirculationRequest:
         - Item
         - Title
     requestDate:
-      description: Date and time the request was made
+      description: Date the request was made
       type: string
       format: date-time
     requestExpirationDate:
