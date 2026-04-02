@@ -39,7 +39,7 @@ public class CirculationRequestServiceImpl implements CirculationRequestService 
     if (request != null && RequestStatus.isRequestOpen(RequestStatus.from(request.getStatus()))) {
       var cancellationReason = dcbEntityServiceFacade.findOrCreateCancellationReason();
       request.setStatus(RequestStatus.CLOSED_CANCELLED.getValue());
-      request.setCancelledDate(OffsetDateTime.now().toString());
+      request.setCancelledDate(OffsetDateTime.now());
       request.setCancellationAdditionalInformation("Request cancelled by DCB");
       request.setCancelledByUserId(folioExecutionContext.getUserId());
       request.setCancellationReasonId(UUID.fromString(cancellationReason.getId()));
