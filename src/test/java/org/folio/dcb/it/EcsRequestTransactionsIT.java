@@ -74,7 +74,8 @@ class EcsRequestTransactionsIT extends BaseTenantIntegrationTest {
       .withRequestBody(matchingJsonPath("$.instanceId", equalTo(DCBConstants.INSTANCE_ID)))
       .withRequestBody(matchingJsonPath("$.requesterId", equalTo(PATRON_TYPE_USER_ID)))
       .withRequestBody(matchingJsonPath("$.pickupServicePointId", equalTo(VIRTUAL_SERVICE_POINT_ID)))
-      .withRequestBody(matchingJsonPath("$.holdingsRecordId", equalTo(DCBConstants.HOLDING_ID))));
+      .withRequestBody(matchingJsonPath("$.holdingsRecordId", equalTo(DCBConstants.HOLDING_ID)))
+      .withRequestBody(matchingJsonPath("$.requestExpirationDate")));
   }
 
   @Test
@@ -97,7 +98,8 @@ class EcsRequestTransactionsIT extends BaseTenantIntegrationTest {
       .withRequestBody(matchingJsonPath("$.instanceId", equalTo(DCBConstants.INSTANCE_ID)))
       .withRequestBody(matchingJsonPath("$.requesterId", equalTo(PATRON_TYPE_USER_ID)))
       .withRequestBody(matchingJsonPath("$.pickupServicePointId", equalTo(VIRTUAL_SERVICE_POINT_ID)))
-      .withRequestBody(matchingJsonPath("$.holdingsRecordId", equalTo(DCBConstants.HOLDING_ID))));
+      .withRequestBody(matchingJsonPath("$.holdingsRecordId", equalTo(DCBConstants.HOLDING_ID)))
+      .withRequestBody(matchingJsonPath("$.requestExpirationDate")));
   }
 
   @Test
@@ -120,7 +122,8 @@ class EcsRequestTransactionsIT extends BaseTenantIntegrationTest {
       .withRequestBody(matchingJsonPath("$.instanceId", equalTo(DCBConstants.INSTANCE_ID)))
       .withRequestBody(matchingJsonPath("$.requesterId", equalTo(PATRON_TYPE_USER_ID)))
       .withRequestBody(matchingJsonPath("$.pickupServicePointId", equalTo(VIRTUAL_SERVICE_POINT_ID)))
-      .withRequestBody(matchingJsonPath("$.holdingsRecordId", equalTo(DCBConstants.HOLDING_ID))));
+      .withRequestBody(matchingJsonPath("$.holdingsRecordId", equalTo(DCBConstants.HOLDING_ID)))
+      .withRequestBody(matchingJsonPath("$.requestExpirationDate")));
   }
 
   @Test
