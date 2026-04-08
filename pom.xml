@@ -425,6 +425,38 @@
         </configuration>
       </plugin>
 
+      <!-- JaCoCo plugin for basic code coverage -->
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>${jacoco-maven-plugin.version}</version>
+        <configuration>
+          <excludes>
+            <exclude>**/domain/**/*</exclude>
+            <exclude>**/cql/**/*</exclude>
+            <exclude>**/configuration/**/*</exclude>
+            <exclude>**/rest/resource/**/*</exclude>
+            <exclude>**/mapper/**/*</exclude>
+            <exclude>**/integration/**/model/**/*</exclude>
+            <exclude>**/*Application.class</exclude>
+          </excludes>
+        </configuration>
+        <executions>
+          <execution>
+            <id>prepare-agent</id>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>report</id>
+            <goals>
+              <goal>report</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
     </plugins>
   </build>
 
@@ -501,38 +533,17 @@
 
       <build>
         <plugins>
+          <!-- Additional JaCoCo executions for integration tests and Sonar integration -->
           <plugin>
             <groupId>org.jacoco</groupId>
             <artifactId>jacoco-maven-plugin</artifactId>
             <version>${jacoco-maven-plugin.version}</version>
-            <configuration>
-              <excludes>
-                <exclude>**/domain/**/*</exclude>
-                <exclude>**/cql/**/*</exclude>
-                <exclude>**/configuration/**/*</exclude>
-                <exclude>**/rest/resource/**/*</exclude>
-                <exclude>**/mapper/**/*</exclude>
-                <exclude>**/integration/**/model/**/*</exclude>
-                <exclude>**/*Application.class</exclude>
-              </excludes>
-            </configuration>
             <executions>
-              <execution>
-                <id>prepare-agent</id>
-                <goals>
-                  <goal>prepare-agent</goal>
-                </goals>
-              </execution>
+              <!-- Integration test coverage -->
               <execution>
                 <id>prepare-agent-integration</id>
                 <goals>
                   <goal>prepare-agent-integration</goal>
-                </goals>
-              </execution>
-              <execution>
-                <id>report</id>
-                <goals>
-                  <goal>report</goal>
                 </goals>
               </execution>
               <execution>
@@ -541,6 +552,7 @@
                   <goal>report-integration</goal>
                 </goals>
               </execution>
+              <!-- Merge unit and integration test results -->
               <execution>
                 <id>merge-results</id>
                 <phase>verify</phase>
@@ -559,6 +571,7 @@
                   <destFile>${project.build.directory}/jacoco-aggregate.exec</destFile>
                 </configuration>
               </execution>
+              <!-- Generate aggregated report for Sonar -->
               <execution>
                 <id>post-merge-report</id>
                 <phase>verify</phase>
@@ -570,6 +583,7 @@
                   <outputDirectory>${project.reporting.outputDirectory}/jacoco-aggregate</outputDirectory>
                 </configuration>
               </execution>
+              <!-- Coverage threshold check -->
               <execution>
                 <id>check</id>
                 <goals>
