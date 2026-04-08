@@ -39,7 +39,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class CirculationLoanEventListenerTest extends BaseTenantIntegrationTest {
+class CirculationLoanEventListenerIT extends BaseTenantIntegrationTest {
 
   private static final String TENANT = "diku";
   private static final String CHECK_OUT_EVENT_SAMPLE = getMockDataAsString("mockdata/kafka/check_out.json");

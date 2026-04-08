@@ -48,7 +48,7 @@ import org.springframework.messaging.MessageHeaders;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @ExtendWith(MockitoExtension.class)
-class CirculationCheckInEventListenerTest extends BaseTenantIntegrationTest {
+class CirculationCheckInEventListenerIT extends BaseTenantIntegrationTest {
 
   private static final String TENANT = "diku";
   private static final UUID ITEM_UUID = UUID.fromString(ITEM_ID);

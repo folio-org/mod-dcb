@@ -40,7 +40,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-class CirculationRequestEventListenerTest extends BaseTenantIntegrationTest {
+class CirculationRequestEventListenerIT extends BaseTenantIntegrationTest {
 
   private static final String TENANT = "diku";
   private static final String REQUEST_EVENT_SAMPLE_NON_DCB = getMockDataAsString("mockdata/kafka/request_sample.json");
