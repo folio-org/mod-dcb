@@ -38,12 +38,6 @@ spring:
       fail-on-null-for-primitives: false
       fail-on-unknown-properties: false
       accept-single-value-as-array: true
-  mustache:
-    check-template-location: false
-  cloud:
-    openfeign:
-      okhttp:
-        enabled: true
 
 folio:
   exchange:

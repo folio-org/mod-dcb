@@ -351,7 +351,7 @@ class ShadowLocationServiceImplTest {
   }
 
   @Test
-  void createShadowLocations_negative_feignExceptionThrown() {
+  void createShadowLocations_negative_httpExceptionThrown() {
     when(dcbFeatureProperties.isFlexibleCirculationRulesEnabled()).thenReturn(true);
     when(dcbEntityServiceFacade.findOrCreateServicePoint()).thenThrow(InternalServerError.class);
 
