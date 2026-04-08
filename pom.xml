@@ -538,6 +538,17 @@
             <groupId>org.jacoco</groupId>
             <artifactId>jacoco-maven-plugin</artifactId>
             <version>${jacoco-maven-plugin.version}</version>
+            <configuration>
+              <excludes>
+                <exclude>**/domain/**/*</exclude>
+                <exclude>**/cql/**/*</exclude>
+                <exclude>**/configuration/**/*</exclude>
+                <exclude>**/rest/resource/**/*</exclude>
+                <exclude>**/mapper/**/*</exclude>
+                <exclude>**/integration/**/model/**/*</exclude>
+                <exclude>**/*Application.class</exclude>
+              </excludes>
+            </configuration>
             <executions>
               <!-- Integration test coverage -->
               <execution>
