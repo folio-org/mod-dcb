@@ -61,6 +61,7 @@ class CirculationItemServiceImplTest {
   void checkIfItemExistsAndCreate_ShouldReturnExistingItem_WhenItemExists() {
     var existingItem = circulationItem();
 
+    when(dcbHubProperties.isFlexibleCirculationRulesEnabled()).thenReturn(false);
     when(circulationItemClient.fetchItemByCqlQuery(any()))
       .thenReturn(CirculationItemCollection.builder()
         .items(Collections.singletonList(existingItem))
@@ -69,6 +70,62 @@ class CirculationItemServiceImplTest {
     var result = circulationItemService.checkIfItemExistsAndCreate(dcbItem(), TEST_SERVICE_POINT_ID);
 
     verify(circulationItemClient).fetchItemByCqlQuery(any());
+    verify(dcbHubProperties).isFlexibleCirculationRulesEnabled();
+    assertEquals(existingItem, result);
+  }
+
+  @Test
+  void checkIfItemExistsAndCreate_ShouldUpdateEffectiveLocation_WhenItemExistsAndLocationChanged() {
+    var existingLocationId = "old-location-id";
+    var existingItem = circulationItem().effectiveLocationId(existingLocationId);
+    var dcbItem = dcbItem(TEST_DCB_LOCATION_CODE, null);
+
+    when(dcbHubProperties.isFlexibleCirculationRulesEnabled()).thenReturn(true);
+    when(circulationItemClient.fetchItemByCqlQuery(any()))
+      .thenReturn(CirculationItemCollection.builder()
+        .items(Collections.singletonList(existingItem))
+        .build());
+
+    Location newLocation = testLocation();
+    var cqlByCode = CqlQuery.exactMatch("code", TEST_DCB_LOCATION_CODE).getQuery();
+    when(locationsClient.findLocationByQuery(cqlByCode, true, 1, 0)).thenReturn(asSinglePage(newLocation));
+
+    var updatedItem = CirculationItem.builder().id(TEST_CIRCULATION_ITEM_ID).barcode("barcode123")
+      .effectiveLocationId(TEST_LOCATION_ID).build();
+    when(circulationItemClient.updateCirculationItem(any(), any())).thenReturn(updatedItem);
+
+    var result = circulationItemService.checkIfItemExistsAndCreate(dcbItem, TEST_SERVICE_POINT_ID);
+
+    verify(circulationItemClient).fetchItemByCqlQuery(any());
+    verify(dcbHubProperties).isFlexibleCirculationRulesEnabled();
+    verify(locationsClient).findLocationByQuery(cqlByCode, true, 1, 0);
+
+    ArgumentCaptor<CirculationItem> captor = ArgumentCaptor.forClass(CirculationItem.class);
+    verify(circulationItemClient).updateCirculationItem(any(), captor.capture());
+    assertEquals(TEST_LOCATION_ID, captor.getValue().getEffectiveLocationId());
+    assertEquals(updatedItem, result);
+  }
+
+  @Test
+  void checkIfItemExistsAndCreate_ShouldNotUpdateEffectiveLocation_WhenItemExistsAndLocationUnchanged() {
+    var existingItem = circulationItem().effectiveLocationId(TEST_LOCATION_ID);
+    var dcbItem = dcbItem(TEST_DCB_LOCATION_CODE, null);
+
+    when(dcbHubProperties.isFlexibleCirculationRulesEnabled()).thenReturn(true);
+    when(circulationItemClient.fetchItemByCqlQuery(any()))
+      .thenReturn(CirculationItemCollection.builder()
+        .items(Collections.singletonList(existingItem))
+        .build());
+
+    Location location = testLocation();
+    var cqlByCode = CqlQuery.exactMatch("code", TEST_DCB_LOCATION_CODE).getQuery();
+    when(locationsClient.findLocationByQuery(cqlByCode, true, 1, 0)).thenReturn(asSinglePage(location));
+
+    var result = circulationItemService.checkIfItemExistsAndCreate(dcbItem, TEST_SERVICE_POINT_ID);
+
+    verify(circulationItemClient).fetchItemByCqlQuery(any());
+    verify(dcbHubProperties).isFlexibleCirculationRulesEnabled();
+    verify(locationsClient).findLocationByQuery(cqlByCode, true, 1, 0);
     assertEquals(existingItem, result);
   }
 
