@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.service.annotation.GetExchange;
 import org.springframework.web.service.annotation.HttpExchange;
 import org.springframework.web.service.annotation.PostExchange;
+import org.springframework.web.service.annotation.PutExchange;
 
 @HttpExchange("circulation-item")
 public interface CirculationItemClient {
@@ -22,4 +23,9 @@ public interface CirculationItemClient {
 
   @GetExchange
   CirculationItemCollection fetchItemByCqlQuery(@RequestParam("query") String query);
+
+  @PutExchange("/{circulationItemId}")
+  CirculationItem updateCirculationItem(
+    @PathVariable String circulationItemId,
+    @RequestBody CirculationItem circulationItem);
 }
