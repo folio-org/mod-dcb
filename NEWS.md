@@ -21,6 +21,7 @@
 * MODDCB-252: Update existing virtual(DCB) patron records with localNames [MODDCB-252](https://folio-org.atlassian.net/browse/MODDCB-252)
 * MODDCB-259: Use GitHub Workflows for Maven [MODDCB-259](https://folio-org.atlassian.net/browse/MODDCB-259)
 * MODDCB-241: Upgrade to Spring Boot v4.0.2 [MODDCB-241](https://folio-org.atlassian.net/browse/MODDCB-241)
+* MODDCB-270: Fix DCB circulation item effective location not updated on re-request with shadow location [MODDCB-270](https://folio-org.atlassian.net/browse/MODDCB-270)
 
 ## v1.3.0 2025-03-13
 
