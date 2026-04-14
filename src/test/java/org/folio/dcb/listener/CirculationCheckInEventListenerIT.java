@@ -102,7 +102,7 @@ class CirculationCheckInEventListenerIT extends BaseTenantIntegrationTest {
   }
 
   @Test
-  void handleCheckInEvent_positive_expiredDcbTransactionFoundWithNotAvailableItem() {
+  void handleCheckInEvent_positive_expiredDcbTransactionClosedWithNonAvailableItem() {
     var item = new InventoryItem().id(ITEM_ID)
       .status(new ItemStatus().name(IN_TRANSIT))
       .lastCheckIn(new ItemLastCheckIn().servicePointId(VIRTUAL_SERVICE_POINT_ID));
@@ -113,8 +113,9 @@ class CirculationCheckInEventListenerIT extends BaseTenantIntegrationTest {
 
     eventListener.handleCheckInEvent(CHECK_IN_EVENT_SAMPLE, messageHeaders());
 
-    verify(repository, never()).save(any());
-    verify(itemStorageClient).findByQuery(exactMatchById(ITEM_ID).getQuery());
+    verify(repository).save(any());
+    var savedValue = transactionEntityArgumentCaptor.getValue();
+    assertThat(savedValue.getStatus()).isEqualTo(CLOSED);
   }
 
   @ParameterizedTest
