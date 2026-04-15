@@ -1,24 +1,17 @@
 
 package org.folio.dcb.service;
 
-import java.util.UUID;
 import org.folio.dcb.domain.ResultList;
-import org.folio.dcb.domain.dto.DcbTransaction.RoleEnum;
-import org.folio.dcb.domain.dto.ItemStatus;
-import org.folio.dcb.domain.dto.ItemStatus.NameEnum;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.domain.mapper.TransactionMapper;
-import org.folio.dcb.exception.InventoryItemNotFound;
 import org.folio.dcb.exception.ResourceAlreadyExistException;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.impl.BaseLibraryService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -27,7 +20,6 @@ import java.util.List;
 
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWER;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWING_PICKUP;
-import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CANCELLED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CLOSED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
@@ -216,41 +208,5 @@ class BaseLibraryServiceTest {
     baseLibraryService.saveDcbTransaction(DCB_TRANSACTION_ID, createDcbTransactionByRole(BORROWER), CIRCULATION_REQUEST_ID);
     verify(transactionRepository).save(any());
   }
-
-  @ParameterizedTest
-  @EnumSource(value = RoleEnum.class, names = "LENDER", mode = EnumSource.Mode.EXCLUDE)
-  void closeExpiredTransactionEntity_positive_parameterized(RoleEnum role) {
-    var entity = createTransactionEntity(role);
-    var servicePointId = UUID.randomUUID().toString();
-
-    baseLibraryService.closeExpiredTransactionEntity(entity, servicePointId);
-
-    verify(transactionRepository).save(any());
-  }
-
-  @ParameterizedTest
-  @EnumSource(value = NameEnum.class, names = {"AVAILABLE", "AWAITING_PICKUP", "IN_TRANSIT"})
-  void closeExpiredTransactionEntity_positive_lenderRole(NameEnum itemStatus) {
-    var entity = createTransactionEntity(LENDER);
-    var item = createInventoryItem().status(new ItemStatus().name(itemStatus));
-    var servicePointId = UUID.randomUUID().toString();
-    when(itemService.findItemByIdAfterCheckIn(entity.getItemId(), servicePointId)).thenReturn(item);
-
-    baseLibraryService.closeExpiredTransactionEntity(entity, servicePointId);
-
-    verify(transactionRepository).save(any());
-  }
-
-  @ParameterizedTest
-  @EnumSource(value = RoleEnum.class, names = "LENDER", mode = EnumSource.Mode.INCLUDE)
-  void closeExpiredTransactionEntity_negative_itemNotFound(RoleEnum role) {
-    var entity = createTransactionEntity(role);
-    var servicePointId = UUID.randomUUID().toString();
-    when(itemService.findItemByIdAfterCheckIn(entity.getItemId(), servicePointId))
-      .thenThrow(new InventoryItemNotFound("not found"));
-
-    baseLibraryService.closeExpiredTransactionEntity(entity, servicePointId);
-
-    verify(transactionRepository, never()).save(any());
-  }
 }
+

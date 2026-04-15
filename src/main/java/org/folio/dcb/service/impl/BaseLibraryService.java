@@ -165,34 +165,6 @@ public class BaseLibraryService {
     updateItemDetailsAndSaveEntity(transactionEntity, item, dcbItem.getMaterialType(), holdRequest.getId());
   }
 
-  /**
-   * Closes the expired transaction entity.
-   * For LENDER role, validates that the item was checked in at the expected service point
-   * and closes the transaction regardless of item status, as the item may have other holds
-   * that change its status to AWAITING_PICKUP or IN_TRANSIT.
-   *
-   * @param dcbTransaction the DCB transaction entity to be closed
-   * @param expectedServicePointId the expected service point ID
-   */
-  public void closeExpiredTransactionEntity(TransactionEntity dcbTransaction, String expectedServicePointId) {
-    var itemId = dcbTransaction.getItemId();
-    var role = dcbTransaction.getRole();
-    if (role != RoleEnum.LENDER) {
-      log.debug("closeExpiredTransactionEntity:: closing expired transaction: {}", dcbTransaction.getId());
-      updateTransactionEntity(dcbTransaction, TransactionStatus.StatusEnum.CLOSED);
-      return;
-    }
-
-    try {
-      itemService.findItemByIdAfterCheckIn(itemId, expectedServicePointId);
-      log.debug("closeExpiredTransactionEntity:: closing expired lender transaction: {}", dcbTransaction.getId());
-      updateTransactionEntity(dcbTransaction, TransactionStatus.StatusEnum.CLOSED);
-    } catch (InventoryItemNotFound exception) {
-      log.warn("closeExpiredTransactionEntity:: Failed to fetch item with id {} after check-in: {}",
-        itemId, expectedServicePointId, exception);
-    }
-  }
-
   private void updateItemDetailsAndSaveEntity(TransactionEntity transactionEntity, CirculationItem item,
                                               String materialType, String requestId) {
     transactionEntity.setItemId(item.getId());
