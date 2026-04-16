@@ -29,7 +29,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.AVAILABLE;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CANCELLED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CLOSED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
@@ -163,34 +162,6 @@ public class BaseLibraryService {
     CirculationRequest holdRequest = requestService.createHoldItemRequest(userService.fetchUser(dcbPatron), dcbItem,
       transactionEntity.getServicePointId());
     updateItemDetailsAndSaveEntity(transactionEntity, item, dcbItem.getMaterialType(), holdRequest.getId());
-  }
-
-  /**
-   * Closes the expired transaction entity if the associated item is available.
-   *
-   * @param dcbTransaction the DCB transaction entity to be closed
-   * @param expectedServicePointId the expected service point ID, used in logging
-   */
-  public void closeExpiredTransactionEntity(TransactionEntity dcbTransaction, String expectedServicePointId) {
-    var itemId = dcbTransaction.getItemId();
-    var role = dcbTransaction.getRole();
-    if (role != RoleEnum.LENDER) {
-      log.debug("closeTransactionEntityIfItemIsAvailable:: closing expired transaction: {}", dcbTransaction.getId());
-      updateTransactionEntity(dcbTransaction, TransactionStatus.StatusEnum.CLOSED);
-      return;
-    }
-
-    try {
-      var inventoryItem = itemService.findItemByIdAfterCheckIn(itemId, expectedServicePointId);
-      var itemStatus = inventoryItem.getStatus();
-      if (itemStatus != null && Objects.equals(itemStatus.getName(), AVAILABLE)) {
-        log.debug("closeTransactionEntityIfItemIsAvailable:: closing expired transaction: {}", dcbTransaction.getId());
-        updateTransactionEntity(dcbTransaction, TransactionStatus.StatusEnum.CLOSED);
-      }
-    } catch (InventoryItemNotFound exception) {
-      log.warn("closeExpiredTransactionEntity:: Failed to fetch item with id {} after check-in: {}",
-        itemId, expectedServicePointId, exception);
-    }
   }
 
   private void updateItemDetailsAndSaveEntity(TransactionEntity transactionEntity, CirculationItem item,

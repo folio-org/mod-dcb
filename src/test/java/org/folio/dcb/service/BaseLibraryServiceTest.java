@@ -1,25 +1,17 @@
 
 package org.folio.dcb.service;
 
-import java.util.UUID;
-import org.folio.dcb.domain.dto.DcbTransaction.RoleEnum;
-import org.folio.dcb.domain.dto.ItemStatus;
-import org.folio.dcb.domain.dto.ItemStatus.NameEnum;
+import org.folio.dcb.domain.ResultList;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.domain.mapper.TransactionMapper;
-import org.folio.dcb.exception.InventoryItemNotFound;
 import org.folio.dcb.exception.ResourceAlreadyExistException;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.impl.BaseLibraryService;
-import org.folio.spring.model.ResultList;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -28,7 +20,6 @@ import java.util.List;
 
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWER;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWING_PICKUP;
-import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CANCELLED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CLOSED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
@@ -236,54 +227,5 @@ class BaseLibraryServiceTest {
     baseLibraryService.saveDcbTransaction(DCB_TRANSACTION_ID, createDcbTransactionByRole(BORROWER), CIRCULATION_REQUEST_ID);
     verify(transactionRepository).save(any());
   }
-
-  @ParameterizedTest
-  @EnumSource(value = RoleEnum.class, names = "LENDER", mode = EnumSource.Mode.EXCLUDE)
-  void closeExpiredTransactionEntity_positive_parameterized(RoleEnum role) {
-    var entity = createTransactionEntity(role);
-    var servicePointId = UUID.randomUUID().toString();
-
-    baseLibraryService.closeExpiredTransactionEntity(entity, servicePointId);
-
-    verify(transactionRepository).save(any());
-  }
-
-  @Test
-  void closeExpiredTransactionEntity_positive_lenderRole() {
-    var entity = createTransactionEntity(LENDER);
-    var item = createInventoryItem().status(new ItemStatus().name(NameEnum.AVAILABLE));
-    var servicePointId = UUID.randomUUID().toString();
-    when(itemService.findItemByIdAfterCheckIn(entity.getItemId(), servicePointId)).thenReturn(item);
-
-    baseLibraryService.closeExpiredTransactionEntity(entity, servicePointId);
-
-    verify(transactionRepository).save(any());
-  }
-
-  @ParameterizedTest
-  @CsvSource(nullValues = "null", value = {"LENDER, null", "LENDER, UNAVAILABLE", "LENDER, IN_TRANSIT"})
-  void closeExpiredTransactionEntity_negative_parameterized(RoleEnum role, ItemStatus.NameEnum itemStatus) {
-    var entity = createTransactionEntity(role);
-    var itemStatusValue = itemStatus != null ? new ItemStatus().name(itemStatus) : null;
-    var item = createInventoryItem().status(itemStatusValue);
-    var servicePointId = UUID.randomUUID().toString();
-    when(itemService.findItemByIdAfterCheckIn(entity.getItemId(), servicePointId)).thenReturn(item);
-
-    baseLibraryService.closeExpiredTransactionEntity(entity, servicePointId);
-
-    verify(transactionRepository, never()).save(any());
-  }
-
-  @ParameterizedTest
-  @EnumSource(value = RoleEnum.class, names = "LENDER", mode = EnumSource.Mode.INCLUDE)
-  void closeExpiredTransactionEntity_negative_itemNotFound(RoleEnum role) {
-    var entity = createTransactionEntity(role);
-    var servicePointId = UUID.randomUUID().toString();
-    when(itemService.findItemByIdAfterCheckIn(entity.getItemId(), servicePointId))
-      .thenThrow(new InventoryItemNotFound("not found"));
-
-    baseLibraryService.closeExpiredTransactionEntity(entity, servicePointId);
-
-    verify(transactionRepository, never()).save(any());
-  }
 }
+
