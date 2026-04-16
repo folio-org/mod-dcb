@@ -88,7 +88,7 @@ public class CirculationItemServiceImpl implements CirculationItemService {
   }
 
   private CirculationItem fetchCirculationItemByBarcode(String barcode) {
-    var query = CqlQuery.exactMatch("barcode", barcode).getQuery();
+    var query = CqlQuery.exactMatch("barcode", barcode);
     return circulationItemClient.fetchItemByCqlQuery(query)
       .getItems()
       .stream()

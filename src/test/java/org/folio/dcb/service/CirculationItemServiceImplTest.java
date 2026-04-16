@@ -73,8 +73,8 @@ class CirculationItemServiceImplTest {
         .items(Collections.singletonList(existingItem))
         .build());
 
-    Location newLocation = testLocation();
-    var cqlByCode = CqlQuery.exactMatch("code", TEST_DCB_LOCATION_CODE).getQuery();
+    var newLocation = testLocation();
+    var cqlByCode = CqlQuery.exactMatch("code", TEST_DCB_LOCATION_CODE);
     when(locationsClient.findLocationByQuery(cqlByCode, true, 1, 0)).thenReturn(asSinglePage(newLocation));
 
     var updatedItem = CirculationItem.builder().id(TEST_CIRCULATION_ITEM_ID).barcode("barcode123")
@@ -104,8 +104,8 @@ class CirculationItemServiceImplTest {
         .items(Collections.singletonList(existingItem))
         .build());
 
-    Location location = testLocation();
-    var cqlByCode = CqlQuery.exactMatch("code", TEST_DCB_LOCATION_CODE).getQuery();
+    var location = testLocation();
+    var cqlByCode = CqlQuery.exactMatch("code", TEST_DCB_LOCATION_CODE);
     when(locationsClient.findLocationByQuery(cqlByCode, true, 1, 0)).thenReturn(asSinglePage(location));
 
     var result = circulationItemService.checkIfItemExistsAndCreate(dcbItem, TEST_SERVICE_POINT_ID);
