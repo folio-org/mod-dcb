@@ -120,7 +120,7 @@ public class CirculationEventListener {
     systemUserScopedExecutionService.executeAsyncSystemUserScoped(tenantId, () -> {
       var itemUuid = UUID.fromString(eventData.getItemId());
       transactionRepository.findExpiredTransactionsByItemId(itemUuid).forEach(entity ->
-        baseLibraryService.closeExpiredTransactionEntity(entity, eventData.getCheckInServicePointId()));
+        baseLibraryService.updateTransactionEntity(entity, TransactionStatus.StatusEnum.CLOSED));
     });
   }
 

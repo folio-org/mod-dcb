@@ -22,6 +22,8 @@
 * MODDCB-259: Use GitHub Workflows for Maven [MODDCB-259](https://folio-org.atlassian.net/browse/MODDCB-259)
 * MODDCB-241: Upgrade to Spring Boot v4.0.2 [MODDCB-241](https://folio-org.atlassian.net/browse/MODDCB-241)
 * MODDCB-270: Fix DCB circulation item effective location not updated on re-request with shadow location [MODDCB-270](https://folio-org.atlassian.net/browse/MODDCB-270)
+* MODDCB-267: Fix close LENDER DCB transaction on check-in regardless of item status when holds exist [MODDCB-267](https://folio-org.atlassian.net/browse/MODDCB-267)
+* MODDCB-271: Allow new transaction creation when EXPIRED transaction exists for same item [MODDCB-271](https://folio-org.atlassian.net/browse/MODDCB-271)
 
 ## v1.3.0 2025-03-13
 
