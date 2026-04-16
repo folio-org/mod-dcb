@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.stream.Stream;
 import org.folio.dcb.domain.dto.DcbAgency;
 import org.folio.dcb.domain.dto.DcbLocation;
+import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.DcbUpdateItem;
 import org.folio.dcb.domain.dto.DcbUpdateTransaction;
 import org.folio.dcb.domain.dto.ShadowLocationRefreshBody;
@@ -93,6 +94,11 @@ class FlexibleEffectiveLocationIT {
         .materialType("DVD")
         .build())
       .build();
+  }
+
+  private static DcbTransaction withShadowLocationCode(DcbTransaction tx) {
+    tx.getItem().locationCode("SHADOW_LOC_OLD");
+    return tx;
   }
 
   @Nested
@@ -252,7 +258,7 @@ class FlexibleEffectiveLocationIT {
     })
     void updateTransaction_positive_effectiveLocationUpdatedForExistingItem() throws Exception {
       testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, CREATED,
-        borrowerDcbTransaction(dcbPatron(PATRON_TYPE_USER_ID)));
+        withShadowLocationCode(borrowerDcbTransaction(dcbPatron(PATRON_TYPE_USER_ID))));
 
       putDcbTransactionDetailsAttempt(DCB_TRANSACTION_ID, updateTransactionWithShadowLibrary())
         .andExpect(status().isNoContent());
@@ -408,7 +414,7 @@ class FlexibleEffectiveLocationIT {
     })
     void updateTransaction_positive_effectiveLocationUpdatedForExistingItem() throws Exception {
       testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, CREATED,
-        borrowingPickupDcbTransaction(dcbPatron(PATRON_TYPE_USER_ID)));
+        withShadowLocationCode(borrowingPickupDcbTransaction(dcbPatron(PATRON_TYPE_USER_ID))));
 
       putDcbTransactionDetailsAttempt(DCB_TRANSACTION_ID, updateTransactionWithShadowLibrary())
         .andExpect(status().isNoContent());
@@ -562,7 +568,7 @@ class FlexibleEffectiveLocationIT {
     })
     void updateTransaction_positive_effectiveLocationUpdatedForExistingItem() throws Exception {
       testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, CREATED,
-        pickupDcbTransaction(dcbPatron(PATRON_TYPE_USER_ID)));
+        withShadowLocationCode(pickupDcbTransaction(dcbPatron(PATRON_TYPE_USER_ID))));
 
       putDcbTransactionDetailsAttempt(DCB_TRANSACTION_ID, updateTransactionWithShadowLibrary())
         .andExpect(status().isNoContent());
