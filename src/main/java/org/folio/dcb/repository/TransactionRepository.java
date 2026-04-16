@@ -15,7 +15,7 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
   @Query(value = "SELECT * FROM transactions where item_id = :itemId AND status not in ('CLOSED', 'CANCELLED', 'ERROR', 'CREATED', 'OPEN')", nativeQuery = true)
   Optional<TransactionEntity> findTransactionByItemIdAndStatusNotInClosed(@Param("itemId") UUID itemId);
 
-  @Query(value = "SELECT * FROM transactions where item_id = :itemId AND status not in ('CLOSED', 'CANCELLED', 'ERROR')", nativeQuery = true)
+  @Query(value = "SELECT * FROM transactions where item_id = :itemId AND status not in ('CLOSED', 'CANCELLED', 'ERROR', 'EXPIRED')", nativeQuery = true)
   List<TransactionEntity> findTransactionsByItemIdAndStatusNotInClosed(@Param("itemId") UUID itemId);
 
   @Query(value = "SELECT * FROM transactions where item_id = :itemId AND status = 'EXPIRED'", nativeQuery = true)

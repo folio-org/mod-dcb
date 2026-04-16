@@ -172,6 +172,25 @@ class BaseLibraryServiceTest {
   }
 
   @Test
+  void createBorrowingTransaction_positive_expiredTransactionExistsForSameItem() {
+    var item = createDcbItem();
+    var user = createUser();
+    user.setType("shadow");
+
+    when(userService.fetchUser(any())).thenReturn(user);
+    when(requestService.createHoldItemRequest(any(), any(), anyString())).thenReturn(createCirculationRequest());
+    when(transactionMapper.mapToEntity(any(), any())).thenReturn(createTransactionEntity());
+    when(itemService.fetchItemByBarcode(item.getBarcode())).thenReturn(new ResultList<>());
+    when(circulationItemService.checkIfItemExistsAndCreate(any(), any())).thenReturn(createCirculationItem());
+    when(transactionRepository.findTransactionsByItemIdAndStatusNotInClosed(any())).thenReturn(List.of());
+
+    var response = baseLibraryService.createBorrowingLibraryTransaction(DCB_TRANSACTION_ID, createDcbTransactionByRole(BORROWER), PICKUP_SERVICE_POINT_ID);
+
+    verify(transactionRepository).save(any());
+    Assertions.assertEquals(TransactionStatusResponse.StatusEnum.CREATED, response.getStatus());
+  }
+
+  @Test
   void checkItemIfExistsInInventory() {
     var item = createDcbItem();
     var inventoryItem = createInventoryItem();

@@ -213,6 +213,25 @@ class PickupTransactionIT extends BaseTenantIntegrationTest {
   }
 
   @Test
+  @WireMockStub({
+    "/stubs/mod-users/users/200-get-by-query(dcb user).json",
+    "/stubs/mod-inventory-storage/item-storage/200-get-by-query(barcode empty).json",
+    "/stubs/mod-circulation-item/200-get-by-query(barcode).json",
+    "/stubs/mod-users/groups/200-get-by-query(staff).json",
+    "/stubs/mod-circulation/requests/201-post(any).json",
+  })
+  void createTransaction_positive_expiredTransactionExistsForSameItem() throws Exception {
+    testJdbcHelper.saveDcbTransaction("571b0a2c-8883-40b5-a449-d41fe6000002", EXPIRED, pickupDcbTransaction());
+
+    var dcbPatron = dcbPatron(EXISTED_PATRON_ID);
+    postDcbTransaction(DCB_TRANSACTION_ID, pickupDcbTransaction(dcbPatron))
+      .andExpect(jsonPath("$.status").value("CREATED"));
+
+    auditEntityVerifier.assertThatLatestEntityIsNotDuplicate(DCB_TRANSACTION_ID);
+    verifyPostCirculationRequestCalledOnce(EXISTED_PATRON_ID);
+  }
+
+  @Test
   @WireMockStub("/stubs/mod-circulation/check-in-by-barcode/201-post(random SP).json")
   void updateTransactionStatus_positive_fromCreatedToOpen() throws Exception {
     testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, CREATED, pickupDcbTransaction());

@@ -178,6 +178,26 @@ class BorrowerTransactionIT extends BaseTenantIntegrationTest {
     "/stubs/mod-circulation-item/200-get-by-query(barcode).json",
     "/stubs/mod-circulation/requests/201-post(any).json",
   })
+  void createTransaction_positive_expiredTransactionExistsForSameItem() throws Exception {
+    testJdbcHelper.saveDcbTransaction("571b0a2c-8883-40b5-a449-d41fe6000001", EXPIRED, borrowerDcbTransaction());
+
+    postDcbTransaction(DCB_TRANSACTION_ID, borrowerDcbTransaction())
+      .andExpect(jsonPath("$.status").value("CREATED"));
+
+    auditEntityVerifier.assertThatLatestEntityIsNotDuplicate(DCB_TRANSACTION_ID);
+    verifyPostCirculationRequestCalledOnce(PATRON_TYPE_USER_ID);
+  }
+
+  @Test
+  @WireMockStub({
+    "/stubs/mod-inventory-storage/service-points/200-get-by-name(Virtual).json",
+    "/stubs/mod-inventory-storage/service-points/204-put(Virtual).json",
+    "/stubs/mod-calendar/calendars/200-get-all.json",
+    "/stubs/mod-users/users/200-get-by-query(patron).json",
+    "/stubs/mod-inventory-storage/item-storage/200-get-by-query(barcode empty).json",
+    "/stubs/mod-circulation-item/200-get-by-query(barcode).json",
+    "/stubs/mod-circulation/requests/201-post(any).json",
+  })
   void createTransaction_positive_withPatronTypeUser() throws Exception {
     var transaction = borrowerDcbTransaction();
     postDcbTransaction(DCB_TRANSACTION_ID, transaction)
