@@ -1,29 +1,63 @@
-## 2.0.0-SNAPSHOT 2026-XX-XX
-* MODDCB-196: Allow patrons to request items from own library via DCB
-* MODDCB-208: Fix cql query for querying patron group by name [MODDCB-208](https://folio-org.atlassian.net/browse/MODDCB-208)
-* MODDCB-208: Bump Spring Boot from 3.4.3 to 3.5.0 and update other dependencies
-* MODDCB-206: Populate locationCode for DCB Transaction API
-* MODDCB-216: Item Storage API version update from 10.1 to 11.0 [MODDCB-216](https://folio-org.atlassian.net/browse/MODDCB-216)
-* MODDCB-187: Create Umbrella DCB Inventory Holding if missing before using it [MODDCB-187](https://folio-org.atlassian.net/browse/MODDCB-187)
-* MODDCB-219: 403 from /circulation/loans during transaction status check [MODDCB-219](https://folio-org.atlassian.net/browse/MODDCB-219)
-* MODDCB-223: Add missing permission for DCB transaction status API [MODDCB-223](https://folio-org.atlassian.net/browse/MODDCB-223)
-* MODDCB-214: Load shadow locations from DCB-Hub [MODDCB-214](https://folio-org.atlassian.net/browse/MODDCB-214)
-* MODDCB-207: Populate effective location id for circulation item [MODDCB-207](https://folio-org.atlassian.net/browse/MODDCB-207)
-* MODDCB-222: Implement an ability to trigger the shadow location refresh operation [MODDCB-222](https://folio-org.atlassian.net/browse/MODDCB-222)
-* MODDCB-233: Implement location search by lendingLibraryCode  [MODDCB-233](https://folio-org.atlassian.net/browse/MODDCB-233)
-* MODDCB-234: Update POST API for DCB transaction creation to support localNames field [MODDCB-234](https://folio-org.atlassian.net/browse/MODDCB-234)
-* MODDCB-240: Fix inventory API call for location and location-units [MODDCB-240](https://folio-org.atlassian.net/browse/MODDCB-240)
-* MODDCB-235: Add hold count field to transaction status response [MODDCB-235](https://folio-org.atlassian.net/browse/MODDCB-235)
-* MODDCB-236: Provide endpoints to toggles borrower role renewals on virtual items [MODDCB-236](https://folio-org.atlassian.net/browse/MODDCB-236)
-* MODDCB-226: Create umbrella when data when requested if not present [MODDCB-226](https://folio-org.atlassian.net/browse/MODDCB-226)
-* MODDCB-242: Add handling of expired lender requests [MODDCB-242](https://folio-org.atlassian.net/browse/MODDCB-242)
-* MODDCB-251: Add request body for /dcb/shadow-locations/refresh [MODDCB-251](https://folio-org.atlassian.net/browse/MODDCB-251)
-* MODDCB-252: Update existing virtual(DCB) patron records with localNames [MODDCB-252](https://folio-org.atlassian.net/browse/MODDCB-252)
-* MODDCB-259: Use GitHub Workflows for Maven [MODDCB-259](https://folio-org.atlassian.net/browse/MODDCB-259)
-* MODDCB-241: Upgrade to Spring Boot v4.0.2 [MODDCB-241](https://folio-org.atlassian.net/browse/MODDCB-241)
-* MODDCB-270: Fix DCB circulation item effective location not updated on re-request with shadow location [MODDCB-270](https://folio-org.atlassian.net/browse/MODDCB-270)
-* MODDCB-267: Fix close LENDER DCB transaction on check-in regardless of item status when holds exist [MODDCB-267](https://folio-org.atlassian.net/browse/MODDCB-267)
-* MODDCB-271: Allow new transaction creation when EXPIRED transaction exists for same item [MODDCB-271](https://folio-org.atlassian.net/browse/MODDCB-271)
+## v2.0.0 2026-04-17
+
+### Breaking changes
+* Upgrade to Spring Boot 4.0 ([MODDCB-241](https://folio-org.atlassian.net/browse/MODDCB-241))
+* Remove `locationCode` from `TransactionMapper` ([MODDCB-270](https://folio-org.atlassian.net/browse/MODDCB-270))
+
+### New APIs versions
+* Provides `transactions v1.6` (was `v1.1`)
+* Provides `ecs-request-transactions v1.2` (was `v1.0`)
+* Provides `dcb_refresh_shadow_locations v2.0` (new)
+* Provides `dcb.settings v1.0` (new)
+
+### Features
+* Allow patrons to request items from own library via DCB (selfBorrowing with BORROWING_PICKUP role) ([MODDCB-196](https://folio-org.atlassian.net/browse/MODDCB-196))
+* Support for Open - Awaiting delivery request status ([MODDCB-197](https://folio-org.atlassian.net/browse/MODDCB-197))
+* Populate effective location id for circulation item ([MODDCB-207](https://folio-org.atlassian.net/browse/MODDCB-207))
+* Load shadow locations from DCB-Hub ([MODDCB-214](https://folio-org.atlassian.net/browse/MODDCB-214))
+* Implement shadow location refresh operation ([MODDCB-222](https://folio-org.atlassian.net/browse/MODDCB-222))
+* Generate runtime umbrella entities ([MODDCB-226](https://folio-org.atlassian.net/browse/MODDCB-226))
+* Implement location search by lendingLibraryCode ([MODDCB-233](https://folio-org.atlassian.net/browse/MODDCB-233))
+* Update POST API for DCB transaction creation to support localNames field ([MODDCB-234](https://folio-org.atlassian.net/browse/MODDCB-234))
+* Add holdCount field to transaction status response ([MODDCB-235](https://folio-org.atlassian.net/browse/MODDCB-235))
+* Provide endpoints to toggle borrower role renewals on virtual items ([MODDCB-236](https://folio-org.atlassian.net/browse/MODDCB-236))
+* Add handling of expired lender requests ([MODDCB-242](https://folio-org.atlassian.net/browse/MODDCB-242))
+* Add request body for /dcb/shadow-locations/refresh ([MODDCB-251](https://folio-org.atlassian.net/browse/MODDCB-251))
+* Update existing virtual/DCB patron records with localNames ([MODDCB-252](https://folio-org.atlassian.net/browse/MODDCB-252))
+* Implement DCB transaction expiry and Settings API ([MODDCB-257](https://folio-org.atlassian.net/browse/MODDCB-257))
+* Allow new transaction creation when EXPIRED transaction exists for same item ([MODDCB-271](https://folio-org.atlassian.net/browse/MODDCB-271))
+
+### Bug fixes
+* Remove sensitive data from logs ([MODDCB-175](https://folio-org.atlassian.net/browse/MODDCB-175))
+* Support items without barcodes ([MODDCB-188](https://folio-org.atlassian.net/browse/MODDCB-188))
+* Fix extension creation ([MODDCB-194](https://folio-org.atlassian.net/browse/MODDCB-194))
+* Fix Liquibase checksum issue for create-service-point-expiration-period-table ([MODDCB-199](https://folio-org.atlassian.net/browse/MODDCB-199))
+* Populate locationCode for DCB Transaction API ([MODDCB-206](https://folio-org.atlassian.net/browse/MODDCB-206))
+* Create Umbrella DCB Inventory Holding if missing before using it ([MODDCB-187](https://folio-org.atlassian.net/browse/MODDCB-187))
+* Fix 403 from /circulation/loans during transaction status check ([MODDCB-219](https://folio-org.atlassian.net/browse/MODDCB-219))
+* Add missing permission for DCB transaction status API ([MODDCB-223](https://folio-org.atlassian.net/browse/MODDCB-223))
+* Fix permissions for cancellation reason client ([MODDCB-226](https://folio-org.atlassian.net/browse/MODDCB-226))
+* Fix inventory API call for location and location-units ([MODDCB-240](https://folio-org.atlassian.net/browse/MODDCB-240))
+* Fix tenant initialization with enabled system user ([MODDCB-241](https://folio-org.atlassian.net/browse/MODDCB-241))
+* Fix close LENDER DCB transaction on check-in regardless of item status when holds exist ([MODDCB-267](https://folio-org.atlassian.net/browse/MODDCB-267))
+* Fix DCB circulation item effective location not updated on re-request with shadow location ([MODDCB-270](https://folio-org.atlassian.net/browse/MODDCB-270))
+
+### Tech Debt
+* Add codeowners, dependabot configuration, and PR template ([MODDCB-203](https://folio-org.atlassian.net/browse/MODDCB-203))
+* Fix CQL query for querying patron group by name ([MODDCB-208](https://folio-org.atlassian.net/browse/MODDCB-208))
+* Item Storage API version update from 10.1 to 11.0 ([MODDCB-216](https://folio-org.atlassian.net/browse/MODDCB-216))
+* Use GitHub Workflows for Maven ([MODDCB-259](https://folio-org.atlassian.net/browse/MODDCB-259))
+* Add JaCoCo plugin for code coverage reporting
+
+### Dependencies
+* Bump `spring-boot` from `3.4.3` to `4.0.5`
+* Bump `folio-spring-support` from `9.0.0` to `10.0.0`
+* Bump `folio-util` from `35.4.0` to `36.0.0`
+* Bump `kafka-clients` from `3.9.0` to `4.1.1`
+* Bump `wiremock` from `3.2.0` to `3.13.2`
+* Bump `rest-assured` from `5.5.1` to `6.0.0`
+* Bump `testcontainers` from `1.20.2` to `2.0.4`
+* Bump `openapi-generator-maven-plugin` from `7.12.0` to `7.21.0`
 
 ## v1.3.0 2025-03-13
 
