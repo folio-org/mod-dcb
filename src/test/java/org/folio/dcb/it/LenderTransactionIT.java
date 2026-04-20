@@ -519,10 +519,7 @@ class LenderTransactionIT extends BaseTenantIntegrationTest {
   }
 
   @Test
-  @WireMockStub({
-    "/stubs/mod-circulation/requests/200-get-by-query(hold requests empty).json",
-    "/stubs/mod-inventory-storage/item-storage/200-get-by-query(id+available).json",
-  })
+  @WireMockStub("/stubs/mod-circulation/requests/200-get-by-query(hold requests empty).json")
   void updateStatus_positive_expiredToClosedTransitionAfterCheckInMessage() throws Exception {
     testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, EXPIRED, lenderDcbTransaction());
     getDcbTransactionStatus(DCB_TRANSACTION_ID)

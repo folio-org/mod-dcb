@@ -40,26 +40,48 @@ public class CirculationItemServiceImpl implements CirculationItemService {
 
   @Override
   public CirculationItem checkIfItemExistsAndCreate(DcbItem dcbItem, String pickupServicePointId) {
-    var dcbItemBarcode = dcbItem.getBarcode();
     log.debug("checkIfItemExistsAndCreate:: generating a circulation item if it does not exist.");
     var circulationItem = fetchCirculationItemByBarcode(dcbItem.getBarcode());
     if(Objects.isNull(circulationItem)) {
       log.warn("checkIfItemExistsAndCreate:: Circulation item not found. Creating it.");
       String effectiveLocationId = fetchShadowLocationForItem(dcbItem);
       circulationItem = createCirculationItem(dcbItem, pickupServicePointId, effectiveLocationId);
+    } else {
+      circulationItem = updateCirculationItemEffectiveLocationIfChanged(circulationItem, dcbItem);
     }
     return circulationItem;
   }
 
+  private CirculationItem updateCirculationItemEffectiveLocationIfChanged(CirculationItem existingItem, DcbItem dcbItem) {
+    if (!dcbFeatureProperties.isFlexibleCirculationRulesEnabled()) {
+      log.debug("updateCirculationItemEffectiveLocationIfChanged:: Shadow location lookup is disabled, skipping update.");
+      return existingItem;
+    }
+    String newEffectiveLocationId = resolveEffectiveLocationId(dcbItem);
+    if (Objects.equals(newEffectiveLocationId, existingItem.getEffectiveLocationId())) {
+      log.debug("updateCirculationItemEffectiveLocationIfChanged:: Effective location unchanged for item {}.",
+        existingItem.getId());
+      return existingItem;
+    }
+    log.info("updateCirculationItemEffectiveLocationIfChanged:: Effective location changed for item {}. "
+        + "Updating from {} to {}.", existingItem.getId(), existingItem.getEffectiveLocationId(), newEffectiveLocationId);
+    existingItem.setEffectiveLocationId(newEffectiveLocationId);
+    return circulationItemClient.updateCirculationItem(existingItem.getId(), existingItem);
+  }
+
   private String fetchShadowLocationForItem(DcbItem dcbItem) {
     if (dcbFeatureProperties.isFlexibleCirculationRulesEnabled()) {
-      return tryFetchLocationIdByLocationCode(dcbItem)
-        .or(() -> tryFetchLocationIdByLendingLibraryCode(dcbItem))
-        .orElseGet(this::getDefaultDcbLocationId);
+      return resolveEffectiveLocationId(dcbItem);
     }
 
     log.debug("fetchShadowLocationForItem:: Shadow location lookup is disabled");
     return getDefaultDcbLocationId();
+  }
+
+  private String resolveEffectiveLocationId(DcbItem dcbItem) {
+    return tryFetchLocationIdByLocationCode(dcbItem)
+      .or(() -> tryFetchLocationIdByLendingLibraryCode(dcbItem))
+      .orElseGet(this::getDefaultDcbLocationId);
   }
 
   private CirculationItem fetchCirculationItemByBarcode(String barcode) {
