@@ -48,7 +48,12 @@ public class BorrowingLibraryServiceImpl implements LibraryService {
     if ((CREATED == currentStatus && OPEN == requestedStatus) || (ITEM_CHECKED_OUT == currentStatus && ITEM_CHECKED_IN == requestedStatus)) {
       log.info("updateTransactionStatus:: Checking in item for transaction {}.", dcbTransaction.getId());
       //Random UUID for servicePointId.
-      circulationService.checkInByBarcode(dcbTransaction, UUID.randomUUID().toString());
+      try {
+        circulationService.checkInByBarcode(dcbTransaction, UUID.randomUUID().toString());
+      } catch (Exception e) {
+        log.info("updateTransactionStatus:: Error occurred during check in for transaction {}. Error: {}",
+          dcbTransaction.getId(), e.getMessage());
+      }
       updateTransactionEntity(dcbTransaction, requestedStatus);
     } else if(OPEN == currentStatus && AWAITING_PICKUP == requestedStatus) {
       circulationService.checkInByBarcode(dcbTransaction);
