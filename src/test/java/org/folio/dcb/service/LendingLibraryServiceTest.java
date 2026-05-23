@@ -36,6 +36,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
 
 @ExtendWith(MockitoExtension.class)
 class LendingLibraryServiceTest {
@@ -118,5 +120,19 @@ class LendingLibraryServiceTest {
     TransactionEntity transactionEntity = createTransactionEntity();
     TransactionStatus transactionStatus = createTransactionStatus(TransactionStatus.StatusEnum.AWAITING_PICKUP);
     assertThrows(IllegalArgumentException.class, () -> lendingLibraryService.updateTransactionStatus(transactionEntity, transactionStatus));
+  }
+
+    @Test
+  void testUpdateTransactionStatusFromCreatedToOpenShouldUpdateEntity() {
+    // TestMate-1bbc6de8d11f860bac864b25fad8e5ad
+    // Given
+    TransactionEntity dcbTransaction = createTransactionEntity();
+    dcbTransaction.setStatus(CREATED);
+    TransactionStatus transactionStatus = createTransactionStatus(OPEN);
+    // When
+    lendingLibraryService.updateTransactionStatus(dcbTransaction, transactionStatus);
+    // Then
+    Assertions.assertEquals(OPEN, dcbTransaction.getStatus());
+    verify(transactionRepository).save(dcbTransaction);
   }
 }

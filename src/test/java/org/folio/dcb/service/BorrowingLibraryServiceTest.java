@@ -30,6 +30,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import org.folio.dcb.domain.entity.TransactionEntity;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CANCELLED;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -115,6 +117,19 @@ class BorrowingLibraryServiceTest {
 
     verify(circulationService).checkInByBarcode(any(), any());
     Assertions.assertEquals(ITEM_CHECKED_IN, transactionEntity.getStatus());
+  }
+
+    @Test
+  void testTransactionStatusUpdateToCancelled() {
+    // TestMate-9100f3c36cb9c9dc6ddfe4531639c7de
+    // Given
+    TransactionEntity transactionEntity = createTransactionEntity();
+    transactionEntity.setStatus(OPEN);
+    TransactionStatus transactionStatus = TransactionStatus.builder().status(CANCELLED).build();
+    // When
+    borrowingLibraryService.updateTransactionStatus(transactionEntity, transactionStatus);
+    // Then
+    verify(baseLibraryService).cancelTransactionRequest(transactionEntity);
   }
 
 }

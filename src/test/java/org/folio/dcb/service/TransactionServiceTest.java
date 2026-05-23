@@ -62,6 +62,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
+import org.folio.dcb.service.impl.BaseLibraryService;
+import org.junit.jupiter.api.BeforeEach;
+import org.folio.dcb.service.LibraryService;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.PICKUP;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
 
 @ExtendWith(MockitoExtension.class)
 class TransactionServiceTest {
@@ -82,6 +88,35 @@ class TransactionServiceTest {
   private CirculationClient circulationClient;
   @Mock
   private CirculationLoanPolicyStorageClient circulationLoanPolicyStorageClient;
+
+    @Mock(name = "pickupLibraryService")
+  private LibraryService pickupLibraryService;
+
+    @Mock(name = "borrowingPickupLibraryService")
+  private LibraryService borrowingPickupLibraryService;
+
+    @Mock(name = "borrowingLibraryService")
+  private LibraryService borrowingLibraryService;
+
+    @Mock
+  private BaseLibraryService baseLibraryService;
+
+    @BeforeEach
+  void setUp() {
+    transactionsService = new TransactionsServiceImpl(
+      lendingLibraryService,
+      borrowingPickupLibraryService,
+      pickupLibraryService,
+      borrowingLibraryService,
+      transactionRepository,
+      statusProcessorService,
+      transactionMapper,
+      transactionAuditRepository,
+      baseLibraryService,
+      circulationClient,
+      circulationLoanPolicyStorageClient
+    );
+  }
 
   @Test
   void renewLoanByTransactionIdTest() {
@@ -160,6 +195,13 @@ class TransactionServiceTest {
     return new RenewByIdResponse()
       .loanPolicyId("123")
       .renewalCount(2);
+  }
+
+    private static Stream<Arguments> pickupRolesProvider() {
+    return Stream.of(
+      Arguments.of(PICKUP),
+      Arguments.of(BORROWING_PICKUP)
+    );
   }
 
   @Test
@@ -317,6 +359,131 @@ class TransactionServiceTest {
     assertNotNull(dcbTransactionActual.getItem());
     assertNotNull(dcbTransactionActual.getItem().getLocationCode());
     assertEquals("TEST_LOCATION_CODE", dcbTransactionActual.getItem().getLocationCode());
+  }
+
+    @Test
+  void createCirculationRequestShouldDelegateToBorrowingPickupService() {
+    // TestMate-0a2a9520399d5c7abefe2604abee8bb1
+    // Given
+    DcbTransaction dcbTransaction = createDcbTransactionByRole(BORROWING_PICKUP);
+    TransactionStatusResponse expectedResponse = createTransactionResponse();
+    when(transactionRepository.existsById(DCB_TRANSACTION_ID)).thenReturn(false);
+    when(borrowingPickupLibraryService.createCirculation(DCB_TRANSACTION_ID, dcbTransaction))
+      .thenReturn(expectedResponse);
+    // When
+    TransactionStatusResponse actualResponse = transactionsService.createCirculationRequest(DCB_TRANSACTION_ID, dcbTransaction);
+    // Then
+    verify(transactionRepository).existsById(DCB_TRANSACTION_ID);
+    verify(borrowingPickupLibraryService).createCirculation(DCB_TRANSACTION_ID, dcbTransaction);
+    verifyNoInteractions(lendingLibraryService, pickupLibraryService, borrowingLibraryService);
+    assertEquals(expectedResponse, actualResponse);
+  }
+
+    @Test
+  void createCirculationRequestShouldDelegateToPickupService() {
+    // TestMate-597be30571329e3ce0267cdfff9dfb08
+    // Given
+    DcbTransaction dcbTransaction = createDcbTransactionByRole(PICKUP);
+    TransactionStatusResponse expectedResponse = createTransactionResponse();
+    when(transactionRepository.existsById(DCB_TRANSACTION_ID)).thenReturn(false);
+    when(pickupLibraryService.createCirculation(DCB_TRANSACTION_ID, dcbTransaction))
+      .thenReturn(expectedResponse);
+    // When
+    TransactionStatusResponse actualResponse = transactionsService.createCirculationRequest(DCB_TRANSACTION_ID, dcbTransaction);
+    // Then
+    verify(transactionRepository).existsById(DCB_TRANSACTION_ID);
+    verify(pickupLibraryService).createCirculation(DCB_TRANSACTION_ID, dcbTransaction);
+    verifyNoInteractions(lendingLibraryService, borrowingPickupLibraryService, borrowingLibraryService);
+    assertEquals(expectedResponse, actualResponse);
+  }
+
+    @Test
+  void createCirculationRequestShouldDelegateToBorrowerService() {
+    // TestMate-7d4eb902b0fe10bf7674b7be235df7bd
+    // Given
+    DcbTransaction dcbTransaction = createDcbTransactionByRole(BORROWER);
+    TransactionStatusResponse expectedResponse = createTransactionResponse();
+    when(transactionRepository.existsById(DCB_TRANSACTION_ID)).thenReturn(false);
+    when(borrowingLibraryService.createCirculation(DCB_TRANSACTION_ID, dcbTransaction))
+      .thenReturn(expectedResponse);
+    // When
+    TransactionStatusResponse actualResponse = transactionsService.createCirculationRequest(DCB_TRANSACTION_ID, dcbTransaction);
+    // Then
+    verify(transactionRepository).existsById(DCB_TRANSACTION_ID);
+    verify(borrowingLibraryService).createCirculation(DCB_TRANSACTION_ID, dcbTransaction);
+    verifyNoInteractions(lendingLibraryService, borrowingPickupLibraryService, pickupLibraryService);
+    assertEquals(expectedResponse, actualResponse);
+  }
+
+    @Test
+  void updateTransactionStatusWhenTransactionNotFoundShouldThrowException() {
+    // TestMate-dcfec3a2e25a9cd96051a6cf26412215
+    // Given
+    String nonExistentId = "non-existent-id";
+    TransactionStatus transactionStatus = TransactionStatus.builder()
+      .status(TransactionStatus.StatusEnum.OPEN)
+      .build();
+    when(transactionRepository.findById(nonExistentId)).thenReturn(Optional.empty());
+    // When
+    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+      () -> transactionsService.updateTransactionStatus(nonExistentId, transactionStatus));
+    // Then
+    assertEquals(String.format("Transaction with id %s not found", nonExistentId), exception.getMessage());
+    verify(transactionRepository).findById(nonExistentId);
+  }
+
+    @Test
+  void updateTransactionStatusForBorrowerRoleShouldUseBorrowingChainProcessor() {
+    // TestMate-e08c55185fe8d0dcaa3a2fd733caef67
+    // Given
+    TransactionStatus targetStatus = TransactionStatus.builder()
+      .status(ITEM_CHECKED_OUT)
+      .build();
+    TransactionEntity dcbTransactionEntity = createTransactionEntity();
+    dcbTransactionEntity.setStatus(OPEN);
+    dcbTransactionEntity.setRole(BORROWER);
+    List<TransactionStatus.StatusEnum> statusChain = List.of(AWAITING_PICKUP, ITEM_CHECKED_OUT);
+    when(transactionRepository.findById(DCB_TRANSACTION_ID))
+      .thenReturn(Optional.of(dcbTransactionEntity));
+    when(statusProcessorService.borrowingChainProcessor(OPEN, ITEM_CHECKED_OUT))
+      .thenReturn(statusChain);
+    doNothing().when(borrowingLibraryService).updateTransactionStatus(any(TransactionEntity.class), any(TransactionStatus.class));
+    // When
+    TransactionStatusResponse response = transactionsService.updateTransactionStatus(DCB_TRANSACTION_ID, targetStatus);
+    // Then
+    verify(statusProcessorService).borrowingChainProcessor(OPEN, ITEM_CHECKED_OUT);
+    verify(borrowingLibraryService).updateTransactionStatus(dcbTransactionEntity, TransactionStatus.builder().status(AWAITING_PICKUP).build());
+    verify(borrowingLibraryService).updateTransactionStatus(dcbTransactionEntity, TransactionStatus.builder().status(ITEM_CHECKED_OUT).build());
+    assertEquals(TransactionStatusResponse.StatusEnum.ITEM_CHECKED_OUT, response.getStatus());
+    verifyNoInteractions(lendingLibraryService, pickupLibraryService, borrowingPickupLibraryService);
+  }
+
+    @ParameterizedTest
+  @MethodSource("pickupRolesProvider")
+  void updateTransactionStatusForPickupRolesShouldUpdateDirectly(DcbTransaction.RoleEnum role) {
+    // TestMate-beca7b72cfab01b9d15502559ed19169
+    // Given
+    TransactionStatus targetStatus = TransactionStatus.builder()
+      .status(OPEN)
+      .build();
+    TransactionEntity dcbTransactionEntity = createTransactionEntity();
+    dcbTransactionEntity.setId(DCB_TRANSACTION_ID);
+    dcbTransactionEntity.setStatus(CREATED);
+    dcbTransactionEntity.setRole(role);
+    when(transactionRepository.findById(DCB_TRANSACTION_ID))
+      .thenReturn(Optional.of(dcbTransactionEntity));
+    // When
+    TransactionStatusResponse response = transactionsService.updateTransactionStatus(DCB_TRANSACTION_ID, targetStatus);
+    // Then
+    if (role == PICKUP) {
+      verify(pickupLibraryService).updateTransactionStatus(dcbTransactionEntity, targetStatus);
+      verifyNoInteractions(borrowingPickupLibraryService);
+    } else {
+      verify(borrowingPickupLibraryService).updateTransactionStatus(dcbTransactionEntity, targetStatus);
+      verifyNoInteractions(pickupLibraryService);
+    }
+    verifyNoInteractions(statusProcessorService, lendingLibraryService, borrowingLibraryService);
+    assertEquals(TransactionStatusResponse.StatusEnum.OPEN, response.getStatus());
   }
 
 }
