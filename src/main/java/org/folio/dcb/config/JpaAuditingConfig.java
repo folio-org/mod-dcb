@@ -1,5 +1,6 @@
 package org.folio.dcb.config;
 
+import java.time.temporal.ChronoUnit;
 import lombok.RequiredArgsConstructor;
 import org.folio.spring.FolioExecutionContext;
 import org.springframework.context.annotation.Bean;
@@ -13,8 +14,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Configuration
-@EnableJpaAuditing(dateTimeProviderRef = "dateTimeProvider", modifyOnCreate = false)
 @RequiredArgsConstructor
+@EnableJpaAuditing(dateTimeProviderRef = "dateTimeProvider")
 public class JpaAuditingConfig implements AuditorAware<UUID>{
 
   private final FolioExecutionContext folioExecutionContext;
@@ -26,7 +27,6 @@ public class JpaAuditingConfig implements AuditorAware<UUID>{
 
   @Bean
   public DateTimeProvider dateTimeProvider() {
-    return () -> Optional.of(OffsetDateTime.now());
+    return () -> Optional.of(OffsetDateTime.now().truncatedTo(ChronoUnit.MICROS));
   }
-
 }

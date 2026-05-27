@@ -4,7 +4,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.matchingJsonPath;
 import static com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
-import static org.folio.dcb.utils.EntityUtils.BORROWER_SERVICE_POINT_ID;
+import static org.folio.dcb.utils.EntityUtils.VIRTUAL_SERVICE_POINT_ID;
 import static org.folio.dcb.utils.EntityUtils.CIRCULATION_REQUEST_ID;
 import static org.folio.dcb.utils.EntityUtils.EXISTED_PATRON_ID;
 import static org.folio.dcb.utils.EntityUtils.ITEM_ID;
@@ -73,7 +73,7 @@ class EcsRequestTransactionsIT extends BaseTenantIntegrationTest {
       .withRequestBody(matchingJsonPath("$.status", equalTo("Open - Not yet filled")))
       .withRequestBody(matchingJsonPath("$.instanceId", equalTo(DCBConstants.INSTANCE_ID)))
       .withRequestBody(matchingJsonPath("$.requesterId", equalTo(PATRON_TYPE_USER_ID)))
-      .withRequestBody(matchingJsonPath("$.pickupServicePointId", equalTo(BORROWER_SERVICE_POINT_ID)))
+      .withRequestBody(matchingJsonPath("$.pickupServicePointId", equalTo(VIRTUAL_SERVICE_POINT_ID)))
       .withRequestBody(matchingJsonPath("$.holdingsRecordId", equalTo(DCBConstants.HOLDING_ID))));
   }
 
@@ -96,7 +96,7 @@ class EcsRequestTransactionsIT extends BaseTenantIntegrationTest {
       .withRequestBody(matchingJsonPath("$.status", equalTo("Open - Not yet filled")))
       .withRequestBody(matchingJsonPath("$.instanceId", equalTo(DCBConstants.INSTANCE_ID)))
       .withRequestBody(matchingJsonPath("$.requesterId", equalTo(PATRON_TYPE_USER_ID)))
-      .withRequestBody(matchingJsonPath("$.pickupServicePointId", equalTo(BORROWER_SERVICE_POINT_ID)))
+      .withRequestBody(matchingJsonPath("$.pickupServicePointId", equalTo(VIRTUAL_SERVICE_POINT_ID)))
       .withRequestBody(matchingJsonPath("$.holdingsRecordId", equalTo(DCBConstants.HOLDING_ID))));
   }
 
@@ -119,7 +119,7 @@ class EcsRequestTransactionsIT extends BaseTenantIntegrationTest {
       .withRequestBody(matchingJsonPath("$.status", equalTo("Open - Not yet filled")))
       .withRequestBody(matchingJsonPath("$.instanceId", equalTo(DCBConstants.INSTANCE_ID)))
       .withRequestBody(matchingJsonPath("$.requesterId", equalTo(PATRON_TYPE_USER_ID)))
-      .withRequestBody(matchingJsonPath("$.pickupServicePointId", equalTo(BORROWER_SERVICE_POINT_ID)))
+      .withRequestBody(matchingJsonPath("$.pickupServicePointId", equalTo(VIRTUAL_SERVICE_POINT_ID)))
       .withRequestBody(matchingJsonPath("$.holdingsRecordId", equalTo(DCBConstants.HOLDING_ID))));
   }
 

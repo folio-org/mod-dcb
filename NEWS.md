@@ -1,3 +1,8 @@
+## 1.3.11 2026-05-27
+* Fix close LENDER DCB transaction on check-in regardless of item status when holds exist ([MODDCB-267](https://folio-org.atlassian.net/browse/MODDCB-267))
+* Fix DCB circulation item effective location not updated on re-request with shadow location ([MODDCB-270](https://folio-org.atlassian.net/browse/MODDCB-270))
+* Allow new transaction creation when EXPIRED transaction exists for same item ([MODDCB-271](https://folio-org.atlassian.net/browse/MODDCB-271))
+
 ## v1.3.10 2026-01-30
 * MODDCB-261: Add missing permissions for system user [MODDCB-261](https://folio-org.atlassian.net/browse/MODDCB-261)
 

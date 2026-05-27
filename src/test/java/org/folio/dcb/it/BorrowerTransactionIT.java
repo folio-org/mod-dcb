@@ -17,18 +17,21 @@ import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.EXPIRED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_IN;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_OUT;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
-import static org.folio.dcb.utils.EntityUtils.BORROWER_SERVICE_POINT_ID;
+import static org.folio.dcb.utils.EntityUtils.VIRTUAL_SERVICE_POINT_ID;
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
 import static org.folio.dcb.utils.EntityUtils.EXISTED_PATRON_ID;
 import static org.folio.dcb.utils.EntityUtils.ITEM_ID;
 import static org.folio.dcb.utils.EntityUtils.LOAN_ID;
 import static org.folio.dcb.utils.EntityUtils.NOT_EXISTED_PATRON_ID;
 import static org.folio.dcb.utils.EntityUtils.PATRON_TYPE_USER_ID;
+import static org.folio.dcb.utils.EntityUtils.TEST_TENANT;
 import static org.folio.dcb.utils.EntityUtils.borrowerDcbTransaction;
 import static org.folio.dcb.utils.EntityUtils.dcbItem;
 import static org.folio.dcb.utils.EntityUtils.dcbPatron;
 import static org.folio.dcb.utils.EntityUtils.dcbTransactionUpdate;
 import static org.folio.dcb.utils.EntityUtils.transactionStatus;
+import static org.folio.dcb.utils.EventDataProvider.expiredRequestMessage;
+import static org.folio.dcb.utils.EventDataProvider.itemCheckInMessage;
 import static org.folio.dcb.utils.JsonTestUtils.asJsonString;
 import static org.hamcrest.Matchers.containsInRelativeOrder;
 import static org.hamcrest.Matchers.containsString;
@@ -77,7 +80,7 @@ class BorrowerTransactionIT extends BaseTenantIntegrationTest {
 
   @Test
   @WireMockStub({
-    "/stubs/mod-inventory-storage/service-points/200-get-by-query(Virtual).json",
+    "/stubs/mod-inventory-storage/service-points/200-get-by-name(Virtual).json",
     "/stubs/mod-inventory-storage/service-points/204-put(Virtual).json",
     "/stubs/mod-calendar/calendars/200-get-all.json",
     "/stubs/mod-users/users/200-get-by-query(user).json",
@@ -103,7 +106,7 @@ class BorrowerTransactionIT extends BaseTenantIntegrationTest {
 
   @Test
   @WireMockStub({
-    "/stubs/mod-inventory-storage/service-points/200-get-by-query(Virtual).json",
+    "/stubs/mod-inventory-storage/service-points/200-get-by-name(Virtual).json",
     "/stubs/mod-inventory-storage/service-points/204-put(Virtual).json",
     "/stubs/mod-calendar/calendars/200-get-all.json",
     "/stubs/mod-users/users/200-get-by-query(patron).json",
@@ -123,7 +126,7 @@ class BorrowerTransactionIT extends BaseTenantIntegrationTest {
 
   @Test
   @WireMockStub({
-    "/stubs/mod-inventory-storage/service-points/200-get-by-query(Virtual).json",
+    "/stubs/mod-inventory-storage/service-points/200-get-by-name(Virtual).json",
     "/stubs/mod-inventory-storage/service-points/204-put(Virtual).json",
     "/stubs/mod-calendar/calendars/200-get-all.json",
     "/stubs/mod-users/users/200-get-by-query(new_user empty).json",
@@ -144,7 +147,7 @@ class BorrowerTransactionIT extends BaseTenantIntegrationTest {
 
   @Test
   @WireMockStub({
-    "/stubs/mod-inventory-storage/service-points/200-get-by-query(Virtual).json",
+    "/stubs/mod-inventory-storage/service-points/200-get-by-name(Virtual).json",
     "/stubs/mod-inventory-storage/service-points/204-put(Virtual).json",
     "/stubs/mod-calendar/calendars/200-get-all.json",
     "/stubs/mod-users/users/200-get-by-query(patron).json",
@@ -167,7 +170,27 @@ class BorrowerTransactionIT extends BaseTenantIntegrationTest {
 
   @Test
   @WireMockStub({
-    "/stubs/mod-inventory-storage/service-points/200-get-by-query(Virtual).json",
+    "/stubs/mod-inventory-storage/service-points/200-get-by-name(Virtual).json",
+    "/stubs/mod-inventory-storage/service-points/204-put(Virtual).json",
+    "/stubs/mod-calendar/calendars/200-get-all.json",
+    "/stubs/mod-users/users/200-get-by-query(patron).json",
+    "/stubs/mod-inventory-storage/item-storage/200-get-by-query(barcode empty).json",
+    "/stubs/mod-circulation-item/200-get-by-query(barcode).json",
+    "/stubs/mod-circulation/requests/201-post(any).json",
+  })
+  void createTransaction_positive_expiredTransactionExistsForSameItem() throws Exception {
+    testJdbcHelper.saveDcbTransaction("571b0a2c-8883-40b5-a449-d41fe6000001", EXPIRED, borrowerDcbTransaction());
+
+    postDcbTransaction(DCB_TRANSACTION_ID, borrowerDcbTransaction())
+      .andExpect(jsonPath("$.status").value("CREATED"));
+
+    auditEntityVerifier.assertThatLatestEntityIsNotDuplicate(DCB_TRANSACTION_ID);
+    verifyPostCirculationRequestCalledOnce(PATRON_TYPE_USER_ID);
+  }
+
+  @Test
+  @WireMockStub({
+    "/stubs/mod-inventory-storage/service-points/200-get-by-name(Virtual).json",
     "/stubs/mod-inventory-storage/service-points/204-put(Virtual).json",
     "/stubs/mod-calendar/calendars/200-get-all.json",
     "/stubs/mod-users/users/200-get-by-query(patron).json",
@@ -251,7 +274,7 @@ class BorrowerTransactionIT extends BaseTenantIntegrationTest {
       .withRequestBody(matchingJsonPath("$.status", equalTo("Closed - Cancelled")))
       .withRequestBody(matchingJsonPath("$.instanceId", equalTo(DCBConstants.INSTANCE_ID)))
       .withRequestBody(matchingJsonPath("$.requesterId", equalTo(PATRON_TYPE_USER_ID)))
-      .withRequestBody(matchingJsonPath("$.pickupServicePointId", equalTo(BORROWER_SERVICE_POINT_ID)))
+      .withRequestBody(matchingJsonPath("$.pickupServicePointId", equalTo(VIRTUAL_SERVICE_POINT_ID)))
       .withRequestBody(matchingJsonPath("$.holdingsRecordId", equalTo(DCBConstants.HOLDING_ID))));
   }
 
@@ -328,7 +351,7 @@ class BorrowerTransactionIT extends BaseTenantIntegrationTest {
 
   @Test
   @WireMockStub({
-    "/stubs/mod-inventory-storage/service-points/200-get-by-query(Virtual).json",
+    "/stubs/mod-inventory-storage/service-points/200-get-by-name(Virtual).json",
     "/stubs/mod-inventory-storage/service-points/204-put(Virtual).json",
     "/stubs/mod-calendar/calendars/200-get-all.json",
     "/stubs/mod-users/users/200-get-by-query(patron).json",
@@ -356,7 +379,7 @@ class BorrowerTransactionIT extends BaseTenantIntegrationTest {
 
   @Test
   @WireMockStub({
-    "/stubs/mod-inventory-storage/service-points/200-get-by-query(Virtual).json",
+    "/stubs/mod-inventory-storage/service-points/200-get-by-name(Virtual).json",
     "/stubs/mod-inventory-storage/service-points/204-put(Virtual).json",
     "/stubs/mod-calendar/calendars/200-get-all.json",
     "/stubs/mod-users/users/200-get-by-query(patron).json",
@@ -439,6 +462,29 @@ class BorrowerTransactionIT extends BaseTenantIntegrationTest {
         "Status transition will not be possible from %s to EXPIRED", sourceStatus))));
   }
 
+  @Test
+  void updateStatus_positive_awaitingPickupTransactionExpiration() throws Exception {
+    testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, AWAITING_PICKUP, borrowerDcbTransaction());
+    getDcbTransactionStatus(DCB_TRANSACTION_ID)
+      .andExpect(jsonPath("$.status").value(AWAITING_PICKUP.getValue()));
+
+    testEventHelper.sendMessage(expiredRequestMessage(TEST_TENANT));
+    awaitUntilAsserted(() -> getDcbTransactionStatus(DCB_TRANSACTION_ID)
+      .andExpect(jsonPath("$.status").value(EXPIRED.getValue())));
+  }
+
+  @Test
+  void updateStatus_positive_expiredToClosedTransitionAfterCheckInMessage() throws Exception {
+    testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, EXPIRED, borrowerDcbTransaction());
+    getDcbTransactionStatus(DCB_TRANSACTION_ID)
+      .andExpect(jsonPath("$.status").value(EXPIRED.getValue()));
+
+    testEventHelper.sendMessage(itemCheckInMessage(TEST_TENANT));
+
+    awaitUntilAsserted(() -> getDcbTransactionStatus(DCB_TRANSACTION_ID)
+      .andExpect(jsonPath("$.status").value(CLOSED.getValue())));
+  }
+
   private static void verifyPostCirculationRequestCalledOnce(String requesterId) {
     verifyPostCirculationRequestCalledOnce(ITEM_ID, requesterId);
   }
@@ -449,7 +495,7 @@ class BorrowerTransactionIT extends BaseTenantIntegrationTest {
       .withRequestBody(matchingJsonPath("$.itemId", equalTo(itemId)))
       .withRequestBody(matchingJsonPath("$.instanceId", equalTo(DCBConstants.INSTANCE_ID)))
       .withRequestBody(matchingJsonPath("$.requesterId", equalTo(requesterId)))
-      .withRequestBody(matchingJsonPath("$.pickupServicePointId", equalTo(BORROWER_SERVICE_POINT_ID)))
+      .withRequestBody(matchingJsonPath("$.pickupServicePointId", equalTo(VIRTUAL_SERVICE_POINT_ID)))
       .withRequestBody(matchingJsonPath("$.holdingsRecordId", equalTo(DCBConstants.HOLDING_ID))));
   }
 }
