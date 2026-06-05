@@ -6,11 +6,14 @@ import org.folio.dcb.domain.dto.User;
 
 public interface RequestService {
   /**
-   * Create request based on status of the item
+   * Create a request based on the status of the item.
+   *
    * @param user - userEntity
    * @param dcbItem - dcbItemEntity
    */
   CirculationRequest createRequestBasedOnItemStatus(User user, DcbItem dcbItem, String pickupServicePointId);
+
   CirculationRequest createHoldItemRequest(User user, DcbItem dcbItem, String pickupServicePointId);
+
   void updateCirculationRequest(CirculationRequest circulationRequest);
 }

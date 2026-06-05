@@ -1,24 +1,31 @@
 package org.folio.dcb.service;
 
+import java.time.OffsetDateTime;
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.DcbUpdateTransaction;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.dto.TransactionStatusResponseCollection;
-import java.time.OffsetDateTime;
 
 public interface TransactionsService {
   /**
-   * create circulation request
+   * Create a circulation request.
+   *
    * @param dcbTransactionId - id of dcb transaction
    * @param dcbTransaction - dcbTransaction entity
    * @return TransactionStatusResponse
    */
   TransactionStatusResponse createCirculationRequest(String dcbTransactionId, DcbTransaction dcbTransaction);
+
   TransactionStatusResponse updateTransactionStatus(String dcbTransactionId, TransactionStatus transactionStatus);
+
   TransactionStatusResponse getTransactionStatusById(String dcbTransactionId);
-  TransactionStatusResponseCollection getTransactionStatusList(OffsetDateTime fromDate, OffsetDateTime toDate, Integer pageNumber, Integer pageSize);
+
+  TransactionStatusResponseCollection getTransactionStatusList(OffsetDateTime fromDate, OffsetDateTime toDate,
+      Integer pageNumber, Integer pageSize);
+
   void updateTransactionDetails(String dcbTransactionId, DcbUpdateTransaction dcbUpdateTransaction);
+
   TransactionStatusResponse renewLoanByTransactionId(String dcbTransactionId);
 
   /**
@@ -36,4 +43,4 @@ public interface TransactionsService {
    * @param dcbTransactionId unique identifier of the DCB transaction
    */
   void unblockItemRenewalByTransactionId(String dcbTransactionId);
-  }
+}
