@@ -1,10 +1,8 @@
 package org.folio.dcb.domain.converter;
 
-import java.util.Arrays;
-
-import org.folio.dcb.domain.dto.IntervalIdEnum;
-
 import jakarta.persistence.AttributeConverter;
+import java.util.Arrays;
+import org.folio.dcb.domain.dto.IntervalIdEnum;
 
 public class IntervalIdEnumConverter implements AttributeConverter<IntervalIdEnum, String> {
 

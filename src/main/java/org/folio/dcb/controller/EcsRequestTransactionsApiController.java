@@ -38,8 +38,8 @@ public class EcsRequestTransactionsApiController implements EcsRequestTransactio
   }
 
   @Override
-  public ResponseEntity<TransactionStatusResponse> updateEcsRequestTransaction(
-    String ecsRequestTransactionId, DcbTransaction dcbTransaction) {
+  public ResponseEntity<TransactionStatusResponse> updateEcsRequestTransaction(String ecsRequestTransactionId,
+      DcbTransaction dcbTransaction) {
 
     log.info("updateEcsRequestTransaction:: update ECS request transaction {}",
       ecsRequestTransactionId);

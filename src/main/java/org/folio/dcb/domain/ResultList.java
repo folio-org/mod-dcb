@@ -16,15 +16,11 @@ import lombok.NoArgsConstructor;
 @JsonIgnoreProperties("resultInfo")
 public class ResultList<T> {
 
-  /**
-   * Page number.
-   */
+  /** Page number. */
   @JsonAlias("total_records")
   private int totalRecords = 0;
 
-  /**
-   * Paged result data.
-   */
+  /** Paged result data. */
   private List<T> result = Collections.emptyList();
 
   /**

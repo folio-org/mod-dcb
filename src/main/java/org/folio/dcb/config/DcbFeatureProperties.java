@@ -11,15 +11,13 @@ import org.springframework.validation.annotation.Validated;
 @ConfigurationProperties(prefix = "application.features")
 public class DcbFeatureProperties {
 
-  /**
-   * Configuration toggle for shadow locations feature.
-   */
+  /** Configuration toggle for shadow locations feature. */
   private boolean flexibleCirculationRulesEnabled = false;
 
   /**
    * Defines if runtime verification of entity presence in the system is required.
    *
-   * <p>If entity is not present - it will be automatically created.</p>
+   * <p>If entity is not present - it will be automatically created.
    */
   private boolean dcbEntitiesRuntimeVerificationEnabled = false;
 }

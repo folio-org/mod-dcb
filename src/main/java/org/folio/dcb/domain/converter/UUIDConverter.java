@@ -1,10 +1,9 @@
 package org.folio.dcb.domain.converter;
 
 import jakarta.persistence.AttributeConverter;
-
 import java.util.UUID;
 
-public class UUIDConverter implements AttributeConverter<String, UUID> {
+public class UuidConverter implements AttributeConverter<String, UUID> {
   @Override
   public UUID convertToDatabaseColumn(String str) {
     return str == null ? null : UUID.fromString(str);

@@ -9,13 +9,9 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties("application.retry.item")
 public class ItemRetryConfiguration {
 
-  /**
-   * The maximum number of retry attempts for item-related operations.
-   */
+  /** The maximum number of retry attempts for item-related operations. */
   private int maxRetries = 10;
 
-  /**
-   * The interval duration between retry attempts.
-   */
+  /** The interval duration between retry attempts. */
   private long delayMilliseconds = 500;
 }

@@ -12,5 +12,4 @@ public class StatusProcessor {
   private StatusEnum nextStatus;
   private boolean manual;
   private StatusProcessor nextProcessor;
-
 }

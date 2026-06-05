@@ -30,9 +30,6 @@ public interface LocationUnitClient {
   @GetExchange("/campuses")
   ResultList<LocationUnit> findCampusesByQuery(@RequestParam("query") String query);
 
-  @GetExchange("/libraries")
-  ResultList<LocationUnit> findLibrariesByQuery(@RequestParam("query") String query);
-
   @GetExchange("/campuses")
   ResultList<LocationUnit> findCampusesByQuery(
     @RequestParam("query") String query,
@@ -42,6 +39,9 @@ public interface LocationUnitClient {
 
   @PostExchange("/libraries")
   LocationUnit createLibrary(@RequestBody LocationUnit locationUnit);
+
+  @GetExchange("/libraries")
+  ResultList<LocationUnit> findLibrariesByQuery(@RequestParam("query") String query);
 
   @GetExchange("/libraries")
   ResultList<LocationUnit> findLibrariesByQuery(

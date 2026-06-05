@@ -1,7 +1,15 @@
 package org.folio.dcb.controller;
 
-import lombok.extern.log4j.Log4j2;
+import static org.folio.dcb.utils.ErrorHelper.ErrorCode.BAD_GATEWAY;
+import static org.folio.dcb.utils.ErrorHelper.ErrorCode.DUPLICATE_ERROR;
+import static org.folio.dcb.utils.ErrorHelper.ErrorCode.INTERNAL_SERVER_ERROR;
+import static org.folio.dcb.utils.ErrorHelper.ErrorCode.NOT_FOUND_ERROR;
+import static org.folio.dcb.utils.ErrorHelper.ErrorCode.VALIDATION_ERROR;
+import static org.folio.dcb.utils.ErrorHelper.createExternalError;
+import static org.folio.dcb.utils.ErrorHelper.createInternalError;
 
+import lombok.extern.log4j.Log4j2;
+import org.folio.dcb.domain.dto.Errors;
 import org.folio.dcb.exception.DcbHubLocationException;
 import org.folio.dcb.exception.ResourceAlreadyExistException;
 import org.folio.dcb.exception.StatusException;
@@ -14,16 +22,6 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import static org.folio.dcb.utils.ErrorHelper.ErrorCode.BAD_GATEWAY;
-import static org.folio.dcb.utils.ErrorHelper.ErrorCode.DUPLICATE_ERROR;
-import static org.folio.dcb.utils.ErrorHelper.ErrorCode.INTERNAL_SERVER_ERROR;
-import static org.folio.dcb.utils.ErrorHelper.ErrorCode.NOT_FOUND_ERROR;
-import static org.folio.dcb.utils.ErrorHelper.ErrorCode.VALIDATION_ERROR;
-import static org.folio.dcb.utils.ErrorHelper.createExternalError;
-import static org.folio.dcb.utils.ErrorHelper.createInternalError;
-
-import org.folio.dcb.domain.dto.Errors;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -98,5 +96,4 @@ public class ExceptionHandlingController {
   private void logExceptionMessage(Exception ex) {
     log.warn("Exception occurred [{}]", ex.getClass().getSimpleName());
   }
-
 }
