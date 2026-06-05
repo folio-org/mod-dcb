@@ -40,12 +40,19 @@ public class CirculationItemServiceImpl implements CirculationItemService {
 
   @Override
   public CirculationItem checkIfItemExistsAndCreate(DcbItem dcbItem, String pickupServicePointId) {
+    return checkIfItemExistsAndCreate(dcbItem, pickupServicePointId, false);
+  }
+
+  @Override
+  public CirculationItem checkIfItemExistsAndCreate(DcbItem dcbItem, String pickupServicePointId,
+    boolean useRealItemId) {
+
     log.debug("checkIfItemExistsAndCreate:: generating a circulation item if it does not exist.");
     var circulationItem = fetchCirculationItemByBarcode(dcbItem.getBarcode());
     if(Objects.isNull(circulationItem)) {
       log.warn("checkIfItemExistsAndCreate:: Circulation item not found. Creating it.");
       String effectiveLocationId = fetchShadowLocationForItem(dcbItem);
-      circulationItem = createCirculationItem(dcbItem, pickupServicePointId, effectiveLocationId);
+      circulationItem = createCirculationItem(dcbItem, pickupServicePointId, effectiveLocationId, useRealItemId);
     } else {
       circulationItem = updateCirculationItemEffectiveLocationIfChanged(circulationItem, dcbItem);
     }
@@ -98,12 +105,14 @@ public class CirculationItemServiceImpl implements CirculationItemService {
     return circulationItemClient.retrieveCirculationItemById(itemId);
   }
 
-  private CirculationItem createCirculationItem(DcbItem item, String pickupServicePointId, String effectiveLocationId){
+  private CirculationItem createCirculationItem(DcbItem item, String pickupServicePointId,
+    String effectiveLocationId, boolean useRealItemId) {
+
     //SetupDefaultMaterialTypeIfNotGiven
     String materialType = StringUtils.isBlank(item.getMaterialType()) ? MATERIAL_TYPE_NAME_BOOK : item.getMaterialType();
     var materialTypeId = itemService.fetchItemMaterialTypeIdByMaterialTypeName(materialType);
     var dcbHolding = dcbEntityService.findOrCreateHolding();
-    var itemId = UUID.randomUUID().toString();
+    var itemId = useRealItemId ? item.getId() : UUID.randomUUID().toString();
     var loanType = dcbEntityService.findOrCreateLoanType();
     CirculationItem circulationItem =
       CirculationItem.builder()

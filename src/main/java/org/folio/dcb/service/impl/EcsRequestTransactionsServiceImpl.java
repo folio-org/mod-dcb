@@ -127,7 +127,8 @@ public class EcsRequestTransactionsServiceImpl implements EcsRequestTransactions
       throw new IllegalArgumentException("Item is required for borrower transaction");
     }
     baseLibraryService.checkItemExistsInInventoryAndThrow(itemVirtual.getBarcode());
-    CirculationItem item = circulationItemService.checkIfItemExistsAndCreate(itemVirtual, circulationRequest.getPickupServicePointId());
+    CirculationItem item = circulationItemService.checkIfItemExistsAndCreate(itemVirtual,
+      circulationRequest.getPickupServicePointId(), true);
     circulationRequest.setItemId(UUID.fromString(item.getId()));
     circulationRequest.setItem(Item.builder()
       .barcode(item.getBarcode())
