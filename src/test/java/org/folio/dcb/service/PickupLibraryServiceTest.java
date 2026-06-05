@@ -49,11 +49,11 @@ class PickupLibraryServiceTest {
     doNothing().when(baseLibraryService).saveDcbTransaction(any(), any(), any());
 
     var patron = createDefaultDcbPatron();
+    final var response = pickupLibraryService.createCirculation(DCB_TRANSACTION_ID, createDcbTransactionByRole(PICKUP));
     verify(userService).fetchOrCreateUser(patron);
     verify(circulationItemService).checkIfItemExistsAndCreate(item, PICKUP_SERVICE_POINT_ID);
     verify(requestService).createHoldItemRequest(user, item, PICKUP_SERVICE_POINT_ID);
 
-    var response = pickupLibraryService.createCirculation(DCB_TRANSACTION_ID, createDcbTransactionByRole(PICKUP));
     assertEquals(TransactionStatusResponse.StatusEnum.CREATED, response.getStatus());
     assertEquals(item, response.getItem());
     assertEquals(patron, response.getPatron());

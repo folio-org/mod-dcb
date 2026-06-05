@@ -107,22 +107,23 @@ class BaseLibraryServiceTest {
     var user = createUser();
     user.setType("shadow");
     var circulationItem = createCirculationItem();
+    var item = createDcbItem();
 
     when(userService.fetchUser(any()))
       .thenReturn(user);
     when(requestService.createHoldItemRequest(any(), any(), anyString())).thenReturn(createCirculationRequest());
     when(transactionMapper.mapToEntity(any(), any())).thenReturn(createTransactionEntity());
-    var item = createDcbItem();
     when(itemService.fetchItemByBarcode(item.getBarcode())).thenReturn(new ResultList<>());
     when(circulationItemService.checkIfItemExistsAndCreate(any(), any())).thenReturn(circulationItem);
+
+    final var response = baseLibraryService.createBorrowingLibraryTransaction(
+      DCB_TRANSACTION_ID, createDcbTransactionByRole(BORROWER), PICKUP_SERVICE_POINT_ID);
+
     verify(userService).fetchUser(createDcbPatronWithExactPatronId(EXISTED_PATRON_ID));
     // Circulation item id will be set as dcb item id in the code, hence setting it for assertion
     item.setId(circulationItem.getId());
     verify(requestService).createHoldItemRequest(user, item, PICKUP_SERVICE_POINT_ID);
     verify(transactionRepository).save(any());
-
-    var response = baseLibraryService.createBorrowingLibraryTransaction(
-      DCB_TRANSACTION_ID, createDcbTransactionByRole(BORROWER), PICKUP_SERVICE_POINT_ID);
     assertEquals(TransactionStatusResponse.StatusEnum.CREATED, response.getStatus());
   }
 
@@ -130,23 +131,22 @@ class BaseLibraryServiceTest {
   void createBorrowingPickupWithSelfBorrowingTransactionTest() {
     var user = createUser();
     user.setType("staff");
+    var item = createDcbItem();
+    var dcbTransaction = createDcbTransactionByRoleAndSelfBorrowing(BORROWING_PICKUP, Boolean.TRUE);
 
     when(userService.fetchUser(any())).thenReturn(user);
     when(transactionMapper.mapToEntity(any(), any())).thenReturn(createTransactionEntity());
     when(requestService.createRequestBasedOnItemStatus(any(), any(), anyString()))
       .thenReturn(createCirculationRequest());
 
+    final var response =
+      baseLibraryService.createBorrowingLibraryTransaction(DCB_TRANSACTION_ID, dcbTransaction, PICKUP_SERVICE_POINT_ID);
+
     var patron = createDcbPatronWithExactPatronId(EXISTED_PATRON_ID);
     verify(userService).fetchUser(patron);
     verify(circulationItemService, never()).checkIfItemExistsAndCreate(any(), any());
-
-    var item = createDcbItem();
-    var dcbTransaction = createDcbTransactionByRoleAndSelfBorrowing(BORROWING_PICKUP, Boolean.TRUE);
     verify(requestService).createRequestBasedOnItemStatus(user, item, dcbTransaction.getPickup().getServicePointId());
     verify(transactionRepository).save(any());
-
-    var response =
-      baseLibraryService.createBorrowingLibraryTransaction(DCB_TRANSACTION_ID, dcbTransaction, PICKUP_SERVICE_POINT_ID);
     assertEquals(TransactionStatusResponse.StatusEnum.CREATED, response.getStatus());
 
     var servicePoint = createServicePointRequest();

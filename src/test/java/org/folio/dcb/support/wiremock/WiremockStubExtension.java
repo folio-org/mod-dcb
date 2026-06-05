@@ -88,10 +88,11 @@ public class WiremockStubExtension implements
       return;
     }
 
+    final var unusedStubs = findUnusedStubs(definedStubMappings);
+
     store.remove(getStubIdsKey(context));
     resetWiremockStubs();
 
-    var unusedStubs = findUnusedStubs(definedStubMappings);
     validateUnmatchedRequests(unmatchedRequestValues);
     validateUnusedStubMappings(unusedStubs);
   }
