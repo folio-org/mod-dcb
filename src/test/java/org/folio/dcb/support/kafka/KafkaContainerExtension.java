@@ -1,6 +1,5 @@
 package org.folio.dcb.support.kafka;
 
-import static org.folio.dcb.utils.EntityUtils.TEST_TENANT;
 import static org.testcontainers.utility.DockerImageName.parse;
 
 import java.util.List;

@@ -9,12 +9,12 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.UUID;
-import org.folio.dcb.integration.invstorage.model.HoldingSource;
-import org.folio.dcb.integration.invstorage.HoldingsStorageClient;
-import org.folio.dcb.integration.invstorage.model.InventoryHolding;
-import org.folio.dcb.integration.inventory.model.InventoryInstance;
-import org.folio.dcb.integration.invstorage.model.Location;
 import org.folio.dcb.domain.ResultList;
+import org.folio.dcb.integration.inventory.model.InventoryInstance;
+import org.folio.dcb.integration.invstorage.HoldingsStorageClient;
+import org.folio.dcb.integration.invstorage.model.HoldingSource;
+import org.folio.dcb.integration.invstorage.model.InventoryHolding;
+import org.folio.dcb.integration.invstorage.model.Location;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,8 +38,7 @@ class DcbHoldingServiceTest {
 
   @AfterEach
   void tearDown() {
-    verifyNoMoreInteractions(dcbInstanceService, dcbLocationService,
-      holdingsStorageClient, dcbHoldingSourceService);
+    verifyNoMoreInteractions(dcbInstanceService, dcbLocationService, holdingsStorageClient, dcbHoldingSourceService);
   }
 
   @Test

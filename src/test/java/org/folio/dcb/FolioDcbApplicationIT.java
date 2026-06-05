@@ -30,10 +30,12 @@ import org.testcontainers.utility.DockerImageName;
 @Testcontainers
 class FolioDcbApplicationIT {
 
-  private static final Logger LOG = LoggerFactory.getLogger(FolioDcbApplicationIT.class);
-  /** Container logging, requires log4j-slf4j2-impl in test scope */
-  private static final boolean IS_LOG_ENABLED = true;
   public static final String TENANT = "diku";
+  private static final Logger LOG = LoggerFactory.getLogger(FolioDcbApplicationIT.class);
+
+  /** Container logging, requires log4j-slf4j2-impl in test scope. */
+  private static final boolean IS_LOG_ENABLED = true;
+
   private static final Network NETWORK = Network.newNetwork();
 
   private static final KafkaContainer KAFKA =
@@ -93,7 +95,7 @@ class FolioDcbApplicationIT {
 
   @BeforeEach
   void beforeEach() {
-    RestAssured.requestSpecification = null;  // unset X-Okapi-Tenant etc.
+    RestAssured.requestSpecification = null; // unset X-Okapi-Tenant etc.
   }
 
   @Test

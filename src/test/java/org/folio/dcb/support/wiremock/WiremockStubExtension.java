@@ -37,7 +37,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
 
 public class WiremockStubExtension implements
-  BeforeEachCallback, AfterEachCallback, BeforeAllCallback, AfterAllCallback {
+    BeforeEachCallback, AfterEachCallback, BeforeAllCallback, AfterAllCallback {
 
   private static final String STUB_IDS = "stubIds";
   private static final Namespace NAMESPACE = Namespace.create(WiremockStubExtension.class);
@@ -88,11 +88,10 @@ public class WiremockStubExtension implements
       return;
     }
 
-    var unusedStubs = findUnusedStubs(definedStubMappings);
-
     store.remove(getStubIdsKey(context));
     resetWiremockStubs();
 
+    var unusedStubs = findUnusedStubs(definedStubMappings);
     validateUnmatchedRequests(unmatchedRequestValues);
     validateUnusedStubMappings(unusedStubs);
   }
@@ -232,6 +231,5 @@ public class WiremockStubExtension implements
       .collect(Collectors.joining("\n", "[\n", "\n]"));
   }
 
-  public record StubMappingRepr(UUID id, String representation) {
-  }
+  public record StubMappingRepr(UUID id, String representation) {}
 }

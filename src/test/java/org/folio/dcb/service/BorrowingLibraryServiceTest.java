@@ -1,18 +1,5 @@
 package org.folio.dcb.service;
 
-import org.folio.dcb.domain.dto.TransactionStatus;
-import org.folio.dcb.repository.TransactionRepository;
-import org.folio.dcb.service.impl.BaseLibraryService;
-import org.folio.dcb.service.impl.BorrowingLibraryServiceImpl;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.UUID;
-
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWER;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.AWAITING_PICKUP;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CLOSED;
@@ -31,6 +18,17 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.UUID;
+import org.folio.dcb.domain.dto.TransactionStatus;
+import org.folio.dcb.repository.TransactionRepository;
+import org.folio.dcb.service.impl.BaseLibraryService;
+import org.folio.dcb.service.impl.BorrowingLibraryServiceImpl;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class BorrowingLibraryServiceTest {
@@ -52,6 +50,7 @@ class BorrowingLibraryServiceTest {
     verify(circulationService).checkInByBarcode(any());
     Assertions.assertEquals(AWAITING_PICKUP, transactionEntity.getStatus());
   }
+
   @Test
   void testTransactionStatusUpdateFromCreatedToOpen() {
     var transactionEntity = createTransactionEntity();
@@ -69,7 +68,8 @@ class BorrowingLibraryServiceTest {
     var transactionEntity = createTransactionEntity();
     transactionEntity.setStatus(CREATED);
     TransactionStatus transactionStatus = TransactionStatus.builder().status(AWAITING_PICKUP).build();
-    assertThrows(IllegalArgumentException.class, () -> borrowingLibraryService.updateTransactionStatus(transactionEntity, transactionStatus));
+    assertThrows(IllegalArgumentException.class, () ->
+      borrowingLibraryService.updateTransactionStatus(transactionEntity, transactionStatus));
   }
 
   @Test
@@ -77,10 +77,13 @@ class BorrowingLibraryServiceTest {
     var servicePointRequest = createServicePointRequest();
     var dcbTransaction = createDcbTransactionByRole(BORROWER);
     servicePointRequest.setId(UUID.randomUUID().toString());
-    when(servicePointService.createServicePointIfNotExists(dcbTransaction)).thenReturn(servicePointRequest);
+    when(servicePointService.createServicePointIfNotExists(dcbTransaction))
+        .thenReturn(servicePointRequest);
     borrowingLibraryService.createCirculation(DCB_TRANSACTION_ID, dcbTransaction);
     assertEquals(servicePointRequest.getId(), dcbTransaction.getPickup().getServicePointId());
-    verify(baseLibraryService).createBorrowingLibraryTransaction(DCB_TRANSACTION_ID, dcbTransaction, servicePointRequest.getId());
+    verify(baseLibraryService)
+        .createBorrowingLibraryTransaction(
+            DCB_TRANSACTION_ID, dcbTransaction, servicePointRequest.getId());
   }
 
   @Test
@@ -98,7 +101,8 @@ class BorrowingLibraryServiceTest {
     var transactionEntity = createTransactionEntity();
     transactionEntity.setStatus(AWAITING_PICKUP);
     doNothing().when(circulationService).checkOutByBarcode(transactionEntity);
-    TransactionStatus transactionStatus = TransactionStatus.builder().status(ITEM_CHECKED_OUT).build();
+    TransactionStatus transactionStatus =
+        TransactionStatus.builder().status(ITEM_CHECKED_OUT).build();
     borrowingLibraryService.updateTransactionStatus(transactionEntity, transactionStatus);
 
     verify(circulationService).checkOutByBarcode(any());
@@ -116,5 +120,4 @@ class BorrowingLibraryServiceTest {
     verify(circulationService).checkInByBarcode(any(), any());
     Assertions.assertEquals(ITEM_CHECKED_IN, transactionEntity.getStatus());
   }
-
 }

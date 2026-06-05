@@ -28,9 +28,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
-
-import org.folio.dcb.integration.circulation.CirculationClient;
-import org.folio.dcb.integration.circstorage.CirculationLoanPolicyStorageClient;
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.DcbTransaction.RoleEnum;
 import org.folio.dcb.domain.dto.LoanPolicy;
@@ -46,6 +43,8 @@ import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.domain.mapper.TransactionMapper;
 import org.folio.dcb.exception.ResourceAlreadyExistException;
 import org.folio.dcb.exception.StatusException;
+import org.folio.dcb.integration.circstorage.CirculationLoanPolicyStorageClient;
+import org.folio.dcb.integration.circulation.CirculationClient;
 import org.folio.dcb.repository.TransactionAuditRepository;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.impl.LendingLibraryServiceImpl;
@@ -66,33 +65,26 @@ import org.springframework.data.domain.Page;
 @ExtendWith(MockitoExtension.class)
 class TransactionServiceTest {
 
-  @InjectMocks
-  private TransactionsServiceImpl transactionsService;
+  @InjectMocks private TransactionsServiceImpl transactionsService;
+
   @Mock(name = "lendingLibraryService")
   private LendingLibraryServiceImpl lendingLibraryService;
-  @Mock
-  private TransactionRepository transactionRepository;
-  @Mock
-  private StatusProcessorService statusProcessorService;
-  @Mock
-  private TransactionAuditRepository transactionAuditRepository;
-  @Mock
-  private TransactionMapper transactionMapper;
-  @Mock
-  private CirculationClient circulationClient;
-  @Mock
-  private CirculationLoanPolicyStorageClient circulationLoanPolicyStorageClient;
+
+  @Mock private TransactionRepository transactionRepository;
+  @Mock private StatusProcessorService statusProcessorService;
+  @Mock private TransactionAuditRepository transactionAuditRepository;
+  @Mock private TransactionMapper transactionMapper;
+  @Mock private CirculationClient circulationClient;
+  @Mock private CirculationLoanPolicyStorageClient circulationLoanPolicyStorageClient;
 
   @Test
   void renewLoanByTransactionIdTest() {
-    when(transactionRepository.findById(anyString())).thenReturn(Optional.ofNullable(
-      buildTransactionToRenew(ITEM_CHECKED_OUT, LENDER)));
+    when(transactionRepository.findById(anyString()))
+        .thenReturn(Optional.ofNullable(buildTransactionToRenew(ITEM_CHECKED_OUT, LENDER)));
     when(circulationClient.renewById(any())).thenReturn(buildTestRenewBleResponse());
-    when(circulationLoanPolicyStorageClient.getById(anyString())).thenReturn(
-      buildTestLoanPolicy());
+    when(circulationLoanPolicyStorageClient.getById(anyString())).thenReturn(buildTestLoanPolicy());
     when(circulationClient.renewById(any())).thenReturn(buildTestRenewBleResponse());
-    when(circulationLoanPolicyStorageClient.getById(anyString())).thenReturn(
-      buildTestLoanPolicy());
+    when(circulationLoanPolicyStorageClient.getById(anyString())).thenReturn(buildTestLoanPolicy());
 
     transactionsService.renewLoanByTransactionId(DCB_TRANSACTION_ID);
     verify(circulationClient, times(1)).renewById(any());
@@ -102,26 +94,25 @@ class TransactionServiceTest {
   @Test
   void renewLoanByTransactionIdShouldThrowNotFoundExceptionWhenRenewResponseNull() {
     when(circulationClient.renewById(any(RenewByIdRequest.class))).thenReturn(null);
-    when(transactionRepository.findById(anyString())).thenReturn(Optional.of(
-      buildTransactionToRenew(ITEM_CHECKED_OUT, LENDER)));
-    assertThrows(NotFoundException.class, () -> transactionsService.renewLoanByTransactionId(
-      DCB_TRANSACTION_ID));
+    when(transactionRepository.findById(anyString()))
+        .thenReturn(Optional.of(buildTransactionToRenew(ITEM_CHECKED_OUT, LENDER)));
+    assertThrows(NotFoundException.class, () ->
+      transactionsService.renewLoanByTransactionId(DCB_TRANSACTION_ID));
   }
 
   @Test
   void renewLoanByTransactionIdShouldThrowNotFoundExceptionWhenLoanPolicyResponseNull() {
-    when(transactionRepository.findById(anyString())).thenReturn(Optional.ofNullable(
-      buildTransactionToRenew(ITEM_CHECKED_OUT, LENDER)));
+    when(transactionRepository.findById(anyString()))
+        .thenReturn(Optional.ofNullable(buildTransactionToRenew(ITEM_CHECKED_OUT, LENDER)));
     when(circulationClient.renewById(any())).thenReturn(buildTestRenewBleResponse());
     when(circulationLoanPolicyStorageClient.getById(anyString())).thenReturn(null);
-    assertThrows(NotFoundException.class, () -> transactionsService.renewLoanByTransactionId(
-      DCB_TRANSACTION_ID));
+    assertThrows(NotFoundException.class, () ->
+      transactionsService.renewLoanByTransactionId(DCB_TRANSACTION_ID));
   }
 
   @ParameterizedTest
   @MethodSource
-  void renewLoanByTransactionIdShouldThrowExceptionTest(TransactionEntity transaction,
-    Class<Throwable> exception) {
+  void renewLoanByTransactionIdShouldThrowExceptionTest(TransactionEntity transaction, Class<Throwable> exception) {
     when(transactionRepository.findById(anyString())).thenReturn(Optional.of(transaction));
     assertThrows(exception, () -> transactionsService.renewLoanByTransactionId(DCB_TRANSACTION_ID));
   }
@@ -197,14 +188,11 @@ class TransactionServiceTest {
       () -> transactionsService.getTransactionStatusById(transactionIdUnique)
     );
 
-    Assertions.assertEquals(
-      String.format("DCB Transaction was not found by id= %s ", transactionIdUnique),
+    Assertions.assertEquals(String.format("DCB Transaction was not found by id= %s ", transactionIdUnique),
       exception.getMessage());
   }
 
-  /**
-   * For any kind of role: LENDER/BORROWER/PICKUP/BORROWING_PICKUP
-   */
+  /** For any kind of role: LENDER/BORROWER/PICKUP/BORROWING_PICKUP. */
   @Test
   void createTransactionWithExistingTransactionIdTest() {
     var dcbTransaction = createDcbTransactionByRole(LENDER);
@@ -219,20 +207,18 @@ class TransactionServiceTest {
     dcbTransactionEntity.setStatus(StatusEnum.OPEN);
     dcbTransactionEntity.setRole(LENDER);
 
-    when(transactionRepository.findById(DCB_TRANSACTION_ID)).thenReturn(
-      Optional.of(dcbTransactionEntity));
+    when(transactionRepository.findById(DCB_TRANSACTION_ID))
+        .thenReturn(Optional.of(dcbTransactionEntity));
     when(statusProcessorService.lendingChainProcessor(StatusEnum.OPEN, ITEM_CHECKED_OUT))
       .thenReturn(List.of(StatusEnum.AWAITING_PICKUP, ITEM_CHECKED_OUT));
     doNothing().when(lendingLibraryService)
       .updateTransactionStatus(dcbTransactionEntity, TransactionStatus.builder().status(
         StatusEnum.AWAITING_PICKUP).build());
     doNothing().when(lendingLibraryService)
-      .updateTransactionStatus(dcbTransactionEntity, TransactionStatus.builder().status(
-        ITEM_CHECKED_OUT).build());
+      .updateTransactionStatus(dcbTransactionEntity, TransactionStatus.builder().status(ITEM_CHECKED_OUT).build());
 
-    transactionsService.updateTransactionStatus(DCB_TRANSACTION_ID,
-      TransactionStatus.builder().status(
-        ITEM_CHECKED_OUT).build());
+    transactionsService.updateTransactionStatus(
+        DCB_TRANSACTION_ID, TransactionStatus.builder().status(ITEM_CHECKED_OUT).build());
 
     verify(statusProcessorService).lendingChainProcessor(StatusEnum.OPEN, ITEM_CHECKED_OUT);
   }
@@ -241,25 +227,23 @@ class TransactionServiceTest {
   void updateTransactionEntityErrorTest() {
     var dcbTransactionEntity = createTransactionEntity();
     dcbTransactionEntity.setStatus(StatusEnum.OPEN);
-    when(transactionRepository.findById(DCB_TRANSACTION_ID)).thenReturn(
-      Optional.of(dcbTransactionEntity));
+    when(transactionRepository.findById(DCB_TRANSACTION_ID))
+        .thenReturn(Optional.of(dcbTransactionEntity));
     var openTransactionStatus = TransactionStatus.builder().status(StatusEnum.OPEN).build();
 
-    Assertions.assertThrows(StatusException.class,
-      () -> transactionsService.updateTransactionStatus(DCB_TRANSACTION_ID, openTransactionStatus));
+    Assertions.assertThrows(StatusException.class, () ->
+      transactionsService.updateTransactionStatus(DCB_TRANSACTION_ID, openTransactionStatus));
 
     dcbTransactionEntity.setStatus(StatusEnum.ITEM_CHECKED_IN);
     var cancelledTransactionStatus = TransactionStatus.builder()
       .status(StatusEnum.CANCELLED)
       .build();
-    Assertions.assertThrows(StatusException.class,
-      () -> transactionsService.updateTransactionStatus(DCB_TRANSACTION_ID,
-        cancelledTransactionStatus));
+    Assertions.assertThrows(StatusException.class, () ->
+      transactionsService.updateTransactionStatus(DCB_TRANSACTION_ID, cancelledTransactionStatus));
 
     dcbTransactionEntity.setStatus(ITEM_CHECKED_OUT);
-    Assertions.assertThrows(StatusException.class,
-      () -> transactionsService.updateTransactionStatus(DCB_TRANSACTION_ID,
-        cancelledTransactionStatus));
+    Assertions.assertThrows(StatusException.class, () ->
+      transactionsService.updateTransactionStatus(DCB_TRANSACTION_ID, cancelledTransactionStatus));
   }
 
   @Test
@@ -304,19 +288,20 @@ class TransactionServiceTest {
 
   @Test
   void shouldVerifyLocationCodeWhenCreatingCirculationRequest() {
-    ArgumentCaptor<DcbTransaction> dcbTransactionArgumentCaptor = ArgumentCaptor.forClass(DcbTransaction.class);
     when(lendingLibraryService.createCirculation(any(), any()))
       .thenReturn(createTransactionResponse());
     DcbTransaction dcbTransaction = createDcbTransactionByRole(LENDER);
-    Optional.ofNullable(dcbTransaction.getItem()).ifPresent(dcbItem -> dcbItem.setLocationCode("TEST_LOCATION_CODE"));
+    Optional.ofNullable(dcbTransaction.getItem())
+      .ifPresent(dcbItem -> dcbItem.setLocationCode("TEST_LOCATION_CODE"));
     transactionsService.createCirculationRequest(DCB_TRANSACTION_ID, dcbTransaction);
     verify(lendingLibraryService).createCirculation(DCB_TRANSACTION_ID, dcbTransaction);
 
-    verify(lendingLibraryService, times(1)).createCirculation(any(), dcbTransactionArgumentCaptor.capture());
+    ArgumentCaptor<DcbTransaction> dcbTransactionArgumentCaptor = ArgumentCaptor.forClass(DcbTransaction.class);
+    verify(lendingLibraryService, times(1))
+      .createCirculation(any(), dcbTransactionArgumentCaptor.capture());
     DcbTransaction dcbTransactionActual = dcbTransactionArgumentCaptor.getValue();
     assertNotNull(dcbTransactionActual.getItem());
     assertNotNull(dcbTransactionActual.getItem().getLocationCode());
     assertEquals("TEST_LOCATION_CODE", dcbTransactionActual.getItem().getLocationCode());
   }
-
 }

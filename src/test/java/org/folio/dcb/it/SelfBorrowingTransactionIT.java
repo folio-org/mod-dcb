@@ -9,7 +9,6 @@ import static org.folio.dcb.domain.dto.CirculationRequest.RequestTypeEnum.HOLD;
 import static org.folio.dcb.domain.dto.CirculationRequest.RequestTypeEnum.PAGE;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.EXPIRED;
 import static org.folio.dcb.support.wiremock.WiremockContainerExtension.getWireMockClient;
-import static org.folio.dcb.utils.EntityUtils.VIRTUAL_SERVICE_POINT_ID;
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
 import static org.folio.dcb.utils.EntityUtils.HOLDING_RECORD_ID;
 import static org.folio.dcb.utils.EntityUtils.INSTANCE_ID;
@@ -17,6 +16,7 @@ import static org.folio.dcb.utils.EntityUtils.ITEM_ID;
 import static org.folio.dcb.utils.EntityUtils.NOT_EXISTED_PATRON_ID;
 import static org.folio.dcb.utils.EntityUtils.PATRON_TYPE_USER_ID;
 import static org.folio.dcb.utils.EntityUtils.PICKUP_SERVICE_POINT_ID;
+import static org.folio.dcb.utils.EntityUtils.VIRTUAL_SERVICE_POINT_ID;
 import static org.folio.dcb.utils.EntityUtils.borrowerDcbTransaction;
 import static org.folio.dcb.utils.EntityUtils.borrowingPickupDcbTransaction;
 import static org.folio.dcb.utils.EntityUtils.dcbPatron;
@@ -40,10 +40,10 @@ import org.junit.jupiter.params.provider.EnumSource;
 @IntegrationTest
 class SelfBorrowingTransactionIT {
 
-  private static final WireMock wiremock = getWireMockClient();
+  private static final WireMock WIREMOCK = getWireMockClient();
 
   private static void  verifyPostCirculationRequestCalledOnce(String type, String servicePointId) {
-    wiremock.verifyThat(1, postRequestedFor(urlPathEqualTo("/circulation/requests"))
+    WIREMOCK.verifyThat(1, postRequestedFor(urlPathEqualTo("/circulation/requests"))
       .withRequestBody(matchingJsonPath("$.requestType", equalTo(type)))
       .withRequestBody(matchingJsonPath("$.itemId", equalTo(ITEM_ID)))
       .withRequestBody(matchingJsonPath("$.instanceId", equalTo(INSTANCE_ID)))

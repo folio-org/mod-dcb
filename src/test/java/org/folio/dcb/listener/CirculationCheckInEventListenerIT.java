@@ -20,8 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.folio.dcb.domain.entity.TransactionEntity;
-import org.folio.dcb.it.base.BaseTenantIntegrationTest;
 import org.folio.dcb.integration.kafka.CirculationEventListener;
+import org.folio.dcb.it.base.BaseTenantIntegrationTest;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.spring.integration.XOkapiHeaders;
 import org.junit.jupiter.api.Test;
@@ -98,4 +98,3 @@ class CirculationCheckInEventListenerIT extends BaseTenantIntegrationTest {
       .build();
   }
 }
-
