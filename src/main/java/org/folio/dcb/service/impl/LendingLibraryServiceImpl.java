@@ -1,5 +1,12 @@
 package org.folio.dcb.service.impl;
 
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.AWAITING_PICKUP;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CANCELLED;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_IN;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_OUT;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dcb.domain.dto.CirculationRequest;
@@ -15,13 +22,6 @@ import org.folio.dcb.service.RequestService;
 import org.folio.dcb.service.ServicePointService;
 import org.folio.dcb.service.UserService;
 import org.springframework.stereotype.Service;
-
-import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.AWAITING_PICKUP;
-import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
-import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_IN;
-import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_OUT;
-import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
-import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CANCELLED;
 
 @Service("lendingLibraryService")
 @RequiredArgsConstructor
@@ -46,7 +46,8 @@ public class LendingLibraryServiceImpl implements LibraryService {
     var user = userService.fetchOrCreateUser(patron);
     ServicePointRequest pickupServicePoint = servicePointService.createServicePointIfNotExists(dcbTransaction);
     dcbTransaction.getPickup().setServicePointId(pickupServicePoint.getId());
-    CirculationRequest pageRequest = requestService.createRequestBasedOnItemStatus(user, item, pickupServicePoint.getId());
+    CirculationRequest pageRequest =
+      requestService.createRequestBasedOnItemStatus(user, item, pickupServicePoint.getId());
     baseLibraryService.saveDcbTransaction(dcbTransactionId, dcbTransaction, pageRequest.getId());
 
     return TransactionStatusResponse.builder()
@@ -74,8 +75,9 @@ public class LendingLibraryServiceImpl implements LibraryService {
       updateTransactionEntity(dcbTransaction, requestedStatus);
     } else if (ITEM_CHECKED_OUT == currentStatus && ITEM_CHECKED_IN == requestedStatus) {
       updateTransactionEntity(dcbTransaction, requestedStatus);
-    } else if(CANCELLED == requestedStatus) {
-      log.info("updateTransactionStatus:: Cancelling transaction with id: {} for Lender role", dcbTransaction.getId());
+    } else if (CANCELLED == requestedStatus) {
+      log.info("updateTransactionStatus:: Cancelling transaction with id: {} for Lender role",
+        dcbTransaction.getId());
       baseLibraryService.cancelTransactionRequest(dcbTransaction);
     } else {
       String errorMessage = String.format("updateTransactionStatus:: status update from %s to %s is not implemented",
@@ -85,8 +87,10 @@ public class LendingLibraryServiceImpl implements LibraryService {
     }
   }
 
-  private void updateTransactionEntity (TransactionEntity transactionEntity, TransactionStatus.StatusEnum transactionStatusEnum) {
-    log.info("updateTransactionEntity:: updating transaction entity from {} to {}", transactionEntity.getStatus(), transactionStatusEnum);
+  private void updateTransactionEntity(TransactionEntity transactionEntity,
+      TransactionStatus.StatusEnum transactionStatusEnum) {
+    log.info("updateTransactionEntity:: updating transaction entity from {} to {}",
+      transactionEntity.getStatus(), transactionStatusEnum);
     transactionEntity.setStatus(transactionStatusEnum);
     transactionRepository.save(transactionEntity);
   }

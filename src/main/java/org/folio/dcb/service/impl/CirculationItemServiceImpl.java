@@ -1,10 +1,9 @@
 package org.folio.dcb.service.impl;
 
-import org.folio.dcb.integration.invstorage.model.Location;
 import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.IN_TRANSIT;
-import static org.folio.dcb.utils.DCBConstants.CODE;
-import static org.folio.dcb.utils.DCBConstants.MATERIAL_TYPE_NAME_BOOK;
-import static org.folio.dcb.utils.DCBConstants.NAME;
+import static org.folio.dcb.utils.DcbConstants.CODE;
+import static org.folio.dcb.utils.DcbConstants.MATERIAL_TYPE_NAME_BOOK;
+import static org.folio.dcb.utils.DcbConstants.NAME;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -13,13 +12,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.folio.dcb.integration.circitem.CirculationItemClient;
-import org.folio.dcb.integration.invstorage.LocationUnitClient;
-import org.folio.dcb.integration.invstorage.LocationsClient;
 import org.folio.dcb.config.DcbFeatureProperties;
 import org.folio.dcb.domain.dto.CirculationItem;
 import org.folio.dcb.domain.dto.DcbItem;
 import org.folio.dcb.domain.dto.ItemStatus;
+import org.folio.dcb.integration.circitem.CirculationItemClient;
+import org.folio.dcb.integration.invstorage.LocationUnitClient;
+import org.folio.dcb.integration.invstorage.LocationsClient;
+import org.folio.dcb.integration.invstorage.model.Location;
 import org.folio.dcb.service.CirculationItemService;
 import org.folio.dcb.service.ItemService;
 import org.folio.dcb.service.entities.DcbEntityServiceFacade;
@@ -42,7 +42,7 @@ public class CirculationItemServiceImpl implements CirculationItemService {
   public CirculationItem checkIfItemExistsAndCreate(DcbItem dcbItem, String pickupServicePointId) {
     log.debug("checkIfItemExistsAndCreate:: generating a circulation item if it does not exist.");
     var circulationItem = fetchCirculationItemByBarcode(dcbItem.getBarcode());
-    if(Objects.isNull(circulationItem)) {
+    if (Objects.isNull(circulationItem)) {
       log.warn("checkIfItemExistsAndCreate:: Circulation item not found. Creating it.");
       String effectiveLocationId = fetchShadowLocationForItem(dcbItem);
       circulationItem = createCirculationItem(dcbItem, pickupServicePointId, effectiveLocationId);
@@ -52,9 +52,11 @@ public class CirculationItemServiceImpl implements CirculationItemService {
     return circulationItem;
   }
 
-  private CirculationItem updateCirculationItemEffectiveLocationIfChanged(CirculationItem existingItem, DcbItem dcbItem) {
+  private CirculationItem updateCirculationItemEffectiveLocationIfChanged(CirculationItem existingItem,
+      DcbItem dcbItem) {
     if (!dcbFeatureProperties.isFlexibleCirculationRulesEnabled()) {
-      log.debug("updateCirculationItemEffectiveLocationIfChanged:: Shadow location lookup is disabled, skipping update.");
+      log.debug(
+        "updateCirculationItemEffectiveLocationIfChanged:: Shadow location lookup is disabled, skipping update.");
       return existingItem;
     }
     String newEffectiveLocationId = resolveEffectiveLocationId(dcbItem);
@@ -64,7 +66,7 @@ public class CirculationItemServiceImpl implements CirculationItemService {
       return existingItem;
     }
     log.info("updateCirculationItemEffectiveLocationIfChanged:: Effective location changed for item {}. "
-        + "Updating from {} to {}.", existingItem.getId(), existingItem.getEffectiveLocationId(), newEffectiveLocationId);
+      + "Updating from {} to {}.", existingItem.getId(), existingItem.getEffectiveLocationId(), newEffectiveLocationId);
     existingItem.setEffectiveLocationId(newEffectiveLocationId);
     return circulationItemClient.updateCirculationItem(existingItem.getId(), existingItem);
   }
@@ -98,28 +100,29 @@ public class CirculationItemServiceImpl implements CirculationItemService {
     return circulationItemClient.retrieveCirculationItemById(itemId);
   }
 
-  private CirculationItem createCirculationItem(DcbItem item, String pickupServicePointId, String effectiveLocationId){
+  private CirculationItem createCirculationItem(DcbItem item, String pickupServicePointId, String effectiveLocationId) {
     //SetupDefaultMaterialTypeIfNotGiven
-    String materialType = StringUtils.isBlank(item.getMaterialType()) ? MATERIAL_TYPE_NAME_BOOK : item.getMaterialType();
+    String materialType = StringUtils.isBlank(item.getMaterialType())
+      ? MATERIAL_TYPE_NAME_BOOK
+      : item.getMaterialType();
     var materialTypeId = itemService.fetchItemMaterialTypeIdByMaterialTypeName(materialType);
     var dcbHolding = dcbEntityService.findOrCreateHolding();
     var itemId = UUID.randomUUID().toString();
     var loanType = dcbEntityService.findOrCreateLoanType();
-    CirculationItem circulationItem =
-      CirculationItem.builder()
-        .id(itemId)
-        .barcode(item.getBarcode())
-        .status(ItemStatus.builder()
-          .name(IN_TRANSIT)
-          .build())
-        .holdingsRecordId(dcbHolding.getId())
-        .instanceTitle(item.getTitle())
-        .materialTypeId(materialTypeId)
-        .permanentLoanTypeId(loanType.getId())
-        .pickupLocation(pickupServicePointId)
-        .lendingLibraryCode(item.getLendingLibraryCode())
-        .effectiveLocationId(effectiveLocationId)
-        .build();
+    CirculationItem circulationItem = CirculationItem.builder()
+      .id(itemId)
+      .barcode(item.getBarcode())
+      .status(ItemStatus.builder()
+        .name(IN_TRANSIT)
+        .build())
+      .holdingsRecordId(dcbHolding.getId())
+      .instanceTitle(item.getTitle())
+      .materialTypeId(materialTypeId)
+      .permanentLoanTypeId(loanType.getId())
+      .pickupLocation(pickupServicePointId)
+      .lendingLibraryCode(item.getLendingLibraryCode())
+      .effectiveLocationId(effectiveLocationId)
+      .build();
 
     return circulationItemClient.createCirculationItem(itemId, circulationItem);
   }
@@ -131,26 +134,27 @@ public class CirculationItemServiceImpl implements CirculationItemService {
       return Optional.empty();
     }
 
-    log.debug("tryFetchLocationIdByLocationCode:: Fetching shadow location id by location code: {}", locationCode);
+    log.debug("tryFetchLocationIdByLocationCode:: Fetching shadow location id by location code: {}",
+      locationCode);
     var query = CqlQuery.exactMatchByCode(locationCode).getQuery();
-    var locationDTOResult = locationsClient.findLocationByQuery(query, true, 1, 0);
-    if(locationDTOResult.getResult().isEmpty()) {
+    var locationDtoResult = locationsClient.findLocationByQuery(query, true, 1, 0);
+    if (locationDtoResult.getResult().isEmpty()) {
       log.debug("tryFetchLocationIdByLocationCode:: No shadow location found for code: {}.", locationCode);
       return Optional.empty();
     }
 
-    var locationDTO = locationDTOResult.getResult().getFirst();
+    var locationDto = locationDtoResult.getResult().getFirst();
     log.debug("tryFetchLocationIdByLocationCode:: "
-        + "Shadow location lookup is enabled. Found location for code: {} with id: {}",
-      locationCode, locationDTO.getId());
-    return Optional.ofNullable(locationDTO.getId());
+      + "Shadow location lookup is enabled. Found location for code: {} with id: {}",
+      locationCode, locationDto.getId());
+    return Optional.ofNullable(locationDto.getId());
   }
 
   private Optional<String> tryFetchLocationIdByLendingLibraryCode(DcbItem dcbItem) {
     var lendingLibraryCode = dcbItem.getLendingLibraryCode();
     if (StringUtils.isBlank(lendingLibraryCode)) {
-      log.debug("tryFetchLocationIdByLendingLibraryCode:: " +
-        "Lending library code is blank, shadow location fetch skipped");
+      log.debug("tryFetchLocationIdByLendingLibraryCode:: "
+        + "Lending library code is blank, shadow location fetch skipped");
       return Optional.empty();
     }
 

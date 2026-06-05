@@ -2,8 +2,6 @@ package org.folio.dcb.service.impl;
 
 import static java.util.Collections.singletonList;
 import static org.apache.commons.lang3.ObjectUtils.anyNull;
-
-import org.folio.dcb.integration.invstorage.model.LocationUnit;
 import static org.folio.dcb.utils.CqlQuery.exactMatchByNameAndCode;
 import static org.folio.dcb.utils.DcbHubLocationsGroupingUtil.groupByAgency;
 
@@ -17,10 +15,8 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
-import org.folio.dcb.integration.invstorage.LocationUnitClient;
-import org.folio.dcb.integration.invstorage.model.Location;
-import org.folio.dcb.integration.invstorage.LocationsClient;
 import org.folio.dcb.config.DcbFeatureProperties;
+import org.folio.dcb.domain.DcbAgencyKey;
 import org.folio.dcb.domain.dto.DcbLocation;
 import org.folio.dcb.domain.dto.RefreshLocationStatus;
 import org.folio.dcb.domain.dto.RefreshLocationStatusType;
@@ -29,7 +25,10 @@ import org.folio.dcb.domain.dto.RefreshShadowLocationResponse;
 import org.folio.dcb.domain.dto.ServicePointRequest;
 import org.folio.dcb.domain.dto.ShadowLocationRefreshBody;
 import org.folio.dcb.exception.ServiceException;
-import org.folio.dcb.domain.DcbAgencyKey;
+import org.folio.dcb.integration.invstorage.LocationUnitClient;
+import org.folio.dcb.integration.invstorage.LocationsClient;
+import org.folio.dcb.integration.invstorage.model.Location;
+import org.folio.dcb.integration.invstorage.model.LocationUnit;
 import org.folio.dcb.service.ShadowLocationService;
 import org.folio.dcb.service.entities.DcbEntityServiceFacade;
 import org.springframework.stereotype.Service;
@@ -40,7 +39,7 @@ import org.springframework.stereotype.Service;
 public class ShadowLocationServiceImpl implements ShadowLocationService {
 
   private static final String INACTIVE_FEATURE_MESSAGE =
-    "Flexible circulation rules feature is disabled, cannot create shadow locations";
+      "Flexible circulation rules feature is disabled, cannot create shadow locations";
 
   private final LocationsClient locationsClient;
   private final LocationUnitClient locationUnitClient;
@@ -69,14 +68,14 @@ public class ShadowLocationServiceImpl implements ShadowLocationService {
     }
   }
 
-  private RefreshShadowLocationResponse createShadowLocations(
-    ServicePointRequest servicePointRequest, List<DcbLocation> locations) {
+  private RefreshShadowLocationResponse createShadowLocations(ServicePointRequest servicePointRequest,
+      List<DcbLocation> locations) {
 
     var locationsGroupedByAgency = groupByAgency(locations);
 
     var locationUnitsResult = createLocationUnits(locationsGroupedByAgency.keySet());
-    var locationStatuses = createShadowLocationEntries(locationsGroupedByAgency,
-      locationUnitsResult.agencyLocationUnitMapping, servicePointRequest);
+    var locationStatuses = createShadowLocationEntries(
+      locationsGroupedByAgency, locationUnitsResult.agencyLocationUnitMapping, servicePointRequest);
 
     var response = new RefreshShadowLocationResponse()
       .locationUnits(locationUnitsResult.locationUnits)
@@ -138,7 +137,8 @@ public class ShadowLocationServiceImpl implements ShadowLocationService {
         .build();
       locationUnitClient.createInstitution(institution);
 
-      log.debug("createInstitution:: Created institution: {} - {}", institution.getCode(), institution.getName());
+      log.debug("createInstitution:: Created institution: {} - {}",
+        institution.getCode(), institution.getName());
 
       return new InstitutionResult(
         institution,
@@ -283,9 +283,9 @@ public class ShadowLocationServiceImpl implements ShadowLocationService {
   }
 
   private List<RefreshLocationStatus> createShadowLocationEntries(
-    Map<DcbAgencyKey, List<DcbLocation>> locationsGroupedByAgency,
-    Map<DcbAgencyKey, LocationAgenciesIds> agencyLocationUnitMapping,
-    ServicePointRequest servicePointRequest) {
+      Map<DcbAgencyKey, List<DcbLocation>> locationsGroupedByAgency,
+      Map<DcbAgencyKey, LocationAgenciesIds> agencyLocationUnitMapping,
+      ServicePointRequest servicePointRequest) {
 
     var locationStatuses = new ArrayList<RefreshLocationStatus>();
     locationsGroupedByAgency.forEach((agencyKey, locationCodeNamePairs) -> {
@@ -302,15 +302,17 @@ public class ShadowLocationServiceImpl implements ShadowLocationService {
     return locationStatuses;
   }
 
-  private RefreshLocationStatus createShadowLocation(DcbLocation location,
-    LocationAgenciesIds locationAgenciesIds, ServicePointRequest servicePointRequest) {
+  private RefreshLocationStatus createShadowLocation(DcbLocation location, LocationAgenciesIds locationAgenciesIds,
+      ServicePointRequest servicePointRequest) {
     var locationName = location.getName();
     var locationCode = location.getCode();
     try {
-      if (anyNull(locationAgenciesIds.institutionId(), locationAgenciesIds.libraryId(), locationAgenciesIds.campusId())) {
+      if (anyNull(
+        locationAgenciesIds.institutionId(), locationAgenciesIds.libraryId(), locationAgenciesIds.campusId())) {
         log.error(
-          "createShadowLocation:: Location agencies IDs are incomplete or null for location: {} - {}, cannot create shadow location. locationAgenciesIds are: {}",
-          locationCode, locationName, locationAgenciesIds.toString());
+            "createShadowLocation:: Location agencies IDs are incomplete or null for location: {} -"
+                + " {}, cannot create shadow location. locationAgenciesIds are: {}",
+            locationCode, locationName, locationAgenciesIds.toString());
         return RefreshLocationStatus.builder()
           .code(locationCode)
           .status(RefreshLocationStatusType.SKIPPED)
@@ -319,8 +321,8 @@ public class ShadowLocationServiceImpl implements ShadowLocationService {
       }
 
       var searchQuery = exactMatchByNameAndCode(locationName, locationCode).getQuery();
-      var locationDTOResultList = locationsClient.findLocationByQuery(searchQuery, true, 10, 0);
-      if (!locationDTOResultList.getResult().isEmpty()) {
+      var locationDtoResultList = locationsClient.findLocationByQuery(searchQuery, true, 10, 0);
+      if (!locationDtoResultList.getResult().isEmpty()) {
         log.info("createShadowLocation:: Location already exists: {} - {}, skipping...",
           locationCode, locationName);
         return RefreshLocationStatus.builder()
@@ -329,8 +331,7 @@ public class ShadowLocationServiceImpl implements ShadowLocationService {
           .build();
       }
 
-      log.debug("createShadowLocation:: Creating shadow location: {} - {}",
-        locationCode, locationName);
+      log.debug("createShadowLocation:: Creating shadow location: {} - {}", locationCode, locationName);
 
       var shadowLocation = Location.builder()
         .id(UUID.randomUUID().toString())

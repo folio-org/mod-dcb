@@ -8,11 +8,11 @@ import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
-import org.folio.dcb.integration.invstorage.InventoryItemStorageClient;
-import org.folio.dcb.integration.invstorage.MaterialTypeClient;
 import org.folio.dcb.domain.ResultList;
 import org.folio.dcb.domain.dto.InventoryItem;
 import org.folio.dcb.exception.InventoryItemNotFound;
+import org.folio.dcb.integration.invstorage.InventoryItemStorageClient;
+import org.folio.dcb.integration.invstorage.MaterialTypeClient;
 import org.folio.dcb.service.ItemService;
 import org.folio.dcb.utils.CqlQuery;
 import org.folio.spring.exception.NotFoundException;
@@ -29,13 +29,15 @@ public class ItemServiceImpl implements ItemService {
 
   @Override
   public String fetchItemMaterialTypeIdByMaterialTypeName(String materialTypeName) {
-    log.debug("fetchItemMaterialTypeIdByMaterialTypeName:: Fetching ItemMaterialTypeId by MaterialTypeName={}", materialTypeName);
+    log.debug("fetchItemMaterialTypeIdByMaterialTypeName:: Fetching ItemMaterialTypeId by MaterialTypeName={}",
+      materialTypeName);
     return materialTypeClient.fetchMaterialTypeByQuery(String.format("name==\"%s\"", materialTypeName))
       .getMtypes()
       .stream()
       .findFirst()
       .map(org.folio.dcb.domain.dto.MaterialType::getId)
-      .orElseThrow(() -> new NotFoundException(String.format("MaterialType not found with name %s ", materialTypeName)));
+      .orElseThrow(() -> new NotFoundException(
+        String.format("MaterialType not found with name %s ", materialTypeName)));
   }
 
   @Override
@@ -71,7 +73,6 @@ public class ItemServiceImpl implements ItemService {
   }
 
   private static boolean hasExpectedServicePointId(String servicePointId, InventoryItem item) {
-    return item.getLastCheckIn() != null
-      && Objects.equals(item.getLastCheckIn().getServicePointId(), servicePointId);
+    return item.getLastCheckIn() != null && Objects.equals(item.getLastCheckIn().getServicePointId(), servicePointId);
   }
 }

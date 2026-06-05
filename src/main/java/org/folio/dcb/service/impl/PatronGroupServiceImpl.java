@@ -18,8 +18,7 @@ public class PatronGroupServiceImpl implements PatronGroupService {
 
   @Override
   public String fetchPatronGroupIdByName(String groupName) {
-    log.debug("fetchPatronGroupIdByName:: Fetching patron group details with groupName {} ",
-      groupName);
+    log.debug("fetchPatronGroupIdByName:: Fetching patron group details with groupName {} ", groupName);
     return groupClient.fetchGroupByName(getQueryByGroupName(groupName))
       .getUsergroups()
       .stream()

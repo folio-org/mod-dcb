@@ -6,10 +6,9 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dcb.domain.dto.DcbTransaction;
-import org.folio.dcb.integration.invstorage.ServicePointClient;
-import org.folio.dcb.domain.dto.DcbPickup;
 import org.folio.dcb.domain.dto.HoldShelfExpiryPeriod;
 import org.folio.dcb.domain.dto.ServicePointRequest;
+import org.folio.dcb.integration.invstorage.ServicePointClient;
 import org.folio.dcb.service.CalendarService;
 import org.folio.dcb.service.ServicePointExpirationPeriodService;
 import org.folio.dcb.service.ServicePointService;
@@ -21,35 +20,38 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class ServicePointServiceImpl implements ServicePointService {
 
+  public static final String HOLD_SHELF_CLOSED_LIBRARY_DATE_MANAGEMENT = "Keep_the_current_due_date";
+
   private final ServicePointClient servicePointClient;
   private final CalendarService calendarService;
   private final ServicePointExpirationPeriodService servicePointExpirationPeriodService;
-  public static final String HOLD_SHELF_CLOSED_LIBRARY_DATE_MANAGEMENT = "Keep_the_current_due_date";
 
   @Override
   public ServicePointRequest createServicePointIfNotExists(DcbTransaction dcbTransaction) {
     var pickupServicePoint = dcbTransaction.getPickup();
     log.debug("createServicePoint:: automate service point creation {} ", pickupServicePoint);
-    String servicePointName = getServicePointName(pickupServicePoint.getLibraryCode(),
-      pickupServicePoint.getServicePointName());
+    String servicePointName =
+      getServicePointName(pickupServicePoint.getLibraryCode(), pickupServicePoint.getServicePointName());
     var query = CqlQuery.exactMatchByName(servicePointName).getQuery();
     var servicePointRequestList = servicePointClient.findByQuery(query).getResult();
     var settingsKey = getSettingsKey(dcbTransaction.getRole().getValue());
     var shelfExpiryPeriod = servicePointExpirationPeriodService.getShelfExpiryPeriod(settingsKey);
     if (servicePointRequestList.isEmpty()) {
       String servicePointId = UUID.randomUUID().toString();
-      String servicePointCode = getServicePointCode(pickupServicePoint.getLibraryCode(),
-        pickupServicePoint.getServicePointName());
+      String servicePointCode =
+        getServicePointCode(pickupServicePoint.getLibraryCode(), pickupServicePoint.getServicePointName());
       log.info("createServicePointIfNotExists:: creating ServicePoint with id {}, name {} and code {}",
         servicePointId, servicePointName, servicePointCode);
-      var servicePointRequest = createServicePointRequest(servicePointId,
-        servicePointName, servicePointCode, shelfExpiryPeriod);
+      var servicePointRequest =
+        createServicePointRequest(servicePointId, servicePointName, servicePointCode, shelfExpiryPeriod);
       ServicePointRequest servicePointResponse = servicePointClient.createServicePoint(servicePointRequest);
       calendarService.addServicePointIdToDefaultCalendar(UUID.fromString(servicePointResponse.getId()));
       return servicePointResponse;
     } else {
-      log.info("createServicePointIfNotExists:: servicePoint Exists with name {}, hence reusing it", servicePointName);
-      calendarService.associateServicePointIdWithDefaultCalendarIfAbsent(UUID.fromString(servicePointRequestList.get(0).getId()));
+      log.info("createServicePointIfNotExists:: servicePoint Exists with name {}, hence reusing it",
+        servicePointName);
+      calendarService.associateServicePointIdWithDefaultCalendarIfAbsent(
+        UUID.fromString(servicePointRequestList.get(0).getId()));
       ServicePointRequest servicePointRequest = servicePointRequestList.get(0);
       servicePointRequest.setHoldShelfExpiryPeriod(shelfExpiryPeriod);
       servicePointClient.updateServicePointById(servicePointRequest.getId(), servicePointRequest);
@@ -58,7 +60,7 @@ public class ServicePointServiceImpl implements ServicePointService {
   }
 
   private ServicePointRequest createServicePointRequest(String id, String name, String code,
-    HoldShelfExpiryPeriod shelfExpiryPeriod){
+      HoldShelfExpiryPeriod shelfExpiryPeriod) {
     return ServicePointRequest.builder()
       .id(id)
       .name(name)
@@ -70,11 +72,13 @@ public class ServicePointServiceImpl implements ServicePointService {
       .build();
   }
 
-  private String getServicePointName(String libraryCode, String servicePointName){
+  private String getServicePointName(String libraryCode, String servicePointName) {
     return String.format("DCB_%s_%s", libraryCode, servicePointName);
   }
 
-  private String getServicePointCode(String libraryCode, String servicePointName){
-    return String.format("DCB_%s_%s", libraryCode, servicePointName).replaceAll("\\s+","").toUpperCase();
+  private String getServicePointCode(String libraryCode, String servicePointName) {
+    return String.format("DCB_%s_%s", libraryCode, servicePointName)
+        .replaceAll("\\s+", "")
+        .toUpperCase();
   }
 }
