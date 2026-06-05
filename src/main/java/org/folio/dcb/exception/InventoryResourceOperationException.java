@@ -9,5 +9,4 @@ public class InventoryResourceOperationException extends RuntimeException {
   public static InventoryResourceOperationException createInventoryResourceException(String resource, Throwable error) {
     return new InventoryResourceOperationException("Failed to create %s".formatted(resource), error);
   }
-
 }

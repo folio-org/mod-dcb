@@ -1,11 +1,10 @@
 package org.folio.dcb.exception;
 
+import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
-import lombok.Getter;
-
 @Getter
-public class DcbHubLocationException extends RuntimeException{
+public class DcbHubLocationException extends RuntimeException {
 
   private final HttpStatus httpStatus;
 

@@ -7,7 +7,7 @@ public class ServiceException extends RuntimeException {
   }
 
   /**
-   * Creates {@link ServiceException}  with error message and error cause.
+   * Creates {@link ServiceException} with error message and error cause.
    *
    * @param message - error message as {@link String} object
    * @param cause - error cause as {@link Throwable} object
