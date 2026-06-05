@@ -1,13 +1,13 @@
 package org.folio.dcb.service.entities;
 
 import static java.util.Collections.singletonList;
-import static org.folio.dcb.utils.DCBConstants.CAMPUS_ID;
-import static org.folio.dcb.utils.DCBConstants.CODE;
-import static org.folio.dcb.utils.DCBConstants.INSTITUTION_ID;
-import static org.folio.dcb.utils.DCBConstants.LIBRARY_ID;
-import static org.folio.dcb.utils.DCBConstants.LOCATION_ID;
-import static org.folio.dcb.utils.DCBConstants.NAME;
-import static org.folio.dcb.utils.DCBConstants.SERVICE_POINT_ID;
+import static org.folio.dcb.utils.DcbConstants.CAMPUS_ID;
+import static org.folio.dcb.utils.DcbConstants.CODE;
+import static org.folio.dcb.utils.DcbConstants.INSTITUTION_ID;
+import static org.folio.dcb.utils.DcbConstants.LIBRARY_ID;
+import static org.folio.dcb.utils.DcbConstants.LOCATION_ID;
+import static org.folio.dcb.utils.DcbConstants.NAME;
+import static org.folio.dcb.utils.DcbConstants.SERVICE_POINT_ID;
 
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -49,8 +49,7 @@ public class DcbLocationService implements DcbEntityService<Location> {
     return getDcbLocation(LIBRARY_ID, CAMPUS_ID, INSTITUTION_ID, SERVICE_POINT_ID);
   }
 
-  private Location createLocation(String libraryId, String campusId,
-    String institutionId, String servicePointId) {
+  private Location createLocation(String libraryId, String campusId, String institutionId, String servicePointId) {
     log.debug("createLocation:: creating a new DCB Location");
     var dcbLocation = getDcbLocation(libraryId, campusId, institutionId, servicePointId);
 
@@ -59,8 +58,8 @@ public class DcbLocationService implements DcbEntityService<Location> {
     return createdLocation;
   }
 
-  private static Location getDcbLocation(String libraryId, String campusId,
-    String institutionId, String servicePointId) {
+  private static Location getDcbLocation(String libraryId, String campusId, String institutionId,
+      String servicePointId) {
     return Location.builder()
       .id(LOCATION_ID)
       .campusId(campusId)

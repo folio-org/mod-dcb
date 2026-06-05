@@ -1,9 +1,9 @@
 package org.folio.dcb.service.entities;
 
 import static org.folio.dcb.utils.CqlQuery.exactMatchByName;
-import static org.folio.dcb.utils.DCBConstants.CODE;
-import static org.folio.dcb.utils.DCBConstants.INSTITUTION_ID;
-import static org.folio.dcb.utils.DCBConstants.NAME;
+import static org.folio.dcb.utils.DcbConstants.CODE;
+import static org.folio.dcb.utils.DcbConstants.INSTITUTION_ID;
+import static org.folio.dcb.utils.DcbConstants.NAME;
 
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;

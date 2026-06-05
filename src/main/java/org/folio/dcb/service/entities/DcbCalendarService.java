@@ -2,8 +2,8 @@ package org.folio.dcb.service.entities;
 
 import static java.util.Collections.emptyList;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
-import static org.folio.dcb.utils.DCBConstants.DCB_CALENDAR_NAME;
-import static org.folio.dcb.utils.DCBConstants.SERVICE_POINT_ID;
+import static org.folio.dcb.utils.DcbConstants.DCB_CALENDAR_NAME;
+import static org.folio.dcb.utils.DcbConstants.SERVICE_POINT_ID;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;

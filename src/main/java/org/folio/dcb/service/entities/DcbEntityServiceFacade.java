@@ -3,12 +3,12 @@ package org.folio.dcb.service.entities;
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.folio.dcb.integration.circstorage.CancellationReasonClient.CancellationReason;
-import org.folio.dcb.integration.invstorage.model.InventoryHolding;
-import org.folio.dcb.integration.circstorage.model.LoanType;
-import org.folio.dcb.integration.invstorage.model.Location;
 import org.folio.dcb.config.DcbFeatureProperties;
 import org.folio.dcb.domain.dto.ServicePointRequest;
+import org.folio.dcb.integration.circstorage.CancellationReasonClient.CancellationReason;
+import org.folio.dcb.integration.circstorage.model.LoanType;
+import org.folio.dcb.integration.invstorage.model.InventoryHolding;
+import org.folio.dcb.integration.invstorage.model.Location;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -26,17 +26,18 @@ public class DcbEntityServiceFacade {
 
   /**
    * Creates all DCB umbrella entities if they do not already exist.
-   * <p>
-   * This method orchestrates the creation of all necessary DCB entities in the following order:
+   *
+   * <p>This method orchestrates the creation of all necessary DCB entities in the following order:
+   *
    * <ol>
-   *   <li>Location Units (DCB institution, campus and library) and DCB Location</li>
-   *   <li>DCB Calendar with DCB Service Point</li>
-   *   <li>DCB Holding with Instance, Holding Source and Instance type</li>
-   *   <li>Cancellation Reason</li>
-   *   <li>Loan Type</li>
+   *   <li>Location Units (DCB institution, campus and library) and DCB Location
+   *   <li>DCB Calendar with DCB Service Point
+   *   <li>DCB Holding with Instance, Holding Source and Instance type
+   *   <li>Cancellation Reason
+   *   <li>Loan Type
    * </ol>
-   * Each entity is created only if it doesn't already exist in the system.
-   * </p>
+   *
+   * <p>Each entity is created only if it doesn't already exist in the system.
    */
   public void createAll() {
     log.debug("createAll:: creating DCB umbrella entities if not exist");
