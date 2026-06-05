@@ -15,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
-
 import org.folio.dcb.integration.circulation.model.RequestStatus;
 import org.folio.util.StringUtil;
 
@@ -157,8 +156,8 @@ public class CqlQuery {
     return new CqlQuery("%s==%s".formatted(param, cqlEncode(value)));
   }
 
-  private static <T> CqlQuery exactMatchAnyQuery(String param,
-    Collection<T> values, Function<T, String> stringValueMapper) {
+  private static <T> CqlQuery exactMatchAnyQuery(String param, Collection<T> values,
+      Function<T, String> stringValueMapper) {
 
     var stringValues = CollectionUtils.emptyIfNull(values).stream()
       .filter(Objects::nonNull)

@@ -1,10 +1,9 @@
 package org.folio.dcb.utils;
 
-import lombok.experimental.UtilityClass;
-import org.folio.dcb.domain.dto.Errors;
-import org.folio.dcb.domain.dto.Error;
-
 import java.util.List;
+import lombok.experimental.UtilityClass;
+import org.folio.dcb.domain.dto.Error;
+import org.folio.dcb.domain.dto.Errors;
 
 @UtilityClass
 public class ErrorHelper {
@@ -22,7 +21,6 @@ public class ErrorHelper {
       .errors(List.of(error))
       .build();
   }
-
 
   public static Errors createInternalError(String message, ErrorCode errorCode) {
     return createErrors(createError(message, ErrorType.INTERNAL, errorCode));
@@ -45,7 +43,6 @@ public class ErrorHelper {
     public String getTypeCode() {
       return typeCode;
     }
-
   }
 
   public enum ErrorCode {
@@ -55,5 +52,4 @@ public class ErrorHelper {
     BAD_GATEWAY,
     INTERNAL_SERVER_ERROR
   }
-
 }
