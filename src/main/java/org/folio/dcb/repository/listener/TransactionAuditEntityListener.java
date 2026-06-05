@@ -1,7 +1,5 @@
 package org.folio.dcb.repository.listener;
 
-import tools.jackson.core.JacksonException;
-import tools.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PostLoad;
 import jakarta.persistence.PrePersist;
@@ -13,6 +11,8 @@ import org.folio.dcb.domain.entity.TransactionAuditEntity;
 import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.utils.BeanUtil;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 @Log4j2
 @Component
@@ -35,7 +35,8 @@ public class TransactionAuditEntityListener {
     transactionAuditEntity.setBefore(null);
     transactionAuditEntity.setAfter(objectMapper.writeValueAsString(transactionEntity));
 
-    log.info("onPrePersist:: creating transaction audit record {} with action {}", transactionEntity.getId(), CREATE_ACTION);
+    log.info("onPrePersist:: creating transaction audit record {} with action {}",
+      transactionEntity.getId(), CREATE_ACTION);
     getEntityManager().persist(transactionAuditEntity);
   }
 
@@ -49,21 +50,23 @@ public class TransactionAuditEntityListener {
     transactionAuditEntity.setTransactionId(transactionEntity.getId());
     transactionAuditEntity.setAction(UPDATE_ACTION);
 
-    log.info("onPreUpdate:: creating transaction audit record {} with action {}", transactionEntity.getId(), UPDATE_ACTION);
+    log.info("onPreUpdate:: creating transaction audit record {} with action {}",
+      transactionEntity.getId(), UPDATE_ACTION);
     getEntityManager().persist(transactionAuditEntity);
   }
 
-  //This method will be invoked when the transactionEntity is loaded and the transactionEntity is stored in a transient field
-  //The stored value will be used in onPreUpdate method's setBefore method.
+  // This method will be invoked when the transactionEntity is loaded and the transactionEntity is
+  // stored in a transient field
+  // The stored value will be used in onPreUpdate method's setBefore method.
   @PostLoad
-  public void saveState(TransactionEntity transactionEntity){
-    transactionEntity.setSavedState(SerializationUtils.clone((transactionEntity)));
+  public void saveState(TransactionEntity transactionEntity) {
+    transactionEntity.setSavedState(SerializationUtils.clone(transactionEntity));
   }
 
-  //EntityListeners are instantiated by JPA, not Spring,
-  //So Spring cannot inject any Spring-managed bean directly, e.g. EntityManager in any EntityListeners.
+  // EntityListeners are instantiated by JPA, not Spring,
+  // So Spring cannot inject any Spring-managed bean directly, e.g. EntityManager in any
+  // EntityListeners.
   private EntityManager getEntityManager() {
     return beanUtil.getBean(EntityManager.class);
   }
-
 }
