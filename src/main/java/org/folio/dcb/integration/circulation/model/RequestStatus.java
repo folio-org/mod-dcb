@@ -5,12 +5,10 @@ import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Set;
-
 import lombok.Getter;
 
 @Getter
 public enum RequestStatus {
-
   NONE(""),
   OPEN_NOT_YET_FILLED("Open - Not yet filled"),
   OPEN_AWAITING_PICKUP("Open - Awaiting pickup"),
@@ -45,7 +43,7 @@ public enum RequestStatus {
     return OPEN_STATUSES;
   }
 
-  public static boolean isRequestOpen(RequestStatus currentStatus){
+  public static boolean isRequestOpen(RequestStatus currentStatus) {
     return OPEN_STATUSES.contains(currentStatus);
   }
 }
