@@ -1,5 +1,6 @@
 package org.folio.dcb.integration.calendar;
 
+import java.util.UUID;
 import org.folio.dcb.domain.dto.Calendar;
 import org.folio.dcb.domain.dto.CalendarCollection;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -9,8 +10,6 @@ import org.springframework.web.service.annotation.GetExchange;
 import org.springframework.web.service.annotation.HttpExchange;
 import org.springframework.web.service.annotation.PostExchange;
 import org.springframework.web.service.annotation.PutExchange;
-
-import java.util.UUID;
 
 @HttpExchange("calendar")
 public interface CalendarClient {
