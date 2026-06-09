@@ -27,10 +27,14 @@ import org.apache.commons.lang3.StringUtils;
 @Log4j2
 public class DcbPersonal {
 
-  /** Default last name used when parsing fails or input is blank. */
+  /**
+   * Default last name used when parsing fails or input is blank.
+   */
   private static final String LAST_NAME = "DcbSystem";
 
-  /** Default PatronInfo returned for blank or unparseable inputs. */
+  /**
+   * Default PatronInfo returned for blank or unparseable inputs.
+   */
   private static final DcbPersonal DEFAULT_VALUE = new DcbPersonal(null, null, LAST_NAME);
 
   private final String firstName;

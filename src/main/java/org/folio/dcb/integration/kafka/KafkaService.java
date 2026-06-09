@@ -15,7 +15,9 @@ import org.springframework.stereotype.Component;
 public class KafkaService {
   private final KafkaListenerEndpointRegistry kafkaListenerEndpointRegistry;
 
-  /** Restarts kafka event listeners in mod-dcb application. */
+  /**
+   * Restarts kafka event listeners in mod-dcb application.
+   */
   public void restartEventListeners() {
     restartEventListener(CHECK_OUT_LOAN_LISTENER_ID);
     restartEventListener(CHECK_IN_LISTENER_ID);

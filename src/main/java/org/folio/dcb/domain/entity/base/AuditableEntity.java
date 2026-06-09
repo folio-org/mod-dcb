@@ -22,25 +22,33 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @EntityListeners(AuditingEntityListener.class)
 public abstract class AuditableEntity {
 
-  /** Indicates the date the entity was created. */
+  /**
+   * Indicates the date the entity was created.
+   */
   @JsonIgnore
   @CreatedDate
   @Column(name = "created_date", nullable = false, updatable = false)
   private OffsetDateTime createdDate;
 
-  /** Indicates the user who created the entity. */
+  /**
+   * Indicates the user who created the entity.
+   */
   @JsonIgnore
   @CreatedBy
   @Column(name = "created_by", updatable = false)
   private UUID createdBy;
 
-  /** Indicates the date the entity was last modified. */
+  /**
+   * Indicates the date the entity was last modified.
+   */
   @JsonIgnore
   @LastModifiedDate
   @Column(name = "updated_date")
   private OffsetDateTime updatedDate;
 
-  /** Indicates the user who last modified the entity. */
+  /**
+   * Indicates the user who last modified the entity.
+   */
   @JsonIgnore
   @LastModifiedBy
   @Column(name = "updated_by")

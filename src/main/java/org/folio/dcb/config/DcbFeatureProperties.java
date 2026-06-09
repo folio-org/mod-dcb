@@ -11,7 +11,9 @@ import org.springframework.validation.annotation.Validated;
 @ConfigurationProperties(prefix = "application.features")
 public class DcbFeatureProperties {
 
-  /** Configuration toggle for shadow locations feature. */
+  /**
+   * Configuration toggle for shadow locations feature.
+   */
   private boolean flexibleCirculationRulesEnabled = false;
 
   /**

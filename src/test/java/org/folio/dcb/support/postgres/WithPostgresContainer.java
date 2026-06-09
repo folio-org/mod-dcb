@@ -6,7 +6,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-/** Starts PostgreSQL server on a random port in docker and sets all required Spring properties. */
+/**
+ * Starts PostgreSQL server on a random port in docker and sets all required Spring properties.
+ */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @ExtendWith(PostgresContainerExtension.class)
