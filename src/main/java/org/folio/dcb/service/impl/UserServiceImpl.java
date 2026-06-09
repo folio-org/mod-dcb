@@ -14,8 +14,8 @@ import org.folio.dcb.domain.dto.User;
 import org.folio.dcb.integration.users.UsersClient;
 import org.folio.dcb.service.PatronGroupService;
 import org.folio.dcb.service.UserService;
+import org.folio.dcb.utils.CqlQuery;
 import org.folio.spring.exception.NotFoundException;
-import org.folio.util.StringUtil;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -34,7 +34,7 @@ public class UserServiceImpl implements UserService {
     log.debug("fetchUser:: Fetching user for transaction processing.");
     var user = fetchUserByBarcodeAndId(dcbPatronBarcode, dcbPatronId);
 
-    if (Objects.isNull(user)) {
+    if (user == null) {
       log.error("fetchUser:: Unable to find existing user.");
       throw new NotFoundException("Unable to find existing user.");
     }
@@ -45,7 +45,7 @@ public class UserServiceImpl implements UserService {
   public User fetchOrCreateUser(DcbPatron patronDetails) {
     log.debug("createOrFetchUser:: Trying to create or find user.");
     var user = fetchUserByBarcodeAndId(patronDetails.getBarcode(), patronDetails.getId());
-    if (Objects.isNull(user)) {
+    if (user == null) {
       log.info("fetchOrCreateUser:: Unable to find existing user. Creating a new user.");
       return createUser(patronDetails);
     }
@@ -72,8 +72,8 @@ public class UserServiceImpl implements UserService {
 
   private User fetchUserByBarcodeAndId(String barcode, String id) {
     log.debug("fetchUserByBarcodeAndId:: Trying to fetch existing user.");
-    return usersClient.fetchUserByBarcodeAndId("barcode==" + StringUtil.cqlEncode(barcode)
-      + " and id==" + StringUtil.cqlEncode(id))
+    var query = CqlQuery.exactMatch("barcode", barcode).and(CqlQuery.exactMatchById(id), true).getQuery();
+    return usersClient.fetchUserByBarcodeAndId(query)
       .getUsers()
       .stream()
       .findFirst()
@@ -121,8 +121,8 @@ public class UserServiceImpl implements UserService {
 
   private void validateDcbUserType(String userType) {
     if (ObjectUtils.notEqual(userType, DCB_TYPE) && ObjectUtils.notEqual(userType, SHADOW_TYPE)) {
-      throw new IllegalArgumentException(
-          String.format("User with type %s is retrieved. so unable to create transaction", userType));
+      throw new IllegalArgumentException(String.format(
+        "User with type %s is retrieved. so unable to create transaction", userType));
     }
   }
 

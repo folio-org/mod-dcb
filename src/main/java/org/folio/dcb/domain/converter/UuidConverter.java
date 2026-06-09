@@ -1,8 +1,10 @@
 package org.folio.dcb.domain.converter;
 
 import jakarta.persistence.AttributeConverter;
+import jakarta.persistence.Converter;
 import java.util.UUID;
 
+@Converter
 public class UuidConverter implements AttributeConverter<String, UUID> {
 
   @Override

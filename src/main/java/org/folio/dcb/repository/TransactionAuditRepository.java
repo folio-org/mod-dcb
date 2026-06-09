@@ -13,18 +13,19 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface TransactionAuditRepository extends JpaRepository<TransactionAuditEntity, String> {
 
-  @Query(value = """
+  @Query(nativeQuery = true,
+    value = """
       SELECT * FROM transactions_audit
       WHERE transaction_id = :trnId
         AND created_date = (
           SELECT MAX(created_date) FROM transactions_audit
           WHERE transaction_id = :trnId
         )
-      """,
-    nativeQuery = true)
+      """)
   Optional<TransactionAuditEntity> findLatestTransactionAuditEntityByDcbTransactionId(@Param("trnId") String trnId);
 
-  @Query(value = """
+  @Query(nativeQuery = true,
+    value = """
       SELECT * FROM transactions_audit t
       WHERE t.created_date >= :fromDate
         AND t.created_date <= :toDate
@@ -35,8 +36,7 @@ public interface TransactionAuditRepository extends JpaRepository<TransactionAud
       WHERE t.created_date >= :fromDate
         AND t.created_date <= :toDate
         AND t.action = 'UPDATE'
-      """,
-    nativeQuery = true)
+      """)
   Page<TransactionAuditEntity> findUpdatedTransactionsByDateRange(OffsetDateTime fromDate, OffsetDateTime toDate,
-      Pageable pageable);
+    Pageable pageable);
 }

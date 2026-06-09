@@ -74,10 +74,9 @@ class RequestServiceTest {
     inventoryItem.setStatus(inventoryItem.getStatus().name(ItemStatus.NameEnum.fromValue(invalidStatus)));
     var user = createUser();
     var item = createDcbItem();
-    var pickupServicePointId = createDcbPickup().getServicePointId();
+    var pickupSpId = createDcbPickup().getServicePointId();
     when(itemService.fetchItemByIdAndBarcode(any(), any())).thenReturn(inventoryItem);
     when(holdingsService.fetchInventoryHoldingDetailsByHoldingId(any())).thenReturn(createInventoryHolding());
-    assertThrows(StatusException.class, () ->
-      requestService.createRequestBasedOnItemStatus(user, item, pickupServicePointId));
+    assertThrows(StatusException.class, () -> requestService.createRequestBasedOnItemStatus(user, item, pickupSpId));
   }
 }

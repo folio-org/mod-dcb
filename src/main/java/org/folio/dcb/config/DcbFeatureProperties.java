@@ -19,7 +19,7 @@ public class DcbFeatureProperties {
   /**
    * Defines if runtime verification of entity presence in the system is required.
    *
-   * <p>If entity is not present - it will be automatically created.
+   * <p>If entity is not present - it will be automatically created.</p>
    */
   private boolean dcbEntitiesRuntimeVerificationEnabled = false;
 }

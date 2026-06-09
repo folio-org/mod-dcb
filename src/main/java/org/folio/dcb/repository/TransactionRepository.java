@@ -11,43 +11,27 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface TransactionRepository extends JpaRepository<TransactionEntity, String> {
-  @Query(value = """
-      SELECT * FROM transactions
-      WHERE item_id = :itemId
-        AND status NOT IN ('CLOSED', 'CANCELLED', 'ERROR', 'CREATED', 'OPEN')
-      """,
-    nativeQuery = true)
+
+  @Query(nativeQuery = true, value = """
+    SELECT * FROM transactions
+    WHERE item_id = :itemId
+      AND status NOT IN ('CLOSED', 'CANCELLED', 'ERROR', 'CREATED', 'OPEN')
+    """)
   Optional<TransactionEntity> findTransactionByItemIdAndStatusNotInClosed(@Param("itemId") UUID itemId);
 
-  @Query(value = """
-      SELECT * FROM transactions
-      WHERE item_id = :itemId
-        AND status NOT IN ('CLOSED', 'CANCELLED', 'ERROR', 'EXPIRED')
-      """,
-    nativeQuery = true)
+  @Query(nativeQuery = true, value = """
+    SELECT * FROM transactions
+    WHERE item_id = :itemId AND status NOT IN ('CLOSED', 'CANCELLED', 'ERROR', 'EXPIRED')
+    """)
   List<TransactionEntity> findTransactionsByItemIdAndStatusNotInClosed(@Param("itemId") UUID itemId);
 
-  @Query(value = """
-      SELECT * FROM transactions
-      WHERE item_id = :itemId
-        AND status = 'EXPIRED'
-      """,
-    nativeQuery = true)
+  @Query(nativeQuery = true, value = "SELECT * FROM transactions WHERE item_id = :itemId AND status = 'EXPIRED'")
   List<TransactionEntity> findExpiredTransactionsByItemId(@Param("itemId") UUID itemId);
 
-  @Query(value = """
-      SELECT * FROM transactions
-      WHERE item_id = :itemId
-        AND status NOT IN ('CLOSED', 'CANCELLED', 'ERROR')
-      """,
-    nativeQuery = true)
+  @Query(nativeQuery = true, value =
+    "SELECT * FROM transactions WHERE item_id = :itemId AND status NOT IN ('CLOSED', 'CANCELLED', 'ERROR')")
   Optional<TransactionEntity> findSingleTransactionsByItemIdAndStatusNotInClosed(@Param("itemId") UUID itemId);
 
-  @Query(value = """
-      SELECT * FROM transactions
-      WHERE request_id = :requestId
-        AND status != 'CLOSED'
-      """,
-    nativeQuery = true)
+  @Query(nativeQuery = true, value = "SELECT * FROM transactions WHERE request_id = :requestId AND status != 'CLOSED'")
   Optional<TransactionEntity> findTransactionByRequestIdAndStatusNotInClosed(@Param("requestId") UUID itemId);
 }

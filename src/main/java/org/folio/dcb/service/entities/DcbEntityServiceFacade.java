@@ -27,17 +27,17 @@ public class DcbEntityServiceFacade {
   /**
    * Creates all DCB umbrella entities if they do not already exist.
    *
-   * <p>This method orchestrates the creation of all necessary DCB entities in the following order:
-   *
+   * <p>
+   * This method orchestrates the creation of all necessary DCB entities in the following order:
    * <ol>
-   *   <li>Location Units (DCB institution, campus and library) and DCB Location
-   *   <li>DCB Calendar with DCB Service Point
-   *   <li>DCB Holding with Instance, Holding Source and Instance type
-   *   <li>Cancellation Reason
-   *   <li>Loan Type
+   *   <li>Location Units (DCB institution, campus and library) and DCB Location</li>
+   *   <li>DCB Calendar with DCB Service Point</li>
+   *   <li>DCB Holding with Instance, Holding Source and Instance type</li>
+   *   <li>Cancellation Reason</li>
+   *   <li>Loan Type</li>
    * </ol>
-   *
-   * <p>Each entity is created only if it doesn't already exist in the system.
+   * Each entity is created only if it doesn't already exist in the system.
+   * </p>
    */
   public void createAll() {
     log.debug("createAll:: creating DCB umbrella entities if not exist");
@@ -112,8 +112,8 @@ public class DcbEntityServiceFacade {
   /**
    * Generic method to retrieve or create an entity based on runtime verification settings.
    *
-   * @param <T>                  - the type of entity to retrieve or create
-   * @param valueSupplier        - supplier that provides the actual entity
+   * @param <T> - the type of entity to retrieve or create
+   * @param valueSupplier - supplier that provides the actual entity
    * @param defaultValueSupplier - supplier that provides a default entity value
    * @return the entity from the - appropriate supplier based on runtime verification configuration
    */

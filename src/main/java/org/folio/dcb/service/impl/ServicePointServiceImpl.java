@@ -5,6 +5,7 @@ import static org.folio.dcb.service.ServicePointExpirationPeriodService.getSetti
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.folio.dcb.domain.dto.DcbPickup;
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.HoldShelfExpiryPeriod;
 import org.folio.dcb.domain.dto.ServicePointRequest;
@@ -28,31 +29,28 @@ public class ServicePointServiceImpl implements ServicePointService {
 
   @Override
   public ServicePointRequest createServicePointIfNotExists(DcbTransaction dcbTransaction) {
-    var pickupServicePoint = dcbTransaction.getPickup();
-    log.debug("createServicePoint:: automate service point creation {} ", pickupServicePoint);
-    String servicePointName =
-      getServicePointName(pickupServicePoint.getLibraryCode(), pickupServicePoint.getServicePointName());
-    var query = CqlQuery.exactMatchByName(servicePointName).getQuery();
-    var servicePointRequestList = servicePointClient.findByQuery(query).getResult();
+    var dcbPickup = dcbTransaction.getPickup();
+    log.debug("createServicePoint:: automate service point creation {} ", dcbPickup);
+    var spName = getServicePointName(dcbPickup);
+    var query = CqlQuery.exactMatchByName(spName).getQuery();
+    var servicePoints = servicePointClient.findByQuery(query).getResult();
     var settingsKey = getSettingsKey(dcbTransaction.getRole().getValue());
     var shelfExpiryPeriod = servicePointExpirationPeriodService.getShelfExpiryPeriod(settingsKey);
-    if (servicePointRequestList.isEmpty()) {
-      String servicePointId = UUID.randomUUID().toString();
-      String servicePointCode =
-        getServicePointCode(pickupServicePoint.getLibraryCode(), pickupServicePoint.getServicePointName());
+
+    if (servicePoints.isEmpty()) {
+      var servicePointId = UUID.randomUUID().toString();
+      var servicePointCode = getServicePointCode(dcbPickup);
       log.info("createServicePointIfNotExists:: creating ServicePoint with id {}, name {} and code {}",
-        servicePointId, servicePointName, servicePointCode);
-      var servicePointRequest =
-        createServicePointRequest(servicePointId, servicePointName, servicePointCode, shelfExpiryPeriod);
-      ServicePointRequest servicePointResponse = servicePointClient.createServicePoint(servicePointRequest);
+        servicePointId, spName, servicePointCode);
+      var servicePointRequest = createServicePointRequest(servicePointId, spName, servicePointCode, shelfExpiryPeriod);
+      var servicePointResponse = servicePointClient.createServicePoint(servicePointRequest);
       calendarService.addServicePointIdToDefaultCalendar(UUID.fromString(servicePointResponse.getId()));
       return servicePointResponse;
     } else {
-      log.info("createServicePointIfNotExists:: servicePoint Exists with name {}, hence reusing it",
-        servicePointName);
-      calendarService.associateServicePointIdWithDefaultCalendarIfAbsent(
-        UUID.fromString(servicePointRequestList.get(0).getId()));
-      ServicePointRequest servicePointRequest = servicePointRequestList.get(0);
+      log.info("createServicePointIfNotExists:: servicePoint Exists with name {}, hence reusing it", spName);
+      var servicePointId = UUID.fromString(servicePoints.getFirst().getId());
+      calendarService.associateServicePointIdWithDefaultCalendarIfAbsent(servicePointId);
+      var servicePointRequest = servicePoints.getFirst();
       servicePointRequest.setHoldShelfExpiryPeriod(shelfExpiryPeriod);
       servicePointClient.updateServicePointById(servicePointRequest.getId(), servicePointRequest);
       return servicePointRequest;
@@ -60,7 +58,7 @@ public class ServicePointServiceImpl implements ServicePointService {
   }
 
   private ServicePointRequest createServicePointRequest(String id, String name, String code,
-      HoldShelfExpiryPeriod shelfExpiryPeriod) {
+    HoldShelfExpiryPeriod shelfExpiryPeriod) {
     return ServicePointRequest.builder()
       .id(id)
       .name(name)
@@ -72,13 +70,13 @@ public class ServicePointServiceImpl implements ServicePointService {
       .build();
   }
 
-  private String getServicePointName(String libraryCode, String servicePointName) {
-    return String.format("DCB_%s_%s", libraryCode, servicePointName);
+  private static String getServicePointName(DcbPickup dcbPickup) {
+    return String.format("DCB_%s_%s", dcbPickup.getLibraryCode(), dcbPickup.getServicePointName());
   }
 
-  private String getServicePointCode(String libraryCode, String servicePointName) {
-    return String.format("DCB_%s_%s", libraryCode, servicePointName)
-        .replaceAll("\\s+", "")
-        .toUpperCase();
+  private static String getServicePointCode(DcbPickup dcbPickup) {
+    return String.format("DCB_%s_%s", dcbPickup.getLibraryCode(), dcbPickup.getServicePointName())
+      .replaceAll("\\s+", "")
+      .toUpperCase();
   }
 }

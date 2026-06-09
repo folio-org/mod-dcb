@@ -21,12 +21,14 @@ import org.springframework.stereotype.Component;
 @Component
 @Log4j2
 public class StatusProcessorService {
+
   private static final String STATUS_TRANSITION_ERROR_MSG = "Status transition will not be possible from %s to %s";
 
   private StatusProcessor chain;
 
   public List<TransactionStatus.StatusEnum> lendingChainProcessor(TransactionStatus.StatusEnum fromStatus,
-      TransactionStatus.StatusEnum toStatus) {
+    TransactionStatus.StatusEnum toStatus) {
+
     log.debug("lendingChainProcessor:: fetching list of statuses from {} to {}", fromStatus, toStatus);
     StatusProcessorService startChain = new StatusProcessorService();
     StatusProcessor closeProcessor = new StatusProcessor(ITEM_CHECKED_IN, CLOSED, true, null);
@@ -41,7 +43,8 @@ public class StatusProcessorService {
   }
 
   public List<TransactionStatus.StatusEnum> borrowingChainProcessor(TransactionStatus.StatusEnum fromStatus,
-      TransactionStatus.StatusEnum toStatus) {
+    TransactionStatus.StatusEnum toStatus) {
+
     log.debug("borrowingChainProcessor:: fetching list of statuses from {} to {}", fromStatus, toStatus);
     StatusProcessorService startChain = new StatusProcessorService();
     StatusProcessor closeProcessor = new StatusProcessor(ITEM_CHECKED_IN, CLOSED, false, null);
@@ -56,7 +59,8 @@ public class StatusProcessorService {
   }
 
   private List<TransactionStatus.StatusEnum> process(StatusProcessorService statusProcessorService,
-      TransactionStatus.StatusEnum fromStatus, TransactionStatus.StatusEnum toStatus) {
+    TransactionStatus.StatusEnum fromStatus, TransactionStatus.StatusEnum toStatus) {
+
     if (fromStatus.ordinal() >= toStatus.ordinal()) {
       throw new StatusException(String.format(STATUS_TRANSITION_ERROR_MSG, fromStatus, toStatus));
     }
@@ -70,7 +74,7 @@ public class StatusProcessorService {
     var processor = statusProcessorService.getChain();
     while (processor != null) {
       if (processor.getCurrentStatus().ordinal() >= fromStatus.ordinal()
-          && processor.getNextStatus().ordinal() <= toStatus.ordinal()) {
+        && processor.getNextStatus().ordinal() <= toStatus.ordinal()) {
         if (processor.isManual()) {
           throw new StatusException(String.format(STATUS_TRANSITION_ERROR_MSG, fromStatus, toStatus));
         } else {

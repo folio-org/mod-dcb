@@ -3,6 +3,7 @@ package org.folio.dcb.service.impl;
 import static org.folio.dcb.utils.DcbConstants.DCB_CALENDAR_NAME;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -21,17 +22,7 @@ public class CalendarServiceImpl implements CalendarService {
   public Calendar findCalendarByName(String calendarName) {
     log.debug("findCalendarByName:: Trying to find the calendar with name {}", calendarName);
     var calendars = getAllCalendars();
-    return findCalendarByName(calendars, calendarName);
-  }
-
-  private Calendar findCalendarByName(List<Calendar> calendars, String calendarName) {
-    log.debug("findCalendarByName:: Finding calendar with name {} from calendarList {}",
-      calendarName, calendars);
-    return calendars
-      .stream()
-      .filter(calendar -> calendar.getName().equals(calendarName))
-      .findFirst()
-      .orElse(null);
+    return retrieveCalendarByName(calendars, calendarName);
   }
 
   @Override
@@ -67,7 +58,7 @@ public class CalendarServiceImpl implements CalendarService {
     } else {
       log.info("associateServicePointIdWithDefaultCalendarIfAbsent:: servicePointId {} is not "
         + "associated with any calendar. so associating with default calendar", servicePointId);
-      var defaultDcbCalendar = findCalendarByName(calendars, DCB_CALENDAR_NAME);
+      var defaultDcbCalendar = retrieveCalendarByName(calendars, DCB_CALENDAR_NAME);
       updateCalendarIfExists(DCB_CALENDAR_NAME, servicePointId, defaultDcbCalendar);
     }
   }
@@ -76,6 +67,14 @@ public class CalendarServiceImpl implements CalendarService {
     log.debug("getAllCalendars:: Fetching all calendars");
     return calendarClient.getAllCalendars(Integer.MAX_VALUE)
       .getCalendars();
+  }
+
+  private Calendar retrieveCalendarByName(List<Calendar> calendars, String calendarName) {
+    log.debug("findCalendarByName:: Finding calendar with name {} from calendarList {}", calendarName, calendars);
+    return calendars.stream()
+      .filter(calendar -> Objects.equals(calendar.getName(), calendarName))
+      .findFirst()
+      .orElse(null);
   }
 
   private boolean checkServicePointIdAssociatedWithAnyCalendar(List<Calendar> calendars, UUID servicePointId) {

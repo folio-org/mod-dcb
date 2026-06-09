@@ -1,6 +1,7 @@
 package org.folio.dcb.service.impl;
 
 import static org.folio.dcb.utils.CqlQuery.exactMatchById;
+import static org.folio.dcb.utils.CqlQuery.exactMatchByName;
 
 import java.util.List;
 import java.util.Objects;
@@ -10,6 +11,7 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.folio.dcb.domain.ResultList;
 import org.folio.dcb.domain.dto.InventoryItem;
+import org.folio.dcb.domain.dto.MaterialType;
 import org.folio.dcb.exception.InventoryItemNotFound;
 import org.folio.dcb.integration.invstorage.InventoryItemStorageClient;
 import org.folio.dcb.integration.invstorage.MaterialTypeClient;
@@ -28,16 +30,14 @@ public class ItemServiceImpl implements ItemService {
   private final MaterialTypeClient materialTypeClient;
 
   @Override
-  public String fetchItemMaterialTypeIdByMaterialTypeName(String materialTypeName) {
-    log.debug("fetchItemMaterialTypeIdByMaterialTypeName:: Fetching ItemMaterialTypeId by MaterialTypeName={}",
-      materialTypeName);
-    return materialTypeClient.fetchMaterialTypeByQuery(String.format("name==\"%s\"", materialTypeName))
+  public String fetchItemMaterialTypeIdByMaterialTypeName(String name) {
+    log.debug("fetchItemMaterialTypeIdByMaterialTypeName:: Fetching ItemMaterialTypeId by: {}", name);
+    return materialTypeClient.fetchMaterialTypeByQuery(exactMatchByName(name).getQuery())
       .getMtypes()
       .stream()
       .findFirst()
-      .map(org.folio.dcb.domain.dto.MaterialType::getId)
-      .orElseThrow(() -> new NotFoundException(
-        String.format("MaterialType not found with name %s ", materialTypeName)));
+      .map(MaterialType::getId)
+      .orElseThrow(() -> new NotFoundException(String.format("MaterialType not found with name %s ", name)));
   }
 
   @Override

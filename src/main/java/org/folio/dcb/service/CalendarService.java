@@ -4,6 +4,7 @@ import java.util.UUID;
 import org.folio.dcb.domain.dto.Calendar;
 
 public interface CalendarService {
+
   /**
    * Finds a calendar by its name.
    *
@@ -21,8 +22,8 @@ public interface CalendarService {
   Calendar createCalendar(Calendar calendar);
 
   /**
-   * Adds a service point ID with a default calendar. If the calendar is found, the service point ID
-   * is added to the calendar's assignments.
+   * Adds a service point ID with a default calendar. If the calendar is found, the service point ID is added to the
+   * calendar's assignments.
    *
    * @param servicePointId the unique identifier of the service point to add.
    * @throws IllegalArgumentException if the default calendar name is not found.
@@ -30,9 +31,8 @@ public interface CalendarService {
   void addServicePointIdToDefaultCalendar(UUID servicePointId);
 
   /**
-   * Associates a service point ID with a default calendar if it is not already associated with any
-   * calendar. Checks existing calendars and adds the service point ID to the default calendar if
-   * absent.
+   * Associates a service point ID with a default calendar if it is not already associated with any calendar. Checks
+   * existing calendars and adds the service point ID to the default calendar if absent.
    *
    * @param servicePointId the unique identifier of the service point to associate.
    * @throws IllegalArgumentException if the default calendar name is not found.

@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dcb.domain.dto.CheckInRequest;
 import org.folio.dcb.domain.dto.CheckOutRequest;
-import org.folio.dcb.domain.dto.CirculationRequest;
 import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.exception.CirculationRequestException;
 import org.folio.dcb.integration.circulation.CirculationClient;
@@ -44,9 +43,9 @@ public class CirculationServiceImpl implements CirculationService {
 
   @Override
   public void cancelRequest(TransactionEntity dcbTransaction, boolean isItemUnavailableCancellation) {
-    log.debug("cancelRequest:: cancelling request using request id {} ", dcbTransaction.getRequestId());
-    CirculationRequest request =
-      circulationStorageService.getCancellationRequestIfOpenOrNull(dcbTransaction.getRequestId().toString());
+    var requestId = dcbTransaction.getRequestId();
+    log.debug("cancelRequest:: cancelling request using request id {} ", requestId);
+    var request = circulationStorageService.getCancellationRequestIfOpenOrNull(requestId.toString());
     if (request != null) {
       try {
         if (isItemUnavailableCancellation) {
@@ -54,10 +53,8 @@ public class CirculationServiceImpl implements CirculationService {
         }
         circulationClient.updateRequest(request.getId(), request);
       } catch (HttpClientErrorException e) {
-        log.warn("cancelRequest:: error cancelling request using request id {} ",
-          dcbTransaction.getRequestId(), e);
-        throw new CirculationRequestException(
-            String.format("Error cancelling request using request id %s", dcbTransaction.getRequestId()));
+        log.warn("cancelRequest:: error cancelling request using request id {} ", requestId, e);
+        throw new CirculationRequestException(String.format("Error cancelling request using request id %s", requestId));
       }
     }
   }

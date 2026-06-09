@@ -10,8 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
-@RestController
 @Log4j2
+@RestController
 @AllArgsConstructor
 public class RefreshShadowLocationController implements RefreshShadowLocationsApi {
 
@@ -19,7 +19,7 @@ public class RefreshShadowLocationController implements RefreshShadowLocationsAp
 
   @Override
   public ResponseEntity<RefreshShadowLocationResponse> refreshShadowLocation(ShadowLocationRefreshBody requestBody) {
-    return ResponseEntity.status(HttpStatus.CREATED)
-      .body(shadowLocationService.createShadowLocations(requestBody));
+    var shadowLocations = shadowLocationService.createShadowLocations(requestBody);
+    return ResponseEntity.status(HttpStatus.CREATED).body(shadowLocations);
   }
 }

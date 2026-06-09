@@ -1,9 +1,11 @@
 package org.folio.dcb.domain.converter;
 
 import jakarta.persistence.AttributeConverter;
+import jakarta.persistence.Converter;
 import java.util.Arrays;
 import org.folio.dcb.domain.dto.IntervalIdEnum;
 
+@Converter
 public class IntervalIdEnumConverter implements AttributeConverter<IntervalIdEnum, String> {
 
   @Override

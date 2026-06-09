@@ -14,8 +14,8 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 /**
- * Auditable is a mapped superclass that contains fields for auditing and the corresponding
- * annotations for JPA auditing.
+ * Auditable is a mapped superclass that contains fields for auditing and the corresponding annotations for JPA
+ * auditing.
  */
 @Data
 @MappedSuperclass

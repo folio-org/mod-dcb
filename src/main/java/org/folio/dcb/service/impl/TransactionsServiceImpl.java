@@ -1,5 +1,7 @@
 package org.folio.dcb.service.impl;
 
+import static org.apache.commons.lang3.BooleanUtils.isFalse;
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.EXPIRED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_OUT;
@@ -17,10 +19,7 @@ import org.folio.dcb.domain.ResultList;
 import org.folio.dcb.domain.dto.DcbItem;
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.DcbUpdateTransaction;
-import org.folio.dcb.domain.dto.Loan;
-import org.folio.dcb.domain.dto.LoanCollection;
 import org.folio.dcb.domain.dto.LoanPolicy;
-import org.folio.dcb.domain.dto.LoanPolicyCollection;
 import org.folio.dcb.domain.dto.RenewByIdRequest;
 import org.folio.dcb.domain.dto.RenewByIdResponse;
 import org.folio.dcb.domain.dto.RenewalInfo;
@@ -72,7 +71,7 @@ public class TransactionsServiceImpl implements TransactionsService {
   @Override
   public TransactionStatusResponse createCirculationRequest(String dcbTransactionId, DcbTransaction dcbTransaction) {
     log.debug("createCirculationRequest:: creating new transaction request for role {} ",
-        dcbTransaction.getRole());
+      dcbTransaction.getRole());
     checkTransactionExistsAndThrow(dcbTransactionId);
 
     return switch (dcbTransaction.getRole()) {
@@ -84,43 +83,31 @@ public class TransactionsServiceImpl implements TransactionsService {
   }
 
   @Override
-  public TransactionStatusResponse updateTransactionStatus(String dcbTransactionId,
-      TransactionStatus transactionStatus) {
-    return transactionRepository.findById(dcbTransactionId).map(dcbTransaction -> {
-      if (dcbTransaction.getStatus() == transactionStatus.getStatus()) {
+  public TransactionStatusResponse updateTransactionStatus(String id, TransactionStatus status) {
+    return transactionRepository.findById(id).map(transaction -> {
+      if (transaction.getStatus() == status.getStatus()) {
         throw new StatusException(String.format(
           "Current transaction status equal to new transaction status: dcbTransactionId: %s, status: %s",
-          dcbTransactionId, transactionStatus.getStatus()));
-      } else if (transactionStatus.getStatus() == EXPIRED || dcbTransaction.getStatus() == EXPIRED) {
+          id, status.getStatus()));
+      } else if (status.getStatus() == EXPIRED || transaction.getStatus() == EXPIRED) {
         throw new StatusException(String.format("Status transition will not be possible from %s to %s",
-          dcbTransaction.getStatus(), transactionStatus.getStatus()));
-      } else if (transactionStatus.getStatus() == TransactionStatus.StatusEnum.CANCELLED
-        && (dcbTransaction.getStatus() == TransactionStatus.StatusEnum.ITEM_CHECKED_IN
-        || dcbTransaction.getStatus() == TransactionStatus.StatusEnum.ITEM_CHECKED_OUT)
-        || dcbTransaction.getStatus() == TransactionStatus.StatusEnum.CLOSED) {
-        throw new StatusException(
-          String.format("Cannot cancel transaction dcbTransactionId: %s. Transaction already in status: %s: ",
-          dcbTransactionId, dcbTransaction.getStatus()));
+          transaction.getStatus(), status.getStatus()));
+      } else if (isNonCancellable(status, transaction)) {
+        throw new StatusException(String.format(
+          "Cannot cancel transaction dcbTransactionId: %s. Transaction already in status: %s: ",
+          id, transaction.getStatus()));
       }
-      switch (dcbTransaction.getRole()) {
-        case LENDER -> statusProcessorService
-          .lendingChainProcessor(dcbTransaction.getStatus(), transactionStatus.getStatus())
-          .forEach(statusEnum -> lendingLibraryService.updateTransactionStatus(
-              dcbTransaction, TransactionStatus.builder().status(statusEnum).build()));
-        case BORROWING_PICKUP -> borrowingPickupLibraryService
-          .updateTransactionStatus(dcbTransaction, transactionStatus);
-        case PICKUP -> pickupLibraryService.updateTransactionStatus(dcbTransaction, transactionStatus);
-        case BORROWER -> statusProcessorService
-          .borrowingChainProcessor(dcbTransaction.getStatus(), transactionStatus.getStatus())
-          .forEach(statusEnum -> borrowingLibraryService
-            .updateTransactionStatus(dcbTransaction, TransactionStatus.builder().status(statusEnum).build()));
-        default -> throw new IllegalStateException("Unsupported role: " + dcbTransaction.getRole());
+      switch (transaction.getRole()) {
+        case LENDER -> processLenderRoleTransaction(status, transaction);
+        case BORROWING_PICKUP -> borrowingPickupLibraryService.updateTransactionStatus(transaction, status);
+        case PICKUP -> pickupLibraryService.updateTransactionStatus(transaction, status);
+        case BORROWER -> processBorrowerTransaction(status, transaction);
+        default -> throw new IllegalStateException("Unsupported role: " + transaction.getRole());
       }
       return TransactionStatusResponse.builder()
-        .status(TransactionStatusResponse.StatusEnum.fromValue(transactionStatus.getStatus().getValue()))
+        .status(TransactionStatusResponse.StatusEnum.fromValue(status.getStatus().getValue()))
         .build();
-    }).orElseThrow(() -> new IllegalArgumentException(String.format(
-      "Transaction with id %s not found", dcbTransactionId)));
+    }).orElseThrow(() -> new IllegalArgumentException(String.format("Transaction with id %s not found", id)));
   }
 
   @Override
@@ -133,27 +120,25 @@ public class TransactionsServiceImpl implements TransactionsService {
 
   private Optional<LoanRenewalDetails> getLoanRenewalDetails(TransactionEntity transactionEntity) {
     if (isTxnItemCheckoutAndRoleIsBorrowerOrBorrowingPickup(transactionEntity)) {
-      String loanQuery = buildLoanQuery(transactionEntity);
-      LoanCollection loanCollection = circulationClient.fetchLoanByQuery(loanQuery);
+      var loanQuery = buildLoanQuery(transactionEntity);
+      var loanCollection = circulationClient.fetchLoanByQuery(loanQuery);
       if (loanCollection.getLoans().isEmpty()) {
         return Optional.empty();
       }
-      Loan firstLoan = loanCollection.getLoans().getFirst();
-      Integer loanRenewalCount = Integer.valueOf(Optional.ofNullable(firstLoan.getRenewalCount()).orElse("0"));
+      var firstLoan = loanCollection.getLoans().getFirst();
+      var loanRenewalCount = Integer.valueOf(Optional.ofNullable(firstLoan.getRenewalCount()).orElse("0"));
 
-      String loanPolicyIdQuery = CqlQuery.exactMatchById(firstLoan.getLoanPolicyId()).getQuery();
-      LoanPolicyCollection loanPolicyCollection = circulationLoanPolicyStorageClient.findByQuery(loanPolicyIdQuery);
-      LoanPolicy firstLoanPolicy = loanPolicyCollection.getLoanPolicies().getFirst();
-      Boolean renewable = firstLoanPolicy.getRenewable();
+      var loanPolicyIdQuery = CqlQuery.exactMatchById(firstLoan.getLoanPolicyId()).getQuery();
+      var loanPolicyCollection = circulationLoanPolicyStorageClient.findByQuery(loanPolicyIdQuery);
+      var firstLoanPolicy = loanPolicyCollection.getLoanPolicies().getFirst();
+      var renewable = firstLoanPolicy.getRenewable();
 
-      if (Boolean.FALSE.equals(firstLoanPolicy.getRenewable())) {
+      if (isFalse(firstLoanPolicy.getRenewable())) {
         return Optional.of(new LoanRenewalDetails(loanRenewalCount, null, renewable));
       }
 
-      Boolean isUnlimited = firstLoanPolicy.getRenewalsPolicy().getUnlimited();
-      Integer renewalMaxCount = Boolean.TRUE.equals(isUnlimited)
-        ? UNLIMITED
-        : firstLoanPolicy.getRenewalsPolicy().getNumberAllowed();
+      var isUnlimited = firstLoanPolicy.getRenewalsPolicy().getUnlimited();
+      var renewalMaxCount = isTrue(isUnlimited) ? UNLIMITED : firstLoanPolicy.getRenewalsPolicy().getNumberAllowed();
 
       return Optional.of(new LoanRenewalDetails(loanRenewalCount, renewalMaxCount, renewable));
     } else {
@@ -176,15 +161,15 @@ public class TransactionsServiceImpl implements TransactionsService {
   }
 
   @Override
-  public TransactionStatusResponseCollection getTransactionStatusList(OffsetDateTime fromDate, OffsetDateTime toDate,
-      Integer pageNumber, Integer pageSize) {
+  public TransactionStatusResponseCollection getTransactionStatusList(
+    OffsetDateTime fromDate, OffsetDateTime toDate, Integer pageNumber, Integer pageSize) {
+
     log.info("getTransactionStatusList:: fromDate {}, toDate {}, pageNumber {}, pageSize {}",
       fromDate, toDate, pageNumber, pageSize);
     var pageable = PageRequest.of(pageNumber, pageSize, Sort.by("created_Date"));
-    var transactionAuditEntityPage =
-        transactionAuditRepository.findUpdatedTransactionsByDateRange(fromDate, toDate, pageable);
-    var transactionStatusResponseList = transactionMapper.mapToDto(transactionAuditEntityPage);
-    var totalRecords = (int) transactionAuditEntityPage.getTotalElements();
+    var txAuditEntityPage = transactionAuditRepository.findUpdatedTransactionsByDateRange(fromDate, toDate, pageable);
+    var transactionStatusResponseList = transactionMapper.mapToDto(txAuditEntityPage);
+    var totalRecords = (int) txAuditEntityPage.getTotalElements();
     var maxPageNumber = pageSize >= totalRecords ? 0 : (int) Math.ceil((double) totalRecords / pageSize) - 1;
     return TransactionStatusResponseCollection.builder()
       .transactions(transactionStatusResponseList)
@@ -236,6 +221,18 @@ public class TransactionsServiceImpl implements TransactionsService {
     setRenewalNumberForVirtualLoan(transactionEntity, 0);
   }
 
+  private void processLenderRoleTransaction(TransactionStatus status, TransactionEntity transaction) {
+    statusProcessorService.lendingChainProcessor(transaction.getStatus(), status.getStatus())
+      .forEach(statusEnum -> lendingLibraryService.updateTransactionStatus(
+        transaction, TransactionStatus.builder().status(statusEnum).build()));
+  }
+
+  private void processBorrowerTransaction(TransactionStatus status, TransactionEntity transaction) {
+    statusProcessorService.borrowingChainProcessor(transaction.getStatus(), status.getStatus())
+      .forEach(statusEnum -> borrowingLibraryService.updateTransactionStatus(
+        transaction, TransactionStatus.builder().status(statusEnum).build()));
+  }
+
   private void validateLoanPolicy(String loanPolicyId, LoanPolicy loanPolicy) {
     if (Objects.isNull(loanPolicy)) {
       log.debug("validateLoanPolicy:: Loan policy is null");
@@ -244,10 +241,10 @@ public class TransactionsServiceImpl implements TransactionsService {
   }
 
   private static void validateRenewalResponse(String dcbTransactionId, RenewByIdResponse response, String itemId) {
-    if (Objects.isNull(response)) {
+    if (response == null) {
       log.debug("validateRenewalResponse:: renewal response is null");
-      throw new NotFoundException(
-        String.format("Renew failed. Transaction id:%s, Item id: %s", dcbTransactionId, itemId));
+      throw new NotFoundException(String.format("Renew failed. Transaction id:%s, Item id: %s",
+        dcbTransactionId, itemId));
     }
   }
 
@@ -289,7 +286,7 @@ public class TransactionsServiceImpl implements TransactionsService {
   }
 
   private TransactionStatusResponse generateTransactionStatusResponseFromTransactionEntity(
-      TransactionEntity transactionEntity, Optional<LoanRenewalDetails> loanRenewalDetails) {
+    TransactionEntity transactionEntity, Optional<LoanRenewalDetails> loanRenewalDetails) {
     return TransactionStatusResponse.builder()
       .status(TransactionStatusResponse.StatusEnum.fromValue(transactionEntity.getStatus().getValue()))
       .item(getDcbItemForTransactionStatus(transactionEntity, loanRenewalDetails).orElse(null))
@@ -297,21 +294,20 @@ public class TransactionsServiceImpl implements TransactionsService {
       .build();
   }
 
-  public TransactionEntity getTransactionEntityOrThrow(String dcbTransactionId) {
-    return transactionRepository.findById(dcbTransactionId)
-      .orElseThrow(() -> new NotFoundException(
-        String.format("DCB Transaction was not found by id= %s ", dcbTransactionId)));
+  public TransactionEntity getTransactionEntityOrThrow(String txId) {
+    return transactionRepository.findById(txId)
+      .orElseThrow(() -> new NotFoundException(String.format("DCB Transaction was not found by id= %s ", txId)));
   }
 
   private void checkTransactionExistsAndThrow(String dcbTransactionId) {
     if (transactionRepository.existsById(dcbTransactionId)) {
       throw new ResourceAlreadyExistException(
-          String.format("Unable to create transaction with id %s as it already exists", dcbTransactionId));
+        String.format("unable to create transaction with id %s as it already exists", dcbTransactionId));
     }
   }
 
   private Optional<DcbItem> getDcbItemForTransactionStatus(
-      TransactionEntity tx, Optional<LoanRenewalDetails> loanRenewalDetails) {
+    TransactionEntity tx, Optional<LoanRenewalDetails> loanRenewalDetails) {
     var renewalInfo = loanRenewalDetails.map(this::createRenewalInfo).orElse(null);
     var holdCount = getOpenHoldRequestsNumber(tx).orElse(null);
     if (ObjectUtils.allNull(renewalInfo, holdCount)) {
@@ -358,6 +354,13 @@ public class TransactionsServiceImpl implements TransactionsService {
     var virtualItemLoan = virtualItemLoans.getFirst();
     virtualItemLoan.setRenewalCount(Integer.toString(renewalCount));
     circulationClient.updateLoan(virtualItemLoan.getId(), virtualItemLoan);
+  }
+
+  private static boolean isNonCancellable(TransactionStatus status, TransactionEntity transaction) {
+    return status.getStatus() == TransactionStatus.StatusEnum.CANCELLED
+      && (transaction.getStatus() == TransactionStatus.StatusEnum.ITEM_CHECKED_IN
+      || transaction.getStatus() == TransactionStatus.StatusEnum.ITEM_CHECKED_OUT)
+      || transaction.getStatus() == TransactionStatus.StatusEnum.CLOSED;
   }
 
   private record LoanRenewalDetails(Integer loanRenewalCount, Integer renewalMaxCount, Boolean renewable) {}

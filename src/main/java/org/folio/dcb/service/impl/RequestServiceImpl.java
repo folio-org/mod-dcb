@@ -41,13 +41,13 @@ public class RequestServiceImpl implements RequestService {
     var inventoryItemStatus = inventoryItem.getStatus().getName();
     if (inventoryItemStatus.equals(AVAILABLE)) {
       log.info("createRequestBasedOnItemStatus:: Creating page request.");
-      var circulationRequest = createCirculationRequest(
-        PAGE, user, item, inventoryItem.getHoldingsRecordId(), inventoryHolding.getInstanceId(), pickupServicePointId);
+      var circulationRequest = createCirculationRequest(PAGE, user, item, inventoryItem.getHoldingsRecordId(),
+        inventoryHolding.getInstanceId(), pickupServicePointId);
       return circulationClient.createRequest(circulationRequest);
     } else if (HOLD_ITEM_STATUS.contains(inventoryItemStatus)) {
       log.info("createRequestBasedOnItemStatus:: Creating hold request.");
-      var circulationRequest = createCirculationRequest(
-        HOLD, user, item, inventoryItem.getHoldingsRecordId(), inventoryHolding.getInstanceId(), pickupServicePointId);
+      var circulationRequest = createCirculationRequest(HOLD, user, item, inventoryItem.getHoldingsRecordId(),
+        inventoryHolding.getInstanceId(), pickupServicePointId);
       return circulationClient.createRequest(circulationRequest);
     } else {
       String errorMsg = String.format("Request will not be created because the item is %s", inventoryItemStatus);
@@ -57,11 +57,10 @@ public class RequestServiceImpl implements RequestService {
   }
 
   @Override
-  public CirculationRequest createHoldItemRequest(User user, DcbItem item, String pickupServicePointId) {
+  public CirculationRequest createHoldItemRequest(User user, DcbItem item, String pickupSpId) {
     log.debug("createHoldItemRequest:: creating a new hold request.");
-    var dcbHolding = dcbEntityServiceFacade.findOrCreateHolding();
-    var circulationRequest =
-      createCirculationRequest(HOLD, user, item, dcbHolding.getId(), INSTANCE_ID, pickupServicePointId);
+    var holding = dcbEntityServiceFacade.findOrCreateHolding();
+    var circulationRequest = createCirculationRequest(HOLD, user, item, holding.getId(), INSTANCE_ID, pickupSpId);
     return circulationClient.createRequest(circulationRequest);
   }
 
@@ -72,7 +71,7 @@ public class RequestServiceImpl implements RequestService {
   }
 
   private CirculationRequest createCirculationRequest(CirculationRequest.RequestTypeEnum type, User user, DcbItem item,
-      String holdingsId, String instanceId, String pickupServicePointId) {
+    String holdingsId, String instanceId, String pickupServicePointId) {
     return CirculationRequest.builder()
       .id(UUID.randomUUID().toString())
       .requesterId(UUID.fromString(user.getId()))

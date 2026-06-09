@@ -54,14 +54,14 @@ public class EntityUtils {
   public static final String NOT_EXISTED_ITEM_ID = "de18d1cd-8312-449c-8db6-c2491467ab76";
 
   /**
-   * NOT_EXISTED_PATRON_ID means the mocked userClient returns an empty result while requesting it
-   * by a query including such a patron ID.
+   * NOT_EXISTED_PATRON_ID - means the Mocked userClient returns empty result, while requesting it by the query,
+   * including such a patron id.
    */
   public static final String NOT_EXISTED_PATRON_ID = "571b0a2c-9456-40b5-a449-d41fe6017082";
 
   /**
-   * EXISTED_PATRON_ID means the mocked userClient returns a single result while requesting it by a
-   * query including such a patron ID.
+   * EXISTED_PATRON_ID - means the Mocked userClient returns result with single value, while requesting it by the query,
+   * including such a patron id.
    */
   public static final String EXISTED_PATRON_ID = "284056f5-0670-4e1e-9e2f-61b9f1ee2d18";
   public static final String PICKUP_SERVICE_POINT_ID = "0da8c1e4-1c1f-4dd9-b189-70ba978b7d94";
@@ -83,7 +83,7 @@ public class EntityUtils {
   public static final String INSTANCE_ID = "a9350401-f2f2-4804-9701-ca813c70e322";
 
   public static final String LENDER_HOLD_SHELF_EXPIRATION_SETTING_ID =
-      "d115a0b6-133d-4148-ac1a-b48c2aa57f57";
+    "d115a0b6-133d-4148-ac1a-b48c2aa57f57";
 
   public static DcbTransaction createDcbTransactionByRole(DcbTransaction.RoleEnum role) {
     return DcbTransaction.builder()
@@ -100,7 +100,7 @@ public class EntityUtils {
   }
 
   public static DcbTransaction createDcbTransactionByRoleAndSelfBorrowing(DcbTransaction.RoleEnum role,
-      Boolean selfBorrowing) {
+    Boolean selfBorrowing) {
     return DcbTransaction.builder()
       .item(createDcbItem())
       .patron(

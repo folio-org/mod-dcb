@@ -9,6 +9,7 @@ import lombok.Getter;
 
 @Getter
 public enum RequestStatus {
+
   NONE(""),
   OPEN_NOT_YET_FILLED("Open - Not yet filled"),
   OPEN_AWAITING_PICKUP("Open - Awaiting pickup"),

@@ -4,6 +4,7 @@ import org.folio.dcb.domain.dto.DcbPatron;
 import org.folio.dcb.domain.dto.User;
 
 public interface UserService {
+
   /**
    * Get a user or create one if not found.
    *

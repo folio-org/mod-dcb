@@ -4,13 +4,10 @@ import static com.github.tomakehurst.wiremock.admin.model.ServeEventQuery.ALL_UN
 import static java.util.Collections.emptyList;
 import static org.apache.commons.lang3.StringUtils.trimToNull;
 import static org.folio.dcb.support.wiremock.WiremockContainerExtension.getWireMockAdminClient;
+import static org.folio.dcb.utils.JsonTestUtils.JSON_MAPPER;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.github.tomakehurst.wiremock.stubbing.ServeEvent;
 import com.github.tomakehurst.wiremock.stubbing.StubMapping;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
@@ -28,32 +25,31 @@ import java.util.stream.Collectors;
 import lombok.SneakyThrows;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.intellij.lang.annotations.Language;
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
+import tools.jackson.databind.node.ArrayNode;
 
 public class WiremockStubExtension implements
-    BeforeEachCallback, AfterEachCallback, BeforeAllCallback, AfterAllCallback {
+  BeforeEachCallback, AfterEachCallback, BeforeAllCallback, AfterAllCallback {
 
   private static final String STUB_IDS = "stubIds";
   private static final Namespace NAMESPACE = Namespace.create(WiremockStubExtension.class);
-  private static final ObjectMapper MAPPER = new ObjectMapper()
-    .setSerializationInclusion(JsonInclude.Include.NON_NULL)
-    .setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL)
-    .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
   private static final ClassLoader CLASS_LOADER = WiremockStubExtension.class.getClassLoader();
 
   @Override
-  public void afterAll(ExtensionContext context) {
+  public void afterAll(@NonNull ExtensionContext context) {
     resetWiremockStubs();
   }
 
   @Override
-  public void beforeAll(ExtensionContext context) {
+  public void beforeAll(@NonNull ExtensionContext context) {
     resetWiremockStubs();
   }
 
@@ -88,7 +84,8 @@ public class WiremockStubExtension implements
       return;
     }
 
-    final var unusedStubs = findUnusedStubs(definedStubMappings);
+    @SuppressWarnings("VariableDeclarationUsageDistance")
+    var unusedStubs = findUnusedStubs(definedStubMappings);
 
     store.remove(getStubIdsKey(context));
     resetWiremockStubs();
@@ -114,7 +111,7 @@ public class WiremockStubExtension implements
 
     // Support both "classpath:" prefixed and plain paths
     var classpathPrefix = "classpath:";
-    var resourcePath = StringUtils.startsWith(path, classpathPrefix)
+    var resourcePath = Strings.CI.startsWith(path, classpathPrefix)
       ? path.substring(classpathPrefix.length())
       : path;
 
@@ -147,7 +144,7 @@ public class WiremockStubExtension implements
 
   @SneakyThrows
   private static List<StubMapping> parseStubMappings(String jsonString) {
-    var jsonNode = MAPPER.readTree(jsonString);
+    var jsonNode = JSON_MAPPER.readTree(jsonString);
 
     var mappingsKey = "mappings";
     var mappingNode = jsonNode.path(mappingsKey);
@@ -167,7 +164,7 @@ public class WiremockStubExtension implements
     map.put("path", URI.create(request.getUrl()).getPath());
     map.put("queryParams", request.getQueryParams().toString());
     map.put("requestBody", trimToNull(request.getBodyAsString()));
-    return MAPPER.writeValueAsString(map);
+    return JSON_MAPPER.writeValueAsString(map);
   }
 
   @SneakyThrows
@@ -179,7 +176,7 @@ public class WiremockStubExtension implements
     map.put("urlPath", request.getUrlPath());
     map.put("urlPattern", request.getUrlPattern());
     map.put("urlPathTemplate", request.getUrlPathTemplate());
-    return MAPPER.writeValueAsString(map);
+    return JSON_MAPPER.writeValueAsString(map);
   }
 
   private static List<String> getStubPathsSafe(WireMockStub stubs) {

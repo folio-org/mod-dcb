@@ -9,9 +9,7 @@ import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.folio.dcb.domain.dto.CirculationRequest;
 import org.folio.dcb.domain.dto.DcbTransaction;
-import org.folio.dcb.domain.dto.ServicePointRequest;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.entity.TransactionEntity;
@@ -44,10 +42,10 @@ public class LendingLibraryServiceImpl implements LibraryService {
     var patron = dcbTransaction.getPatron();
 
     var user = userService.fetchOrCreateUser(patron);
-    ServicePointRequest pickupServicePoint = servicePointService.createServicePointIfNotExists(dcbTransaction);
+    var pickupServicePoint = servicePointService.createServicePointIfNotExists(dcbTransaction);
     dcbTransaction.getPickup().setServicePointId(pickupServicePoint.getId());
-    CirculationRequest pageRequest =
-      requestService.createRequestBasedOnItemStatus(user, item, pickupServicePoint.getId());
+
+    var pageRequest = requestService.createRequestBasedOnItemStatus(user, item, pickupServicePoint.getId());
     baseLibraryService.saveDcbTransaction(dcbTransactionId, dcbTransaction, pageRequest.getId());
 
     return TransactionStatusResponse.builder()
@@ -76,8 +74,7 @@ public class LendingLibraryServiceImpl implements LibraryService {
     } else if (ITEM_CHECKED_OUT == currentStatus && ITEM_CHECKED_IN == requestedStatus) {
       updateTransactionEntity(dcbTransaction, requestedStatus);
     } else if (CANCELLED == requestedStatus) {
-      log.info("updateTransactionStatus:: Cancelling transaction with id: {} for Lender role",
-        dcbTransaction.getId());
+      log.info("updateTransactionStatus:: Cancelling transaction with id: {} for Lender role", dcbTransaction.getId());
       baseLibraryService.cancelTransactionRequest(dcbTransaction);
     } else {
       String errorMessage = String.format("updateTransactionStatus:: status update from %s to %s is not implemented",
@@ -87,11 +84,9 @@ public class LendingLibraryServiceImpl implements LibraryService {
     }
   }
 
-  private void updateTransactionEntity(TransactionEntity transactionEntity,
-      TransactionStatus.StatusEnum transactionStatusEnum) {
-    log.info("updateTransactionEntity:: updating transaction entity from {} to {}",
-      transactionEntity.getStatus(), transactionStatusEnum);
-    transactionEntity.setStatus(transactionStatusEnum);
-    transactionRepository.save(transactionEntity);
+  private void updateTransactionEntity(TransactionEntity entity, TransactionStatus.StatusEnum status) {
+    log.info("updateTransactionEntity:: updating transaction entity from {} to {}", entity.getStatus(), status);
+    entity.setStatus(status);
+    transactionRepository.save(entity);
   }
 }

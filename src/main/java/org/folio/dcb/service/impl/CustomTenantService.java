@@ -24,8 +24,9 @@ public class CustomTenantService extends TenantService {
   private final PrepareSystemUserService prepareSystemUserService;
 
   public CustomTenantService(JdbcTemplate jdbcTemplate, FolioExecutionContext context,
-      FolioSpringLiquibase folioSpringLiquibase, PrepareSystemUserService prepareSystemUserService,
-      KafkaService kafkaService, DcbEntityServiceFacade dcbEntityServiceFacade) {
+    FolioSpringLiquibase folioSpringLiquibase, PrepareSystemUserService prepareSystemUserService,
+    KafkaService kafkaService, DcbEntityServiceFacade dcbEntityServiceFacade) {
+
     super(jdbcTemplate, context, folioSpringLiquibase);
 
     this.prepareSystemUserService = prepareSystemUserService;

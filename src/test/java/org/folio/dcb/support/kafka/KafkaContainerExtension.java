@@ -10,6 +10,7 @@ import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.admin.KafkaAdminClient;
 import org.apache.kafka.clients.admin.NewTopic;
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -26,7 +27,7 @@ public class KafkaContainerExtension implements BeforeAllCallback, AfterAllCallb
     .withStartupAttempts(3);
 
   @Override
-  public void beforeAll(ExtensionContext context) {
+  public void beforeAll(@NonNull ExtensionContext context) {
     if (!CONTAINER.isRunning()) {
       CONTAINER.start();
     }
@@ -35,7 +36,7 @@ public class KafkaContainerExtension implements BeforeAllCallback, AfterAllCallb
   }
 
   @Override
-  public void afterAll(ExtensionContext context) {
+  public void afterAll(@NonNull ExtensionContext context) {
     System.clearProperty(SPRING_PROPERTY_NAME);
   }
 

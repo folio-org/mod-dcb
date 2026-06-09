@@ -1,7 +1,7 @@
 package org.folio.dcb.service.entities;
 
 import static java.util.Collections.emptyList;
-import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 import static org.folio.dcb.utils.DcbConstants.DCB_CALENDAR_NAME;
 import static org.folio.dcb.utils.DcbConstants.SERVICE_POINT_ID;
 
@@ -52,7 +52,7 @@ public class DcbCalendarService implements DcbEntityService<Calendar> {
       .startDate(LocalDate.now().toString())
       .endDate(LocalDate.now().plusYears(10).toString())
       .normalHours(List.of(getNormalHours()))
-      .assignments(List.of(UUID.fromString(defaultIfNull(servicePointId, SERVICE_POINT_ID))))
+      .assignments(List.of(UUID.fromString(getIfNull(servicePointId, SERVICE_POINT_ID))))
       .exceptions(emptyList())
       .build();
   }

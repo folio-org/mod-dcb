@@ -50,8 +50,7 @@ class ServicePointExpirationPeriodServiceTest {
   void getShelfExpiryPeriod_positive_settingFound() {
     var holdShelfExpiryPeriod = new HoldShelfExpiryPeriod().duration(15).intervalId(MINUTES);
     var setting = setting(jsonMapper.valueToTree(holdShelfExpiryPeriod));
-    when(settingService.findByQuery("key==\"%s\"".formatted(SETTING_KEY), 1, 0))
-      .thenReturn(asSinglePage(setting));
+    when(settingService.findByQuery("key==\"%s\"".formatted(SETTING_KEY), 1, 0)).thenReturn(asSinglePage(setting));
 
     var actual = servicePointExpirationPeriodService.getShelfExpiryPeriod(SETTING_KEY);
 
@@ -60,11 +59,9 @@ class ServicePointExpirationPeriodServiceTest {
 
   @ParameterizedTest(name = "[{index}] {0}")
   @MethodSource("invalidSettingDataSource")
-  void getShelfExpiryPeriod_parameterized_validSettingNotFound(@SuppressWarnings("unused") String name,
-      Setting setting) {
+  void getShelfExpiryPeriod_parameterized_validSettingNotFound(@SuppressWarnings("unused") String name, Setting s) {
     var settingKey = getSettingsKey(LENDER.getValue());
-    when(settingService.findByQuery("key==\"%s\"".formatted(settingKey), 1, 0))
-        .thenReturn(asSinglePage(setting));
+    when(settingService.findByQuery("key==\"%s\"".formatted(settingKey), 1, 0)).thenReturn(asSinglePage(s));
     when(servicePointExpirationPeriodRepository.findAll()).thenReturn(Collections.emptyList());
 
     var actual = servicePointExpirationPeriodService.getShelfExpiryPeriod(settingKey);
@@ -77,8 +74,7 @@ class ServicePointExpirationPeriodServiceTest {
   @MethodSource("databaseShelfExpiryDataSource")
   void getShelfExpiryPeriod_positive_settingFoundInDatabase(List<ServicePointExpirationPeriodEntity> periods,
     HoldShelfExpiryPeriod expected) {
-    when(settingService.findByQuery("key==\"%s\"".formatted(SETTING_KEY), 1, 0))
-      .thenReturn(ResultList.empty());
+    when(settingService.findByQuery("key==\"%s\"".formatted(SETTING_KEY), 1, 0)).thenReturn(ResultList.empty());
     when(servicePointExpirationPeriodRepository.findAll()).thenReturn(periods);
     var actual = servicePointExpirationPeriodService.getShelfExpiryPeriod(SETTING_KEY);
     assertThat(actual).isEqualTo(expected);
@@ -94,8 +90,7 @@ class ServicePointExpirationPeriodServiceTest {
   }
 
   private static Stream<Arguments> invalidSettingDataSource() {
-    var invalidContentNode = JsonTestUtils.JSON_MAPPER.createObjectNode()
-      .put("invalidKey", "invalidValue");
+    var invalidContentNode = JsonTestUtils.JSON_MAPPER.createObjectNode().put("invalidKey", "invalidValue");
     return Stream.of(
       arguments("null value", null),
       arguments("duration is null and intervalId is null", setting(holdShelfPeriodNode(null, null))),
@@ -113,8 +108,7 @@ class ServicePointExpirationPeriodServiceTest {
       arguments("json string in value", setting("{\"duration\":\"10\",\"intervalId\":\"Minutes\"}")),
       arguments("long in value", setting(Long.MIN_VALUE)),
       arguments("invalid map in value", setting(Map.of("invalidKey", "invalidValue"))),
-      arguments("array in value", setting(List.of(holdShelfPeriodNode(1L, "Days"),
-        holdShelfPeriodNode(2L, "Days"))))
+      arguments("array in value", setting(List.of(holdShelfPeriodNode(1L, "Days"), holdShelfPeriodNode(2L, "Days"))))
     );
   }
 

@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.folio.spring.FolioExecutionContext;
+import org.jspecify.annotations.NonNull;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.auditing.DateTimeProvider;
@@ -20,7 +21,7 @@ public class JpaAuditingConfig implements AuditorAware<UUID> {
   private final FolioExecutionContext folioExecutionContext;
 
   @Override
-  public Optional<UUID> getCurrentAuditor() {
+  public @NonNull Optional<UUID> getCurrentAuditor() {
     return Optional.ofNullable(folioExecutionContext.getUserId());
   }
 

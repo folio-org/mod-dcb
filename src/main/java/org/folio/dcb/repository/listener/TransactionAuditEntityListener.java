@@ -28,44 +28,54 @@ public class TransactionAuditEntityListener {
   @PrePersist
   public void onPrePersist(Object entity) throws JacksonException {
     log.debug("onPrePersist:: creating transaction audit record");
-    TransactionEntity transactionEntity = (TransactionEntity) entity;
-    TransactionAuditEntity transactionAuditEntity = new TransactionAuditEntity();
+    var txEntity = (TransactionEntity) entity;
+    var transactionAuditEntity = new TransactionAuditEntity();
     transactionAuditEntity.setAction(CREATE_ACTION);
-    transactionAuditEntity.setTransactionId(transactionEntity.getId());
+    transactionAuditEntity.setTransactionId(txEntity.getId());
     transactionAuditEntity.setBefore(null);
-    transactionAuditEntity.setAfter(objectMapper.writeValueAsString(transactionEntity));
+    transactionAuditEntity.setAfter(objectMapper.writeValueAsString(txEntity));
 
-    log.info("onPrePersist:: creating transaction audit record {} with action {}",
-      transactionEntity.getId(), CREATE_ACTION);
+    log.info("onPrePersist:: creating transaction audit record {} with action {}", txEntity.getId(), CREATE_ACTION);
     getEntityManager().persist(transactionAuditEntity);
   }
 
   @PreUpdate
   public void onPreUpdate(Object entity) throws JacksonException {
     log.debug("onPreUpdate:: creating transaction audit record");
-    TransactionEntity transactionEntity = (TransactionEntity) entity;
-    TransactionAuditEntity transactionAuditEntity = new TransactionAuditEntity();
-    transactionAuditEntity.setBefore(objectMapper.writeValueAsString(transactionEntity.getSavedState()));
-    transactionAuditEntity.setAfter(objectMapper.writeValueAsString(transactionEntity));
-    transactionAuditEntity.setTransactionId(transactionEntity.getId());
+    var txEntity = (TransactionEntity) entity;
+    var transactionAuditEntity = new TransactionAuditEntity();
+    transactionAuditEntity.setBefore(objectMapper.writeValueAsString(txEntity.getSavedState()));
+    transactionAuditEntity.setAfter(objectMapper.writeValueAsString(txEntity));
+    transactionAuditEntity.setTransactionId(txEntity.getId());
     transactionAuditEntity.setAction(UPDATE_ACTION);
 
-    log.info("onPreUpdate:: creating transaction audit record {} with action {}",
-      transactionEntity.getId(), UPDATE_ACTION);
+    log.info("onPreUpdate:: creating transaction audit record {} with action {}", txEntity.getId(), UPDATE_ACTION);
     getEntityManager().persist(transactionAuditEntity);
   }
 
-  // This method will be invoked when the transactionEntity is loaded and the transactionEntity is
-  // stored in a transient field
-  // The stored value will be used in onPreUpdate method's setBefore method.
+  /**
+   * Saves entity state.
+   *
+   * <p>This method will be invoked when the transactionEntity is loaded and the transactionEntity is stored in a
+   * transient field. The stored value will be used in onPreUpdate method's setBefore method.</p>
+   *
+   * @param transactionEntity the transaction entity being loaded
+   */
   @PostLoad
   public void saveState(TransactionEntity transactionEntity) {
     transactionEntity.setSavedState(SerializationUtils.clone(transactionEntity));
   }
 
-  // EntityListeners are instantiated by JPA, not Spring,
-  // So Spring cannot inject any Spring-managed bean directly, e.g. EntityManager in any
-  // EntityListeners.
+  /**
+   * Gets the entity manager bean from the application context.
+   *
+   * <p>
+   * EntityListeners are instantiated by JPA, not Spring, so Spring cannot inject any Spring-managed bean directly, e.g.
+   * EntityManager in any EntityListeners.
+   * </p>
+   *
+   * @return the entity manager instance
+   */
   private EntityManager getEntityManager() {
     return beanUtil.getBean(EntityManager.class);
   }

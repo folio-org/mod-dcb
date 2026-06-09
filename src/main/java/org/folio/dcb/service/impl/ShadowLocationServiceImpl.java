@@ -39,7 +39,7 @@ import org.springframework.stereotype.Service;
 public class ShadowLocationServiceImpl implements ShadowLocationService {
 
   private static final String INACTIVE_FEATURE_MESSAGE =
-      "Flexible circulation rules feature is disabled, cannot create shadow locations";
+    "Flexible circulation rules feature is disabled, cannot create shadow locations";
 
   private final LocationsClient locationsClient;
   private final LocationUnitClient locationUnitClient;
@@ -68,14 +68,14 @@ public class ShadowLocationServiceImpl implements ShadowLocationService {
     }
   }
 
-  private RefreshShadowLocationResponse createShadowLocations(ServicePointRequest servicePointRequest,
-      List<DcbLocation> locations) {
+  private RefreshShadowLocationResponse createShadowLocations(
+    ServicePointRequest servicePointRequest, List<DcbLocation> locations) {
 
     var locationsGroupedByAgency = groupByAgency(locations);
 
     var locationUnitsResult = createLocationUnits(locationsGroupedByAgency.keySet());
-    var locationStatuses = createShadowLocationEntries(
-      locationsGroupedByAgency, locationUnitsResult.agencyLocationUnitMapping, servicePointRequest);
+    var locationStatuses = createShadowLocationEntries(locationsGroupedByAgency,
+      locationUnitsResult.agencyLocationUnitMapping, servicePointRequest);
 
     var response = new RefreshShadowLocationResponse()
       .locationUnits(locationUnitsResult.locationUnits)
@@ -137,8 +137,7 @@ public class ShadowLocationServiceImpl implements ShadowLocationService {
         .build();
       locationUnitClient.createInstitution(institution);
 
-      log.debug("createInstitution:: Created institution: {} - {}",
-        institution.getCode(), institution.getName());
+      log.debug("createInstitution:: Created institution: {} - {}", institution.getCode(), institution.getName());
 
       return new InstitutionResult(
         institution,
@@ -283,9 +282,9 @@ public class ShadowLocationServiceImpl implements ShadowLocationService {
   }
 
   private List<RefreshLocationStatus> createShadowLocationEntries(
-      Map<DcbAgencyKey, List<DcbLocation>> locationsGroupedByAgency,
-      Map<DcbAgencyKey, LocationAgenciesIds> agencyLocationUnitMapping,
-      ServicePointRequest servicePointRequest) {
+    Map<DcbAgencyKey, List<DcbLocation>> locationsGroupedByAgency,
+    Map<DcbAgencyKey, LocationAgenciesIds> agencyLocationUnitMapping,
+    ServicePointRequest servicePointRequest) {
 
     var locationStatuses = new ArrayList<RefreshLocationStatus>();
     locationsGroupedByAgency.forEach((agencyKey, locationCodeNamePairs) -> {
@@ -302,17 +301,16 @@ public class ShadowLocationServiceImpl implements ShadowLocationService {
     return locationStatuses;
   }
 
-  private RefreshLocationStatus createShadowLocation(DcbLocation location, LocationAgenciesIds locationAgenciesIds,
-      ServicePointRequest servicePointRequest) {
+  private RefreshLocationStatus createShadowLocation(DcbLocation location,
+    LocationAgenciesIds agenciesIds, ServicePointRequest servicePointRequest) {
     var locationName = location.getName();
     var locationCode = location.getCode();
     try {
-      if (anyNull(
-        locationAgenciesIds.institutionId(), locationAgenciesIds.libraryId(), locationAgenciesIds.campusId())) {
+      if (anyNull(agenciesIds.institutionId(), agenciesIds.libraryId(), agenciesIds.campusId())) {
         log.error(
-            "createShadowLocation:: Location agencies IDs are incomplete or null for location: {} -"
-                + " {}, cannot create shadow location. locationAgenciesIds are: {}",
-            locationCode, locationName, locationAgenciesIds.toString());
+          "createShadowLocation:: Location agencies IDs are incomplete or null for location: {} -"
+            + " {}, cannot create shadow location. locationAgenciesIds are: {}",
+          locationCode, locationName, agenciesIds.toString());
         return RefreshLocationStatus.builder()
           .code(locationCode)
           .status(RefreshLocationStatusType.SKIPPED)
@@ -337,9 +335,9 @@ public class ShadowLocationServiceImpl implements ShadowLocationService {
         .id(UUID.randomUUID().toString())
         .code(locationCode)
         .name(locationName)
-        .institutionId(locationAgenciesIds.institutionId())
-        .campusId(locationAgenciesIds.campusId())
-        .libraryId(locationAgenciesIds.libraryId())
+        .institutionId(agenciesIds.institutionId())
+        .campusId(agenciesIds.campusId())
+        .libraryId(agenciesIds.libraryId())
         .primaryServicePoint(servicePointRequest.getId())
         .servicePointIds(singletonList(servicePointRequest.getId()))
         .isShadow(true)

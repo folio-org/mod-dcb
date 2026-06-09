@@ -4,8 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.folio.dcb.domain.dto.TransactionStatus.StatusEnum;
 
-@AllArgsConstructor
 @Data
+@AllArgsConstructor
 public class StatusProcessor {
 
   private StatusEnum currentStatus;
