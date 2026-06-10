@@ -47,20 +47,19 @@ public class BorrowingLibraryServiceImpl implements LibraryService {
       dcbTransaction.getId(), dcbTransaction.getStatus(), transactionStatus.getStatus());
     var currentStatus = dcbTransaction.getStatus();
     var requestedStatus = transactionStatus.getStatus();
+    String randomServicePointId = UUID.randomUUID().toString();
 
     if (CREATED == currentStatus && OPEN == requestedStatus) {
       log.info("updateTransactionStatus:: Checking in item for transaction {}.", dcbTransaction.getId());
-      //Random UUID for servicePointId.
-      circulationService.checkInByBarcode(dcbTransaction, UUID.randomUUID().toString());
+      circulationService.checkInByBarcode(dcbTransaction, randomServicePointId);
       updateTransactionEntity(dcbTransaction, requestedStatus);
     } else if (ITEM_CHECKED_OUT == currentStatus && ITEM_CHECKED_IN == requestedStatus) {
       log.info("updateTransactionStatus:: Checking in item for transaction {}.", dcbTransaction.getId());
-      String claimReturnedResolution = extractClaimReturnedResolution(transactionStatus);
-      if (claimReturnedResolution != null) {
-        circulationService.checkInByBarcode(dcbTransaction, UUID.randomUUID().toString(), claimReturnedResolution);
-      } else {
-        circulationService.checkInByBarcode(dcbTransaction, UUID.randomUUID().toString());
-      }
+      extractClaimReturnedResolution(transactionStatus)
+        .ifPresentOrElse(
+          resolution -> circulationService.checkInByBarcode(dcbTransaction, randomServicePointId, resolution),
+          () -> circulationService.checkInByBarcode(dcbTransaction, randomServicePointId));
+
       updateTransactionEntity(dcbTransaction, requestedStatus);
     } else if(OPEN == currentStatus && AWAITING_PICKUP == requestedStatus) {
       circulationService.checkInByBarcode(dcbTransaction);
@@ -89,12 +88,11 @@ public class BorrowingLibraryServiceImpl implements LibraryService {
     transactionRepository.save(transactionEntity);
   }
 
-  private String extractClaimReturnedResolution(TransactionStatus transactionStatus) {
+  private Optional<String> extractClaimReturnedResolution(TransactionStatus transactionStatus) {
     return Optional.ofNullable(transactionStatus)
       .map(TransactionStatus::getContext)
       .map(TransactionStatusContext::getClaimReturnedResulution)
-      .map(TransactionStatusContext.ClaimReturnedResulutionEnum::getValue)
-      .orElse(null);
+      .map(TransactionStatusContext.ClaimReturnedResulutionEnum::getValue);
   }
 
 }
