@@ -107,7 +107,8 @@ public class TransactionsServiceImpl implements TransactionsService {
         case BORROWING_PICKUP -> borrowingPickupLibraryService.updateTransactionStatus(dcbTransaction, transactionStatus);
         case PICKUP -> pickupLibraryService.updateTransactionStatus(dcbTransaction, transactionStatus);
         case BORROWER -> statusProcessorService.borrowingChainProcessor(dcbTransaction.getStatus(), transactionStatus.getStatus())
-          .forEach(statusEnum -> borrowingLibraryService.updateTransactionStatus(dcbTransaction, TransactionStatus.builder().status(statusEnum).build()));
+          .forEach(statusEnum -> borrowingLibraryService.updateTransactionStatus(dcbTransaction,
+            TransactionStatus.builder().status(statusEnum).context(transactionStatus.getContext()).build()));
       }
 
       return TransactionStatusResponse.builder()

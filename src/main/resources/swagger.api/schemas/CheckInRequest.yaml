@@ -13,3 +13,6 @@ CheckInRequest:
       description: When the item was checked in
       type: string
       format: date-type
+    claimReturnedResolution:
+      description: Claim returned resolution, passed when checking in a claimed returned item
+      type: string

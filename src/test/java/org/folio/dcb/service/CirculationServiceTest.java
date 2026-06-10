@@ -5,6 +5,7 @@ import static org.folio.dcb.utils.EntityUtils.createTransactionEntity;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -44,6 +45,20 @@ class CirculationServiceTest {
   void checkInByBarcodeWithServicePointTest(){
     circulationService.checkInByBarcode(createTransactionEntity(), String.valueOf(UUID.randomUUID()));
     verify(circulationClient).checkInByBarcode(any());
+  }
+
+  @Test
+  void checkInByBarcodeWithServicePointAndClaimReturnedResolutionTest() {
+    circulationService.checkInByBarcode(createTransactionEntity(), String.valueOf(UUID.randomUUID()), "Found by library");
+    verify(circulationClient).checkInByBarcode(argThat(req ->
+      "Found by library".equals(req.getClaimReturnedResolution())));
+  }
+
+  @Test
+  void checkInByBarcodeWithServicePointAndNullClaimReturnedResolutionTest() {
+    circulationService.checkInByBarcode(createTransactionEntity(), String.valueOf(UUID.randomUUID()), null);
+    verify(circulationClient).checkInByBarcode(argThat(req ->
+      req.getClaimReturnedResolution() == null));
   }
 
   @Test

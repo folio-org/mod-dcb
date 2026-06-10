@@ -35,6 +35,13 @@ public class CirculationServiceImpl implements CirculationService {
   }
 
   @Override
+  public void checkInByBarcode(TransactionEntity dcbTransaction, String servicePointId, String claimReturnedResolution) {
+    log.debug("checkInByBarcode:: checking in item for transaction {} with claimReturnedResolution '{}'.",
+      dcbTransaction.getId(), claimReturnedResolution);
+    circulationClient.checkInByBarcode(createCheckInRequest(dcbTransaction.getItemBarcode(), servicePointId, claimReturnedResolution));
+  }
+
+  @Override
   public void checkOutByBarcode(TransactionEntity dcbTransaction) {
     log.debug("checkOutByBarcode:: checking out item for transaction {}.", dcbTransaction.getId());
     circulationClient.checkOutByBarcode(createCheckOutRequest(dcbTransaction.getItemBarcode(), dcbTransaction.getPatronBarcode(), dcbTransaction.getServicePointId()));
@@ -58,10 +65,15 @@ public class CirculationServiceImpl implements CirculationService {
   }
 
   private CheckInRequest createCheckInRequest(String itemBarcode, String servicePointId){
+    return createCheckInRequest(itemBarcode, servicePointId, null);
+  }
+
+  private CheckInRequest createCheckInRequest(String itemBarcode, String servicePointId, String claimReturnedResolution){
     return CheckInRequest.builder()
       .itemBarcode(itemBarcode)
       .servicePointId(servicePointId)
       .checkInDate(OffsetDateTime.now().toString())
+      .claimReturnedResolution(claimReturnedResolution)
       .build();
   }
 

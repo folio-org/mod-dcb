@@ -44,7 +44,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Map;
+
+import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatus.StatusEnum;
+import org.folio.dcb.domain.dto.TransactionStatusContext;
 import org.folio.dcb.it.base.BaseTenantIntegrationTest;
 import org.folio.dcb.support.types.IntegrationTest;
 import org.folio.dcb.support.wiremock.WireMockStub;
@@ -220,6 +223,42 @@ class BorrowerTransactionIT extends BaseTenantIntegrationTest {
     testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, ITEM_CHECKED_OUT, borrowerDcbTransaction());
     putDcbTransactionStatus(DCB_TRANSACTION_ID, transactionStatus(ITEM_CHECKED_IN))
       .andExpect(jsonPath("$.status").value("ITEM_CHECKED_IN"));
+  }
+
+  @Test
+  @WireMockStub("/stubs/mod-circulation/check-in-by-barcode/201-post(with claim returned found by library).json")
+  void updateTransactionStatus_positive_fromItemCheckedOutToItemCheckedInWithFoundByLibraryContext() throws Exception {
+    testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, ITEM_CHECKED_OUT, borrowerDcbTransaction());
+    var context = TransactionStatusContext.builder()
+      .claimReturnedResulution(TransactionStatusContext.ClaimReturnedResulutionEnum.FOUND_BY_LIBRARY)
+      .build();
+    var transactionStatus = TransactionStatus.builder()
+      .status(ITEM_CHECKED_IN)
+      .context(context)
+      .build();
+    putDcbTransactionStatus(DCB_TRANSACTION_ID, transactionStatus)
+      .andExpect(jsonPath("$.status").value("ITEM_CHECKED_IN"));
+
+    wiremock.verifyThat(1, postRequestedFor(urlPathEqualTo("/circulation/check-in-by-barcode"))
+      .withRequestBody(matchingJsonPath("$.claimReturnedResolution", equalTo("Found by library"))));
+  }
+
+  @Test
+  @WireMockStub("/stubs/mod-circulation/check-in-by-barcode/201-post(with claim returned returned by patron).json")
+  void updateTransactionStatus_positive_fromItemCheckedOutToItemCheckedInWithReturnedByPatronContext() throws Exception {
+    testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, ITEM_CHECKED_OUT, borrowerDcbTransaction());
+    var context = TransactionStatusContext.builder()
+      .claimReturnedResulution(TransactionStatusContext.ClaimReturnedResulutionEnum.RETURNED_BY_PATRON)
+      .build();
+    var transactionStatus = TransactionStatus.builder()
+      .status(ITEM_CHECKED_IN)
+      .context(context)
+      .build();
+    putDcbTransactionStatus(DCB_TRANSACTION_ID, transactionStatus)
+      .andExpect(jsonPath("$.status").value("ITEM_CHECKED_IN"));
+
+    wiremock.verifyThat(1, postRequestedFor(urlPathEqualTo("/circulation/check-in-by-barcode"))
+      .withRequestBody(matchingJsonPath("$.claimReturnedResolution", equalTo("Returned by patron"))));
   }
 
   @Test

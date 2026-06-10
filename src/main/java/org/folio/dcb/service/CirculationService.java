@@ -12,6 +12,14 @@ public interface CirculationService {
   void checkInByBarcode(TransactionEntity dcbTransaction, String servicePointId);
 
   /**
+   * Check in item by barcode with an optional claim returned resolution
+   * @param dcbTransaction dcbTransactionEntity
+   * @param servicePointId service point id
+   * @param claimReturnedResolution optional claim returned resolution value
+   */
+  void checkInByBarcode(TransactionEntity dcbTransaction, String servicePointId, String claimReturnedResolution);
+
+  /**
    * Check out item by barcode
    * @param dcbTransaction dcbTransactionEntity
    */

@@ -5,6 +5,7 @@ import lombok.extern.log4j.Log4j2;
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.ServicePointRequest;
 import org.folio.dcb.domain.dto.TransactionStatus;
+import org.folio.dcb.domain.dto.TransactionStatusContext;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.repository.TransactionRepository;
@@ -12,6 +13,8 @@ import org.folio.dcb.service.CirculationService;
 import org.folio.dcb.service.LibraryService;
 import org.folio.dcb.service.ServicePointService;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.AWAITING_PICKUP;
@@ -45,10 +48,19 @@ public class BorrowingLibraryServiceImpl implements LibraryService {
     var currentStatus = dcbTransaction.getStatus();
     var requestedStatus = transactionStatus.getStatus();
 
-    if ((CREATED == currentStatus && OPEN == requestedStatus) || (ITEM_CHECKED_OUT == currentStatus && ITEM_CHECKED_IN == requestedStatus)) {
+    if (CREATED == currentStatus && OPEN == requestedStatus) {
       log.info("updateTransactionStatus:: Checking in item for transaction {}.", dcbTransaction.getId());
       //Random UUID for servicePointId.
       circulationService.checkInByBarcode(dcbTransaction, UUID.randomUUID().toString());
+      updateTransactionEntity(dcbTransaction, requestedStatus);
+    } else if (ITEM_CHECKED_OUT == currentStatus && ITEM_CHECKED_IN == requestedStatus) {
+      log.info("updateTransactionStatus:: Checking in item for transaction {}.", dcbTransaction.getId());
+      String claimReturnedResolution = extractClaimReturnedResolution(transactionStatus);
+      if (claimReturnedResolution != null) {
+        circulationService.checkInByBarcode(dcbTransaction, UUID.randomUUID().toString(), claimReturnedResolution);
+      } else {
+        circulationService.checkInByBarcode(dcbTransaction, UUID.randomUUID().toString());
+      }
       updateTransactionEntity(dcbTransaction, requestedStatus);
     } else if(OPEN == currentStatus && AWAITING_PICKUP == requestedStatus) {
       circulationService.checkInByBarcode(dcbTransaction);
@@ -75,6 +87,14 @@ public class BorrowingLibraryServiceImpl implements LibraryService {
     log.info("updateTransactionEntity:: updating transaction entity from {} to {}", transactionEntity.getStatus(), transactionStatusEnum);
     transactionEntity.setStatus(transactionStatusEnum);
     transactionRepository.save(transactionEntity);
+  }
+
+  private String extractClaimReturnedResolution(TransactionStatus transactionStatus) {
+    return Optional.ofNullable(transactionStatus)
+      .map(TransactionStatus::getContext)
+      .map(TransactionStatusContext::getClaimReturnedResulution)
+      .map(TransactionStatusContext.ClaimReturnedResulutionEnum::getValue)
+      .orElse(null);
   }
 
 }
