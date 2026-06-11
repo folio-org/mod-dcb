@@ -1,5 +1,6 @@
 package org.folio.dcb.service;
 
+import org.folio.dcb.domain.dto.ClaimReturnedResolution;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusContext;
 import org.folio.dcb.repository.TransactionRepository;
@@ -125,7 +126,7 @@ class BorrowingLibraryServiceTest {
     transactionEntity.setStatus(ITEM_CHECKED_OUT);
     doNothing().when(circulationService).checkInByBarcode(any(), any(), any());
     var context = TransactionStatusContext.builder()
-      .claimReturnedResulution(TransactionStatusContext.ClaimReturnedResulutionEnum.FOUND_BY_LIBRARY)
+      .claimReturnedResolution(ClaimReturnedResolution.FOUND_BY_LIBRARY)
       .build();
     TransactionStatus transactionStatus = TransactionStatus.builder()
       .status(ITEM_CHECKED_IN)
@@ -133,7 +134,7 @@ class BorrowingLibraryServiceTest {
       .build();
     borrowingLibraryService.updateTransactionStatus(transactionEntity, transactionStatus);
 
-    verify(circulationService).checkInByBarcode(any(), any(), eq("Found by library"));
+    verify(circulationService).checkInByBarcode(any(), any(), eq(ClaimReturnedResolution.FOUND_BY_LIBRARY));
     Assertions.assertEquals(ITEM_CHECKED_IN, transactionEntity.getStatus());
   }
 
@@ -143,7 +144,7 @@ class BorrowingLibraryServiceTest {
     transactionEntity.setStatus(ITEM_CHECKED_OUT);
     doNothing().when(circulationService).checkInByBarcode(any(), any(), any());
     var context = TransactionStatusContext.builder()
-      .claimReturnedResulution(TransactionStatusContext.ClaimReturnedResulutionEnum.RETURNED_BY_PATRON)
+      .claimReturnedResolution(ClaimReturnedResolution.RETURNED_BY_PATRON)
       .build();
     TransactionStatus transactionStatus = TransactionStatus.builder()
       .status(ITEM_CHECKED_IN)
@@ -151,7 +152,7 @@ class BorrowingLibraryServiceTest {
       .build();
     borrowingLibraryService.updateTransactionStatus(transactionEntity, transactionStatus);
 
-    verify(circulationService).checkInByBarcode(any(), any(), eq("Returned by patron"));
+    verify(circulationService).checkInByBarcode(any(), any(), eq(ClaimReturnedResolution.RETURNED_BY_PATRON));
     Assertions.assertEquals(ITEM_CHECKED_IN, transactionEntity.getStatus());
   }
 

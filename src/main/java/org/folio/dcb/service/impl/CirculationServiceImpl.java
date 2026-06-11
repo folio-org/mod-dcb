@@ -6,6 +6,7 @@ import org.folio.dcb.integration.circulation.CirculationClient;
 import org.folio.dcb.domain.dto.CheckInRequest;
 import org.folio.dcb.domain.dto.CheckOutRequest;
 import org.folio.dcb.domain.dto.CirculationRequest;
+import org.folio.dcb.domain.dto.ClaimReturnedResolution;
 import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.exception.CirculationRequestException;
 import org.folio.dcb.service.CirculationService;
@@ -35,7 +36,7 @@ public class CirculationServiceImpl implements CirculationService {
   }
 
   @Override
-  public void checkInByBarcode(TransactionEntity dcbTransaction, String servicePointId, String claimReturnedResolution) {
+  public void checkInByBarcode(TransactionEntity dcbTransaction, String servicePointId, ClaimReturnedResolution claimReturnedResolution) {
     log.debug("checkInByBarcode:: checking in item for transaction {} with claimReturnedResolution '{}'.",
       dcbTransaction.getId(), claimReturnedResolution);
     circulationClient.checkInByBarcode(createCheckInRequest(dcbTransaction.getItemBarcode(), servicePointId, claimReturnedResolution));
@@ -68,7 +69,7 @@ public class CirculationServiceImpl implements CirculationService {
     return createCheckInRequest(itemBarcode, servicePointId, null);
   }
 
-  private CheckInRequest createCheckInRequest(String itemBarcode, String servicePointId, String claimReturnedResolution){
+  private CheckInRequest createCheckInRequest(String itemBarcode, String servicePointId, ClaimReturnedResolution claimReturnedResolution){
     return CheckInRequest.builder()
       .itemBarcode(itemBarcode)
       .servicePointId(servicePointId)

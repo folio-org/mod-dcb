@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.UUID;
 
+import org.folio.dcb.domain.dto.ClaimReturnedResolution;
 import org.folio.dcb.integration.circulation.CirculationClient;
 import org.folio.dcb.domain.dto.CirculationRequest;
 import org.folio.dcb.domain.entity.TransactionEntity;
@@ -49,9 +50,9 @@ class CirculationServiceTest {
 
   @Test
   void checkInByBarcodeWithServicePointAndClaimReturnedResolutionTest() {
-    circulationService.checkInByBarcode(createTransactionEntity(), String.valueOf(UUID.randomUUID()), "Found by library");
+    circulationService.checkInByBarcode(createTransactionEntity(), String.valueOf(UUID.randomUUID()), ClaimReturnedResolution.FOUND_BY_LIBRARY);
     verify(circulationClient).checkInByBarcode(argThat(req ->
-      "Found by library".equals(req.getClaimReturnedResolution())));
+      ClaimReturnedResolution.FOUND_BY_LIBRARY.equals(req.getClaimReturnedResolution())));
   }
 
   @Test

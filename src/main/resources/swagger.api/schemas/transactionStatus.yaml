@@ -22,9 +22,5 @@ TransactionStatusContext:
   type: object
   description: Optional context for the transaction status update
   properties:
-    claimReturnedResulution:
-      type: string
-      description: Claim returned resolution value
-      enum:
-        - Found by library
-        - Returned by patron
+    claimReturnedResolution:
+      $ref: 'ClaimReturnedResolution.yaml#/ClaimReturnedResolution'

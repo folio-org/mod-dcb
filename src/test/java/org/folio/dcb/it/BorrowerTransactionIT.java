@@ -45,6 +45,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Map;
 
+import org.folio.dcb.domain.dto.ClaimReturnedResolution;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatus.StatusEnum;
 import org.folio.dcb.domain.dto.TransactionStatusContext;
@@ -230,7 +231,7 @@ class BorrowerTransactionIT extends BaseTenantIntegrationTest {
   void updateTransactionStatus_positive_fromItemCheckedOutToItemCheckedInWithFoundByLibraryContext() throws Exception {
     testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, ITEM_CHECKED_OUT, borrowerDcbTransaction());
     var context = TransactionStatusContext.builder()
-      .claimReturnedResulution(TransactionStatusContext.ClaimReturnedResulutionEnum.FOUND_BY_LIBRARY)
+      .claimReturnedResolution(ClaimReturnedResolution.FOUND_BY_LIBRARY)
       .build();
     var transactionStatus = TransactionStatus.builder()
       .status(ITEM_CHECKED_IN)
@@ -248,7 +249,7 @@ class BorrowerTransactionIT extends BaseTenantIntegrationTest {
   void updateTransactionStatus_positive_fromItemCheckedOutToItemCheckedInWithReturnedByPatronContext() throws Exception {
     testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, ITEM_CHECKED_OUT, borrowerDcbTransaction());
     var context = TransactionStatusContext.builder()
-      .claimReturnedResulution(TransactionStatusContext.ClaimReturnedResulutionEnum.RETURNED_BY_PATRON)
+      .claimReturnedResolution(ClaimReturnedResolution.RETURNED_BY_PATRON)
       .build();
     var transactionStatus = TransactionStatus.builder()
       .status(ITEM_CHECKED_IN)
@@ -259,6 +260,17 @@ class BorrowerTransactionIT extends BaseTenantIntegrationTest {
 
     wiremock.verifyThat(1, postRequestedFor(urlPathEqualTo("/circulation/check-in-by-barcode"))
       .withRequestBody(matchingJsonPath("$.claimReturnedResolution", equalTo("Returned by patron"))));
+  }
+
+  @Test
+  void updateTransactionStatus_negative_invalidClaimReturnedResolution() throws Exception {
+    testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, ITEM_CHECKED_OUT, borrowerDcbTransaction());
+    mockMvc.perform(put("/transactions/{id}/status", DCB_TRANSACTION_ID)
+        .content("{\"status\":\"ITEM_CHECKED_IN\",\"context\":{\"claimReturnedResolution\":\"INVALID_VALUE\"}}")
+        .headers(defaultHeaders())
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isBadRequest());
   }
 
   @Test

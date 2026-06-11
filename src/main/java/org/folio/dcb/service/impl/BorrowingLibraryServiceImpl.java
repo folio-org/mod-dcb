@@ -2,6 +2,7 @@ package org.folio.dcb.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.folio.dcb.domain.dto.ClaimReturnedResolution;
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.ServicePointRequest;
 import org.folio.dcb.domain.dto.TransactionStatus;
@@ -87,11 +88,10 @@ public class BorrowingLibraryServiceImpl implements LibraryService {
     transactionRepository.save(transactionEntity);
   }
 
-  private Optional<String> extractClaimReturnedResolution(TransactionStatus transactionStatus) {
+  private Optional<ClaimReturnedResolution> extractClaimReturnedResolution(TransactionStatus transactionStatus) {
     return Optional.ofNullable(transactionStatus)
       .map(TransactionStatus::getContext)
-      .map(TransactionStatusContext::getClaimReturnedResulution)
-      .map(TransactionStatusContext.ClaimReturnedResulutionEnum::getValue);
+      .map(TransactionStatusContext::getClaimReturnedResolution);
   }
 
 }
