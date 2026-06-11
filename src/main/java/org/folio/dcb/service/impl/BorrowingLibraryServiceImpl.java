@@ -55,10 +55,9 @@ public class BorrowingLibraryServiceImpl implements LibraryService {
       updateTransactionEntity(dcbTransaction, requestedStatus);
     } else if (ITEM_CHECKED_OUT == currentStatus && ITEM_CHECKED_IN == requestedStatus) {
       log.info("updateTransactionStatus:: Checking in item for transaction {}.", dcbTransaction.getId());
-      extractClaimReturnedResolution(transactionStatus)
-        .ifPresentOrElse(
-          resolution -> circulationService.checkInByBarcode(dcbTransaction, randomServicePointId, resolution),
-          () -> circulationService.checkInByBarcode(dcbTransaction, randomServicePointId));
+      extractClaimReturnedResolution(transactionStatus).ifPresentOrElse(
+        resolution -> circulationService.checkInByBarcode(dcbTransaction, randomServicePointId, resolution),
+        () -> circulationService.checkInByBarcode(dcbTransaction, randomServicePointId));
 
       updateTransactionEntity(dcbTransaction, requestedStatus);
     } else if(OPEN == currentStatus && AWAITING_PICKUP == requestedStatus) {
