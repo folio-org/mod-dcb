@@ -121,7 +121,7 @@ class BorrowingLibraryServiceTest {
   }
 
   @Test
-  void testTransactionStatusUpdateFromItemCheckedOutToItemCheckedInWithFoundByLibraryContext() {
+  void testTransactionStatusUpdateFromItemCheckedOutToItemCheckedInWithFoundByLibrary() {
     var transactionEntity = createTransactionEntity();
     transactionEntity.setStatus(ITEM_CHECKED_OUT);
     doNothing().when(circulationService).checkInByBarcode(any(), any(), any());
@@ -139,7 +139,7 @@ class BorrowingLibraryServiceTest {
   }
 
   @Test
-  void testTransactionStatusUpdateFromItemCheckedOutToItemCheckedInWithReturnedByPatronContext() {
+  void testTransactionStatusUpdateFromItemCheckedOutToItemCheckedInWithReturnedByPatron() {
     var transactionEntity = createTransactionEntity();
     transactionEntity.setStatus(ITEM_CHECKED_OUT);
     doNothing().when(circulationService).checkInByBarcode(any(), any(), any());
