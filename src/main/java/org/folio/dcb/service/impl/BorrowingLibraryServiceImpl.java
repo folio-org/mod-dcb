@@ -2,7 +2,7 @@ package org.folio.dcb.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.folio.dcb.domain.dto.ClaimReturnedResolution;
+
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.ServicePointRequest;
 import org.folio.dcb.domain.dto.TransactionStatus;
@@ -56,9 +56,11 @@ public class BorrowingLibraryServiceImpl implements LibraryService {
       updateTransactionEntity(dcbTransaction, requestedStatus);
     } else if (ITEM_CHECKED_OUT == currentStatus && ITEM_CHECKED_IN == requestedStatus) {
       log.info("updateTransactionStatus:: Checking in item for transaction {}.", dcbTransaction.getId());
-      extractClaimReturnedResolution(transactionStatus).ifPresentOrElse(
-        resolution -> circulationService.checkInByBarcode(dcbTransaction, randomServicePointId, resolution),
-        () -> circulationService.checkInByBarcode(dcbTransaction, randomServicePointId));
+      Optional.ofNullable(transactionStatus.getContext())
+        .map(TransactionStatusContext::getClaimReturnedResolution)
+        .ifPresentOrElse(
+          resolution -> circulationService.checkInByBarcode(dcbTransaction, randomServicePointId, resolution),
+          () -> circulationService.checkInByBarcode(dcbTransaction, randomServicePointId));
 
       updateTransactionEntity(dcbTransaction, requestedStatus);
     } else if(OPEN == currentStatus && AWAITING_PICKUP == requestedStatus) {
@@ -86,12 +88,6 @@ public class BorrowingLibraryServiceImpl implements LibraryService {
     log.info("updateTransactionEntity:: updating transaction entity from {} to {}", transactionEntity.getStatus(), transactionStatusEnum);
     transactionEntity.setStatus(transactionStatusEnum);
     transactionRepository.save(transactionEntity);
-  }
-
-  private Optional<ClaimReturnedResolution> extractClaimReturnedResolution(TransactionStatus transactionStatus) {
-    return Optional.ofNullable(transactionStatus)
-      .map(TransactionStatus::getContext)
-      .map(TransactionStatusContext::getClaimReturnedResolution);
   }
 
 }

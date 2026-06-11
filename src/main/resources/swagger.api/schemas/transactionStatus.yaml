@@ -16,11 +16,8 @@ TransactionStatus:
     message:
       type: string
     context:
-      $ref: '#/TransactionStatusContext'
-
-TransactionStatusContext:
-  type: object
-  description: Optional context for the transaction status update
-  properties:
-    claimReturnedResolution:
-      $ref: 'ClaimReturnedResolution.yaml#/ClaimReturnedResolution'
+      type: object
+      description: Optional context for the transaction status update
+      properties:
+        claimReturnedResolution:
+          $ref: 'ClaimReturnedResolution.yaml#/ClaimReturnedResolution'
