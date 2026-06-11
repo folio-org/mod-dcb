@@ -1,22 +1,4 @@
-
 package org.folio.dcb.service;
-
-import org.folio.dcb.domain.ResultList;
-import org.folio.dcb.domain.dto.TransactionStatus;
-import org.folio.dcb.domain.dto.TransactionStatusResponse;
-import org.folio.dcb.domain.entity.TransactionEntity;
-import org.folio.dcb.domain.mapper.TransactionMapper;
-import org.folio.dcb.exception.ResourceAlreadyExistException;
-import org.folio.dcb.repository.TransactionRepository;
-import org.folio.dcb.service.impl.BaseLibraryService;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.List;
 
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWER;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWING_PICKUP;
@@ -45,10 +27,25 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.List;
+import org.folio.dcb.domain.ResultList;
+import org.folio.dcb.domain.dto.TransactionStatus;
+import org.folio.dcb.domain.dto.TransactionStatusResponse;
+import org.folio.dcb.domain.entity.TransactionEntity;
+import org.folio.dcb.domain.mapper.TransactionMapper;
+import org.folio.dcb.exception.ResourceAlreadyExistException;
+import org.folio.dcb.repository.TransactionRepository;
+import org.folio.dcb.service.impl.BaseLibraryService;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class BaseLibraryServiceTest {
@@ -66,7 +63,8 @@ class BaseLibraryServiceTest {
   void updateTransactionWithWrongStatusTest() {
     TransactionEntity transactionEntity = createTransactionEntity();
     TransactionStatus transactionStatus = createTransactionStatus(TransactionStatus.StatusEnum.AWAITING_PICKUP);
-    assertThrows(IllegalArgumentException.class, () -> baseLibraryService.updateTransactionStatus(transactionEntity, transactionStatus));
+    assertThrows(IllegalArgumentException.class, () ->
+      baseLibraryService.updateTransactionStatus(transactionEntity, transactionStatus));
   }
 
   @Test
@@ -74,8 +72,11 @@ class BaseLibraryServiceTest {
     var transactionEntity = createTransactionEntity();
     transactionEntity.setStatus(TransactionStatus.StatusEnum.CREATED);
     transactionEntity.setRole(BORROWING_PICKUP);
-    TransactionStatus transactionStatus = TransactionStatus.builder().status(TransactionStatus.StatusEnum.AWAITING_PICKUP).build();
-    assertThrows(IllegalArgumentException.class, () -> baseLibraryService.updateTransactionStatus(transactionEntity, transactionStatus));
+    var transactionStatus = TransactionStatus.builder()
+      .status(TransactionStatus.StatusEnum.AWAITING_PICKUP)
+      .build();
+    assertThrows(IllegalArgumentException.class, () ->
+      baseLibraryService.updateTransactionStatus(transactionEntity, transactionStatus));
   }
 
   @Test
@@ -86,7 +87,7 @@ class BaseLibraryServiceTest {
 
     baseLibraryService.updateTransactionStatus(transactionEntity, TransactionStatus.builder().status(CLOSED).build());
 
-    Assertions.assertEquals(CLOSED, transactionEntity.getStatus());
+    assertEquals(CLOSED, transactionEntity.getStatus());
   }
 
   @Test
@@ -96,18 +97,18 @@ class BaseLibraryServiceTest {
     transactionEntity.setRole(BORROWING_PICKUP);
     doNothing().when(circulationService).checkInByBarcode(any(), any());
 
-    baseLibraryService.updateTransactionStatus(transactionEntity, TransactionStatus.builder().status(TransactionStatus.StatusEnum.OPEN).build());
+    baseLibraryService.updateTransactionStatus(
+      transactionEntity, TransactionStatus.builder().status(TransactionStatus.StatusEnum.OPEN).build());
     verify(transactionRepository, times(1)).save(transactionEntity);
     verify(circulationService, timeout(1)).checkInByBarcode(any(), any());
   }
 
   @Test
   void createBorrowingTransactionTest() {
-    var item = createDcbItem();
-    var patron = createDcbPatronWithExactPatronId(EXISTED_PATRON_ID);
     var user = createUser();
     user.setType("shadow");
     var circulationItem = createCirculationItem();
+    var item = createDcbItem();
 
     when(userService.fetchUser(any()))
       .thenReturn(user);
@@ -115,36 +116,41 @@ class BaseLibraryServiceTest {
     when(transactionMapper.mapToEntity(any(), any())).thenReturn(createTransactionEntity());
     when(itemService.fetchItemByBarcode(item.getBarcode())).thenReturn(new ResultList<>());
     when(circulationItemService.checkIfItemExistsAndCreate(any(), any())).thenReturn(circulationItem);
-    var response = baseLibraryService.createBorrowingLibraryTransaction(DCB_TRANSACTION_ID, createDcbTransactionByRole(BORROWER), PICKUP_SERVICE_POINT_ID);
-    verify(userService).fetchUser(patron);
+
+    var response = baseLibraryService.createBorrowingLibraryTransaction(
+      DCB_TRANSACTION_ID, createDcbTransactionByRole(BORROWER), PICKUP_SERVICE_POINT_ID);
+
+    assertEquals(TransactionStatusResponse.StatusEnum.CREATED, response.getStatus());
+    verify(userService).fetchUser(createDcbPatronWithExactPatronId(EXISTED_PATRON_ID));
     // Circulation item id will be set as dcb item id in the code, hence setting it for assertion
     item.setId(circulationItem.getId());
     verify(requestService).createHoldItemRequest(user, item, PICKUP_SERVICE_POINT_ID);
     verify(transactionRepository).save(any());
-    Assertions.assertEquals(TransactionStatusResponse.StatusEnum.CREATED, response.getStatus());
   }
 
   @Test
   void createBorrowingPickupWithSelfBorrowingTransactionTest() {
-    var item = createDcbItem();
-    var patron = createDcbPatronWithExactPatronId(EXISTED_PATRON_ID);
     var user = createUser();
     user.setType("staff");
     var dcbTransaction = createDcbTransactionByRoleAndSelfBorrowing(BORROWING_PICKUP, Boolean.TRUE);
-    var servicePoint = createServicePointRequest();
-
 
     when(userService.fetchUser(any())).thenReturn(user);
     when(transactionMapper.mapToEntity(any(), any())).thenReturn(createTransactionEntity());
-    when(requestService.createRequestBasedOnItemStatus(any(), any(), anyString())).thenReturn(createCirculationRequest());
+    when(requestService.createRequestBasedOnItemStatus(any(), any(), anyString()))
+      .thenReturn(createCirculationRequest());
 
-    var response = baseLibraryService.createBorrowingLibraryTransaction(DCB_TRANSACTION_ID, dcbTransaction, PICKUP_SERVICE_POINT_ID);
+    var response =
+      baseLibraryService.createBorrowingLibraryTransaction(DCB_TRANSACTION_ID, dcbTransaction, PICKUP_SERVICE_POINT_ID);
+
+    var item = createDcbItem();
+    var patron = createDcbPatronWithExactPatronId(EXISTED_PATRON_ID);
+    assertEquals(TransactionStatusResponse.StatusEnum.CREATED, response.getStatus());
+    verify(requestService).createRequestBasedOnItemStatus(user, item, dcbTransaction.getPickup().getServicePointId());
     verify(userService).fetchUser(patron);
     verify(circulationItemService, never()).checkIfItemExistsAndCreate(any(), any());
-    verify(requestService).createRequestBasedOnItemStatus(user, item, dcbTransaction.getPickup().getServicePointId());
     verify(transactionRepository).save(any());
 
-    Assertions.assertEquals(TransactionStatusResponse.StatusEnum.CREATED, response.getStatus());
+    var servicePoint = createServicePointRequest();
     assertEquals(servicePoint.getId(), dcbTransaction.getPickup().getServicePointId());
   }
 
@@ -154,31 +160,36 @@ class BaseLibraryServiceTest {
     var user = createUser();
     user.setType("shadow");
 
-    when(userService.fetchUser(any()))
-      .thenReturn(user);
+    when(userService.fetchUser(any())).thenReturn(user);
     when(itemService.fetchItemByBarcode(item.getBarcode())).thenReturn(new ResultList<>());
     when(circulationItemService.checkIfItemExistsAndCreate(any(), any())).thenReturn(createCirculationItem());
-    when(transactionRepository.findTransactionsByItemIdAndStatusNotInClosed(any())).thenReturn(List.of(createTransactionEntity()));
-    assertThrows(ResourceAlreadyExistException.class, () -> baseLibraryService.createBorrowingLibraryTransaction(DCB_TRANSACTION_ID, createDcbTransactionByRole(BORROWER), PICKUP_SERVICE_POINT_ID));
+    when(transactionRepository.findTransactionsByItemIdAndStatusNotInClosed(any()))
+      .thenReturn(List.of(createTransactionEntity()));
+    assertThrows(ResourceAlreadyExistException.class, () ->
+      baseLibraryService.createBorrowingLibraryTransaction(
+        DCB_TRANSACTION_ID, createDcbTransactionByRole(BORROWER), PICKUP_SERVICE_POINT_ID));
   }
 
   @Test
   void createBorrowingTransaction_positive_expiredTransactionExistsForSameItem() {
-    var item = createDcbItem();
     var user = createUser();
     user.setType("shadow");
 
     when(userService.fetchUser(any())).thenReturn(user);
-    when(requestService.createHoldItemRequest(any(), any(), anyString())).thenReturn(createCirculationRequest());
+    when(requestService.createHoldItemRequest(any(), any(), anyString()))
+        .thenReturn(createCirculationRequest());
     when(transactionMapper.mapToEntity(any(), any())).thenReturn(createTransactionEntity());
-    when(itemService.fetchItemByBarcode(item.getBarcode())).thenReturn(new ResultList<>());
-    when(circulationItemService.checkIfItemExistsAndCreate(any(), any())).thenReturn(createCirculationItem());
-    when(transactionRepository.findTransactionsByItemIdAndStatusNotInClosed(any())).thenReturn(List.of());
+    when(itemService.fetchItemByBarcode(createDcbItem().getBarcode())).thenReturn(new ResultList<>());
+    when(circulationItemService.checkIfItemExistsAndCreate(any(), any()))
+        .thenReturn(createCirculationItem());
+    when(transactionRepository.findTransactionsByItemIdAndStatusNotInClosed(any()))
+        .thenReturn(List.of());
 
-    var response = baseLibraryService.createBorrowingLibraryTransaction(DCB_TRANSACTION_ID, createDcbTransactionByRole(BORROWER), PICKUP_SERVICE_POINT_ID);
-
+    var dcbTransaction = createDcbTransactionByRole(BORROWER);
+    var response = baseLibraryService.createBorrowingLibraryTransaction(
+      DCB_TRANSACTION_ID, dcbTransaction, PICKUP_SERVICE_POINT_ID);
     verify(transactionRepository).save(any());
-    Assertions.assertEquals(TransactionStatusResponse.StatusEnum.CREATED, response.getStatus());
+    assertEquals(TransactionStatusResponse.StatusEnum.CREATED, response.getStatus());
   }
 
   @Test
@@ -186,9 +197,11 @@ class BaseLibraryServiceTest {
     var item = createDcbItem();
     var inventoryItem = createInventoryItem();
 
-    when(itemService.fetchItemByBarcode(item.getBarcode())).thenReturn(ResultList.of(1, List.of(inventoryItem)));
+    when(itemService.fetchItemByBarcode(item.getBarcode()))
+        .thenReturn(ResultList.of(1, List.of(inventoryItem)));
 
-    assertThrows(ResourceAlreadyExistException.class, () -> baseLibraryService.checkItemExistsInInventoryAndThrow("DCB_ITEM"));
+    assertThrows(ResourceAlreadyExistException.class, () ->
+      baseLibraryService.checkItemExistsInInventoryAndThrow("DCB_ITEM"));
   }
 
   @Test
@@ -205,14 +218,14 @@ class BaseLibraryServiceTest {
   void createBorrowingTransactionTestThrowException() {
     var user = createUser();
     var transaction = createDcbTransactionByRole(BORROWER);
-    when(userService.fetchUser(any()))
-      .thenReturn(user);
+    when(userService.fetchUser(any())).thenReturn(user);
 
-    assertThrows(IllegalArgumentException.class, () -> baseLibraryService.createBorrowingLibraryTransaction(DCB_TRANSACTION_ID, transaction, PICKUP_SERVICE_POINT_ID));
+    assertThrows(IllegalArgumentException.class, () ->
+      baseLibraryService.createBorrowingLibraryTransaction(DCB_TRANSACTION_ID, transaction, PICKUP_SERVICE_POINT_ID));
   }
 
   @Test
-  void testTransactionCancelTest(){
+  void testTransactionCancelTest() {
     var transactionEntity = createTransactionEntity();
     transactionEntity.setStatus(OPEN);
     TransactionStatus transactionStatus = TransactionStatus.builder().status(CANCELLED).build();
@@ -224,8 +237,8 @@ class BaseLibraryServiceTest {
   void saveTransactionTest() {
     when(transactionMapper.mapToEntity(any(), any())).thenReturn(createTransactionEntity());
 
-    baseLibraryService.saveDcbTransaction(DCB_TRANSACTION_ID, createDcbTransactionByRole(BORROWER), CIRCULATION_REQUEST_ID);
+    baseLibraryService.saveDcbTransaction(
+        DCB_TRANSACTION_ID, createDcbTransactionByRole(BORROWER), CIRCULATION_REQUEST_ID);
     verify(transactionRepository).save(any());
   }
 }
-

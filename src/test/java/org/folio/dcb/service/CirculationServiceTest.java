@@ -10,6 +10,7 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.UUID;
 import org.folio.dcb.domain.dto.ClaimReturnedResolution;
 import org.folio.dcb.integration.circulation.CirculationClient;
 import org.folio.dcb.domain.dto.CirculationRequest;
@@ -26,24 +27,21 @@ import org.springframework.web.client.HttpClientErrorException;
 @ExtendWith(MockitoExtension.class)
 class CirculationServiceTest {
 
-  @InjectMocks
-  private CirculationServiceImpl circulationService;
+  @InjectMocks private CirculationServiceImpl circulationService;
 
-  @Mock
-  private CirculationClient circulationClient;
+  @Mock private CirculationClient circulationClient;
 
-  @Mock
-  private CirculationRequestService circulationRequestService;
+  @Mock private CirculationRequestService circulationRequestService;
 
   @Test
-  void checkInByBarcodeTest(){
+  void checkInByBarcodeTest() {
     circulationService.checkInByBarcode(createTransactionEntity());
     verify(circulationClient).checkInByBarcode(any());
   }
 
   @Test
-  void checkInByBarcodeWithServicePointTest(){
-    circulationService.checkInByBarcode(createTransactionEntity(), String.valueOf(randomUUID()));
+  void checkInByBarcodeWithServicePointTest() {
+    circulationService.checkInByBarcode(createTransactionEntity(), String.valueOf(UUID.randomUUID()));
     verify(circulationClient).checkInByBarcode(any());
   }
 
@@ -74,7 +72,8 @@ class CirculationServiceTest {
 
   @Test
   void cancelRequestTest() {
-    when(circulationRequestService.getCancellationRequestIfOpenOrNull(anyString())).thenReturn(createCirculationRequest());
+    when(circulationRequestService.getCancellationRequestIfOpenOrNull(anyString()))
+      .thenReturn(createCirculationRequest());
     circulationService.cancelRequest(createTransactionEntity(), false);
     verify(circulationClient).updateRequest(anyString(), any());
   }
@@ -82,11 +81,11 @@ class CirculationServiceTest {
   @Test
   void shouldThrowExceptionWhenRequestIsNotUpdated() {
     TransactionEntity transactionEntity = createTransactionEntity();
-    when(circulationRequestService.getCancellationRequestIfOpenOrNull(anyString())).thenReturn(createCirculationRequest());
-    when(circulationClient.updateRequest(anyString(), any())).thenThrow(HttpClientErrorException.BadRequest.class);
-    assertThrows(CirculationRequestException.class, () -> {
-      circulationService.cancelRequest(transactionEntity, false);
-    });
+    when(circulationRequestService.getCancellationRequestIfOpenOrNull(anyString()))
+      .thenReturn(createCirculationRequest());
+    when(circulationClient.updateRequest(anyString(), any()))
+      .thenThrow(HttpClientErrorException.BadRequest.class);
+    assertThrows(CirculationRequestException.class, () ->
+      circulationService.cancelRequest(transactionEntity, false));
   }
-
 }

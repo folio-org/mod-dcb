@@ -2,8 +2,6 @@ package org.folio.dcb.service.impl;
 
 import static java.util.Collections.singletonList;
 import static org.apache.commons.lang3.ObjectUtils.anyNull;
-
-import org.folio.dcb.integration.invstorage.model.LocationUnit;
 import static org.folio.dcb.utils.CqlQuery.exactMatchByNameAndCode;
 import static org.folio.dcb.utils.DcbHubLocationsGroupingUtil.groupByAgency;
 
@@ -17,10 +15,8 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
-import org.folio.dcb.integration.invstorage.LocationUnitClient;
-import org.folio.dcb.integration.invstorage.model.Location;
-import org.folio.dcb.integration.invstorage.LocationsClient;
 import org.folio.dcb.config.DcbFeatureProperties;
+import org.folio.dcb.domain.DcbAgencyKey;
 import org.folio.dcb.domain.dto.DcbLocation;
 import org.folio.dcb.domain.dto.RefreshLocationStatus;
 import org.folio.dcb.domain.dto.RefreshLocationStatusType;
@@ -29,7 +25,10 @@ import org.folio.dcb.domain.dto.RefreshShadowLocationResponse;
 import org.folio.dcb.domain.dto.ServicePointRequest;
 import org.folio.dcb.domain.dto.ShadowLocationRefreshBody;
 import org.folio.dcb.exception.ServiceException;
-import org.folio.dcb.domain.DcbAgencyKey;
+import org.folio.dcb.integration.invstorage.LocationUnitClient;
+import org.folio.dcb.integration.invstorage.LocationsClient;
+import org.folio.dcb.integration.invstorage.model.Location;
+import org.folio.dcb.integration.invstorage.model.LocationUnit;
 import org.folio.dcb.service.ShadowLocationService;
 import org.folio.dcb.service.entities.DcbEntityServiceFacade;
 import org.springframework.stereotype.Service;
@@ -303,14 +302,15 @@ public class ShadowLocationServiceImpl implements ShadowLocationService {
   }
 
   private RefreshLocationStatus createShadowLocation(DcbLocation location,
-    LocationAgenciesIds locationAgenciesIds, ServicePointRequest servicePointRequest) {
+    LocationAgenciesIds agenciesIds, ServicePointRequest servicePointRequest) {
     var locationName = location.getName();
     var locationCode = location.getCode();
     try {
-      if (anyNull(locationAgenciesIds.institutionId(), locationAgenciesIds.libraryId(), locationAgenciesIds.campusId())) {
+      if (anyNull(agenciesIds.institutionId(), agenciesIds.libraryId(), agenciesIds.campusId())) {
         log.error(
-          "createShadowLocation:: Location agencies IDs are incomplete or null for location: {} - {}, cannot create shadow location. locationAgenciesIds are: {}",
-          locationCode, locationName, locationAgenciesIds.toString());
+          "createShadowLocation:: Location agencies IDs are incomplete or null for location: {} -"
+            + " {}, cannot create shadow location. locationAgenciesIds are: {}",
+          locationCode, locationName, agenciesIds.toString());
         return RefreshLocationStatus.builder()
           .code(locationCode)
           .status(RefreshLocationStatusType.SKIPPED)
@@ -319,8 +319,8 @@ public class ShadowLocationServiceImpl implements ShadowLocationService {
       }
 
       var searchQuery = exactMatchByNameAndCode(locationName, locationCode).getQuery();
-      var locationDTOResultList = locationsClient.findLocationByQuery(searchQuery, true, 10, 0);
-      if (!locationDTOResultList.getResult().isEmpty()) {
+      var locationDtoResultList = locationsClient.findLocationByQuery(searchQuery, true, 10, 0);
+      if (!locationDtoResultList.getResult().isEmpty()) {
         log.info("createShadowLocation:: Location already exists: {} - {}, skipping...",
           locationCode, locationName);
         return RefreshLocationStatus.builder()
@@ -329,16 +329,15 @@ public class ShadowLocationServiceImpl implements ShadowLocationService {
           .build();
       }
 
-      log.debug("createShadowLocation:: Creating shadow location: {} - {}",
-        locationCode, locationName);
+      log.debug("createShadowLocation:: Creating shadow location: {} - {}", locationCode, locationName);
 
       var shadowLocation = Location.builder()
         .id(UUID.randomUUID().toString())
         .code(locationCode)
         .name(locationName)
-        .institutionId(locationAgenciesIds.institutionId())
-        .campusId(locationAgenciesIds.campusId())
-        .libraryId(locationAgenciesIds.libraryId())
+        .institutionId(agenciesIds.institutionId())
+        .campusId(agenciesIds.campusId())
+        .libraryId(agenciesIds.libraryId())
         .primaryServicePoint(servicePointRequest.getId())
         .servicePointIds(singletonList(servicePointRequest.getId()))
         .isShadow(true)

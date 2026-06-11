@@ -6,11 +6,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.UUID;
-import org.folio.dcb.integration.circulation.CirculationClient;
-import org.folio.dcb.integration.invstorage.model.InventoryHolding;
 import org.folio.dcb.domain.dto.CirculationRequest;
 import org.folio.dcb.domain.dto.DcbItem;
 import org.folio.dcb.domain.dto.User;
+import org.folio.dcb.integration.circulation.CirculationClient;
+import org.folio.dcb.integration.invstorage.model.InventoryHolding;
 import org.folio.dcb.service.entities.DcbEntityServiceFacade;
 import org.folio.dcb.service.impl.RequestServiceImpl;
 import org.junit.jupiter.api.Test;
@@ -26,13 +26,12 @@ class RequestServiceImplTest {
   @Mock private CirculationClient circulationClient;
   @Mock private DcbEntityServiceFacade dcbEntityServiceFacade;
 
-
   @Test
   void createHoldItemRequest_ShouldCreateRequest_WhenValidInput() {
     // Mock
     var randomUuid = UUID.randomUUID().toString();
     var user = User.builder().username("username").id(randomUuid).barcode("barcode").build();
-    var item = DcbItem.builder().title ("title").id(randomUuid).build();
+    var item = DcbItem.builder().title("title").id(randomUuid).build();
     var pickupServicePointId = "pickupPointId";
 
     var dcbHolding = InventoryHolding.builder().id(randomUuid).build();

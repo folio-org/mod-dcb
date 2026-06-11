@@ -7,7 +7,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
-import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.AWAITING_PICKUP;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CANCELLED;
@@ -17,7 +16,6 @@ import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.EXPIRED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_IN;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_OUT;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
-import static org.folio.dcb.utils.EntityUtils.VIRTUAL_SERVICE_POINT_ID;
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
 import static org.folio.dcb.utils.EntityUtils.EXISTED_PATRON_ID;
 import static org.folio.dcb.utils.EntityUtils.ITEM_ID;
@@ -26,6 +24,7 @@ import static org.folio.dcb.utils.EntityUtils.NOT_EXISTED_PATRON_ID;
 import static org.folio.dcb.utils.EntityUtils.PATRON_TYPE_USER_ID;
 import static org.folio.dcb.utils.EntityUtils.PICKUP_SERVICE_POINT_ID;
 import static org.folio.dcb.utils.EntityUtils.TEST_TENANT;
+import static org.folio.dcb.utils.EntityUtils.VIRTUAL_SERVICE_POINT_ID;
 import static org.folio.dcb.utils.EntityUtils.borrowingPickupDcbTransaction;
 import static org.folio.dcb.utils.EntityUtils.dcbItem;
 import static org.folio.dcb.utils.EntityUtils.dcbPatron;
@@ -46,7 +45,7 @@ import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.it.base.BaseTenantIntegrationTest;
 import org.folio.dcb.support.types.IntegrationTest;
 import org.folio.dcb.support.wiremock.WireMockStub;
-import org.folio.dcb.utils.DCBConstants;
+import org.folio.dcb.utils.DcbConstants;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -284,10 +283,10 @@ class BorrowingPickupTransactionIT extends BaseTenantIntegrationTest {
       .withRequestBody(matchingJsonPath("$.requestType", equalTo("Hold")))
       .withRequestBody(matchingJsonPath("$.itemId", equalTo(ITEM_ID)))
       .withRequestBody(matchingJsonPath("$.status", equalTo("Closed - Cancelled")))
-      .withRequestBody(matchingJsonPath("$.instanceId", equalTo(DCBConstants.INSTANCE_ID)))
+      .withRequestBody(matchingJsonPath("$.instanceId", equalTo(DcbConstants.INSTANCE_ID)))
       .withRequestBody(matchingJsonPath("$.requesterId", equalTo(PATRON_TYPE_USER_ID)))
       .withRequestBody(matchingJsonPath("$.pickupServicePointId", equalTo(VIRTUAL_SERVICE_POINT_ID)))
-      .withRequestBody(matchingJsonPath("$.holdingsRecordId", equalTo(DCBConstants.HOLDING_ID))));
+      .withRequestBody(matchingJsonPath("$.holdingsRecordId", equalTo(DcbConstants.HOLDING_ID))));
   }
 
   @Test
@@ -344,9 +343,9 @@ class BorrowingPickupTransactionIT extends BaseTenantIntegrationTest {
     wiremock.verifyThat(1, postRequestedFor(urlPathEqualTo("/circulation/requests"))
       .withRequestBody(matchingJsonPath("$.requestType", equalTo("Hold")))
       .withRequestBody(matchingJsonPath("$.itemId", equalTo(itemId)))
-      .withRequestBody(matchingJsonPath("$.instanceId", equalTo(DCBConstants.INSTANCE_ID)))
+      .withRequestBody(matchingJsonPath("$.instanceId", equalTo(DcbConstants.INSTANCE_ID)))
       .withRequestBody(matchingJsonPath("$.requesterId", equalTo(requesterId)))
       .withRequestBody(matchingJsonPath("$.pickupServicePointId", equalTo(PICKUP_SERVICE_POINT_ID)))
-      .withRequestBody(matchingJsonPath("$.holdingsRecordId", equalTo(DCBConstants.HOLDING_ID))));
+      .withRequestBody(matchingJsonPath("$.holdingsRecordId", equalTo(DcbConstants.HOLDING_ID))));
   }
 }

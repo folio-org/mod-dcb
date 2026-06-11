@@ -4,11 +4,11 @@ import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.matchingJsonPath;
 import static com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
-import static org.folio.dcb.utils.EntityUtils.VIRTUAL_SERVICE_POINT_ID;
 import static org.folio.dcb.utils.EntityUtils.CIRCULATION_REQUEST_ID;
 import static org.folio.dcb.utils.EntityUtils.EXISTED_PATRON_ID;
 import static org.folio.dcb.utils.EntityUtils.ITEM_ID;
 import static org.folio.dcb.utils.EntityUtils.PATRON_TYPE_USER_ID;
+import static org.folio.dcb.utils.EntityUtils.VIRTUAL_SERVICE_POINT_ID;
 import static org.folio.dcb.utils.EntityUtils.createBorrowingEcsRequestTransactionByRole;
 import static org.folio.dcb.utils.EntityUtils.createBorrowingPickupEcsRequestTransactionByRole;
 import static org.folio.dcb.utils.EntityUtils.createLendingEcsRequestTransactionByRole;
@@ -27,7 +27,7 @@ import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.it.base.BaseTenantIntegrationTest;
 import org.folio.dcb.support.types.IntegrationTest;
 import org.folio.dcb.support.wiremock.WireMockStub;
-import org.folio.dcb.utils.DCBConstants;
+import org.folio.dcb.utils.DcbConstants;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.jdbc.Sql;
@@ -46,7 +46,7 @@ class EcsRequestTransactionsIT extends BaseTenantIntegrationTest {
       .andExpect(jsonPath("$.patron.id", is(EXISTED_PATRON_ID)))
       .andExpect(jsonPath("$.patron.barcode", is("DCB_PATRON")));
 
-    //Trying to create another transaction with same transaction id
+    // Trying to create another transaction with same transaction id
     postEcsRequestTransactionAttempt(createLendingEcsRequestTransactionByRole())
       .andExpectAll(status().is4xxClientError(),
         jsonPath("$.errors[0].code", is("DUPLICATE_ERROR")));
@@ -71,10 +71,10 @@ class EcsRequestTransactionsIT extends BaseTenantIntegrationTest {
       .withRequestBody(matchingJsonPath("$.requestType", equalTo("Hold")))
       .withRequestBody(matchingJsonPath("$.itemId", equalTo(ITEM_ID)))
       .withRequestBody(matchingJsonPath("$.status", equalTo("Open - Not yet filled")))
-      .withRequestBody(matchingJsonPath("$.instanceId", equalTo(DCBConstants.INSTANCE_ID)))
+      .withRequestBody(matchingJsonPath("$.instanceId", equalTo(DcbConstants.INSTANCE_ID)))
       .withRequestBody(matchingJsonPath("$.requesterId", equalTo(PATRON_TYPE_USER_ID)))
       .withRequestBody(matchingJsonPath("$.pickupServicePointId", equalTo(VIRTUAL_SERVICE_POINT_ID)))
-      .withRequestBody(matchingJsonPath("$.holdingsRecordId", equalTo(DCBConstants.HOLDING_ID)))
+      .withRequestBody(matchingJsonPath("$.holdingsRecordId", equalTo(DcbConstants.HOLDING_ID)))
       .withRequestBody(matchingJsonPath("$.requestExpirationDate")));
   }
 
@@ -95,10 +95,10 @@ class EcsRequestTransactionsIT extends BaseTenantIntegrationTest {
       .withRequestBody(matchingJsonPath("$.requestType", equalTo("Hold")))
       .withRequestBody(matchingJsonPath("$.itemId", equalTo(ITEM_ID)))
       .withRequestBody(matchingJsonPath("$.status", equalTo("Open - Not yet filled")))
-      .withRequestBody(matchingJsonPath("$.instanceId", equalTo(DCBConstants.INSTANCE_ID)))
+      .withRequestBody(matchingJsonPath("$.instanceId", equalTo(DcbConstants.INSTANCE_ID)))
       .withRequestBody(matchingJsonPath("$.requesterId", equalTo(PATRON_TYPE_USER_ID)))
       .withRequestBody(matchingJsonPath("$.pickupServicePointId", equalTo(VIRTUAL_SERVICE_POINT_ID)))
-      .withRequestBody(matchingJsonPath("$.holdingsRecordId", equalTo(DCBConstants.HOLDING_ID)))
+      .withRequestBody(matchingJsonPath("$.holdingsRecordId", equalTo(DcbConstants.HOLDING_ID)))
       .withRequestBody(matchingJsonPath("$.requestExpirationDate")));
   }
 
@@ -119,10 +119,10 @@ class EcsRequestTransactionsIT extends BaseTenantIntegrationTest {
       .withRequestBody(matchingJsonPath("$.requestType", equalTo("Hold")))
       .withRequestBody(matchingJsonPath("$.itemId", equalTo(ITEM_ID)))
       .withRequestBody(matchingJsonPath("$.status", equalTo("Open - Not yet filled")))
-      .withRequestBody(matchingJsonPath("$.instanceId", equalTo(DCBConstants.INSTANCE_ID)))
+      .withRequestBody(matchingJsonPath("$.instanceId", equalTo(DcbConstants.INSTANCE_ID)))
       .withRequestBody(matchingJsonPath("$.requesterId", equalTo(PATRON_TYPE_USER_ID)))
       .withRequestBody(matchingJsonPath("$.pickupServicePointId", equalTo(VIRTUAL_SERVICE_POINT_ID)))
-      .withRequestBody(matchingJsonPath("$.holdingsRecordId", equalTo(DCBConstants.HOLDING_ID)))
+      .withRequestBody(matchingJsonPath("$.holdingsRecordId", equalTo(DcbConstants.HOLDING_ID)))
       .withRequestBody(matchingJsonPath("$.requestExpirationDate")));
   }
 

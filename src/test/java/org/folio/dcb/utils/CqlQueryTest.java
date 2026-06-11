@@ -70,12 +70,12 @@ class CqlQueryTest {
   void openHoldRequestsQuery() {
     var itemId = "06adc710-c240-4d28-afd2-ec92c9020a56";
     var result = CqlQuery.openHoldRequestsQuery(itemId);
-    var expectedQuery = "itemId==\"06adc710-c240-4d28-afd2-ec92c9020a56\"" +
-      " and requestType==\"Hold\"" +
-      " and status==(\"Open - Not yet filled\"" +
-      " or \"Open - Awaiting pickup\"" +
-      " or \"Open - In transit\"" +
-      " or \"Open - Awaiting delivery\")";
+    var expectedQuery = "itemId==\"06adc710-c240-4d28-afd2-ec92c9020a56\""
+      + " and requestType==\"Hold\""
+      + " and status==(\"Open - Not yet filled\""
+      + " or \"Open - Awaiting pickup\""
+      + " or \"Open - In transit\""
+      + " or \"Open - Awaiting delivery\")";
 
     assertThat(result.getQuery()).isEqualTo(expectedQuery);
   }

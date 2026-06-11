@@ -6,10 +6,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import org.folio.dcb.integration.invstorage.model.InventoryHolding;
-import org.folio.dcb.integration.circstorage.model.LoanType;
-import org.folio.dcb.integration.invstorage.model.Location;
 import org.folio.dcb.config.DcbFeatureProperties;
+import org.folio.dcb.integration.circstorage.model.LoanType;
+import org.folio.dcb.integration.invstorage.model.InventoryHolding;
+import org.folio.dcb.integration.invstorage.model.Location;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

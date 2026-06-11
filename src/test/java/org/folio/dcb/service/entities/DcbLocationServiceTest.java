@@ -9,11 +9,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import org.folio.dcb.integration.invstorage.model.LocationUnit;
-import org.folio.dcb.integration.invstorage.LocationsClient;
-import org.folio.dcb.integration.invstorage.model.Location;
 import org.folio.dcb.domain.ResultList;
 import org.folio.dcb.domain.dto.ServicePointRequest;
+import org.folio.dcb.integration.invstorage.LocationsClient;
+import org.folio.dcb.integration.invstorage.model.Location;
+import org.folio.dcb.integration.invstorage.model.LocationUnit;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
