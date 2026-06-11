@@ -227,7 +227,7 @@ class BorrowerTransactionIT extends BaseTenantIntegrationTest {
   }
 
   @Test
-  @WireMockStub("/stubs/mod-circulation/check-in-by-barcode/201-post(with claim returned found by library).json")
+  @WireMockStub("/stubs/mod-circulation/check-in-by-barcode/201-post(with claim returned - found by library).json")
   void updateTransactionStatus_positive_fromItemCheckedOutToItemCheckedInWithFoundByLibraryContext() throws Exception {
     testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, ITEM_CHECKED_OUT, borrowerDcbTransaction());
     var context = TransactionStatusContext.builder()
@@ -245,7 +245,7 @@ class BorrowerTransactionIT extends BaseTenantIntegrationTest {
   }
 
   @Test
-  @WireMockStub("/stubs/mod-circulation/check-in-by-barcode/201-post(with claim returned returned by patron).json")
+  @WireMockStub("/stubs/mod-circulation/check-in-by-barcode/201-post(with claim returned - returned by patron).json")
   void updateTransactionStatus_positive_fromItemCheckedOutToItemCheckedInWithReturnedByPatronContext() throws Exception {
     testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, ITEM_CHECKED_OUT, borrowerDcbTransaction());
     var context = TransactionStatusContext.builder()
