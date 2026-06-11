@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dcb.domain.dto.CheckInRequest;
 import org.folio.dcb.domain.dto.CheckOutRequest;
-import org.folio.dcb.domain.dto.CirculationRequest;
 import org.folio.dcb.domain.dto.ClaimReturnedResolution;
 import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.exception.CirculationRequestException;
@@ -37,10 +36,13 @@ public class CirculationServiceImpl implements CirculationService {
   }
 
   @Override
-  public void checkInByBarcode(TransactionEntity dcbTransaction, String servicePointId, ClaimReturnedResolution claimReturnedResolution) {
+  public void checkInByBarcode(TransactionEntity dcbTransaction, String servicePointId,
+    ClaimReturnedResolution claimReturnedResolution) {
+
     log.debug("checkInByBarcode:: checking in item for transaction {} with claimReturnedResolution '{}'.",
       dcbTransaction.getId(), claimReturnedResolution);
-    circulationClient.checkInByBarcode(createCheckInRequest(dcbTransaction.getItemBarcode(), servicePointId, claimReturnedResolution));
+    circulationClient.checkInByBarcode(createCheckInRequest(dcbTransaction.getItemBarcode(), servicePointId,
+      claimReturnedResolution));
   }
 
   @Override
@@ -68,11 +70,13 @@ public class CirculationServiceImpl implements CirculationService {
     }
   }
 
-  private CheckInRequest createCheckInRequest(String itemBarcode, String servicePointId){
+  private CheckInRequest createCheckInRequest(String itemBarcode, String servicePointId) {
     return createCheckInRequest(itemBarcode, servicePointId, null);
   }
 
-  private CheckInRequest createCheckInRequest(String itemBarcode, String servicePointId, ClaimReturnedResolution claimReturnedResolution){
+  private CheckInRequest createCheckInRequest(String itemBarcode, String servicePointId,
+    ClaimReturnedResolution claimReturnedResolution) {
+
     return CheckInRequest.builder()
       .itemBarcode(itemBarcode)
       .servicePointId(servicePointId)
@@ -81,7 +85,7 @@ public class CirculationServiceImpl implements CirculationService {
       .build();
   }
 
-  private CheckOutRequest createCheckOutRequest(String itemBarcode, String userBarcode, String servicePointId){
+  private CheckOutRequest createCheckOutRequest(String itemBarcode, String userBarcode, String servicePointId) {
     return CheckOutRequest.builder()
       .itemBarcode(itemBarcode)
       .userBarcode(userBarcode)

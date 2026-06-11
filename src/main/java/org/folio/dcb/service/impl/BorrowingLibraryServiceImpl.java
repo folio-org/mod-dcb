@@ -13,7 +13,6 @@ import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.ServicePointRequest;
 import org.folio.dcb.domain.dto.TransactionStatus;
@@ -65,7 +64,7 @@ public class BorrowingLibraryServiceImpl implements LibraryService {
           () -> circulationService.checkInByBarcode(dcbTransaction, randomServicePointId));
 
       updateTransactionEntity(dcbTransaction, newStatus);
-    } else if(OPEN == currStatus && AWAITING_PICKUP == newStatus) {
+    } else if (OPEN == currStatus && AWAITING_PICKUP == newStatus) {
       circulationService.checkInByBarcode(dcbTransaction);
       updateTransactionEntity(dcbTransaction, newStatus);
     } else if (AWAITING_PICKUP == currStatus && ITEM_CHECKED_OUT == newStatus) {

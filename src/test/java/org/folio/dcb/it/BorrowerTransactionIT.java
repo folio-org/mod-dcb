@@ -43,7 +43,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Map;
-
 import org.folio.dcb.domain.dto.ClaimReturnedResolution;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatus.StatusEnum;
@@ -227,7 +226,7 @@ class BorrowerTransactionIT extends BaseTenantIntegrationTest {
 
   @Test
   @WireMockStub("/stubs/mod-circulation/check-in-by-barcode/201-post(with claim returned - found by library).json")
-  void updateTransactionStatus_positive_fromItemCheckedOutToItemCheckedInWithFoundByLibraryContext() throws Exception {
+  void updateTransactionStatus_positive_fromItemCheckedOutToItemCheckedInWithFoundByLibrary() throws Exception {
     testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, ITEM_CHECKED_OUT, borrowerDcbTransaction());
     var context = TransactionStatusContext.builder()
       .claimReturnedResolution(ClaimReturnedResolution.FOUND_BY_LIBRARY)
@@ -245,7 +244,8 @@ class BorrowerTransactionIT extends BaseTenantIntegrationTest {
 
   @Test
   @WireMockStub("/stubs/mod-circulation/check-in-by-barcode/201-post(with claim returned - returned by patron).json")
-  void updateTransactionStatus_positive_fromItemCheckedOutToItemCheckedInWithReturnedByPatronContext() throws Exception {
+  void updateTransactionStatus_positive_fromItemCheckedOutToItemCheckedInWithReturnedByPatron() throws Exception {
+
     testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, ITEM_CHECKED_OUT, borrowerDcbTransaction());
     var context = TransactionStatusContext.builder()
       .claimReturnedResolution(ClaimReturnedResolution.RETURNED_BY_PATRON)

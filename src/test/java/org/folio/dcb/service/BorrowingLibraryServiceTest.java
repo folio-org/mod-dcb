@@ -20,7 +20,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.UUID;
-
 import org.folio.dcb.domain.dto.ClaimReturnedResolution;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusContext;
@@ -156,5 +155,4 @@ class BorrowingLibraryServiceTest {
     verify(circulationService).checkInByBarcode(any(), any(), eq(ClaimReturnedResolution.RETURNED_BY_PATRON));
     assertEquals(ITEM_CHECKED_IN, transactionEntity.getStatus());
   }
-
 }
