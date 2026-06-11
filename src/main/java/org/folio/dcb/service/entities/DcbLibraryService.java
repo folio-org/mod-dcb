@@ -1,10 +1,10 @@
 package org.folio.dcb.service.entities;
 
 import static org.folio.dcb.utils.CqlQuery.exactMatchByName;
-import static org.folio.dcb.utils.DCBConstants.CAMPUS_ID;
-import static org.folio.dcb.utils.DCBConstants.CODE;
-import static org.folio.dcb.utils.DCBConstants.LIBRARY_ID;
-import static org.folio.dcb.utils.DCBConstants.NAME;
+import static org.folio.dcb.utils.DcbConstants.CAMPUS_ID;
+import static org.folio.dcb.utils.DcbConstants.CODE;
+import static org.folio.dcb.utils.DcbConstants.LIBRARY_ID;
+import static org.folio.dcb.utils.DcbConstants.NAME;
 
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;

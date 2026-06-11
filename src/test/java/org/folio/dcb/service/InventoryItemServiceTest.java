@@ -1,21 +1,5 @@
 package org.folio.dcb.service;
 
-import org.folio.dcb.integration.invstorage.InventoryItemStorageClient;
-import org.folio.dcb.domain.ResultList;
-import org.folio.dcb.domain.dto.ItemLastCheckIn;
-import org.folio.dcb.exception.InventoryItemNotFound;
-import org.folio.dcb.service.impl.ItemServiceImpl;
-import org.folio.dcb.utils.CqlQuery;
-import org.folio.spring.exception.NotFoundException;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.List;
-import java.util.UUID;
-
 import static org.folio.dcb.domain.ResultList.asSinglePage;
 import static org.folio.dcb.domain.ResultList.empty;
 import static org.folio.dcb.utils.CqlQuery.exactMatchById;
@@ -24,6 +8,21 @@ import static org.folio.dcb.utils.EntityUtils.createInventoryItem;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
+
+import java.util.List;
+import java.util.UUID;
+import org.folio.dcb.domain.ResultList;
+import org.folio.dcb.domain.dto.ItemLastCheckIn;
+import org.folio.dcb.exception.InventoryItemNotFound;
+import org.folio.dcb.integration.invstorage.InventoryItemStorageClient;
+import org.folio.dcb.service.impl.ItemServiceImpl;
+import org.folio.dcb.utils.CqlQuery;
+import org.folio.spring.exception.NotFoundException;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class InventoryItemServiceTest {

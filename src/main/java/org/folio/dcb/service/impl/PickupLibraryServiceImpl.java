@@ -2,8 +2,6 @@ package org.folio.dcb.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.folio.dcb.domain.dto.CirculationItem;
-import org.folio.dcb.domain.dto.CirculationRequest;
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
@@ -14,9 +12,9 @@ import org.folio.dcb.service.RequestService;
 import org.folio.dcb.service.UserService;
 import org.springframework.stereotype.Service;
 
-@Service("pickupLibraryService")
-@RequiredArgsConstructor
 @Log4j2
+@RequiredArgsConstructor
+@Service("pickupLibraryService")
 public class PickupLibraryServiceImpl implements LibraryService {
 
   private final UserService userService;
@@ -27,16 +25,19 @@ public class PickupLibraryServiceImpl implements LibraryService {
   @Override
   public TransactionStatusResponse createCirculation(String dcbTransactionId, DcbTransaction dcbTransaction) {
     var itemVirtual = dcbTransaction.getItem();
-    var patron = dcbTransaction.getPatron();
 
+    var patron = dcbTransaction.getPatron();
+    @SuppressWarnings("VariableDeclarationUsageDistance")
     var user = userService.fetchOrCreateUser(patron);
+
     baseLibraryService.checkItemExistsInInventoryAndThrow(itemVirtual.getBarcode());
-    CirculationItem item = circulationItemService.checkIfItemExistsAndCreate(
-      itemVirtual, dcbTransaction.getPickup().getServicePointId());
+    var pickupServicePointId = dcbTransaction.getPickup().getServicePointId();
+    var item = circulationItemService.checkIfItemExistsAndCreate(itemVirtual, pickupServicePointId);
 
     dcbTransaction.getItem().setId(item.getId());
     baseLibraryService.checkOpenTransactionExistsAndThrow(item.getId());
-    CirculationRequest holdRequest = requestService.createHoldItemRequest(user, itemVirtual, dcbTransaction.getPickup().getServicePointId());
+
+    var holdRequest = requestService.createHoldItemRequest(user, itemVirtual, pickupServicePointId);
     baseLibraryService.saveDcbTransaction(dcbTransactionId, dcbTransaction, holdRequest.getId());
 
     return TransactionStatusResponse.builder()

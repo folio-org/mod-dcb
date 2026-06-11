@@ -1,23 +1,5 @@
 package org.folio.dcb.service;
 
-import org.folio.dcb.integration.users.UsersClient;
-import org.folio.dcb.domain.dto.Personal;
-import org.folio.dcb.domain.dto.User;
-import org.folio.dcb.domain.dto.UserCollection;
-import org.folio.dcb.service.impl.PatronGroupServiceImpl;
-import org.folio.dcb.service.impl.UserServiceImpl;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.List;
-import java.util.UUID;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.folio.dcb.utils.EntityUtils.DCB_USER_TYPE;
 import static org.folio.dcb.utils.EntityUtils.createDefaultDcbPatron;
@@ -30,6 +12,23 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+
+import java.util.List;
+import java.util.UUID;
+import org.folio.dcb.domain.dto.Personal;
+import org.folio.dcb.domain.dto.User;
+import org.folio.dcb.domain.dto.UserCollection;
+import org.folio.dcb.integration.users.UsersClient;
+import org.folio.dcb.service.impl.PatronGroupServiceImpl;
+import org.folio.dcb.service.impl.UserServiceImpl;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
@@ -46,13 +45,13 @@ class UserServiceTest {
 
   @Test
   void fetchOrCreateUser_positive_newVirtualUser() {
-    var userId = randomUuid();
     var groupId = randomUuid();
 
     when(usersClient.fetchUserByBarcodeAndId(any())).thenReturn(userCollection());
     when(patronGroupService.fetchPatronGroupIdByName(any())).thenReturn(groupId);
     when(usersClient.createUser(userCaptor.capture())).then(inv -> inv.getArgument(0));
 
+    var userId = randomUuid();
     userService.fetchOrCreateUser(dcbPatron(userId));
 
     assertThat(userCaptor.getValue()).isEqualTo(virtualUser(userId, groupId));
@@ -236,7 +235,7 @@ class UserServiceTest {
     verify(usersClient, never()).createUser(any());
   }
 
-  private static UserCollection userCollection(User...users) {
+  private static UserCollection userCollection(User... users) {
     return new UserCollection().users(List.of(users)).totalRecords(users.length);
   }
 

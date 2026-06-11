@@ -2,16 +2,16 @@ package org.folio.dcb.service.entities;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.folio.dcb.utils.CqlQuery.exactMatchByName;
-import static org.folio.dcb.utils.DCBConstants.DCB_LOAN_TYPE_NAME;
+import static org.folio.dcb.utils.DcbConstants.DCB_LOAN_TYPE_NAME;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import org.folio.dcb.domain.ResultList;
 import org.folio.dcb.integration.circstorage.LoanTypeClient;
 import org.folio.dcb.integration.circstorage.model.LoanType;
-import org.folio.dcb.domain.ResultList;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

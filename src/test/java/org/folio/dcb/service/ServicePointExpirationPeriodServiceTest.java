@@ -23,7 +23,7 @@ import org.folio.dcb.domain.dto.SettingScope;
 import org.folio.dcb.domain.entity.ServicePointExpirationPeriodEntity;
 import org.folio.dcb.repository.ServicePointExpirationPeriodRepository;
 import org.folio.dcb.service.impl.ServicePointExpirationPeriodServiceImpl;
-import org.folio.dcb.utils.DCBConstants;
+import org.folio.dcb.utils.DcbConstants;
 import org.folio.dcb.utils.JsonTestUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -59,15 +59,15 @@ class ServicePointExpirationPeriodServiceTest {
 
   @ParameterizedTest(name = "[{index}] {0}")
   @MethodSource("invalidSettingDataSource")
-  void getShelfExpiryPeriod_parameterized_validSettingNotFound(@SuppressWarnings("unused") String name, Setting setting) {
+  void getShelfExpiryPeriod_parameterized_validSettingNotFound(@SuppressWarnings("unused") String name, Setting s) {
     var settingKey = getSettingsKey(LENDER.getValue());
-    when(settingService.findByQuery("key==\"%s\"".formatted(settingKey), 1, 0)).thenReturn(asSinglePage(setting));
+    when(settingService.findByQuery("key==\"%s\"".formatted(settingKey), 1, 0)).thenReturn(asSinglePage(s));
     when(servicePointExpirationPeriodRepository.findAll()).thenReturn(Collections.emptyList());
 
     var actual = servicePointExpirationPeriodService.getShelfExpiryPeriod(settingKey);
 
     assertThat(settingKey).isEqualTo("lender.hold-shelf-expiry-period");
-    assertThat(actual).isEqualTo(DCBConstants.DEFAULT_PERIOD);
+    assertThat(actual).isEqualTo(DcbConstants.DEFAULT_PERIOD);
   }
 
   @ParameterizedTest
@@ -82,7 +82,7 @@ class ServicePointExpirationPeriodServiceTest {
 
   private static Stream<Arguments> databaseShelfExpiryDataSource() {
     return Stream.of(
-      arguments(List.of(), DCBConstants.DEFAULT_PERIOD),
+      arguments(List.of(), DcbConstants.DEFAULT_PERIOD),
       arguments(servicePointExpirationPeriodList(2, MONTHS), holdShelfPeriod(2, MONTHS)),
       arguments(servicePointExpirationPeriodList(3, HOURS), holdShelfPeriod(3, HOURS)),
       arguments(servicePointExpirationPeriodList(4, MINUTES), holdShelfPeriod(4, MINUTES))

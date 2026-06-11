@@ -8,5 +8,4 @@ public interface CirculationItemService {
   CirculationItem checkIfItemExistsAndCreate(DcbItem dcbTransaction, String pickupServicePointId);
 
   CirculationItem fetchItemById(String itemId);
-
 }

@@ -1,23 +1,22 @@
 package org.folio.dcb.service.impl;
 
+import static org.folio.dcb.utils.DcbConstants.DCB_TYPE;
+import static org.folio.dcb.utils.DcbConstants.SHADOW_TYPE;
+
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.ObjectUtils;
-import org.folio.dcb.integration.users.UsersClient;
 import org.folio.dcb.domain.DcbPersonal;
 import org.folio.dcb.domain.dto.DcbPatron;
 import org.folio.dcb.domain.dto.Personal;
 import org.folio.dcb.domain.dto.User;
+import org.folio.dcb.integration.users.UsersClient;
 import org.folio.dcb.service.PatronGroupService;
 import org.folio.dcb.service.UserService;
+import org.folio.dcb.utils.CqlQuery;
 import org.folio.spring.exception.NotFoundException;
-import org.folio.util.StringUtil;
 import org.springframework.stereotype.Service;
-
-import java.util.Objects;
-
-import static org.folio.dcb.utils.DCBConstants.DCB_TYPE;
-import static org.folio.dcb.utils.DCBConstants.SHADOW_TYPE;
 
 @Service
 @RequiredArgsConstructor
@@ -35,7 +34,7 @@ public class UserServiceImpl implements UserService {
     log.debug("fetchUser:: Fetching user for transaction processing.");
     var user = fetchUserByBarcodeAndId(dcbPatronBarcode, dcbPatronId);
 
-    if(Objects.isNull(user)) {
+    if (user == null) {
       log.error("fetchUser:: Unable to find existing user.");
       throw new NotFoundException("Unable to find existing user.");
     }
@@ -46,7 +45,7 @@ public class UserServiceImpl implements UserService {
   public User fetchOrCreateUser(DcbPatron patronDetails) {
     log.debug("createOrFetchUser:: Trying to create or find user.");
     var user = fetchUserByBarcodeAndId(patronDetails.getBarcode(), patronDetails.getId());
-    if(Objects.isNull(user)) {
+    if (user == null) {
       log.info("fetchOrCreateUser:: Unable to find existing user. Creating a new user.");
       return createUser(patronDetails);
     }
@@ -56,7 +55,7 @@ public class UserServiceImpl implements UserService {
 
   private User modifyAndGetExistingUser(DcbPatron patronDetails, User user) {
     validateDcbUserType(user.getType());
-    var isUserGroupChanged =  updateUserGroup(patronDetails, user);
+    var isUserGroupChanged = updateUserGroup(patronDetails, user);
     var isUserPersonalInfoChanged = updateUserPersonal(patronDetails, user);
     if (isUserGroupChanged || isUserPersonalInfoChanged) {
       usersClient.updateUser(user.getId(), user);
@@ -73,7 +72,8 @@ public class UserServiceImpl implements UserService {
 
   private User fetchUserByBarcodeAndId(String barcode, String id) {
     log.debug("fetchUserByBarcodeAndId:: Trying to fetch existing user.");
-    return usersClient.fetchUserByBarcodeAndId("barcode==" + StringUtil.cqlEncode(barcode) + " and id==" + StringUtil.cqlEncode(id))
+    var query = CqlQuery.exactMatch("barcode", barcode).and(CqlQuery.exactMatchById(id), true).getQuery();
+    return usersClient.fetchUserByBarcodeAndId(query)
       .getUsers()
       .stream()
       .findFirst()
@@ -95,8 +95,7 @@ public class UserServiceImpl implements UserService {
   private boolean updateUserGroup(DcbPatron patronDetails, User user) {
     var groupId = patronGroupService.fetchPatronGroupIdByName(patronDetails.getGroup());
     if (!groupId.equals(user.getPatronGroup())) {
-      log.info("updateUserGroup:: updating patron group from {} to {}.",
-        user.getPatronGroup(), groupId);
+      log.info("updateUserGroup:: updating patron group from {} to {}.", user.getPatronGroup(), groupId);
       user.setPatronGroup(groupId);
       return true;
     }
@@ -112,7 +111,7 @@ public class UserServiceImpl implements UserService {
 
     var newUserPersonal = getUserPersonalInfo(newPersonalData);
     if (Objects.equals(user.getPersonal(), newUserPersonal)) {
-     return false;
+      return false;
     }
 
     log.info("updateUserPersonal:: updating personal data for existing user.");
@@ -121,8 +120,9 @@ public class UserServiceImpl implements UserService {
   }
 
   private void validateDcbUserType(String userType) {
-    if(ObjectUtils.notEqual(userType, DCB_TYPE) && ObjectUtils.notEqual(userType, SHADOW_TYPE)) {
-      throw new IllegalArgumentException(String.format("User with type %s is retrieved. so unable to create transaction", userType));
+    if (ObjectUtils.notEqual(userType, DCB_TYPE) && ObjectUtils.notEqual(userType, SHADOW_TYPE)) {
+      throw new IllegalArgumentException(String.format(
+        "User with type %s is retrieved. so unable to create transaction", userType));
     }
   }
 

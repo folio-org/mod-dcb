@@ -7,14 +7,12 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import lombok.extern.log4j.Log4j2;
-import org.apache.commons.collections4.CollectionUtils;
-import org.folio.dcb.domain.dto.DcbLocation;
-import org.folio.dcb.domain.DcbAgencyKey;
-
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+import org.apache.commons.collections4.CollectionUtils;
+import org.folio.dcb.domain.DcbAgencyKey;
+import org.folio.dcb.domain.dto.DcbLocation;
 
 @Log4j2
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
