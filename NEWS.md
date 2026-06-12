@@ -1,3 +1,8 @@
+## v2.1.0-SNAPSHOT In progress
+
+### Tech Debt
+* Add FOLIO Checkstyle enforcement using shared `folio-java-checkstyle` ruleset ([MODDCB-288](https://folio-org.atlassian.net/browse/MODDCB-288))
+
 ## v2.0.0 2026-04-17
 
 ### Breaking changes

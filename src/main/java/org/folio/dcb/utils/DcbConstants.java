@@ -1,20 +1,17 @@
 package org.folio.dcb.utils;
 
-import org.folio.dcb.domain.dto.HoldShelfExpiryPeriod;
-import org.folio.dcb.domain.dto.IntervalIdEnum;
-import org.folio.dcb.domain.dto.ItemStatus;
-
-import java.util.List;
-
 import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.AWAITING_DELIVERY;
 import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.AWAITING_PICKUP;
 import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.CHECKED_OUT;
 import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.IN_TRANSIT;
 import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.PAGED;
 
-public class DCBConstants {
+import java.util.List;
+import org.folio.dcb.domain.dto.HoldShelfExpiryPeriod;
+import org.folio.dcb.domain.dto.IntervalIdEnum;
+import org.folio.dcb.domain.dto.ItemStatus;
 
-  private DCBConstants() {}
+public final class DcbConstants {
 
   public static final String INSTANCE_ID = "9d1b77e4-f02e-4b7f-b296-3f2042ddac54";
   public static final String INSTANCE_TYPE_ID = "9d1b77e0-f02e-4b7f-b296-3f2042ddac54";
@@ -38,7 +35,8 @@ public class DCBConstants {
   public static final String SHADOW_TYPE = "shadow";
   public static final String HOLDING_SOURCE = "folio";
   public static final String DCB_CALENDAR_NAME = "DCB Calendar";
-  public static final List<ItemStatus.NameEnum> holdItemStatus = List.of(IN_TRANSIT, CHECKED_OUT, PAGED, AWAITING_PICKUP, AWAITING_DELIVERY);
+  public static final List<ItemStatus.NameEnum> HOLD_ITEM_STATUS =
+      List.of(IN_TRANSIT, CHECKED_OUT, PAGED, AWAITING_PICKUP, AWAITING_DELIVERY);
   public static final int DEFAULT_SERVICE_POINT_PERIOD_DURATION = 10;
   public static final IntervalIdEnum DEFAULT_SERVICE_POINT_PERIOD_INTERVAL = IntervalIdEnum.DAYS;
   public static final HoldShelfExpiryPeriod DEFAULT_PERIOD = HoldShelfExpiryPeriod.builder()
@@ -48,4 +46,5 @@ public class DCBConstants {
   public static final String OPEN_LOAN_STATUS = "Open";
   public static final String CLOSED_LOAN_STATUS = "Closed";
 
+  private DcbConstants() {}
 }

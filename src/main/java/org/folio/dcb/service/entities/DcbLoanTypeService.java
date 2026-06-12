@@ -1,8 +1,8 @@
 package org.folio.dcb.service.entities;
 
 import static org.folio.dcb.utils.CqlQuery.exactMatchByName;
-import static org.folio.dcb.utils.DCBConstants.DCB_LOAN_TYPE_NAME;
-import static org.folio.dcb.utils.DCBConstants.LOAN_TYPE_ID;
+import static org.folio.dcb.utils.DcbConstants.DCB_LOAN_TYPE_NAME;
+import static org.folio.dcb.utils.DcbConstants.LOAN_TYPE_ID;
 
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;

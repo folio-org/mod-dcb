@@ -53,9 +53,7 @@ class DcbHubLocationsGroupingUtilTest {
   @DisplayName("groupByAgency_positive_invalidValues")
   @ParameterizedTest(name = "[{index}] {0}")
   @MethodSource("provideInvalidLocations")
-  void groupByAgency_positive_invalidValues(
-    @SuppressWarnings("unused") String name, List<DcbLocation> locations) {
-
+  void groupByAgency_positive_invalidValues(@SuppressWarnings("unused") String name, List<DcbLocation> locations) {
     var result = DcbHubLocationsGroupingUtil.groupByAgency(locations);
     assertThat(result).isEmpty();
   }

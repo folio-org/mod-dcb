@@ -24,8 +24,8 @@ import org.folio.dcb.domain.dto.DcbTransaction.RoleEnum;
 import org.folio.dcb.domain.dto.ItemStatus;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.entity.TransactionEntity;
-import org.folio.dcb.it.base.BaseTenantIntegrationTest;
 import org.folio.dcb.integration.kafka.CirculationEventListener;
+import org.folio.dcb.it.base.BaseTenantIntegrationTest;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.CirculationItemService;
 import org.folio.spring.integration.XOkapiHeaders;
@@ -43,31 +43,36 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 class CirculationRequestEventListenerIT extends BaseTenantIntegrationTest {
 
   private static final String TENANT = "diku";
-  private static final String REQUEST_EVENT_SAMPLE_NON_DCB = getMockDataAsString("mockdata/kafka/request_sample.json");
+  private static final String REQUEST_EVENT_SAMPLE_NON_DCB =
+      getMockDataAsString("mockdata/kafka/request_sample.json");
+  private static final String CHECK_IN_EVENT_SAMPLE_FOR_DCB =
+      getMockDataAsString("mockdata/kafka/check_in_dcb.json");
+  private static final String CHECK_IN_DELIVERY_EVENT_SAMPLE =
+      getMockDataAsString("mockdata/kafka/check_in_awaiting_delivery.json");
+  private static final String CHECK_IN_TRANSIT_EVENT_SAMPLE =
+      getMockDataAsString("mockdata/kafka/check_in_transit.json");
+  private static final String CHECK_IN_TRANSIT_EVENT_FOR_DCB_SAMPLE =
+      getMockDataAsString("mockdata/kafka/check_in_transit_dcb.json");
+  private static final String CHECK_IN_UNDEFINED_EVENT_SAMPLE =
+      getMockDataAsString("mockdata/kafka/request_undefined.json");
+  private static final String REQUEST_CANCEL_EVENT_SAMPLE =
+      getMockDataAsString("mockdata/kafka/cancel_request.json");
+  private static final String REQUEST_CANCEL_EVENT_FOR_DCB_SAMPLE =
+      getMockDataAsString("mockdata/kafka/cancel_request_dcb.json");
+  private static final String REQUEST_EXPIRED_EVENT_FOR_DCB_SAMPLE =
+      getMockDataAsString("mockdata/kafka/expired_request_dcb.json");
+  private static final String CANCELLATION_DCB_REREQUEST_TRUE_SAMPLE =
+      getMockDataAsString("mockdata/kafka/cancellation_dcb_rerequest_true.json");
+  private static final String CANCELLATION_DCB_REREQUEST_FALSE_SAMPLE =
+      getMockDataAsString("mockdata/kafka/cancellation_dcb_rerequest_false.json");
+  private static final String CANCELLATION_DCB_REREQUEST_WITHOUT_SAMPLE =
+      getMockDataAsString("mockdata/kafka/cancellation_dcb_rerequest_without_dcb_rerequest_property.json");
 
-  private static final String CHECK_IN_EVENT_SAMPLE_FOR_DCB = getMockDataAsString("mockdata/kafka/check_in_dcb.json");
-  private static final String CHECK_IN_DELIVERY_EVENT_SAMPLE = getMockDataAsString("mockdata/kafka/check_in_awaiting_delivery.json");
-  private static final String CHECK_IN_TRANSIT_EVENT_SAMPLE = getMockDataAsString("mockdata/kafka/check_in_transit.json");
-  private static final String CHECK_IN_TRANSIT_EVENT_FOR_DCB_SAMPLE = getMockDataAsString("mockdata/kafka/check_in_transit_dcb.json");
-  private static final String CHECK_IN_UNDEFINED_EVENT_SAMPLE = getMockDataAsString("mockdata/kafka/request_undefined.json");
-  private static final String REQUEST_CANCEL_EVENT_SAMPLE = getMockDataAsString("mockdata/kafka/cancel_request.json");
-  private static final String REQUEST_CANCEL_EVENT_FOR_DCB_SAMPLE = getMockDataAsString("mockdata/kafka/cancel_request_dcb.json");
-  private static final String REQUEST_EXPIRED_EVENT_FOR_DCB_SAMPLE = getMockDataAsString("mockdata/kafka/expired_request_dcb.json");
-  private static final String CANCELLATION_DCB_REREQUEST_TRUE_SAMPLE = getMockDataAsString(
-    "mockdata/kafka/cancellation_dcb_rerequest_true.json");
-  private static final String CANCELLATION_DCB_REREQUEST_FALSE_SAMPLE = getMockDataAsString(
-    "mockdata/kafka/cancellation_dcb_rerequest_false.json");
-  private static final String CANCELLATION_DCB_REREQUEST_WITHOUT_SAMPLE = getMockDataAsString(
-    "mockdata/kafka/cancellation_dcb_rerequest_without_dcb_rerequest_property.json");
+  @Autowired private CirculationEventListener eventListener;
 
-  @Autowired
-  private CirculationEventListener eventListener ;
+  @MockitoBean private TransactionRepository transactionRepository;
 
-  @MockitoBean
-  private TransactionRepository transactionRepository;
-
-  @MockitoBean
-  private CirculationItemService circulationItemService;
+  @MockitoBean private CirculationItemService circulationItemService;
 
   @Test
   void handleNonDcbRequestTest() {
@@ -102,9 +107,10 @@ class CirculationRequestEventListenerIT extends BaseTenantIntegrationTest {
     transactionEntity.setStatus(TransactionStatus.StatusEnum.OPEN);
     transactionEntity.setRole(PICKUP);
     var circulationItem = createCirculationItem();
-    circulationItem.setStatus(org.folio.dcb.domain.dto.ItemStatus.builder().name(org.folio.dcb.domain.dto.ItemStatus.NameEnum.AWAITING_PICKUP).build());
+    circulationItem.setStatus(ItemStatus.builder().name(ItemStatus.NameEnum.AWAITING_PICKUP).build());
     MessageHeaders messageHeaders = getMessageHeaders();
-    when(transactionRepository.findTransactionByRequestIdAndStatusNotInClosed(any())).thenReturn(Optional.of(transactionEntity));
+    when(transactionRepository.findTransactionByRequestIdAndStatusNotInClosed(any()))
+        .thenReturn(Optional.of(transactionEntity));
     when(circulationItemService.fetchItemById(anyString())).thenReturn(circulationItem);
     eventListener.handleRequestEvent(CHECK_IN_EVENT_SAMPLE_FOR_DCB, messageHeaders);
     Mockito.verify(transactionRepository).save(any());
@@ -117,8 +123,7 @@ class CirculationRequestEventListenerIT extends BaseTenantIntegrationTest {
     transactionEntity.setStatus(TransactionStatus.StatusEnum.OPEN);
     transactionEntity.setRole(PICKUP);
     var circulationItem = createCirculationItem();
-    circulationItem.setStatus(org.folio.dcb.domain.dto.ItemStatus.builder()
-      .name(org.folio.dcb.domain.dto.ItemStatus.NameEnum.AWAITING_PICKUP).build());
+    circulationItem.setStatus(ItemStatus.builder().name(ItemStatus.NameEnum.AWAITING_PICKUP).build());
     MessageHeaders messageHeaders = getMessageHeaders();
     when(transactionRepository.findTransactionByRequestIdAndStatusNotInClosed(any()))
       .thenReturn(Optional.of(transactionEntity));
@@ -134,8 +139,9 @@ class CirculationRequestEventListenerIT extends BaseTenantIntegrationTest {
     transactionEntity.setStatus(TransactionStatus.StatusEnum.OPEN);
     transactionEntity.setRole(BORROWING_PICKUP);
     var circulationItem = createCirculationItem();
-    circulationItem.setStatus(org.folio.dcb.domain.dto.ItemStatus.builder().name(org.folio.dcb.domain.dto.ItemStatus.NameEnum.AWAITING_PICKUP).build());
-    when(transactionRepository.findTransactionByRequestIdAndStatusNotInClosed(any())).thenReturn(Optional.of(transactionEntity));
+    circulationItem.setStatus(ItemStatus.builder().name(ItemStatus.NameEnum.AWAITING_PICKUP).build());
+    when(transactionRepository.findTransactionByRequestIdAndStatusNotInClosed(any()))
+      .thenReturn(Optional.of(transactionEntity));
     when(circulationItemService.fetchItemById(anyString())).thenReturn(circulationItem);
     MessageHeaders messageHeaders = getMessageHeaders();
     eventListener.handleRequestEvent(CHECK_IN_EVENT_SAMPLE_FOR_DCB, messageHeaders);
@@ -147,7 +153,8 @@ class CirculationRequestEventListenerIT extends BaseTenantIntegrationTest {
     var transactionEntity = createTransactionEntity();
     transactionEntity.setRole(LENDER);
     MessageHeaders messageHeaders = getMessageHeaders();
-    when(transactionRepository.findTransactionByRequestIdAndStatusNotInClosed(any())).thenReturn(Optional.of(transactionEntity));
+    when(transactionRepository.findTransactionByRequestIdAndStatusNotInClosed(any()))
+        .thenReturn(Optional.of(transactionEntity));
     eventListener.handleRequestEvent(REQUEST_CANCEL_EVENT_SAMPLE, messageHeaders);
     Mockito.verify(transactionRepository, times(1)).save(any());
   }
@@ -157,7 +164,8 @@ class CirculationRequestEventListenerIT extends BaseTenantIntegrationTest {
     var transactionEntity = createTransactionEntity();
     transactionEntity.setRole(LENDER);
     MessageHeaders messageHeaders = getMessageHeaders();
-    when(transactionRepository.findTransactionByRequestIdAndStatusNotInClosed(any())).thenReturn(Optional.of(transactionEntity));
+    when(transactionRepository.findTransactionByRequestIdAndStatusNotInClosed(any()))
+        .thenReturn(Optional.of(transactionEntity));
     eventListener.handleRequestEvent(REQUEST_CANCEL_EVENT_FOR_DCB_SAMPLE, messageHeaders);
     Mockito.verify(transactionRepository).save(any());
   }
@@ -170,8 +178,9 @@ class CirculationRequestEventListenerIT extends BaseTenantIntegrationTest {
     transactionEntity.setRole(LENDER);
 
     var circulationItem = createCirculationItem();
-    circulationItem.setStatus(org.folio.dcb.domain.dto.ItemStatus.builder().name(ItemStatus.NameEnum.IN_TRANSIT).build());
-    when(transactionRepository.findTransactionByRequestIdAndStatusNotInClosed(any())).thenReturn(Optional.of(transactionEntity));
+    circulationItem.setStatus(ItemStatus.builder().name(ItemStatus.NameEnum.IN_TRANSIT).build());
+    when(transactionRepository.findTransactionByRequestIdAndStatusNotInClosed(any()))
+        .thenReturn(Optional.of(transactionEntity));
     when(circulationItemService.fetchItemById(anyString())).thenReturn(circulationItem);
     MessageHeaders messageHeaders = getMessageHeaders();
     eventListener.handleRequestEvent(CHECK_IN_TRANSIT_EVENT_SAMPLE, messageHeaders);
@@ -186,14 +195,14 @@ class CirculationRequestEventListenerIT extends BaseTenantIntegrationTest {
     transactionEntity.setRole(LENDER);
 
     var circulationItem = createCirculationItem();
-    circulationItem.setStatus(org.folio.dcb.domain.dto.ItemStatus.builder().name(ItemStatus.NameEnum.IN_TRANSIT).build());
-    when(transactionRepository.findTransactionByRequestIdAndStatusNotInClosed(any())).thenReturn(Optional.of(transactionEntity));
+    circulationItem.setStatus(ItemStatus.builder().name(ItemStatus.NameEnum.IN_TRANSIT).build());
+    when(transactionRepository.findTransactionByRequestIdAndStatusNotInClosed(any()))
+        .thenReturn(Optional.of(transactionEntity));
     when(circulationItemService.fetchItemById(anyString())).thenReturn(circulationItem);
     MessageHeaders messageHeaders = getMessageHeaders();
     eventListener.handleRequestEvent(CHECK_IN_TRANSIT_EVENT_FOR_DCB_SAMPLE, messageHeaders);
     Mockito.verify(transactionRepository).save(any());
   }
-
 
   @Test
   void handleUndefinedEventTest() {
@@ -203,10 +212,11 @@ class CirculationRequestEventListenerIT extends BaseTenantIntegrationTest {
     transactionEntity.setRole(LENDER);
 
     var circulationItem = createCirculationItem();
-    circulationItem.setStatus(org.folio.dcb.domain.dto.ItemStatus.builder().name(ItemStatus.NameEnum.IN_TRANSIT).build());
+    circulationItem.setStatus(ItemStatus.builder().name(ItemStatus.NameEnum.IN_TRANSIT).build());
 
     MessageHeaders messageHeaders = getMessageHeaders();
-    when(transactionRepository.findTransactionByRequestIdAndStatusNotInClosed(any())).thenReturn(Optional.of(transactionEntity));
+    when(transactionRepository.findTransactionByRequestIdAndStatusNotInClosed(any()))
+        .thenReturn(Optional.of(transactionEntity));
     when(circulationItemService.fetchItemById(anyString())).thenReturn(circulationItem);
     eventListener.handleRequestEvent(CHECK_IN_UNDEFINED_EVENT_SAMPLE, messageHeaders);
     Mockito.verify(transactionRepository, times(0)).save(any());
@@ -225,7 +235,8 @@ class CirculationRequestEventListenerIT extends BaseTenantIntegrationTest {
     when(transactionRepository.save(transactionEntityCaptor.capture())).then(v -> v.getArgument(0));
 
     MessageHeaders messageHeaders = getMessageHeaders();
-    when(transactionRepository.findTransactionByRequestIdAndStatusNotInClosed(any())).thenReturn(Optional.of(transactionEntity));
+    when(transactionRepository.findTransactionByRequestIdAndStatusNotInClosed(any()))
+        .thenReturn(Optional.of(transactionEntity));
     when(circulationItemService.fetchItemById(anyString())).thenReturn(circulationItem);
     eventListener.handleRequestEvent(REQUEST_EXPIRED_EVENT_FOR_DCB_SAMPLE, messageHeaders);
 
@@ -244,7 +255,8 @@ class CirculationRequestEventListenerIT extends BaseTenantIntegrationTest {
     var transactionEntityCaptor = ArgumentCaptor.<TransactionEntity>captor();
 
     MessageHeaders messageHeaders = getMessageHeaders();
-    when(transactionRepository.findTransactionByRequestIdAndStatusNotInClosed(any())).thenReturn(Optional.of(transactionEntity));
+    when(transactionRepository.findTransactionByRequestIdAndStatusNotInClosed(any()))
+        .thenReturn(Optional.of(transactionEntity));
     when(transactionRepository.save(transactionEntityCaptor.capture())).then(v -> v.getArgument(0));
     eventListener.handleRequestEvent(REQUEST_EXPIRED_EVENT_FOR_DCB_SAMPLE, messageHeaders);
 

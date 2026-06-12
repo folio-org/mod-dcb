@@ -1,33 +1,10 @@
 package org.folio.dcb.utils;
 
-import lombok.SneakyThrows;
-import org.apache.commons.io.IOUtils;
-import org.folio.dcb.DcbApplication;
-import org.folio.dcb.domain.dto.DcbTransaction.RoleEnum;
-import org.folio.dcb.domain.dto.HoldShelfExpiryPeriod;
-import org.folio.dcb.domain.dto.IntervalIdEnum;
-import org.folio.dcb.domain.dto.Setting;
-import org.folio.dcb.domain.dto.SettingScope;
-import org.folio.dcb.integration.invstorage.model.InventoryHolding;
-import org.folio.dcb.domain.dto.Calendar;
-import org.folio.dcb.domain.dto.CalendarCollection;
-import org.folio.dcb.domain.dto.CirculationItem;
-import org.folio.dcb.domain.dto.CirculationRequest;
-import org.folio.dcb.domain.dto.DcbTransaction;
-import org.folio.dcb.domain.dto.DcbItem;
-import org.folio.dcb.domain.dto.DcbPatron;
-import org.folio.dcb.domain.dto.DcbPickup;
-import org.folio.dcb.domain.dto.DcbUpdateTransaction;
-import org.folio.dcb.domain.dto.DcbUpdateItem;
-import org.folio.dcb.domain.dto.ItemStatus;
-import org.folio.dcb.domain.dto.TransactionStatusResponse;
-import org.folio.dcb.domain.dto.User;
-import org.folio.dcb.domain.dto.TransactionStatus;
-import org.folio.dcb.domain.entity.TransactionAuditEntity;
-import org.folio.dcb.domain.entity.TransactionEntity;
-import org.folio.dcb.domain.dto.InventoryItem;
-import org.folio.dcb.domain.dto.UserGroupCollection;
-import org.folio.dcb.domain.dto.UserGroup;
+import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWER;
+import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWING_PICKUP;
+import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
+import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.PICKUP;
+import static org.folio.dcb.service.impl.ServicePointServiceImpl.HOLD_SHELF_CLOSED_LIBRARY_DATE_MANAGEMENT;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -38,12 +15,35 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
-
-import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWER;
-import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWING_PICKUP;
-import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
-import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.PICKUP;
-import static org.folio.dcb.service.impl.ServicePointServiceImpl.HOLD_SHELF_CLOSED_LIBRARY_DATE_MANAGEMENT;
+import lombok.SneakyThrows;
+import org.apache.commons.io.IOUtils;
+import org.folio.dcb.DcbApplication;
+import org.folio.dcb.domain.dto.Calendar;
+import org.folio.dcb.domain.dto.CalendarCollection;
+import org.folio.dcb.domain.dto.CirculationItem;
+import org.folio.dcb.domain.dto.CirculationRequest;
+import org.folio.dcb.domain.dto.DcbItem;
+import org.folio.dcb.domain.dto.DcbPatron;
+import org.folio.dcb.domain.dto.DcbPickup;
+import org.folio.dcb.domain.dto.DcbTransaction;
+import org.folio.dcb.domain.dto.DcbTransaction.RoleEnum;
+import org.folio.dcb.domain.dto.DcbUpdateItem;
+import org.folio.dcb.domain.dto.DcbUpdateTransaction;
+import org.folio.dcb.domain.dto.HoldShelfExpiryPeriod;
+import org.folio.dcb.domain.dto.IntervalIdEnum;
+import org.folio.dcb.domain.dto.InventoryItem;
+import org.folio.dcb.domain.dto.ItemStatus;
+import org.folio.dcb.domain.dto.ServicePointRequest;
+import org.folio.dcb.domain.dto.Setting;
+import org.folio.dcb.domain.dto.SettingScope;
+import org.folio.dcb.domain.dto.TransactionStatus;
+import org.folio.dcb.domain.dto.TransactionStatusResponse;
+import org.folio.dcb.domain.dto.User;
+import org.folio.dcb.domain.dto.UserGroup;
+import org.folio.dcb.domain.dto.UserGroupCollection;
+import org.folio.dcb.domain.entity.TransactionAuditEntity;
+import org.folio.dcb.domain.entity.TransactionEntity;
+import org.folio.dcb.integration.invstorage.model.InventoryHolding;
 
 public class EntityUtils {
 
@@ -54,17 +54,15 @@ public class EntityUtils {
   public static final String NOT_EXISTED_ITEM_ID = "de18d1cd-8312-449c-8db6-c2491467ab76";
 
   /**
-   * NOT_EXISTED_PATRON_ID - means
-   * the Mocked userClient returns empty result,
-   * while requesting it by the query, including such a patron id
-   * */
+   * NOT_EXISTED_PATRON_ID - means the Mocked userClient returns empty result, while requesting it by the query,
+   * including such a patron id.
+   */
   public static final String NOT_EXISTED_PATRON_ID = "571b0a2c-9456-40b5-a449-d41fe6017082";
 
   /**
-   * EXISTED_PATRON_ID - means
-   * the Mocked userClient returns result with single value,
-   * while requesting it by the query, including such a patron id
-   * */
+   * EXISTED_PATRON_ID - means the Mocked userClient returns result with single value, while requesting it by the query,
+   * including such a patron id.
+   */
   public static final String EXISTED_PATRON_ID = "284056f5-0670-4e1e-9e2f-61b9f1ee2d18";
   public static final String PICKUP_SERVICE_POINT_ID = "0da8c1e4-1c1f-4dd9-b189-70ba978b7d94";
   public static final String VIRTUAL_SERVICE_POINT_ID = "9d1b77e8-f02e-4b7f-b296-3f2042ddac55";
@@ -84,14 +82,16 @@ public class EntityUtils {
   public static final String HOLDING_RECORD_ID = "fcee331d-2b50-49de-9395-a76a6ff4e385";
   public static final String INSTANCE_ID = "a9350401-f2f2-4804-9701-ca813c70e322";
 
-  public static final String LENDER_HOLD_SHELF_EXPIRATION_SETTING_ID = "d115a0b6-133d-4148-ac1a-b48c2aa57f57";
+  public static final String LENDER_HOLD_SHELF_EXPIRATION_SETTING_ID =
+    "d115a0b6-133d-4148-ac1a-b48c2aa57f57";
 
   public static DcbTransaction createDcbTransactionByRole(DcbTransaction.RoleEnum role) {
     return DcbTransaction.builder()
       .item(createDcbItem())
-      .patron(switch (role){
-        case BORROWING_PICKUP, BORROWER -> createDcbPatronWithExactPatronId(EXISTED_PATRON_ID);
-        default -> createDefaultDcbPatron();
+      .patron(
+        switch (role) {
+          case BORROWING_PICKUP, BORROWER -> createDcbPatronWithExactPatronId(EXISTED_PATRON_ID);
+          default -> createDefaultDcbPatron();
         }
       )
       .role(role)
@@ -99,18 +99,20 @@ public class EntityUtils {
       .build();
   }
 
-  public static DcbTransaction createDcbTransactionByRoleAndSelfBorrowing(DcbTransaction.RoleEnum role, Boolean selfBorrowing) {
+  public static DcbTransaction createDcbTransactionByRoleAndSelfBorrowing(DcbTransaction.RoleEnum role,
+    Boolean selfBorrowing) {
     return DcbTransaction.builder()
-            .item(createDcbItem())
-            .patron(switch (role){
-                      case BORROWING_PICKUP, BORROWER -> createDcbPatronWithExactPatronId(EXISTED_PATRON_ID);
-                      default -> createDefaultDcbPatron();
-                    }
-            )
-            .role(role)
-            .selfBorrowing(selfBorrowing)
-            .pickup(createDcbPickup())
-            .build();
+      .item(createDcbItem())
+      .patron(
+        switch (role) {
+          case BORROWING_PICKUP, BORROWER -> createDcbPatronWithExactPatronId(EXISTED_PATRON_ID);
+          default -> createDefaultDcbPatron();
+        }
+      )
+      .role(role)
+      .selfBorrowing(selfBorrowing)
+      .pickup(createDcbPickup())
+      .build();
   }
 
   public static DcbTransaction createLendingEcsRequestTransactionByRole() {
@@ -148,23 +150,23 @@ public class EntityUtils {
       .build();
   }
 
-  public static org.folio.dcb.domain.dto.ServicePointRequest createServicePointRequest() {
-    return org.folio.dcb.domain.dto.ServicePointRequest.builder()
+  public static ServicePointRequest createServicePointRequest() {
+    return ServicePointRequest.builder()
       .id(PICKUP_SERVICE_POINT_ID)
       .name("DCB_TestLibraryCode_TestServicePointCode")
       .code("DCB_TESTLIBRARYCODE_TESTSERVICEPOINTCODE")
       .discoveryDisplayName("DCB_TestLibraryCode_TestServicePointCode")
       .pickupLocation(true)
-      .holdShelfExpiryPeriod(org.folio.dcb.domain.dto.HoldShelfExpiryPeriod.builder().duration(3).intervalId(org.folio.dcb.domain.dto.IntervalIdEnum.DAYS).build())
+      .holdShelfExpiryPeriod(HoldShelfExpiryPeriod.builder().duration(3).intervalId(IntervalIdEnum.DAYS).build())
       .holdShelfClosedLibraryDateManagement(HOLD_SHELF_CLOSED_LIBRARY_DATE_MANAGEMENT)
       .build();
   }
 
-  public static TransactionStatus createTransactionStatus(TransactionStatus.StatusEnum statusEnum){
+  public static TransactionStatus createTransactionStatus(TransactionStatus.StatusEnum statusEnum) {
     return TransactionStatus.builder().status(statusEnum).build();
   }
 
-  public static TransactionStatus transactionStatus(TransactionStatus.StatusEnum statusEnum){
+  public static TransactionStatus transactionStatus(TransactionStatus.StatusEnum statusEnum) {
     return TransactionStatus.builder().status(statusEnum).build();
   }
 
@@ -190,8 +192,7 @@ public class EntityUtils {
   }
 
   public static DcbUpdateTransaction createDcbTransactionUpdate() {
-    return DcbUpdateTransaction
-      .builder()
+    return DcbUpdateTransaction.builder()
       .item(DcbUpdateItem
         .builder()
         .barcode(DCB_NEW_BARCODE)
@@ -220,6 +221,7 @@ public class EntityUtils {
       .group("staff")
       .build();
   }
+
   public static DcbPatron createDefaultDcbPatron() {
     return createDcbPatronWithExactPatronId(NOT_EXISTED_PATRON_ID);
   }
@@ -344,7 +346,7 @@ public class EntityUtils {
       .build();
   }
 
-  public static TransactionAuditEntity createTransactionAuditEntity(){
+  public static TransactionAuditEntity createTransactionAuditEntity() {
     return TransactionAuditEntity.builder()
       .id(UUID.randomUUID())
       .transactionId(UUID.randomUUID().toString())
@@ -455,8 +457,7 @@ public class EntityUtils {
   }
 
   public static DcbUpdateTransaction dcbTransactionUpdate() {
-    return DcbUpdateTransaction
-      .builder()
+    return DcbUpdateTransaction.builder()
       .item(DcbUpdateItem
         .builder()
         .barcode(DCB_ITEM_NEW_BARCODE)

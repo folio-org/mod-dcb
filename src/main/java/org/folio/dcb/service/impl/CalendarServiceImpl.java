@@ -1,16 +1,16 @@
 package org.folio.dcb.service.impl;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
-import org.folio.dcb.integration.calendar.CalendarClient;
-import org.folio.dcb.domain.dto.Calendar;
-import org.folio.dcb.service.CalendarService;
-import org.springframework.stereotype.Service;
+import static org.folio.dcb.utils.DcbConstants.DCB_CALENDAR_NAME;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
-
-import static org.folio.dcb.utils.DCBConstants.DCB_CALENDAR_NAME;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+import org.folio.dcb.domain.dto.Calendar;
+import org.folio.dcb.integration.calendar.CalendarClient;
+import org.folio.dcb.service.CalendarService;
+import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
@@ -22,7 +22,7 @@ public class CalendarServiceImpl implements CalendarService {
   public Calendar findCalendarByName(String calendarName) {
     log.debug("findCalendarByName:: Trying to find the calendar with name {}", calendarName);
     var calendars = getAllCalendars();
-    return findCalendarByName(calendars, calendarName);
+    return retrieveCalendarByName(calendars, calendarName);
   }
 
   @Override
@@ -53,12 +53,12 @@ public class CalendarServiceImpl implements CalendarService {
   public void associateServicePointIdWithDefaultCalendarIfAbsent(UUID servicePointId) {
     var calendars = getAllCalendars();
     if (checkServicePointIdAssociatedWithAnyCalendar(calendars, servicePointId)) {
-      log.info("associateServicePointIdWithDefaultCalendarIfAbsent:: servicePointId {} is already " +
-        "associated with calendar", servicePointId);
+      log.info("associateServicePointIdWithDefaultCalendarIfAbsent:: servicePointId {} is already "
+        + "associated with calendar", servicePointId);
     } else {
-      log.info("associateServicePointIdWithDefaultCalendarIfAbsent:: servicePointId {} is not " +
-        "associated with any calendar. so associating with default calendar", servicePointId);
-      var defaultDcbCalendar = findCalendarByName(calendars, DCB_CALENDAR_NAME);
+      log.info("associateServicePointIdWithDefaultCalendarIfAbsent:: servicePointId {} is not "
+        + "associated with any calendar. so associating with default calendar", servicePointId);
+      var defaultDcbCalendar = retrieveCalendarByName(calendars, DCB_CALENDAR_NAME);
       updateCalendarIfExists(DCB_CALENDAR_NAME, servicePointId, defaultDcbCalendar);
     }
   }
@@ -69,20 +69,18 @@ public class CalendarServiceImpl implements CalendarService {
       .getCalendars();
   }
 
-  private Calendar findCalendarByName(List<Calendar> calendars, String calendarName) {
+  private Calendar retrieveCalendarByName(List<Calendar> calendars, String calendarName) {
     log.debug("findCalendarByName:: Finding calendar with name {} from calendarList {}", calendarName, calendars);
-    return calendars
-      .stream()
-      .filter(calendar -> calendar.getName().equals(calendarName))
+    return calendars.stream()
+      .filter(calendar -> Objects.equals(calendar.getName(), calendarName))
       .findFirst()
       .orElse(null);
   }
 
   private boolean checkServicePointIdAssociatedWithAnyCalendar(List<Calendar> calendars, UUID servicePointId) {
-    log.debug("checkServicePointIdAssociatedWithAnyCalendar:: checking servicePointId {} associated with " +
-      "any calendar {}", servicePointId, calendars);
+    log.debug("checkServicePointIdAssociatedWithAnyCalendar:: checking servicePointId {} associated with "
+      + "any calendar {}", servicePointId, calendars);
     return calendars.stream()
       .anyMatch(calendar -> calendar.getAssignments().contains(servicePointId));
   }
-
 }
