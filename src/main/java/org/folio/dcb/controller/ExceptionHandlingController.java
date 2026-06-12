@@ -174,6 +174,7 @@ public class ExceptionHandlingController {
   }
 
   private void logExceptionMessage(Exception ex) {
-    log.warn("Exception occurred [{}]", ex.getClass().getSimpleName());
+    log.warn("Exception occurred [{}]", ex.getClass().getSimpleName(), ex);
+
   }
 }
