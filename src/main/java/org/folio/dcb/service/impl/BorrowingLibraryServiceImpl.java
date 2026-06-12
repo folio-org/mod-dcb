@@ -47,6 +47,7 @@ public class BorrowingLibraryServiceImpl implements LibraryService {
   public void updateTransactionStatus(TransactionEntity dcbTransaction, TransactionStatus transactionStatus) {
     log.debug("updateTransactionStatus:: Updating transaction {} from {} to {}.",
       dcbTransaction.getId(), dcbTransaction.getStatus(), transactionStatus.getStatus());
+    log.info("updateTransactionStatus:: transactionStatus={}", transactionStatus);
     var currStatus = dcbTransaction.getStatus();
     var newStatus = transactionStatus.getStatus();
     String randomServicePointId = UUID.randomUUID().toString();
@@ -60,8 +61,14 @@ public class BorrowingLibraryServiceImpl implements LibraryService {
       Optional.ofNullable(transactionStatus.getContext())
         .map(TransactionStatusContext::getClaimReturnedResolution)
         .ifPresentOrElse(
-          resolution -> circulationService.checkInByBarcode(dcbTransaction, randomServicePointId, resolution),
-          () -> circulationService.checkInByBarcode(dcbTransaction, randomServicePointId));
+          resolution -> {
+            log.info("updateTransactionStatus:: resolution={}", resolution);
+            circulationService.checkInByBarcode(dcbTransaction, randomServicePointId, resolution);
+          },
+          () -> {
+            log.info("updateTransactionStatus:: no resolution");
+            circulationService.checkInByBarcode(dcbTransaction, randomServicePointId);
+          });
 
       updateTransactionEntity(dcbTransaction, newStatus);
     } else if (OPEN == currStatus && AWAITING_PICKUP == newStatus) {
