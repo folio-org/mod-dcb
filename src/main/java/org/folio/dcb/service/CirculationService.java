@@ -1,6 +1,6 @@
 package org.folio.dcb.service;
 
-import org.folio.dcb.domain.dto.ClaimReturnedResolution;
+import org.folio.dcb.domain.dto.ClaimedReturnedResolution;
 import org.folio.dcb.domain.entity.TransactionEntity;
 
 public interface CirculationService {
@@ -19,10 +19,10 @@ public interface CirculationService {
    *
    * @param dcbTransaction dcbTransactionEntity
    * @param servicePointId service point id
-   * @param claimReturnedResolution optional claim returned resolution
+   * @param claimedReturnedResolution optional claim returned resolution
    */
   void checkInByBarcode(TransactionEntity dcbTransaction, String servicePointId,
-    ClaimReturnedResolution claimReturnedResolution);
+    ClaimedReturnedResolution claimedReturnedResolution);
 
   /**
    * Check out an item by barcode.

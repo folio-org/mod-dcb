@@ -20,7 +20,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.UUID;
-import org.folio.dcb.domain.dto.ClaimReturnedResolution;
+import org.folio.dcb.domain.dto.ClaimedReturnedResolution;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusContext;
 import org.folio.dcb.repository.TransactionRepository;
@@ -126,7 +126,7 @@ class BorrowingLibraryServiceTest {
     transactionEntity.setStatus(ITEM_CHECKED_OUT);
     doNothing().when(circulationService).checkInByBarcode(any(), any(), any());
     var context = TransactionStatusContext.builder()
-      .claimReturnedResolution(ClaimReturnedResolution.FOUND_BY_LIBRARY)
+      .claimedReturnedResolution(ClaimedReturnedResolution.FOUND_BY_LIBRARY)
       .build();
     TransactionStatus transactionStatus = TransactionStatus.builder()
       .status(ITEM_CHECKED_IN)
@@ -134,7 +134,7 @@ class BorrowingLibraryServiceTest {
       .build();
     borrowingLibraryService.updateTransactionStatus(transactionEntity, transactionStatus);
 
-    verify(circulationService).checkInByBarcode(any(), any(), eq(ClaimReturnedResolution.FOUND_BY_LIBRARY));
+    verify(circulationService).checkInByBarcode(any(), any(), eq(ClaimedReturnedResolution.FOUND_BY_LIBRARY));
     assertEquals(ITEM_CHECKED_IN, transactionEntity.getStatus());
   }
 
@@ -144,7 +144,7 @@ class BorrowingLibraryServiceTest {
     transactionEntity.setStatus(ITEM_CHECKED_OUT);
     doNothing().when(circulationService).checkInByBarcode(any(), any(), any());
     var context = TransactionStatusContext.builder()
-      .claimReturnedResolution(ClaimReturnedResolution.RETURNED_BY_PATRON)
+      .claimedReturnedResolution(ClaimedReturnedResolution.RETURNED_BY_PATRON)
       .build();
     TransactionStatus transactionStatus = TransactionStatus.builder()
       .status(ITEM_CHECKED_IN)
@@ -152,7 +152,7 @@ class BorrowingLibraryServiceTest {
       .build();
     borrowingLibraryService.updateTransactionStatus(transactionEntity, transactionStatus);
 
-    verify(circulationService).checkInByBarcode(any(), any(), eq(ClaimReturnedResolution.RETURNED_BY_PATRON));
+    verify(circulationService).checkInByBarcode(any(), any(), eq(ClaimedReturnedResolution.RETURNED_BY_PATRON));
     assertEquals(ITEM_CHECKED_IN, transactionEntity.getStatus());
   }
 }

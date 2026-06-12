@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dcb.domain.dto.CheckInRequest;
 import org.folio.dcb.domain.dto.CheckOutRequest;
-import org.folio.dcb.domain.dto.ClaimReturnedResolution;
+import org.folio.dcb.domain.dto.ClaimedReturnedResolution;
 import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.exception.CirculationRequestException;
 import org.folio.dcb.integration.circulation.CirculationClient;
@@ -37,12 +37,12 @@ public class CirculationServiceImpl implements CirculationService {
 
   @Override
   public void checkInByBarcode(TransactionEntity dcbTransaction, String servicePointId,
-    ClaimReturnedResolution claimReturnedResolution) {
+    ClaimedReturnedResolution claimedReturnedResolution) {
 
-    log.info("checkInByBarcode:: checking in item for transaction {} with claimReturnedResolution '{}'.",
-      dcbTransaction.getId(), claimReturnedResolution);
+    log.info("checkInByBarcode:: checking in item for transaction {} with claimedReturnedResolution '{}'.",
+      dcbTransaction.getId(), claimedReturnedResolution);
     CheckInRequest checkInRequest = createCheckInRequest(dcbTransaction.getItemBarcode(), servicePointId,
-      claimReturnedResolution);
+      claimedReturnedResolution);
     log.info("checkInByBarcode:: request={}", checkInRequest);
     circulationClient.checkInByBarcode(checkInRequest);
   }
@@ -77,13 +77,13 @@ public class CirculationServiceImpl implements CirculationService {
   }
 
   private CheckInRequest createCheckInRequest(String itemBarcode, String servicePointId,
-    ClaimReturnedResolution claimReturnedResolution) {
+    ClaimedReturnedResolution claimedReturnedResolution) {
 
     return CheckInRequest.builder()
       .itemBarcode(itemBarcode)
       .servicePointId(servicePointId)
       .checkInDate(OffsetDateTime.now().toString())
-      .claimReturnedResolution(claimReturnedResolution)
+      .claimedReturnedResolution(claimedReturnedResolution)
       .build();
   }
 

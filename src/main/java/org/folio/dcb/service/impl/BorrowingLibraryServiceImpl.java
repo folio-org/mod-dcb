@@ -59,7 +59,7 @@ public class BorrowingLibraryServiceImpl implements LibraryService {
     } else if (ITEM_CHECKED_OUT == currStatus && ITEM_CHECKED_IN == newStatus) {
       log.info("updateTransactionStatus:: Checking in item for transaction {}.", dcbTransaction.getId());
       Optional.ofNullable(transactionStatus.getContext())
-        .map(TransactionStatusContext::getClaimReturnedResolution)
+        .map(TransactionStatusContext::getClaimedReturnedResolution)
         .ifPresentOrElse(
           resolution -> {
             log.info("updateTransactionStatus:: resolution={}", resolution);

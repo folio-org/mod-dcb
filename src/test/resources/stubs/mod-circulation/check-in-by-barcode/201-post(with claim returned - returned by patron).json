@@ -6,7 +6,7 @@
       {
         "equalToJson": {
           "itemBarcode": "DCB_ITEM",
-          "claimReturnedResolution": "Returned by patron"
+          "claimedReturnedResolution": "Returned by patron"
         },
         "ignoreExtraElements": true
       },

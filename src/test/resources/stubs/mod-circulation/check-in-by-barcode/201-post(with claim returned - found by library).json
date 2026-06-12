@@ -6,7 +6,7 @@
       {
         "equalToJson": {
           "itemBarcode": "DCB_ITEM",
-          "claimReturnedResolution": "Found by library"
+          "claimedReturnedResolution": "Found by library"
         },
         "ignoreExtraElements": true
       },
