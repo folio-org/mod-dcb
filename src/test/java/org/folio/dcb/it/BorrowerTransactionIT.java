@@ -43,7 +43,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Map;
+import org.folio.dcb.domain.dto.ClaimedReturnedResolution;
+import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatus.StatusEnum;
+import org.folio.dcb.domain.dto.TransactionStatusContext;
 import org.folio.dcb.it.base.BaseTenantIntegrationTest;
 import org.folio.dcb.support.types.IntegrationTest;
 import org.folio.dcb.support.wiremock.WireMockStub;
@@ -219,6 +222,54 @@ class BorrowerTransactionIT extends BaseTenantIntegrationTest {
     testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, ITEM_CHECKED_OUT, borrowerDcbTransaction());
     putDcbTransactionStatus(DCB_TRANSACTION_ID, transactionStatus(ITEM_CHECKED_IN))
       .andExpect(jsonPath("$.status").value("ITEM_CHECKED_IN"));
+  }
+
+  @Test
+  @WireMockStub("/stubs/mod-circulation/check-in-by-barcode/201-post(with claim returned - found by library).json")
+  void updateTransactionStatus_positive_fromItemCheckedOutToItemCheckedInWithFoundByLibrary() throws Exception {
+    testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, ITEM_CHECKED_OUT, borrowerDcbTransaction());
+    var context = TransactionStatusContext.builder()
+      .claimedReturnedResolution(ClaimedReturnedResolution.FOUND_BY_LIBRARY)
+      .build();
+    var transactionStatus = TransactionStatus.builder()
+      .status(ITEM_CHECKED_IN)
+      .context(context)
+      .build();
+    putDcbTransactionStatus(DCB_TRANSACTION_ID, transactionStatus)
+      .andExpect(jsonPath("$.status").value("ITEM_CHECKED_IN"));
+
+    wiremock.verifyThat(1, postRequestedFor(urlPathEqualTo("/circulation/check-in-by-barcode"))
+      .withRequestBody(matchingJsonPath("$.claimedReturnedResolution", equalTo("Found by library"))));
+  }
+
+  @Test
+  @WireMockStub("/stubs/mod-circulation/check-in-by-barcode/201-post(with claim returned - returned by patron).json")
+  void updateTransactionStatus_positive_fromItemCheckedOutToItemCheckedInWithReturnedByPatron() throws Exception {
+
+    testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, ITEM_CHECKED_OUT, borrowerDcbTransaction());
+    var context = TransactionStatusContext.builder()
+      .claimedReturnedResolution(ClaimedReturnedResolution.RETURNED_BY_PATRON)
+      .build();
+    var transactionStatus = TransactionStatus.builder()
+      .status(ITEM_CHECKED_IN)
+      .context(context)
+      .build();
+    putDcbTransactionStatus(DCB_TRANSACTION_ID, transactionStatus)
+      .andExpect(jsonPath("$.status").value("ITEM_CHECKED_IN"));
+
+    wiremock.verifyThat(1, postRequestedFor(urlPathEqualTo("/circulation/check-in-by-barcode"))
+      .withRequestBody(matchingJsonPath("$.claimedReturnedResolution", equalTo("Returned by patron"))));
+  }
+
+  @Test
+  void updateTransactionStatus_negative_invalidClaimedReturnedResolution() throws Exception {
+    testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, ITEM_CHECKED_OUT, borrowerDcbTransaction());
+    mockMvc.perform(put("/transactions/{id}/status", DCB_TRANSACTION_ID)
+        .content("{\"status\":\"ITEM_CHECKED_IN\",\"context\":{\"claimedReturnedResolution\":\"INVALID_VALUE\"}}")
+        .headers(defaultHeaders())
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isBadRequest());
   }
 
   @Test

@@ -9,12 +9,14 @@ import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_OUT;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
 
+import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.ServicePointRequest;
 import org.folio.dcb.domain.dto.TransactionStatus;
+import org.folio.dcb.domain.dto.TransactionStatusContext;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.repository.TransactionRepository;
@@ -47,11 +49,20 @@ public class BorrowingLibraryServiceImpl implements LibraryService {
       dcbTransaction.getId(), dcbTransaction.getStatus(), transactionStatus.getStatus());
     var currStatus = dcbTransaction.getStatus();
     var newStatus = transactionStatus.getStatus();
+    String randomServicePointId = UUID.randomUUID().toString();
 
-    if (CREATED == currStatus && OPEN == newStatus || ITEM_CHECKED_OUT == currStatus && ITEM_CHECKED_IN == newStatus) {
+    if (CREATED == currStatus && OPEN == newStatus) {
       log.info("updateTransactionStatus:: Checking in item for transaction {}.", dcbTransaction.getId());
-      // Random UUID for servicePointId.
-      circulationService.checkInByBarcode(dcbTransaction, UUID.randomUUID().toString());
+      circulationService.checkInByBarcode(dcbTransaction, randomServicePointId);
+      updateTransactionEntity(dcbTransaction, newStatus);
+    } else if (ITEM_CHECKED_OUT == currStatus && ITEM_CHECKED_IN == newStatus) {
+      log.info("updateTransactionStatus:: Checking in item for transaction {}.", dcbTransaction.getId());
+      Optional.ofNullable(transactionStatus.getContext())
+        .map(TransactionStatusContext::getClaimedReturnedResolution)
+        .ifPresentOrElse(
+          resolution -> circulationService.checkInByBarcode(dcbTransaction, randomServicePointId, resolution),
+          () -> circulationService.checkInByBarcode(dcbTransaction, randomServicePointId));
+
       updateTransactionEntity(dcbTransaction, newStatus);
     } else if (OPEN == currStatus && AWAITING_PICKUP == newStatus) {
       circulationService.checkInByBarcode(dcbTransaction);

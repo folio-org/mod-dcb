@@ -14,12 +14,15 @@ import static org.folio.dcb.utils.EntityUtils.createTransactionEntity;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.UUID;
+import org.folio.dcb.domain.dto.ClaimedReturnedResolution;
 import org.folio.dcb.domain.dto.TransactionStatus;
+import org.folio.dcb.domain.dto.TransactionStatusContext;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.impl.BaseLibraryService;
 import org.folio.dcb.service.impl.BorrowingLibraryServiceImpl;
@@ -114,6 +117,42 @@ class BorrowingLibraryServiceTest {
     borrowingLibraryService.updateTransactionStatus(transactionEntity, transactionStatus);
 
     verify(circulationService).checkInByBarcode(any(), any());
+    assertEquals(ITEM_CHECKED_IN, transactionEntity.getStatus());
+  }
+
+  @Test
+  void testTransactionStatusUpdateFromItemCheckedOutToItemCheckedInWithFoundByLibrary() {
+    var transactionEntity = createTransactionEntity();
+    transactionEntity.setStatus(ITEM_CHECKED_OUT);
+    doNothing().when(circulationService).checkInByBarcode(any(), any(), any());
+    var context = TransactionStatusContext.builder()
+      .claimedReturnedResolution(ClaimedReturnedResolution.FOUND_BY_LIBRARY)
+      .build();
+    TransactionStatus transactionStatus = TransactionStatus.builder()
+      .status(ITEM_CHECKED_IN)
+      .context(context)
+      .build();
+    borrowingLibraryService.updateTransactionStatus(transactionEntity, transactionStatus);
+
+    verify(circulationService).checkInByBarcode(any(), any(), eq(ClaimedReturnedResolution.FOUND_BY_LIBRARY));
+    assertEquals(ITEM_CHECKED_IN, transactionEntity.getStatus());
+  }
+
+  @Test
+  void testTransactionStatusUpdateFromItemCheckedOutToItemCheckedInWithReturnedByPatron() {
+    var transactionEntity = createTransactionEntity();
+    transactionEntity.setStatus(ITEM_CHECKED_OUT);
+    doNothing().when(circulationService).checkInByBarcode(any(), any(), any());
+    var context = TransactionStatusContext.builder()
+      .claimedReturnedResolution(ClaimedReturnedResolution.RETURNED_BY_PATRON)
+      .build();
+    TransactionStatus transactionStatus = TransactionStatus.builder()
+      .status(ITEM_CHECKED_IN)
+      .context(context)
+      .build();
+    borrowingLibraryService.updateTransactionStatus(transactionEntity, transactionStatus);
+
+    verify(circulationService).checkInByBarcode(any(), any(), eq(ClaimedReturnedResolution.RETURNED_BY_PATRON));
     assertEquals(ITEM_CHECKED_IN, transactionEntity.getStatus());
   }
 }

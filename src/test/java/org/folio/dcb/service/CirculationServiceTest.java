@@ -1,15 +1,18 @@
 package org.folio.dcb.service;
 
+import static java.util.UUID.randomUUID;
 import static org.folio.dcb.utils.EntityUtils.createCirculationRequest;
 import static org.folio.dcb.utils.EntityUtils.createTransactionEntity;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.UUID;
 import org.folio.dcb.domain.dto.CirculationRequest;
+import org.folio.dcb.domain.dto.ClaimedReturnedResolution;
 import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.exception.CirculationRequestException;
 import org.folio.dcb.integration.circulation.CirculationClient;
@@ -40,6 +43,20 @@ class CirculationServiceTest {
   void checkInByBarcodeWithServicePointTest() {
     circulationService.checkInByBarcode(createTransactionEntity(), String.valueOf(UUID.randomUUID()));
     verify(circulationClient).checkInByBarcode(any());
+  }
+
+  @Test
+  void checkInByBarcodeWithServicePointAndClaimedReturnedResolutionTest() {
+    circulationService.checkInByBarcode(createTransactionEntity(), randomUUID().toString(),
+      ClaimedReturnedResolution.FOUND_BY_LIBRARY);
+    verify(circulationClient).checkInByBarcode(argThat(req ->
+      ClaimedReturnedResolution.FOUND_BY_LIBRARY.equals(req.getClaimedReturnedResolution())));
+  }
+
+  @Test
+  void checkInByBarcodeWithServicePointAndNullClaimedReturnedResolutionTest() {
+    circulationService.checkInByBarcode(createTransactionEntity(), randomUUID().toString(), null);
+    verify(circulationClient).checkInByBarcode(argThat(req -> req.getClaimedReturnedResolution() == null));
   }
 
   @Test
