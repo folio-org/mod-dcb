@@ -1,5 +1,8 @@
-## 1.3.11 2026-05-27
+## 1.3.12 2026-06-15
 * Fix close LENDER DCB transaction on check-in regardless of item status when holds exist ([MODDCB-267](https://folio-org.atlassian.net/browse/MODDCB-267))
+
+## 1.3.11 2026-05-27
+* Implement DCB transaction expiry and Settings API ([MODDCB-257](https://folio-org.atlassian.net/browse/MODDCB-257))
 * Fix DCB circulation item effective location not updated on re-request with shadow location ([MODDCB-270](https://folio-org.atlassian.net/browse/MODDCB-270))
 * Allow new transaction creation when EXPIRED transaction exists for same item ([MODDCB-271](https://folio-org.atlassian.net/browse/MODDCB-271))
 
