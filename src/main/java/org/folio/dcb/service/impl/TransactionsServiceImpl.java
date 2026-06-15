@@ -232,6 +232,18 @@ public class TransactionsServiceImpl implements TransactionsService {
     setRenewalNumberForVirtualLoan(transactionEntity, 0);
   }
 
+  private void processLenderRoleTransaction(TransactionStatus status, TransactionEntity transaction) {
+    statusProcessorService.lendingChainProcessor(transaction.getStatus(), status.getStatus())
+      .forEach(statusEnum -> lendingLibraryService.updateTransactionStatus(
+        transaction, TransactionStatus.builder().status(statusEnum).build()));
+  }
+
+  private void processBorrowerTransaction(TransactionStatus status, TransactionEntity transaction) {
+    statusProcessorService.borrowingChainProcessor(transaction.getStatus(), status.getStatus())
+      .forEach(statusEnum -> borrowingLibraryService.updateTransactionStatus(
+        transaction, TransactionStatus.builder().status(statusEnum).build()));
+  }
+
   private void validateLoanPolicy(String loanPolicyId, LoanPolicy loanPolicy) {
     if (Objects.isNull(loanPolicy)) {
       log.debug("validateLoanPolicy:: Loan policy is null");

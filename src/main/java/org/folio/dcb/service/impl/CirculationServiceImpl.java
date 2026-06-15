@@ -6,6 +6,7 @@ import org.folio.dcb.integration.circulation.CirculationClient;
 import org.folio.dcb.domain.dto.CheckInRequest;
 import org.folio.dcb.domain.dto.CheckOutRequest;
 import org.folio.dcb.domain.dto.CirculationRequest;
+import org.folio.dcb.domain.dto.ClaimedReturnedResolution;
 import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.exception.CirculationRequestException;
 import org.folio.dcb.service.CirculationService;
@@ -35,6 +36,16 @@ public class CirculationServiceImpl implements CirculationService {
   }
 
   @Override
+  public void checkInByBarcode(TransactionEntity dcbTransaction, String servicePointId,
+    ClaimedReturnedResolution claimedReturnedResolution) {
+
+    log.info("checkInByBarcode:: checking in item for transaction {} with claimedReturnedResolution '{}'.",
+      dcbTransaction.getId(), claimedReturnedResolution);
+    circulationClient.checkInByBarcode(createCheckInRequest(dcbTransaction.getItemBarcode(), servicePointId,
+      claimedReturnedResolution));
+  }
+
+  @Override
   public void checkOutByBarcode(TransactionEntity dcbTransaction) {
     log.debug("checkOutByBarcode:: checking out item for transaction {}.", dcbTransaction.getId());
     circulationClient.checkOutByBarcode(createCheckOutRequest(dcbTransaction.getItemBarcode(), dcbTransaction.getPatronBarcode(), dcbTransaction.getServicePointId()));
@@ -57,11 +68,18 @@ public class CirculationServiceImpl implements CirculationService {
     }
   }
 
-  private CheckInRequest createCheckInRequest(String itemBarcode, String servicePointId){
+  private CheckInRequest createCheckInRequest(String itemBarcode, String servicePointId) {
+    return createCheckInRequest(itemBarcode, servicePointId, null);
+  }
+
+  private CheckInRequest createCheckInRequest(String itemBarcode, String servicePointId,
+    ClaimedReturnedResolution claimedReturnedResolution) {
+
     return CheckInRequest.builder()
       .itemBarcode(itemBarcode)
       .servicePointId(servicePointId)
       .checkInDate(OffsetDateTime.now().toString())
+      .claimedReturnedResolution(claimedReturnedResolution)
       .build();
   }
 
