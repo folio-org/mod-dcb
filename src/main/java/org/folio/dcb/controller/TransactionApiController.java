@@ -56,7 +56,6 @@ public class TransactionApiController implements TransactionsApi {
   @Override
   public ResponseEntity<TransactionStatusResponse> updateTransactionStatus(String id, TransactionStatus status) {
     log.info("updateTransactionStatus:: updating dcbTransaction with id {} to status {} ", id, status.getStatus());
-    log.info("updateTransactionStatus:: status={}", status);
     try {
       var transactionStatusResponse = transactionsService.updateTransactionStatus(id, status);
       return ResponseEntity.status(HttpStatus.OK).body(transactionStatusResponse);

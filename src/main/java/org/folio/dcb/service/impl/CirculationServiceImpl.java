@@ -41,10 +41,8 @@ public class CirculationServiceImpl implements CirculationService {
 
     log.info("checkInByBarcode:: checking in item for transaction {} with claimedReturnedResolution '{}'.",
       dcbTransaction.getId(), claimedReturnedResolution);
-    CheckInRequest checkInRequest = createCheckInRequest(dcbTransaction.getItemBarcode(), servicePointId,
-      claimedReturnedResolution);
-    log.info("checkInByBarcode:: request={}", checkInRequest);
-    circulationClient.checkInByBarcode(checkInRequest);
+    circulationClient.checkInByBarcode(createCheckInRequest(dcbTransaction.getItemBarcode(), servicePointId,
+      claimedReturnedResolution));
   }
 
   @Override
