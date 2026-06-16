@@ -229,8 +229,8 @@ public class TransactionsServiceImpl implements TransactionsService {
 
   private void processBorrowerTransaction(TransactionStatus status, TransactionEntity transaction) {
     statusProcessorService.borrowingChainProcessor(transaction.getStatus(), status.getStatus())
-      .forEach(statusEnum -> borrowingLibraryService.updateTransactionStatus(
-        transaction, TransactionStatus.builder().status(statusEnum).build()));
+      .forEach(statusEnum -> borrowingLibraryService.updateTransactionStatus(transaction,
+        TransactionStatus.builder().status(statusEnum).context(status.getContext()).build()));
   }
 
   private void validateLoanPolicy(String loanPolicyId, LoanPolicy loanPolicy) {
