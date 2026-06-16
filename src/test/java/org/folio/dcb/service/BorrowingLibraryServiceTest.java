@@ -17,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -24,16 +25,17 @@ import java.util.UUID;
 import org.folio.dcb.domain.dto.ClaimedReturnedResolution;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusContext;
-import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.impl.BaseLibraryService;
 import org.folio.dcb.service.impl.BorrowingLibraryServiceImpl;
+import org.folio.dcb.support.types.UnitTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+@UnitTest
 @ExtendWith(MockitoExtension.class)
 class BorrowingLibraryServiceTest {
 
@@ -48,11 +50,13 @@ class BorrowingLibraryServiceTest {
     var transactionEntity = createTransactionEntity();
     transactionEntity.setStatus(OPEN);
     doNothing().when(circulationService).checkInByBarcode(transactionEntity);
+
     var transactionStatus = TransactionStatus.builder().status(AWAITING_PICKUP).build();
     borrowingLibraryService.updateTransactionStatus(transactionEntity, transactionStatus);
 
     verify(circulationService).checkInByBarcode(any());
     assertEquals(AWAITING_PICKUP, transactionEntity.getStatus());
+    verify(transactionRepository).save(any());
   }
 
   @Test
@@ -60,6 +64,7 @@ class BorrowingLibraryServiceTest {
     var transactionEntity = createTransactionEntity();
     transactionEntity.setStatus(CREATED);
     doNothing().when(circulationService).checkInByBarcode(any(), any());
+
     var transactionStatus = TransactionStatus.builder().status(OPEN).build();
     borrowingLibraryService.updateTransactionStatus(transactionEntity, transactionStatus);
 
@@ -82,7 +87,9 @@ class BorrowingLibraryServiceTest {
     var dcbTransaction = createDcbTransactionByRole(BORROWER);
     servicePointRequest.setId(UUID.randomUUID().toString());
     when(servicePointService.createServicePointIfNotExists(dcbTransaction)).thenReturn(servicePointRequest);
+
     borrowingLibraryService.createCirculation(DCB_TRANSACTION_ID, dcbTransaction);
+
     assertEquals(servicePointRequest.getId(), dcbTransaction.getPickup().getServicePointId());
     verify(baseLibraryService).createBorrowingLibraryTransaction(
       DCB_TRANSACTION_ID, dcbTransaction, servicePointRequest.getId());
@@ -93,6 +100,7 @@ class BorrowingLibraryServiceTest {
     var transactionEntity = createTransactionEntity();
     transactionEntity.setStatus(ITEM_CHECKED_IN);
     var transactionStatus = TransactionStatus.builder().status(CLOSED).build();
+
     borrowingLibraryService.updateTransactionStatus(transactionEntity, transactionStatus);
 
     assertEquals(CLOSED, transactionEntity.getStatus());
@@ -103,6 +111,7 @@ class BorrowingLibraryServiceTest {
     var transactionEntity = createTransactionEntity();
     transactionEntity.setStatus(AWAITING_PICKUP);
     doNothing().when(circulationService).checkOutByBarcode(transactionEntity);
+
     var transactionStatus = TransactionStatus.builder().status(ITEM_CHECKED_OUT).build();
     borrowingLibraryService.updateTransactionStatus(transactionEntity, transactionStatus);
 
@@ -115,6 +124,7 @@ class BorrowingLibraryServiceTest {
     var transactionEntity = createTransactionEntity();
     transactionEntity.setStatus(ITEM_CHECKED_OUT);
     doNothing().when(circulationService).checkInByBarcode(any(), any());
+
     var transactionStatus = TransactionStatus.builder().status(ITEM_CHECKED_IN).build();
     borrowingLibraryService.updateTransactionStatus(transactionEntity, transactionStatus);
 
@@ -134,6 +144,7 @@ class BorrowingLibraryServiceTest {
       .status(ITEM_CHECKED_IN)
       .context(context)
       .build();
+
     borrowingLibraryService.updateTransactionStatus(transactionEntity, transactionStatus);
 
     verify(circulationService).checkInByBarcode(any(), any(), eq(ClaimedReturnedResolution.FOUND_BY_LIBRARY));
@@ -152,6 +163,7 @@ class BorrowingLibraryServiceTest {
       .status(ITEM_CHECKED_IN)
       .context(context)
       .build();
+
     borrowingLibraryService.updateTransactionStatus(transactionEntity, transactionStatus);
 
     verify(circulationService).checkInByBarcode(any(), any(), eq(ClaimedReturnedResolution.RETURNED_BY_PATRON));
@@ -159,15 +171,14 @@ class BorrowingLibraryServiceTest {
   }
 
   @Test
-  void testTransactionStatusUpdateToCancelled() {
+  void updateTransactionStatus_positive_fromOpenToCancelled() {
     // TestMate-e1cff5bbc66a1de74fa24b29a6802de6
-    // Given
-    TransactionEntity transactionEntity = createTransactionEntity();
+    var transactionEntity = createTransactionEntity();
     transactionEntity.setStatus(OPEN);
+
     var transactionStatus = new TransactionStatus().status(CANCELLED);
-    // When
     borrowingLibraryService.updateTransactionStatus(transactionEntity, transactionStatus);
-    // Then
     verify(baseLibraryService).cancelTransactionRequest(transactionEntity);
+    verify(transactionRepository, never()).save(any());
   }
 }
