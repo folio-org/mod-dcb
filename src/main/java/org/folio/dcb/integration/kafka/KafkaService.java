@@ -1,19 +1,20 @@
 package org.folio.dcb.integration.kafka;
 
+import static org.folio.dcb.integration.kafka.CirculationEventListener.CHECK_IN_LISTENER_ID;
+import static org.folio.dcb.integration.kafka.CirculationEventListener.CHECK_OUT_LOAN_LISTENER_ID;
+import static org.folio.dcb.integration.kafka.CirculationEventListener.REQUEST_LISTENER_ID;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
 import org.springframework.stereotype.Component;
 
-import static org.folio.dcb.integration.kafka.CirculationEventListener.CHECK_IN_LISTENER_ID;
-import static org.folio.dcb.integration.kafka.CirculationEventListener.CHECK_OUT_LOAN_LISTENER_ID;
-import static org.folio.dcb.integration.kafka.CirculationEventListener.REQUEST_LISTENER_ID;
-
-@Component
 @Log4j2
+@Component
 @RequiredArgsConstructor
 public class KafkaService {
   private final KafkaListenerEndpointRegistry kafkaListenerEndpointRegistry;
+
   /**
    * Restarts kafka event listeners in mod-dcb application.
    */

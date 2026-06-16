@@ -1,8 +1,8 @@
 package org.folio.dcb.service.entities;
 
 import static org.folio.dcb.utils.CqlQuery.exactMatchById;
-import static org.folio.dcb.utils.DCBConstants.CANCELLATION_REASON_ID;
-import static org.folio.dcb.utils.DCBConstants.DCB_CANCELLATION_REASON_NAME;
+import static org.folio.dcb.utils.DcbConstants.CANCELLATION_REASON_ID;
+import static org.folio.dcb.utils.DcbConstants.DCB_CANCELLATION_REASON_NAME;
 
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;

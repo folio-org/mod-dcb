@@ -1,9 +1,9 @@
 package org.folio.dcb.utils;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.SneakyThrows;
 import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.JsonNode;
-import lombok.SneakyThrows;
 import tools.jackson.databind.json.JsonMapper;
 
 public class JsonTestUtils {

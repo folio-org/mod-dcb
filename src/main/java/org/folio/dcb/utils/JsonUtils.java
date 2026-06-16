@@ -1,9 +1,9 @@
 package org.folio.dcb.utils;
 
-import tools.jackson.core.JacksonException;
-import tools.jackson.databind.ObjectMapper;
 import lombok.experimental.UtilityClass;
 import lombok.extern.log4j.Log4j2;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 @UtilityClass
 @Log4j2
@@ -19,5 +19,4 @@ public class JsonUtils {
       throw new IllegalArgumentException(DESERIALIZATION_FAILURE + ex.getMessage());
     }
   }
-
 }

@@ -3,23 +3,15 @@ package org.folio.dcb.listener;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.folio.dcb.domain.ResultList.asSinglePage;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
-import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.AVAILABLE;
-import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.AWAITING_PICKUP;
-import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.IN_TRANSIT;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CLOSED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.EXPIRED;
-import static org.folio.dcb.utils.CqlQuery.exactMatchById;
-import static org.folio.dcb.utils.EntityUtils.VIRTUAL_SERVICE_POINT_ID;
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
 import static org.folio.dcb.utils.EntityUtils.EXISTED_PATRON_ID;
 import static org.folio.dcb.utils.EntityUtils.ITEM_ID;
-import static org.folio.dcb.utils.EntityUtils.PICKUP_SERVICE_POINT_ID;
 import static org.folio.dcb.utils.EntityUtils.getMockDataAsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -27,13 +19,9 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import org.folio.dcb.integration.invstorage.InventoryItemStorageClient;
-import org.folio.dcb.domain.dto.InventoryItem;
-import org.folio.dcb.domain.dto.ItemLastCheckIn;
-import org.folio.dcb.domain.dto.ItemStatus;
 import org.folio.dcb.domain.entity.TransactionEntity;
-import org.folio.dcb.it.base.BaseTenantIntegrationTest;
 import org.folio.dcb.integration.kafka.CirculationEventListener;
+import org.folio.dcb.it.base.BaseTenantIntegrationTest;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.spring.integration.XOkapiHeaders;
 import org.junit.jupiter.api.Test;
@@ -57,64 +45,25 @@ class CirculationCheckInEventListenerIT extends BaseTenantIntegrationTest {
   @Captor private ArgumentCaptor<TransactionEntity> transactionEntityArgumentCaptor;
   @Autowired private CirculationEventListener eventListener;
   @MockitoBean private TransactionRepository repository;
-  @MockitoBean private InventoryItemStorageClient itemStorageClient;
 
   @Test
   void handleCheckInEvent_positive_expiredDcbTransactionFound() {
-    var prevItem = new InventoryItem()
-      .id(ITEM_ID)
-      .status(new ItemStatus().name(AWAITING_PICKUP))
-      .lastCheckIn(new ItemLastCheckIn().servicePointId(PICKUP_SERVICE_POINT_ID));
-
-    var validItem = new InventoryItem()
-      .id(ITEM_ID)
-      .status(new ItemStatus().name(AVAILABLE))
-      .lastCheckIn(new ItemLastCheckIn().servicePointId(VIRTUAL_SERVICE_POINT_ID));
-
     when(repository.findExpiredTransactionsByItemId(ITEM_UUID)).thenReturn(List.of(transactionEntity()));
     when(repository.save(transactionEntityArgumentCaptor.capture())).then(v -> v.getArgument(0));
-    when(itemStorageClient.findByQuery(exactMatchById(ITEM_ID).getQuery()))
-      .thenReturn(asSinglePage(prevItem))
-      .thenReturn(asSinglePage(validItem));
 
     eventListener.handleCheckInEvent(CHECK_IN_EVENT_SAMPLE, messageHeaders());
 
     verify(repository).save(any());
-    verify(itemStorageClient, times(2)).findByQuery(exactMatchById(ITEM_ID).getQuery());
-    var savedValue = transactionEntityArgumentCaptor.getValue();
-    assertThat(savedValue.getStatus()).isEqualTo(CLOSED);
+    assertThat(transactionEntityArgumentCaptor.getValue().getStatus()).isEqualTo(CLOSED);
   }
 
   @Test
-  void handleCheckInEvent_positive_itemWithValidServicePointNotFound() {
-    var item = new InventoryItem()
-      .id(ITEM_ID)
-      .status(new ItemStatus().name(AWAITING_PICKUP))
-      .lastCheckIn(new ItemLastCheckIn().servicePointId(PICKUP_SERVICE_POINT_ID));
-
-    when(repository.findExpiredTransactionsByItemId(ITEM_UUID)).thenReturn(List.of(transactionEntity()));
-    when(itemStorageClient.findByQuery(exactMatchById(ITEM_ID).getQuery())).thenReturn(asSinglePage(item));
-
-    eventListener.handleCheckInEvent(CHECK_IN_EVENT_SAMPLE, messageHeaders());
-
-    verify(itemStorageClient, times(4)).findByQuery(exactMatchById(ITEM_ID).getQuery());
-    verify(repository, never()).save(any());
-  }
-
-  @Test
-  void handleCheckInEvent_positive_expiredDcbTransactionFoundWithNotAvailableItem() {
-    var item = new InventoryItem().id(ITEM_ID)
-      .status(new ItemStatus().name(IN_TRANSIT))
-      .lastCheckIn(new ItemLastCheckIn().servicePointId(VIRTUAL_SERVICE_POINT_ID));
-
-    when(repository.findExpiredTransactionsByItemId(ITEM_UUID)).thenReturn(List.of(transactionEntity()));
-    when(repository.save(transactionEntityArgumentCaptor.capture())).then(v -> v.getArgument(0));
-    when(itemStorageClient.findByQuery(exactMatchById(ITEM_ID).getQuery())).thenReturn(asSinglePage(item));
+  void handleCheckInEvent_positive_expiredDcbTransactionNotFound() {
+    when(repository.findExpiredTransactionsByItemId(ITEM_UUID)).thenReturn(emptyList());
 
     eventListener.handleCheckInEvent(CHECK_IN_EVENT_SAMPLE, messageHeaders());
 
     verify(repository, never()).save(any());
-    verify(itemStorageClient).findByQuery(exactMatchById(ITEM_ID).getQuery());
   }
 
   @ParameterizedTest
@@ -133,18 +82,6 @@ class CirculationCheckInEventListenerIT extends BaseTenantIntegrationTest {
   void handleCheckInEvent_parameterized_emptyMessageHeaders() {
     eventListener.handleCheckInEvent(CHECK_IN_EVENT_SAMPLE, new MessageHeaders(emptyMap()));
     verifyNoInteractions(repository);
-  }
-
-  @Test
-  void handleCheckInEvent_positive_expiredDcbTransactionNotFound() {
-    var item = new InventoryItem().id(ITEM_ID).status(new ItemStatus().name(AVAILABLE));
-
-    when(repository.findExpiredTransactionsByItemId(ITEM_UUID)).thenReturn(emptyList());
-    when(itemStorageClient.findByQuery(exactMatchById(ITEM_ID).getQuery())).thenReturn(asSinglePage(item));
-
-    eventListener.handleCheckInEvent(CHECK_IN_EVENT_SAMPLE, messageHeaders());
-
-    verify(repository, never()).save(any());
   }
 
   private static MessageHeaders messageHeaders() {

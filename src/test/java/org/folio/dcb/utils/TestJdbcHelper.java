@@ -73,7 +73,8 @@ public class TestJdbcHelper {
 
   @Transactional
   public void saveDcbSetting(String tenantId, Setting setting) {
-    log.debug("saveDcbSetting:: providing db entity: tenant={}, setting={}", () -> tenantId, () -> asJsonString(setting));
+    log.debug("saveDcbSetting:: providing db entity: tenant={}, setting={}",
+      () -> tenantId, () -> asJsonString(setting));
 
     var createdDate = OffsetDateTime.now(ZoneOffset.UTC).minusSeconds(600);
     var params = new MapSqlParameterSource()
@@ -107,9 +108,10 @@ public class TestJdbcHelper {
 
   private static @NonNull String getDcbSettingSql(String tenantId) {
     @Language("PostgreSQL") var dcbSettingSqlTemplate = """
-      INSERT INTO %s_mod_dcb.settings (id, key, scope, value, version, created_by, created_date, updated_by, updated_date)
-      VALUES (:id, :key, :scope, :value::jsonb, :version, :createdBy, :createdDate, :updatedBy, :updatedDate)
-    """;
+      INSERT INTO %s_mod_dcb.settings (id, key, scope, value, version, created_by, created_date,
+                                       updated_by, updated_date)
+      VALUES (:id, :key, :scope, :value::JSONB, :version, :createdBy, :createdDate, :updatedBy, :updatedDate)
+      """;
 
     return dcbSettingSqlTemplate.formatted(tenantId);
   }

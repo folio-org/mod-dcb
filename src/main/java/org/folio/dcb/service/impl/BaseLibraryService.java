@@ -1,5 +1,15 @@
 package org.folio.dcb.service.impl;
 
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CANCELLED;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CLOSED;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_IN;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
+import static org.folio.dcb.utils.DcbConstants.DCB_TYPE;
+
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.BooleanUtils;
@@ -8,14 +18,12 @@ import org.folio.dcb.domain.dto.CirculationRequest;
 import org.folio.dcb.domain.dto.DcbItem;
 import org.folio.dcb.domain.dto.DcbPatron;
 import org.folio.dcb.domain.dto.DcbTransaction;
-import org.folio.dcb.domain.dto.DcbTransaction.RoleEnum;
 import org.folio.dcb.domain.dto.DcbUpdateItem;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.domain.mapper.TransactionMapper;
 import org.folio.dcb.exception.CirculationRequestException;
-import org.folio.dcb.exception.InventoryItemNotFound;
 import org.folio.dcb.exception.ResourceAlreadyExistException;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.CirculationItemService;
@@ -24,18 +32,6 @@ import org.folio.dcb.service.ItemService;
 import org.folio.dcb.service.RequestService;
 import org.folio.dcb.service.UserService;
 import org.springframework.stereotype.Service;
-
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.folio.dcb.domain.dto.ItemStatus.NameEnum.AVAILABLE;
-import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CANCELLED;
-import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CLOSED;
-import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
-import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_IN;
-import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
-import static org.folio.dcb.utils.DCBConstants.DCB_TYPE;
 
 @Service
 @RequiredArgsConstructor
@@ -50,20 +46,22 @@ public class BaseLibraryService {
   private final TransactionMapper transactionMapper;
   private final ItemService itemService;
 
-  public TransactionStatusResponse createBorrowingLibraryTransaction(String dcbTransactionId, DcbTransaction dcbTransaction, String pickupServicePointId) {
+  public TransactionStatusResponse createBorrowingLibraryTransaction(String dcbTransactionId,
+      DcbTransaction dcbTransaction, String pickupServicePointId) {
     // Item is real when if self`s borrowing is true, otherwise virtual.
     var itemVirtualOrReal = dcbTransaction.getItem();
     var patron = dcbTransaction.getPatron();
     Boolean selfBorrowing = Optional.ofNullable(dcbTransaction.getSelfBorrowing()).orElse(false);
 
-    var user = userService.fetchUser(patron); //user is needed, but shouldn't be generated. it should be fetched.
+    var user = userService.fetchUser(patron); // user is needed, but shouldn't be generated. it should be fetched.
     if (Objects.equals(user.getType(), DCB_TYPE)) {
-      throw new IllegalArgumentException(String.format("User with type %s is retrieved. so unable to create " +
-              "transaction", user.getType()));
+      throw new IllegalArgumentException(
+        String.format("User with type %s is retrieved. so unable to create " + "transaction", user.getType()));
     }
 
     if (BooleanUtils.isFalse(selfBorrowing)) {
-      // check existence of virtual item only if selfBorrowing is false, item will be real if selfBorrowing is true.
+      // check existence of virtual item only if selfBorrowing is false, item will be real if
+      // selfBorrowing is true.
       checkItemExistsInInventoryAndThrow(itemVirtualOrReal.getBarcode());
       CirculationItem item = circulationItemService.checkIfItemExistsAndCreate(itemVirtualOrReal, pickupServicePointId);
       dcbTransaction.getItem().setId(item.getId());
@@ -71,12 +69,12 @@ public class BaseLibraryService {
     checkOpenTransactionExistsAndThrow(dcbTransaction.getItem().getId());
 
     if (BooleanUtils.isFalse(selfBorrowing)) {
-      CirculationRequest holdRequest = requestService.createHoldItemRequest(user, itemVirtualOrReal,
-              pickupServicePointId);
+      CirculationRequest holdRequest =
+        requestService.createHoldItemRequest(user, itemVirtualOrReal, pickupServicePointId);
       saveDcbTransaction(dcbTransactionId, dcbTransaction, holdRequest.getId());
     } else {
-      CirculationRequest pageRequest = requestService.createRequestBasedOnItemStatus(user, itemVirtualOrReal,
-              pickupServicePointId);
+      CirculationRequest pageRequest =
+          requestService.createRequestBasedOnItemStatus(user, itemVirtualOrReal, pickupServicePointId);
       saveDcbTransaction(dcbTransactionId, dcbTransaction, pageRequest.getId());
     }
 
@@ -104,29 +102,31 @@ public class BaseLibraryService {
     var requestedStatus = transactionStatus.getStatus();
     if (CREATED == currentStatus && OPEN == requestedStatus) {
       log.info("updateTransactionStatus:: Checking in item for transaction {}.", dcbTransaction.getId());
-      //Random UUID for servicePointId.
+      // Random UUID for servicePointId.
       circulationService.checkInByBarcode(dcbTransaction, UUID.randomUUID().toString());
       updateTransactionEntity(dcbTransaction, requestedStatus);
     } else if (ITEM_CHECKED_IN == currentStatus && CLOSED == requestedStatus) {
       log.info("updateTransactionStatus:: transaction {} status transition from {} to {}.",
         dcbTransaction.getId(), ITEM_CHECKED_IN.getValue(), CLOSED.getValue());
       updateTransactionEntity(dcbTransaction, requestedStatus);
-    } else if(CANCELLED == requestedStatus) {
-      log.info("updateTransactionStatus:: Cancelling transaction with id: {} for Borrower/Pickup role", dcbTransaction.getId());
+    } else if (CANCELLED == requestedStatus) {
+      log.info("updateTransactionStatus:: Cancelling transaction with id: {} for Borrower/Pickup role",
+        dcbTransaction.getId());
       cancelTransactionRequest(dcbTransaction);
     } else {
-      String errorMessage = String.format("updateTransactionStatus:: status update from %s to %s is not implemented", currentStatus, requestedStatus);
+      String errorMessage = String.format("updateTransactionStatus:: status update from %s to %s is not implemented",
+        currentStatus, requestedStatus);
       log.warn(errorMessage);
       throw new IllegalArgumentException(errorMessage);
     }
   }
 
-  public void cancelTransactionRequest(TransactionEntity transactionEntity){
+  public void cancelTransactionRequest(TransactionEntity transactionEntity) {
     try {
       circulationService.cancelRequest(transactionEntity, false);
     } catch (CirculationRequestException e) {
-      log.error("cancelTransactionRequest:: error during updating circulation request " +
-        "to cancel status", e);
+      log.error("cancelTransactionRequest:: error during updating circulation request "
+        + "to cancel status", e);
       updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.ERROR);
     }
   }
@@ -137,65 +137,42 @@ public class BaseLibraryService {
   }
 
   public void checkItemExistsInInventoryAndThrow(String itemBarcode) {
-    if(itemService.fetchItemByBarcode(itemBarcode).getTotalRecords() != 0)
+    if (itemService.fetchItemByBarcode(itemBarcode).getTotalRecords() != 0) {
       throw new ResourceAlreadyExistException("Unable to create item because it already exists in inventory.");
-  }
-
-  public void checkOpenTransactionExistsAndThrow(String itemId) {
-    if(!transactionRepository.findTransactionsByItemIdAndStatusNotInClosed(UUID.fromString(itemId)).isEmpty()){
-      throw new ResourceAlreadyExistException(String.format("Item with id %s already has an open DCB transaction ", itemId));
     }
   }
 
-  public void updateTransactionEntity(TransactionEntity transactionEntity, TransactionStatus.StatusEnum transactionStatusEnum) {
-    log.debug("updateTransactionEntity:: updating transaction entity from {} to {}", transactionEntity.getStatus(), transactionStatusEnum);
+  public void checkOpenTransactionExistsAndThrow(String itemId) {
+    if (!transactionRepository.findTransactionsByItemIdAndStatusNotInClosed(UUID.fromString(itemId)).isEmpty()) {
+      throw new ResourceAlreadyExistException(
+        String.format("Item with id %s already has an open DCB transaction ", itemId));
+    }
+  }
+
+  public void updateTransactionEntity(TransactionEntity transactionEntity,
+      TransactionStatus.StatusEnum transactionStatusEnum) {
+    log.debug("updateTransactionEntity:: updating transaction entity from {} to {}",
+      transactionEntity.getStatus(), transactionStatusEnum);
     transactionEntity.setStatus(transactionStatusEnum);
     transactionRepository.save(transactionEntity);
   }
 
   public void updateTransactionDetails(TransactionEntity transactionEntity, DcbUpdateItem dcbUpdateItem) {
-    DcbPatron dcbPatron = transactionMapper.mapTransactionEntityToDcbPatron(transactionEntity);
     DcbItem dcbItem = transactionMapper.convertTransactionUpdateItemToDcbItem(dcbUpdateItem, transactionEntity);
     checkItemExistsInInventoryAndThrow(dcbItem.getBarcode());
-    CirculationItem item = circulationItemService.checkIfItemExistsAndCreate(dcbItem, transactionEntity.getServicePointId());
+    CirculationItem item =
+      circulationItemService.checkIfItemExistsAndCreate(dcbItem, transactionEntity.getServicePointId());
     dcbItem.setId(item.getId());
     checkOpenTransactionExistsAndThrow(item.getId());
     circulationService.cancelRequest(transactionEntity, true);
-    CirculationRequest holdRequest = requestService.createHoldItemRequest(userService.fetchUser(dcbPatron), dcbItem,
-      transactionEntity.getServicePointId());
+    DcbPatron dcbPatron = transactionMapper.mapTransactionEntityToDcbPatron(transactionEntity);
+    CirculationRequest holdRequest = requestService.createHoldItemRequest(
+      userService.fetchUser(dcbPatron), dcbItem, transactionEntity.getServicePointId());
     updateItemDetailsAndSaveEntity(transactionEntity, item, dcbItem.getMaterialType(), holdRequest.getId());
   }
 
-  /**
-   * Closes the expired transaction entity if the associated item is available.
-   *
-   * @param dcbTransaction the DCB transaction entity to be closed
-   * @param expectedServicePointId the expected service point ID, used in logging
-   */
-  public void closeExpiredTransactionEntity(TransactionEntity dcbTransaction, String expectedServicePointId) {
-    var itemId = dcbTransaction.getItemId();
-    var role = dcbTransaction.getRole();
-    if (role != RoleEnum.LENDER) {
-      log.debug("closeTransactionEntityIfItemIsAvailable:: closing expired transaction: {}", dcbTransaction.getId());
-      updateTransactionEntity(dcbTransaction, TransactionStatus.StatusEnum.CLOSED);
-      return;
-    }
-
-    try {
-      var inventoryItem = itemService.findItemByIdAfterCheckIn(itemId, expectedServicePointId);
-      var itemStatus = inventoryItem.getStatus();
-      if (itemStatus != null && Objects.equals(itemStatus.getName(), AVAILABLE)) {
-        log.debug("closeTransactionEntityIfItemIsAvailable:: closing expired transaction: {}", dcbTransaction.getId());
-        updateTransactionEntity(dcbTransaction, TransactionStatus.StatusEnum.CLOSED);
-      }
-    } catch (InventoryItemNotFound exception) {
-      log.warn("closeExpiredTransactionEntity:: Failed to fetch item with id {} after check-in: {}",
-        itemId, expectedServicePointId, exception);
-    }
-  }
-
   private void updateItemDetailsAndSaveEntity(TransactionEntity transactionEntity, CirculationItem item,
-                                              String materialType, String requestId) {
+      String materialType, String requestId) {
     transactionEntity.setItemId(item.getId());
     transactionEntity.setRequestId(UUID.fromString(requestId));
     transactionEntity.setItemBarcode(item.getBarcode());

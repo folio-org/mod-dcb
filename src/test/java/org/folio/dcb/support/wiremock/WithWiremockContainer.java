@@ -8,5 +8,5 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@ExtendWith({ WiremockContainerExtension.class, WiremockStubExtension.class})
+@ExtendWith({WiremockContainerExtension.class, WiremockStubExtension.class})
 public @interface WithWiremockContainer {}
