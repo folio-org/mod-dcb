@@ -37,7 +37,7 @@ class FolioDcbApplicationIT {
   private static final Network NETWORK = Network.newNetwork();
 
   private static final KafkaContainer KAFKA =
-    new KafkaContainer(DockerImageName.parse("apache/kafka-native:3.8.0"))
+    new KafkaContainer(DockerImageName.parse("apache/kafka-native:4.2.1"))
       .withNetwork(NETWORK)
       .withNetworkAliases("ourkafka")
       .withStartupAttempts(3);
