@@ -2,7 +2,7 @@ package org.folio.dcb.service.impl;
 
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static org.apache.commons.lang3.ObjectUtils.allNotNull;
-import static org.folio.dcb.utils.DCBConstants.DEFAULT_PERIOD;
+import static org.folio.dcb.utils.DcbConstants.DEFAULT_PERIOD;
 
 import java.util.List;
 import java.util.Objects;

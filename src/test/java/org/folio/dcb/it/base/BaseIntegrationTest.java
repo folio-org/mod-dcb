@@ -23,8 +23,8 @@ import org.folio.dcb.support.wiremock.WithWiremockContainer;
 import org.folio.tenant.domain.dto.TenantAttributes;
 import org.junit.jupiter.api.BeforeAll;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
@@ -46,19 +46,14 @@ public abstract class BaseIntegrationTest {
 
   protected static MockMvc mockMvc;
 
-  @SneakyThrows
-  protected static void enableTenant() {
-    enableTenant(TEST_TENANT, new TenantAttributes());
-  }
-
-  @SneakyThrows
-  protected static void purgeTenant() {
-    purgeTenant(TEST_TENANT);
-  }
-
   @BeforeAll
   static void setupMockMvc(@Autowired MockMvc mockMvc) {
     BaseIntegrationTest.mockMvc = mockMvc;
+  }
+
+  @SneakyThrows
+  protected static void enableTenant() {
+    enableTenant(TEST_TENANT, new TenantAttributes());
   }
 
   @SneakyThrows
@@ -71,6 +66,11 @@ public abstract class BaseIntegrationTest {
         .header(TENANT, tenant)
         .header(URL, System.getProperty(WM_URL_PROPERTY)))
       .andExpect(status().isNoContent());
+  }
+
+  @SneakyThrows
+  protected static void purgeTenant() {
+    purgeTenant(TEST_TENANT);
   }
 
   @SneakyThrows

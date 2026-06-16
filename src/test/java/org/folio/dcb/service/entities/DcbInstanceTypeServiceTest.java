@@ -8,9 +8,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import org.folio.dcb.domain.ResultList;
 import org.folio.dcb.integration.invstorage.InstanceTypeClient;
 import org.folio.dcb.integration.invstorage.model.InstanceType;
-import org.folio.dcb.domain.ResultList;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

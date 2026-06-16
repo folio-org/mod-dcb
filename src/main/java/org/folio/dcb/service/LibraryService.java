@@ -7,7 +7,8 @@ import org.folio.dcb.domain.entity.TransactionEntity;
 
 public interface LibraryService {
   /**
-   * Create transaction
+   * Create a transaction.
+   *
    * @param dcbTransactionId - id of transaction
    * @param dcbTransaction - dcbTransaction Entity
    * @return TransactionStatusResponse

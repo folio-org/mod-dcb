@@ -1,21 +1,5 @@
 package org.folio.dcb.service;
 
-import org.folio.dcb.integration.circulation.CirculationClient;
-import org.folio.dcb.domain.dto.CirculationRequest;
-import org.folio.dcb.domain.dto.ItemStatus;
-import org.folio.dcb.exception.StatusException;
-import org.folio.dcb.service.impl.HoldingsServiceImpl;
-import org.folio.dcb.service.impl.ItemServiceImpl;
-import org.folio.dcb.service.impl.RequestServiceImpl;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
 import static org.folio.dcb.utils.EntityUtils.createDcbItem;
 import static org.folio.dcb.utils.EntityUtils.createDcbPickup;
 import static org.folio.dcb.utils.EntityUtils.createInventoryHolding;
@@ -28,17 +12,29 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import org.folio.dcb.domain.dto.CirculationRequest;
+import org.folio.dcb.domain.dto.ItemStatus;
+import org.folio.dcb.exception.StatusException;
+import org.folio.dcb.integration.circulation.CirculationClient;
+import org.folio.dcb.service.impl.HoldingsServiceImpl;
+import org.folio.dcb.service.impl.ItemServiceImpl;
+import org.folio.dcb.service.impl.RequestServiceImpl;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 @ExtendWith(MockitoExtension.class)
 class RequestServiceTest {
 
-  @InjectMocks
-  private RequestServiceImpl requestService;
-  @Mock
-  private ItemServiceImpl itemService;
-  @Mock
-  private HoldingsServiceImpl holdingsService;
-  @Mock
-  private CirculationClient circulationClient;
+  @InjectMocks private RequestServiceImpl requestService;
+  @Mock private ItemServiceImpl itemService;
+  @Mock private HoldingsServiceImpl holdingsService;
+  @Mock private CirculationClient circulationClient;
 
   @Test
   void createItemRequestWithPageStatusTest() {
@@ -78,10 +74,9 @@ class RequestServiceTest {
     inventoryItem.setStatus(inventoryItem.getStatus().name(ItemStatus.NameEnum.fromValue(invalidStatus)));
     var user = createUser();
     var item = createDcbItem();
-    var pickupServicePointId = createDcbPickup().getServicePointId();
+    var pickupSpId = createDcbPickup().getServicePointId();
     when(itemService.fetchItemByIdAndBarcode(any(), any())).thenReturn(inventoryItem);
     when(holdingsService.fetchInventoryHoldingDetailsByHoldingId(any())).thenReturn(createInventoryHolding());
-    assertThrows(StatusException.class, () -> requestService.createRequestBasedOnItemStatus(user, item, pickupServicePointId));
+    assertThrows(StatusException.class, () -> requestService.createRequestBasedOnItemStatus(user, item, pickupSpId));
   }
-
 }

@@ -9,7 +9,6 @@ class IntervalIdEnumConverterTest {
 
   private final IntervalIdEnumConverter converter = new IntervalIdEnumConverter();
 
-
   @Test
   void convertToDatabaseColumnTest() {
     assertEquals("Days", converter.convertToDatabaseColumn(IntervalIdEnum.DAYS));
@@ -17,6 +16,6 @@ class IntervalIdEnumConverterTest {
 
   @Test
   void convertToEntityAttributeTest() {
-    assertEquals(IntervalIdEnum.DAYS , converter.convertToEntityAttribute("Days"));
+    assertEquals(IntervalIdEnum.DAYS, converter.convertToEntityAttribute("Days"));
   }
 }

@@ -1,7 +1,5 @@
 package org.folio.dcb.service;
 
-import org.folio.dcb.integration.circstorage.model.LoanType;
-import org.folio.dcb.integration.invstorage.model.Location;
 import static org.folio.dcb.domain.ResultList.asSinglePage;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -10,20 +8,22 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.UUID;
-import org.folio.dcb.integration.circitem.CirculationItemClient;
-import org.folio.dcb.integration.invstorage.model.InventoryHolding;
-import org.folio.dcb.integration.invstorage.LocationUnitClient;
-import org.folio.dcb.integration.invstorage.model.LocationUnit;
-import org.folio.dcb.integration.invstorage.LocationsClient;
+import org.folio.dcb.config.DcbFeatureProperties;
 import org.folio.dcb.domain.ResultList;
 import org.folio.dcb.domain.dto.CirculationItem;
 import org.folio.dcb.domain.dto.CirculationItemCollection;
 import org.folio.dcb.domain.dto.DcbItem;
-import org.folio.dcb.config.DcbFeatureProperties;
+import org.folio.dcb.integration.circitem.CirculationItemClient;
+import org.folio.dcb.integration.circstorage.model.LoanType;
+import org.folio.dcb.integration.invstorage.LocationUnitClient;
+import org.folio.dcb.integration.invstorage.LocationsClient;
+import org.folio.dcb.integration.invstorage.model.InventoryHolding;
+import org.folio.dcb.integration.invstorage.model.Location;
+import org.folio.dcb.integration.invstorage.model.LocationUnit;
 import org.folio.dcb.service.entities.DcbEntityServiceFacade;
 import org.folio.dcb.service.impl.CirculationItemServiceImpl;
 import org.folio.dcb.utils.CqlQuery;
-import org.folio.dcb.utils.DCBConstants;
+import org.folio.dcb.utils.DcbConstants;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -95,6 +95,7 @@ class CirculationItemServiceImplTest {
     when(circulationItemClient.updateCirculationItem(any(), any())).thenReturn(updatedItem);
 
     var result = circulationItemService.checkIfItemExistsAndCreate(dcbItem, TEST_SERVICE_POINT_ID);
+    assertEquals(updatedItem, result);
 
     verify(circulationItemClient).fetchItemByCqlQuery(any());
     verify(dcbHubProperties).isFlexibleCirculationRulesEnabled();
@@ -103,7 +104,6 @@ class CirculationItemServiceImplTest {
     ArgumentCaptor<CirculationItem> captor = ArgumentCaptor.forClass(CirculationItem.class);
     verify(circulationItemClient).updateCirculationItem(any(), captor.capture());
     assertEquals(TEST_LOCATION_ID, captor.getValue().getEffectiveLocationId());
-    assertEquals(updatedItem, result);
   }
 
   @Test
@@ -122,11 +122,10 @@ class CirculationItemServiceImplTest {
     when(locationsClient.findLocationByQuery(cqlByCode, true, 1, 0)).thenReturn(asSinglePage(location));
 
     var result = circulationItemService.checkIfItemExistsAndCreate(dcbItem, TEST_SERVICE_POINT_ID);
-
+    assertEquals(existingItem, result);
     verify(circulationItemClient).fetchItemByCqlQuery(any());
     verify(dcbHubProperties).isFlexibleCirculationRulesEnabled();
     verify(locationsClient).findLocationByQuery(cqlByCode, true, 1, 0);
-    assertEquals(existingItem, result);
   }
 
   @Test
@@ -144,11 +143,10 @@ class CirculationItemServiceImplTest {
     when(circulationItemClient.createCirculationItem(any(), any())).thenReturn(createdItem);
 
     var result = circulationItemService.checkIfItemExistsAndCreate(dcbItem(), TEST_SERVICE_POINT_ID);
-
+    assertEquals(createdItem, result);
     verify(circulationItemClient).fetchItemByCqlQuery(any());
     verify(dcbEntityServiceFacade).findOrCreateHolding();
     verify(circulationItemClient).createCirculationItem(any(), any());
-    assertEquals(createdItem, result);
   }
 
   @Test
@@ -207,7 +205,7 @@ class CirculationItemServiceImplTest {
     ArgumentCaptor<CirculationItem> circulationItemArgumentCaptor = ArgumentCaptor.forClass(CirculationItem.class);
     verify(circulationItemClient).createCirculationItem(any(), circulationItemArgumentCaptor.capture());
     CirculationItem capturedItem = circulationItemArgumentCaptor.getValue();
-    assertEquals(DCBConstants.LOCATION_ID, capturedItem.getEffectiveLocationId());
+    assertEquals(DcbConstants.LOCATION_ID, capturedItem.getEffectiveLocationId());
     assertEquals(createdItem, result);
   }
 
@@ -216,7 +214,12 @@ class CirculationItemServiceImplTest {
     // Mock
     var randomUuid = randomUuid();
     var locationCode = "nonExistedShadowLocationCode";
-    var dcbItem = DcbItem.builder().barcode("barcode123").title("title").id(randomUuid).locationCode(locationCode).build();
+    var dcbItem = DcbItem.builder()
+      .barcode("barcode123")
+      .title("title")
+      .id(randomUuid)
+      .locationCode(locationCode)
+      .build();
     var pickupServicePointId = "pickupPointId";
 
     when(dcbHubProperties.isFlexibleCirculationRulesEnabled()).thenReturn(true);
@@ -241,7 +244,7 @@ class CirculationItemServiceImplTest {
     ArgumentCaptor<CirculationItem> circulationItemArgumentCaptor = ArgumentCaptor.forClass(CirculationItem.class);
     verify(circulationItemClient).createCirculationItem(any(), circulationItemArgumentCaptor.capture());
     CirculationItem capturedItem = circulationItemArgumentCaptor.getValue();
-    assertEquals(DCBConstants.LOCATION_ID, capturedItem.getEffectiveLocationId());
+    assertEquals(DcbConstants.LOCATION_ID, capturedItem.getEffectiveLocationId());
     assertEquals(createdItem, result);
   }
 
@@ -249,7 +252,12 @@ class CirculationItemServiceImplTest {
   void checkIfItemExistsAndCreate_NullLocationCode_negative() {
     var randomUuid = randomUuid();
     String locationCode = null;
-    var dcbItem = DcbItem.builder().barcode("barcode123").title("title").id(randomUuid).locationCode(locationCode).build();
+    var dcbItem = DcbItem.builder()
+      .barcode("barcode123")
+      .title("title")
+      .id(randomUuid)
+      .locationCode(locationCode)
+      .build();
     var pickupServicePointId = "pickupPointId";
 
     when(dcbHubProperties.isFlexibleCirculationRulesEnabled()).thenReturn(true);
@@ -270,7 +278,7 @@ class CirculationItemServiceImplTest {
     ArgumentCaptor<CirculationItem> circulationItemArgumentCaptor = ArgumentCaptor.forClass(CirculationItem.class);
     verify(circulationItemClient).createCirculationItem(any(), circulationItemArgumentCaptor.capture());
     CirculationItem capturedItem = circulationItemArgumentCaptor.getValue();
-    assertEquals(DCBConstants.LOCATION_ID, capturedItem.getEffectiveLocationId());
+    assertEquals(DcbConstants.LOCATION_ID, capturedItem.getEffectiveLocationId());
     assertEquals(createdItem, result);
   }
 
@@ -278,7 +286,12 @@ class CirculationItemServiceImplTest {
   void checkIfItemExistsAndCreate_ShadowLocationLookupDisabled_negative() {
     String locationCode = "shadowLocationCode";
     var randomUuid = randomUuid();
-    var dcbItem = DcbItem.builder().barcode("barcode123").title("title").id(randomUuid).locationCode(locationCode).build();
+    var dcbItem = DcbItem.builder()
+      .barcode("barcode123")
+      .title("title")
+      .id(randomUuid)
+      .locationCode(locationCode)
+      .build();
     var pickupServicePointId = "pickupPointId";
 
     when(dcbHubProperties.isFlexibleCirculationRulesEnabled()).thenReturn(false);
@@ -298,7 +311,7 @@ class CirculationItemServiceImplTest {
     ArgumentCaptor<CirculationItem> circulationItemArgumentCaptor = ArgumentCaptor.forClass(CirculationItem.class);
     verify(circulationItemClient).createCirculationItem(any(), circulationItemArgumentCaptor.capture());
     CirculationItem capturedItem = circulationItemArgumentCaptor.getValue();
-    assertEquals(DCBConstants.LOCATION_ID, capturedItem.getEffectiveLocationId());
+    assertEquals(DcbConstants.LOCATION_ID, capturedItem.getEffectiveLocationId());
     assertEquals(createdItem, result);
   }
 
@@ -362,7 +375,7 @@ class CirculationItemServiceImplTest {
     ArgumentCaptor<CirculationItem> circulationItemArgumentCaptor = ArgumentCaptor.forClass(CirculationItem.class);
     verify(circulationItemClient).createCirculationItem(any(), circulationItemArgumentCaptor.capture());
     CirculationItem capturedItem = circulationItemArgumentCaptor.getValue();
-    assertEquals(DCBConstants.LOCATION_ID, capturedItem.getEffectiveLocationId());
+    assertEquals(DcbConstants.LOCATION_ID, capturedItem.getEffectiveLocationId());
     assertEquals(createdItem, result);
   }
 
@@ -397,7 +410,7 @@ class CirculationItemServiceImplTest {
     ArgumentCaptor<CirculationItem> circulationItemArgumentCaptor = ArgumentCaptor.forClass(CirculationItem.class);
     verify(circulationItemClient).createCirculationItem(any(), circulationItemArgumentCaptor.capture());
     CirculationItem capturedItem = circulationItemArgumentCaptor.getValue();
-    assertEquals(DCBConstants.LOCATION_ID, capturedItem.getEffectiveLocationId());
+    assertEquals(DcbConstants.LOCATION_ID, capturedItem.getEffectiveLocationId());
     assertEquals(createdItem, result);
   }
 
@@ -452,13 +465,13 @@ class CirculationItemServiceImplTest {
 
   private static Location dcbLocation() {
     return Location.builder()
-      .id(DCBConstants.LOCATION_ID)
+      .id(DcbConstants.LOCATION_ID)
       .build();
   }
 
   private static LoanType dcbLoanType() {
     return LoanType.builder()
-      .id(DCBConstants.LOAN_TYPE_ID)
+      .id(DcbConstants.LOAN_TYPE_ID)
       .build();
   }
 }
