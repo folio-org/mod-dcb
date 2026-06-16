@@ -1,71 +1,61 @@
 package org.folio.dcb.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.folio.dcb.utils.EntityUtils.lenderDcbTransaction;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.UUID;
+import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.service.EcsRequestTransactionsService;
 import org.folio.dcb.service.TransactionAuditService;
+import org.folio.dcb.support.types.UnitTest;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.folio.dcb.domain.dto.DcbTransaction;
-import org.folio.dcb.domain.dto.TransactionStatusResponse;
-import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@UnitTest
 @ExtendWith(MockitoExtension.class)
 class EcsRequestTransactionsApiControllerTest {
 
-  @InjectMocks
-  private EcsRequestTransactionsApiController ecsRequestTransactionsApiController;
+  @InjectMocks private EcsRequestTransactionsApiController ecsRequestTransactionsApiController;
+  @Mock private EcsRequestTransactionsService ecsRequestTransactionsService;
+  @Mock private TransactionAuditService transactionAuditService;
 
-  @Mock
-  private EcsRequestTransactionsService ecsRequestTransactionsService;
-
-  @Mock
-  private TransactionAuditService transactionAuditService;
-
-    @Test
+  @Test
   void createEcsRequestTransactionsShouldReturnCreatedStatusWhenSuccessful() {
     // TestMate-fb0e3f3afb8bd45bf92f0bfdaf01a130
-    // Given
-    String ecsRequestTransactionId = "550e8400-e29b-41d4-a716-446655440000";
-    DcbTransaction dcbTransaction = new DcbTransaction();
-    dcbTransaction.setRole(DcbTransaction.RoleEnum.LENDER);
-    TransactionStatusResponse expectedResponse = new TransactionStatusResponse();
-    expectedResponse.setStatus(TransactionStatusResponse.StatusEnum.CREATED);
-    when(ecsRequestTransactionsService.createEcsRequestTransactions(ecsRequestTransactionId, dcbTransaction))
-      .thenReturn(expectedResponse);
-    // When
-    ResponseEntity<TransactionStatusResponse> actualResponse = ecsRequestTransactionsApiController
-      .createEcsRequestTransactions(ecsRequestTransactionId, dcbTransaction);
-    // Then
-    assertEquals(HttpStatus.CREATED, actualResponse.getStatusCode());
-    assertEquals(expectedResponse, actualResponse.getBody());
-    verify(ecsRequestTransactionsService).createEcsRequestTransactions(ecsRequestTransactionId, dcbTransaction);
+    var txId = UUID.randomUUID().toString();
+    var dcbTransaction = lenderDcbTransaction();
+    var expectedResponse = new TransactionStatusResponse().status(TransactionStatusResponse.StatusEnum.CREATED);
+    when(ecsRequestTransactionsService.createEcsRequestTransactions(txId, dcbTransaction)).thenReturn(expectedResponse);
+
+    var actualResponse = ecsRequestTransactionsApiController.createEcsRequestTransactions(txId, dcbTransaction);
+
+    assertThat(actualResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+    assertThat(actualResponse.getBody()).isEqualTo(expectedResponse);
+    verify(ecsRequestTransactionsService).createEcsRequestTransactions(txId, dcbTransaction);
   }
 
-    @Test
+  @Test
   void createEcsRequestTransactionsShouldLogErrorToAuditAndRethrowWhenServiceFails() {
     // TestMate-2b1511e07057750f28e1b2d54902dfe4
-    // Given
-    String ecsRequestTransactionId = "550e8400-e29b-41d4-a716-446655440000";
-    DcbTransaction dcbTransaction = new DcbTransaction();
-    dcbTransaction.setRole(DcbTransaction.RoleEnum.LENDER);
-    String errorMessage = "Service failure";
-    RuntimeException expectedException = new RuntimeException(errorMessage);
-    when(ecsRequestTransactionsService.createEcsRequestTransactions(ecsRequestTransactionId, dcbTransaction))
-      .thenThrow(expectedException);
-    // When
-    RuntimeException actualException = assertThrows(RuntimeException.class, () ->
-      ecsRequestTransactionsApiController.createEcsRequestTransactions(ecsRequestTransactionId, dcbTransaction));
-    // Then
-    assertEquals(errorMessage, actualException.getMessage());
-    verify(transactionAuditService).logErrorIfTransactionAuditNotExists(ecsRequestTransactionId, dcbTransaction, errorMessage);
-    verify(ecsRequestTransactionsService).createEcsRequestTransactions(ecsRequestTransactionId, dcbTransaction);
-  }
+    var transactionId = UUID.randomUUID().toString();
+    var dcbTransaction = lenderDcbTransaction();
+    var errorMessage = "Service failure";
+    when(ecsRequestTransactionsService.createEcsRequestTransactions(transactionId, dcbTransaction))
+      .thenThrow(new RuntimeException(errorMessage));
 
+    assertThatThrownBy(() ->
+      ecsRequestTransactionsApiController.createEcsRequestTransactions(transactionId, dcbTransaction))
+      .isInstanceOf(RuntimeException.class)
+      .hasMessage(errorMessage);
+
+    verify(transactionAuditService).logErrorIfTransactionAuditNotExists(transactionId, dcbTransaction, errorMessage);
+    verify(ecsRequestTransactionsService).createEcsRequestTransactions(transactionId, dcbTransaction);
+  }
 }
