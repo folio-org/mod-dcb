@@ -17,7 +17,6 @@ import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.EXPIRED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_IN;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_OUT;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
-import static org.folio.dcb.utils.EntityUtils.VIRTUAL_SERVICE_POINT_ID;
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
 import static org.folio.dcb.utils.EntityUtils.EXISTED_PATRON_ID;
 import static org.folio.dcb.utils.EntityUtils.HOLDING_RECORD_ID;
@@ -26,6 +25,7 @@ import static org.folio.dcb.utils.EntityUtils.ITEM_ID;
 import static org.folio.dcb.utils.EntityUtils.NOT_EXISTED_PATRON_ID;
 import static org.folio.dcb.utils.EntityUtils.PATRON_TYPE_USER_ID;
 import static org.folio.dcb.utils.EntityUtils.TEST_TENANT;
+import static org.folio.dcb.utils.EntityUtils.VIRTUAL_SERVICE_POINT_ID;
 import static org.folio.dcb.utils.EntityUtils.dcbItem;
 import static org.folio.dcb.utils.EntityUtils.dcbPatron;
 import static org.folio.dcb.utils.EntityUtils.dcbTransactionUpdate;
@@ -519,10 +519,7 @@ class LenderTransactionIT extends BaseTenantIntegrationTest {
   }
 
   @Test
-  @WireMockStub({
-    "/stubs/mod-circulation/requests/200-get-by-query(hold requests empty).json",
-    "/stubs/mod-inventory-storage/item-storage/200-get-by-query(id+available).json",
-  })
+  @WireMockStub("/stubs/mod-circulation/requests/200-get-by-query(hold requests empty).json")
   void updateStatus_positive_expiredToClosedTransitionAfterCheckInMessage() throws Exception {
     testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, EXPIRED, lenderDcbTransaction());
     getDcbTransactionStatus(DCB_TRANSACTION_ID)

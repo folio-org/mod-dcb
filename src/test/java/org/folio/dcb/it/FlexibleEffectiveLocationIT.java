@@ -11,12 +11,12 @@ import static java.util.Collections.emptyList;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
 import static org.folio.dcb.support.wiremock.WiremockContainerExtension.getWireMockClient;
 import static org.folio.dcb.utils.EntityUtils.DCB_ITEM_NEW_BARCODE;
-import static org.folio.dcb.utils.EntityUtils.VIRTUAL_SERVICE_POINT_ID;
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
 import static org.folio.dcb.utils.EntityUtils.EXISTED_PATRON_ID;
 import static org.folio.dcb.utils.EntityUtils.ITEM_ID;
 import static org.folio.dcb.utils.EntityUtils.PATRON_TYPE_USER_ID;
 import static org.folio.dcb.utils.EntityUtils.PICKUP_SERVICE_POINT_ID;
+import static org.folio.dcb.utils.EntityUtils.VIRTUAL_SERVICE_POINT_ID;
 import static org.folio.dcb.utils.EntityUtils.borrowerDcbTransaction;
 import static org.folio.dcb.utils.EntityUtils.borrowingPickupDcbTransaction;
 import static org.folio.dcb.utils.EntityUtils.dcbItem;
@@ -35,13 +35,14 @@ import java.util.List;
 import java.util.stream.Stream;
 import org.folio.dcb.domain.dto.DcbAgency;
 import org.folio.dcb.domain.dto.DcbLocation;
+import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.DcbUpdateItem;
 import org.folio.dcb.domain.dto.DcbUpdateTransaction;
 import org.folio.dcb.domain.dto.ShadowLocationRefreshBody;
 import org.folio.dcb.it.base.BaseTenantIntegrationTest;
 import org.folio.dcb.support.types.IntegrationTest;
 import org.folio.dcb.support.wiremock.WireMockStub;
-import org.folio.dcb.utils.DCBConstants;
+import org.folio.dcb.utils.DcbConstants;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -55,33 +56,33 @@ class FlexibleEffectiveLocationIT {
 
   private static final String SHADOW_LIBRARY_ID = "32188fb2-ac26-42ab-9fd0-1f027e9bf7e2";
   private static final String SHADOW_LOCATION_ID = "e78b9006-c477-4fea-b8e1-5af659948491";
-  private static final String DCB_LOCATION_ID = DCBConstants.LOCATION_ID;
+  private static final String DCB_LOCATION_ID = DcbConstants.LOCATION_ID;
   private static final String QUERY_BY_SHADOW_LOCATION_CODE = "code==\"KU\"";
-  private static final WireMock wiremock = getWireMockClient();
+  private static final WireMock WIREMOCK = getWireMockClient();
 
   private static void verifyGetRequestBeingCalledOnce(String exactUrlPath, String query) {
-    wiremock.verifyThat(1, getRequestedFor(
+    WIREMOCK.verifyThat(1, getRequestedFor(
       urlPathEqualTo(exactUrlPath)).withQueryParam("query", equalTo(query)));
   }
 
   private static void verifyPostCirculationItemIsCalledOnce(String effectiveLocationId) {
-    wiremock.verifyThat(1, postRequestedFor(urlPathMatching("/circulation-item/.{36}"))
+    WIREMOCK.verifyThat(1, postRequestedFor(urlPathMatching("/circulation-item/.{36}"))
       .withRequestBody(matchingJsonPath("$.effectiveLocationId", equalTo(effectiveLocationId))));
   }
 
   @SuppressWarnings("SameParameterValue")
   private static void verifyPostCirculationRequestCalledOnce(String requesterId, String servicePointId) {
-    wiremock.verifyThat(1, postRequestedFor(urlPathEqualTo("/circulation/requests"))
+    WIREMOCK.verifyThat(1, postRequestedFor(urlPathEqualTo("/circulation/requests"))
       .withRequestBody(matchingJsonPath("$.requestType", equalTo("Hold")))
       .withRequestBody(matchingJsonPath("$.itemId", equalTo(ITEM_ID)))
-      .withRequestBody(matchingJsonPath("$.instanceId", equalTo(DCBConstants.INSTANCE_ID)))
+      .withRequestBody(matchingJsonPath("$.instanceId", equalTo(DcbConstants.INSTANCE_ID)))
       .withRequestBody(matchingJsonPath("$.requesterId", equalTo(requesterId)))
       .withRequestBody(matchingJsonPath("$.pickupServicePointId", equalTo(servicePointId)))
-      .withRequestBody(matchingJsonPath("$.holdingsRecordId", equalTo(DCBConstants.HOLDING_ID))));
+      .withRequestBody(matchingJsonPath("$.holdingsRecordId", equalTo(DcbConstants.HOLDING_ID))));
   }
 
   private static void verifyPutCirculationItemCalledOnce(String effectiveLocationId) {
-    wiremock.verifyThat(1, putRequestedFor(urlPathMatching("/circulation-item/.{36}"))
+    WIREMOCK.verifyThat(1, putRequestedFor(urlPathMatching("/circulation-item/.{36}"))
       .withRequestBody(matchingJsonPath("$.effectiveLocationId", equalTo(effectiveLocationId))));
   }
 
@@ -93,6 +94,11 @@ class FlexibleEffectiveLocationIT {
         .materialType("DVD")
         .build())
       .build();
+  }
+
+  private static DcbTransaction withShadowLocationCode(DcbTransaction tx) {
+    tx.getItem().locationCode("SHADOW_LOC_OLD");
+    return tx;
   }
 
   @Nested
@@ -252,7 +258,7 @@ class FlexibleEffectiveLocationIT {
     })
     void updateTransaction_positive_effectiveLocationUpdatedForExistingItem() throws Exception {
       testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, CREATED,
-        borrowerDcbTransaction(dcbPatron(PATRON_TYPE_USER_ID)));
+        withShadowLocationCode(borrowerDcbTransaction(dcbPatron(PATRON_TYPE_USER_ID))));
 
       putDcbTransactionDetailsAttempt(DCB_TRANSACTION_ID, updateTransactionWithShadowLibrary())
         .andExpect(status().isNoContent());
@@ -408,7 +414,7 @@ class FlexibleEffectiveLocationIT {
     })
     void updateTransaction_positive_effectiveLocationUpdatedForExistingItem() throws Exception {
       testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, CREATED,
-        borrowingPickupDcbTransaction(dcbPatron(PATRON_TYPE_USER_ID)));
+        withShadowLocationCode(borrowingPickupDcbTransaction(dcbPatron(PATRON_TYPE_USER_ID))));
 
       putDcbTransactionDetailsAttempt(DCB_TRANSACTION_ID, updateTransactionWithShadowLibrary())
         .andExpect(status().isNoContent());
@@ -562,7 +568,7 @@ class FlexibleEffectiveLocationIT {
     })
     void updateTransaction_positive_effectiveLocationUpdatedForExistingItem() throws Exception {
       testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, CREATED,
-        pickupDcbTransaction(dcbPatron(PATRON_TYPE_USER_ID)));
+        withShadowLocationCode(pickupDcbTransaction(dcbPatron(PATRON_TYPE_USER_ID))));
 
       putDcbTransactionDetailsAttempt(DCB_TRANSACTION_ID, updateTransactionWithShadowLibrary())
         .andExpect(status().isNoContent());
@@ -675,7 +681,8 @@ class FlexibleEffectiveLocationIT {
         .andExpect(jsonPath("$.location-units.campuses[?(@.code=='AG-002')].cause").value(hasItem(allOf(
           startsWith("400 Bad Request:"), containsString("Campus with code AG-004 already exists")))))
         .andExpect(jsonPath("$.location-units.libraries[?(@.code=='AG-002')].status").value("SKIPPED"))
-        .andExpect(jsonPath("$.location-units.libraries[?(@.code=='AG-002')].cause").value("Parent campus is not created"))
+        .andExpect(jsonPath("$.location-units.libraries[?(@.code=='AG-002')].cause")
+          .value("Parent campus is not created"))
         .andExpect(jsonPath("$.location-units.institutions[?(@.code=='AG-002')].status").value("SUCCESS"));
     }
 

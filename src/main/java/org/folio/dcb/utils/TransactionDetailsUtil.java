@@ -1,16 +1,15 @@
 package org.folio.dcb.utils;
 
 import java.util.Objects;
-
+import lombok.experimental.UtilityClass;
 import org.folio.dcb.domain.dto.DcbTransaction;
 import org.folio.dcb.domain.dto.TransactionStatus;
-
-import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public class TransactionDetailsUtil {
 
-  public static boolean statusesNotEqual(TransactionStatus.StatusEnum statusOne, TransactionStatus.StatusEnum statusTwo) {
+  public static boolean statusesNotEqual(TransactionStatus.StatusEnum statusOne,
+      TransactionStatus.StatusEnum statusTwo) {
     return !Objects.equals(statusOne, statusTwo);
   }
 

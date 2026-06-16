@@ -1,10 +1,18 @@
 package org.folio.dcb.integration.kafka;
 
+import static org.apache.commons.collections4.CollectionUtils.isEmpty;
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
+import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWING_PICKUP;
+import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
+import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.PICKUP;
+import static org.folio.dcb.integration.kafka.TransactionHelper.getHeaderValue;
+import static org.folio.dcb.utils.DcbConstants.CLOSED_LOAN_STATUS;
+
+import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.BooleanUtils;
 import org.folio.dcb.domain.dto.TransactionStatus;
 import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.integration.kafka.model.EventData;
@@ -16,23 +24,16 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.stereotype.Component;
 
-import java.util.UUID;
-
-import static org.apache.commons.collections4.CollectionUtils.isEmpty;
-import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWING_PICKUP;
-import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
-import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.PICKUP;
-import static org.folio.dcb.utils.DCBConstants.CLOSED_LOAN_STATUS;
-import static org.folio.dcb.integration.kafka.TransactionHelper.getHeaderValue;
-
 @Log4j2
 @Component
 @RequiredArgsConstructor
 public class CirculationEventListener {
+
   public static final String CHECK_IN_LISTENER_ID = "mod-dcb-check-in-listener-id";
   public static final String CHECK_OUT_LOAN_LISTENER_ID = "mod-dcb-loan-listener-id";
   public static final String REQUEST_LISTENER_ID = "mod-dcb-request-listener-id";
-  private static final String LOAN_EVENT_STATUS_UPDATE_MESSAGE = "{}:: status for event {} can not be updated with itemId {}";
+  private static final String LOAN_EVENT_STATUS_UPDATE_MESSAGE =
+    "{}:: status for event {} can not be updated with itemId {}";
   private final TransactionRepository transactionRepository;
   private final SystemUserScopedExecutionService systemUserScopedExecutionService;
   private final BaseLibraryService baseLibraryService;
@@ -74,6 +75,7 @@ public class CirculationEventListener {
 
   public static void processMessage(String data, MessageHeaders messageHeaders, String type,
     Function<String, EventData> eventDataParser, BiConsumer<String, EventData> eventHandler) {
+
     var tenantHeaders = getHeaderValue(messageHeaders, XOkapiHeaders.TENANT, null);
     if (isEmpty(tenantHeaders)) {
       log.warn("processMessage:: tenantId is null, skipping processing: {}", type);
@@ -108,7 +110,7 @@ public class CirculationEventListener {
 
     systemUserScopedExecutionService.executeAsyncSystemUserScoped(tenantId, () ->
       transactionRepository.findTransactionByRequestIdAndStatusNotInClosed(UUID.fromString(requestId))
-        .ifPresent(transactionEntity -> handleRequestEvent(transactionEntity, eventData))
+        .ifPresent(transactionEntity -> processRequestEvent(transactionEntity, eventData))
     );
   }
 
@@ -120,27 +122,27 @@ public class CirculationEventListener {
     systemUserScopedExecutionService.executeAsyncSystemUserScoped(tenantId, () -> {
       var itemUuid = UUID.fromString(eventData.getItemId());
       transactionRepository.findExpiredTransactionsByItemId(itemUuid).forEach(entity ->
-        baseLibraryService.closeExpiredTransactionEntity(entity, eventData.getCheckInServicePointId()));
+        baseLibraryService.updateTransactionEntity(entity, TransactionStatus.StatusEnum.CLOSED));
     });
   }
 
-  private void processDcbTransactionEntity(EventData eventData, TransactionEntity transactionEntity) {
-    if (eventData.getType() == EventData.EventType.CHECK_OUT) {
+  private void processDcbTransactionEntity(EventData event, TransactionEntity transactionEntity) {
+    if (event.getType() == EventData.EventType.CHECK_OUT) {
       if (transactionEntity.getRole() == BORROWING_PICKUP || transactionEntity.getRole() == PICKUP) {
         baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.ITEM_CHECKED_OUT);
       }
-    } else if (eventData.getType() == EventData.EventType.CHECK_IN) {
+    } else if (event.getType() == EventData.EventType.CHECK_IN) {
       if (transactionEntity.getRole() == LENDER) {
         baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.CLOSED);
       } else if (transactionEntity.getRole() == BORROWING_PICKUP || transactionEntity.getRole() == PICKUP) {
         baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.ITEM_CHECKED_IN);
       }
     } else {
-      log.info(LOAN_EVENT_STATUS_UPDATE_MESSAGE, "processDcbTransactionEntity",  eventData.getType(), eventData.getItemId());
+      logUnprocessedEvent("processDcbTransactionEntity", event);
     }
   }
 
-  private void handleRequestEvent(TransactionEntity transactionEntity, EventData eventData) {
+  private void processRequestEvent(TransactionEntity transactionEntity, EventData eventData) {
     var type = eventData.getType();
     var role = transactionEntity.getRole();
     if (type == EventData.EventType.CANCEL && !eventData.isDcbReRequestCancellation()) {
@@ -152,7 +154,7 @@ public class CirculationEventListener {
     } else if (type == EventData.EventType.EXPIRED) {
       baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.EXPIRED);
     } else {
-      log.info("handleRequestEvent:: status for event {} can not be updated", eventData);
+      log.info("processRequestEvent:: status for event {} can not be updated", eventData);
     }
   }
 
@@ -165,24 +167,27 @@ public class CirculationEventListener {
     );
   }
 
-  private void processNonDcbTransactionEntity(EventData eventData, TransactionEntity transactionEntity) {
-    if (eventData.getType() == EventData.EventType.CHECK_OUT && isSelfBorrowingPickup(transactionEntity)) {
-      baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.ITEM_CHECKED_OUT);
-    } else if (eventData.getType() == EventData.EventType.CHECK_IN &&
-               isSelfBorrowingPickupAndClosedLoan(transactionEntity, eventData)) {
-      baseLibraryService.updateTransactionEntity(transactionEntity, TransactionStatus.StatusEnum.CLOSED);
+  private void processNonDcbTransactionEntity(EventData event, TransactionEntity entity) {
+    if (event.getType() == EventData.EventType.CHECK_OUT && isSelfBorrowingPickup(entity)) {
+      baseLibraryService.updateTransactionEntity(entity, TransactionStatus.StatusEnum.ITEM_CHECKED_OUT);
+    } else if (event.getType() == EventData.EventType.CHECK_IN && isSelfBorrowingPickupAndClosedLoan(entity, event)) {
+      baseLibraryService.updateTransactionEntity(entity, TransactionStatus.StatusEnum.CLOSED);
     } else {
-      log.info(LOAN_EVENT_STATUS_UPDATE_MESSAGE, "processNonDcbTransactionEntity", eventData.getType(), eventData.getItemId());
+      logUnprocessedEvent("processNonDcbTransactionEntity", event);
     }
   }
 
-  private static boolean isSelfBorrowingPickup(TransactionEntity transactionEntity) {
-    return transactionEntity.getRole() == BORROWING_PICKUP && BooleanUtils.isTrue(transactionEntity.getSelfBorrowing());
+  private static boolean isSelfBorrowingPickup(TransactionEntity entity) {
+    return entity.getRole() == BORROWING_PICKUP && isTrue(entity.getSelfBorrowing());
   }
 
-  private static boolean isSelfBorrowingPickupAndClosedLoan(TransactionEntity transactionEntity,
-    EventData eventData) {
-    return transactionEntity.getRole() == BORROWING_PICKUP && BooleanUtils.isTrue(transactionEntity.getSelfBorrowing())
-           && CLOSED_LOAN_STATUS.equals(eventData.getLoanStatus());
+  private static boolean isSelfBorrowingPickupAndClosedLoan(TransactionEntity entity, EventData event) {
+    return entity.getRole() == BORROWING_PICKUP
+      && isTrue(entity.getSelfBorrowing())
+      && CLOSED_LOAN_STATUS.equals(event.getLoanStatus());
+  }
+
+  private static void logUnprocessedEvent(String methodName, EventData event) {
+    log.info(LOAN_EVENT_STATUS_UPDATE_MESSAGE, methodName, event.getType(), event.getItemId());
   }
 }

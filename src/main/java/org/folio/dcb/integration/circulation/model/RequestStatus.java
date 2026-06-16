@@ -5,7 +5,6 @@ import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Set;
-
 import lombok.Getter;
 
 @Getter
@@ -45,7 +44,7 @@ public enum RequestStatus {
     return OPEN_STATUSES;
   }
 
-  public static boolean isRequestOpen(RequestStatus currentStatus){
+  public static boolean isRequestOpen(RequestStatus currentStatus) {
     return OPEN_STATUSES.contains(currentStatus);
   }
 }

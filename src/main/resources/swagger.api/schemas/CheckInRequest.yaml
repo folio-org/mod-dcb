@@ -13,3 +13,5 @@ CheckInRequest:
       description: When the item was checked in
       type: string
       format: date-type
+    claimedReturnedResolution:
+      $ref: 'claimedReturnedResolution.yaml#/ClaimedReturnedResolution'

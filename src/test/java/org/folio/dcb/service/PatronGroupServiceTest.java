@@ -1,5 +1,12 @@
 package org.folio.dcb.service;
 
+import static org.folio.dcb.utils.EntityUtils.createUserGroupCollection;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import org.folio.dcb.integration.users.GroupClient;
 import org.folio.dcb.service.impl.PatronGroupServiceImpl;
 import org.folio.spring.exception.NotFoundException;
@@ -9,20 +16,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.folio.dcb.utils.EntityUtils.createUserGroupCollection;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 @ExtendWith(MockitoExtension.class)
 class PatronGroupServiceTest {
 
-  @InjectMocks
-  private PatronGroupServiceImpl patronGroupService;
-  @Mock
-  private GroupClient groupClient;
+  @InjectMocks private PatronGroupServiceImpl patronGroupService;
+  @Mock private GroupClient groupClient;
 
   @Test
   void fetchPatronGroupIdByNameTest() {

@@ -4,19 +4,22 @@ import org.folio.dcb.domain.dto.DcbPatron;
 import org.folio.dcb.domain.dto.User;
 
 public interface UserService {
+
   /**
-   * Get user or create an user if not found
+   * Get a user or create one if not found.
+   *
    * @param dcbPatron - dcbPatronEntity
    * @return user
    */
   User fetchOrCreateUser(DcbPatron dcbPatron);
 
   /**
-   * Retrieving User.
-   * @param dcbPatron - dcbPatronEntity
-   * It's strongly expected to provide input param content referenced to an existing user.
-   * @return user
+   * Retrieve an existing user.
    *
-   * * */
+   * <p>It is strongly expected that the input parameter references an existing user.
+   *
+   * @param dcbPatron - dcbPatronEntity
+   * @return user
+   */
   User fetchUser(DcbPatron dcbPatron);
 }

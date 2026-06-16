@@ -13,7 +13,6 @@ import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.EXPIRED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ITEM_CHECKED_IN;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
-import static org.folio.dcb.utils.EntityUtils.VIRTUAL_SERVICE_POINT_ID;
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
 import static org.folio.dcb.utils.EntityUtils.EXISTED_PATRON_ID;
 import static org.folio.dcb.utils.EntityUtils.ITEM_ID;
@@ -22,6 +21,7 @@ import static org.folio.dcb.utils.EntityUtils.PATRON_GROUP_ID;
 import static org.folio.dcb.utils.EntityUtils.PATRON_TYPE_USER_ID;
 import static org.folio.dcb.utils.EntityUtils.PICKUP_SERVICE_POINT_ID;
 import static org.folio.dcb.utils.EntityUtils.TEST_TENANT;
+import static org.folio.dcb.utils.EntityUtils.VIRTUAL_SERVICE_POINT_ID;
 import static org.folio.dcb.utils.EntityUtils.dcbItem;
 import static org.folio.dcb.utils.EntityUtils.dcbPatron;
 import static org.folio.dcb.utils.EntityUtils.dcbTransactionUpdate;
@@ -41,7 +41,7 @@ import org.folio.dcb.domain.dto.TransactionStatus.StatusEnum;
 import org.folio.dcb.it.base.BaseTenantIntegrationTest;
 import org.folio.dcb.support.types.IntegrationTest;
 import org.folio.dcb.support.wiremock.WireMockStub;
-import org.folio.dcb.utils.DCBConstants;
+import org.folio.dcb.utils.DcbConstants;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -213,6 +213,25 @@ class PickupTransactionIT extends BaseTenantIntegrationTest {
   }
 
   @Test
+  @WireMockStub({
+    "/stubs/mod-users/users/200-get-by-query(dcb user).json",
+    "/stubs/mod-inventory-storage/item-storage/200-get-by-query(barcode empty).json",
+    "/stubs/mod-circulation-item/200-get-by-query(barcode).json",
+    "/stubs/mod-users/groups/200-get-by-query(staff).json",
+    "/stubs/mod-circulation/requests/201-post(any).json",
+  })
+  void createTransaction_positive_expiredTransactionExistsForSameItem() throws Exception {
+    testJdbcHelper.saveDcbTransaction("571b0a2c-8883-40b5-a449-d41fe6000002", EXPIRED, pickupDcbTransaction());
+
+    var dcbPatron = dcbPatron(EXISTED_PATRON_ID);
+    postDcbTransaction(DCB_TRANSACTION_ID, pickupDcbTransaction(dcbPatron))
+      .andExpect(jsonPath("$.status").value("CREATED"));
+
+    auditEntityVerifier.assertThatLatestEntityIsNotDuplicate(DCB_TRANSACTION_ID);
+    verifyPostCirculationRequestCalledOnce(EXISTED_PATRON_ID);
+  }
+
+  @Test
   @WireMockStub("/stubs/mod-circulation/check-in-by-barcode/201-post(random SP).json")
   void updateTransactionStatus_positive_fromCreatedToOpen() throws Exception {
     testJdbcHelper.saveDcbTransaction(DCB_TRANSACTION_ID, CREATED, pickupDcbTransaction());
@@ -273,10 +292,10 @@ class PickupTransactionIT extends BaseTenantIntegrationTest {
       .withRequestBody(matchingJsonPath("$.requestType", equalTo("Hold")))
       .withRequestBody(matchingJsonPath("$.itemId", equalTo(ITEM_ID)))
       .withRequestBody(matchingJsonPath("$.status", equalTo("Closed - Cancelled")))
-      .withRequestBody(matchingJsonPath("$.instanceId", equalTo(DCBConstants.INSTANCE_ID)))
+      .withRequestBody(matchingJsonPath("$.instanceId", equalTo(DcbConstants.INSTANCE_ID)))
       .withRequestBody(matchingJsonPath("$.requesterId", equalTo(PATRON_TYPE_USER_ID)))
       .withRequestBody(matchingJsonPath("$.pickupServicePointId", equalTo(VIRTUAL_SERVICE_POINT_ID)))
-      .withRequestBody(matchingJsonPath("$.holdingsRecordId", equalTo(DCBConstants.HOLDING_ID))));
+      .withRequestBody(matchingJsonPath("$.holdingsRecordId", equalTo(DcbConstants.HOLDING_ID))));
   }
 
   @Test
@@ -334,9 +353,9 @@ class PickupTransactionIT extends BaseTenantIntegrationTest {
     wiremock.verifyThat(1, postRequestedFor(urlPathEqualTo("/circulation/requests"))
       .withRequestBody(matchingJsonPath("$.requestType", equalTo("Hold")))
       .withRequestBody(matchingJsonPath("$.itemId", equalTo(itemId)))
-      .withRequestBody(matchingJsonPath("$.instanceId", equalTo(DCBConstants.INSTANCE_ID)))
+      .withRequestBody(matchingJsonPath("$.instanceId", equalTo(DcbConstants.INSTANCE_ID)))
       .withRequestBody(matchingJsonPath("$.requesterId", equalTo(requesterId)))
       .withRequestBody(matchingJsonPath("$.pickupServicePointId", equalTo(PICKUP_SERVICE_POINT_ID)))
-      .withRequestBody(matchingJsonPath("$.holdingsRecordId", equalTo(DCBConstants.HOLDING_ID))));
+      .withRequestBody(matchingJsonPath("$.holdingsRecordId", equalTo(DcbConstants.HOLDING_ID))));
   }
 }

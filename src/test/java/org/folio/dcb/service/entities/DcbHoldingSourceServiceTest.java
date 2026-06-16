@@ -9,9 +9,9 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.UUID;
+import org.folio.dcb.domain.ResultList;
 import org.folio.dcb.integration.invstorage.HoldingSourcesClient;
 import org.folio.dcb.integration.invstorage.model.HoldingSource;
-import org.folio.dcb.domain.ResultList;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
