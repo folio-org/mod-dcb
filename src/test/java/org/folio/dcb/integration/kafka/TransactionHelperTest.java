@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import org.folio.dcb.integration.kafka.model.EventData;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -71,5 +72,158 @@ class TransactionHelperTest {
     var result = TransactionHelper.getHeaderValue(headers, headerName, defaultValue);
 
     assertThat(result).hasSize(1).containsExactly(headerValue);
+  }
+
+  @Test
+  void parseLoanEventShouldMapCheckOutAction() {
+    var itemId = "8db107f5-12aa-479f-9c07-39e7c9cf2e4d";
+    var payload = """
+      {
+        "type": "UPDATED",
+        "data": {
+          "new": {
+            "itemId": "%s",
+            "action": "checkedout"
+          }
+        }
+      }
+      """.formatted(itemId);
+
+    var result = TransactionHelper.parseLoanEvent(payload);
+
+    assertThat(result).isNotNull();
+    assertThat(result.getType()).isEqualTo(EventData.EventType.CHECK_OUT);
+  }
+
+  @Test
+  void parseLoanEventShouldMapCheckInAction() {
+    var itemId = "8db107f5-12aa-479f-9c07-39e7c9cf2e4d";
+    var payload = """
+      {
+        "type": "UPDATED",
+        "data": {
+          "new": {
+            "itemId": "%s",
+            "action": "checkedin"
+          }
+        }
+      }
+      """.formatted(itemId);
+
+    var result = TransactionHelper.parseLoanEvent(payload);
+
+    assertThat(result).isNotNull();
+    assertThat(result.getType()).isEqualTo(EventData.EventType.CHECK_IN);
+  }
+
+  @Test
+  void parseLoanEventShouldReturnNullTypeForUnknownAction() {
+    var itemId = "8db107f5-12aa-479f-9c07-39e7c9cf2e4d";
+    var payload = """
+      {
+        "type": "UPDATED",
+        "data": {
+          "new": {
+            "itemId": "%s",
+            "action": "other"
+          }
+        }
+      }
+      """.formatted(itemId);
+
+    var result = TransactionHelper.parseLoanEvent(payload);
+
+    assertThat(result).isNotNull();
+    assertThat(result.getType()).isNull();
+  }
+
+  @Test
+  void parseLoanEventShouldDefaultIsDcbToTrueWhenMissing() {
+    var itemId = "8db107f5-12aa-479f-9c07-39e7c9cf2e4d";
+    var payload = """
+      {
+        "type": "UPDATED",
+        "data": {
+          "new": {
+            "itemId": "%s"
+          }
+        }
+      }
+      """.formatted(itemId);
+
+    var result = TransactionHelper.parseLoanEvent(payload);
+
+    assertThat(result).isNotNull()
+      .extracting(EventData::isDcb)
+      .isEqualTo(true);
+  }
+
+  @Test
+  void parseLoanEventShouldPreserveIsDcbWhenTrue() {
+    var itemId = "8db107f5-12aa-479f-9c07-39e7c9cf2e4d";
+    var payload = """
+      {
+        "type": "UPDATED",
+        "data": {
+          "new": {
+            "itemId": "%s",
+            "isDcb": true
+          }
+        }
+      }
+      """.formatted(itemId);
+
+    var result = TransactionHelper.parseLoanEvent(payload);
+
+    assertThat(result).isNotNull()
+      .extracting(EventData::isDcb)
+      .isEqualTo(true);
+  }
+
+  @Test
+  void parseLoanEventShouldPreserveIsDcbWhenFalse() {
+    var itemId = "8db107f5-12aa-479f-9c07-39e7c9cf2e4d";
+    var payload = """
+      {
+        "type": "UPDATED",
+        "data": {
+          "new": {
+            "itemId": "%s",
+            "isDcb": false
+          }
+        }
+      }
+      """.formatted(itemId);
+
+    var result = TransactionHelper.parseLoanEvent(payload);
+
+    assertThat(result).isNotNull()
+      .extracting(EventData::isDcb)
+      .isEqualTo(false);
+  }
+
+  @Test
+  void parseLoanEventShouldPopulateLoanStatusWhenPresent() {
+    // TestMate-bcbe206fc559de7d897da32b27a7e5ab
+    var itemId = "8db107f5-12aa-479f-9c07-39e7c9cf2e4d";
+    var expectedStatus = "Open - Checked out";
+    var payload = """
+      {
+        "type": "UPDATED",
+        "data": {
+          "new": {
+            "itemId": "%s",
+            "status": {
+              "name": "%s"
+            }
+          }
+        }
+      }
+      """.formatted(itemId, expectedStatus);
+
+    var result = TransactionHelper.parseLoanEvent(payload);
+    assertThat(result).isNotNull();
+    assertThat(result.getItemId()).isEqualTo(itemId);
+    assertThat(result.getLoanStatus()).isEqualTo(expectedStatus);
   }
 }
