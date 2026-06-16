@@ -74,13 +74,10 @@ class TransactionHelperTest {
     assertThat(result).hasSize(1).containsExactly(headerValue);
   }
 
-
   @Test
-  void parseLoanEventShouldCorrectMapCheckOutAndCheckInActions() {
-    // TestMate-bae863f11690bb7c8697340f2df3b944
-    // Given
-    String itemId = "8db107f5-12aa-479f-9c07-39e7c9cf2e4d";
-    String checkOutPayload = """
+  void parseLoanEventShouldMapCheckOutAction() {
+    var itemId = "8db107f5-12aa-479f-9c07-39e7c9cf2e4d";
+    var payload = """
       {
         "type": "UPDATED",
         "data": {
@@ -91,7 +88,17 @@ class TransactionHelperTest {
         }
       }
       """.formatted(itemId);
-    String checkInPayload = """
+
+    var result = TransactionHelper.parseLoanEvent(payload);
+
+    assertThat(result).isNotNull();
+    assertThat(result.getType()).isEqualTo(EventData.EventType.CHECK_OUT);
+  }
+
+  @Test
+  void parseLoanEventShouldMapCheckInAction() {
+    var itemId = "8db107f5-12aa-479f-9c07-39e7c9cf2e4d";
+    var payload = """
       {
         "type": "UPDATED",
         "data": {
@@ -102,7 +109,17 @@ class TransactionHelperTest {
         }
       }
       """.formatted(itemId);
-    String unknownActionPayload = """
+
+    var result = TransactionHelper.parseLoanEvent(payload);
+
+    assertThat(result).isNotNull();
+    assertThat(result.getType()).isEqualTo(EventData.EventType.CHECK_IN);
+  }
+
+  @Test
+  void parseLoanEventShouldReturnNullTypeForUnknownAction() {
+    var itemId = "8db107f5-12aa-479f-9c07-39e7c9cf2e4d";
+    var payload = """
       {
         "type": "UPDATED",
         "data": {
@@ -113,22 +130,17 @@ class TransactionHelperTest {
         }
       }
       """.formatted(itemId);
-    // When
-    EventData checkOutResult = TransactionHelper.parseLoanEvent(checkOutPayload);
-    EventData checkInResult = TransactionHelper.parseLoanEvent(checkInPayload);
-    EventData unknownResult = TransactionHelper.parseLoanEvent(unknownActionPayload);
-    // Then
-    assertThat(checkOutResult.getType()).isEqualTo(EventData.EventType.CHECK_OUT);
-    assertThat(checkInResult.getType()).isEqualTo(EventData.EventType.CHECK_IN);
-    assertThat(unknownResult.getType()).isNull();
+
+    var result = TransactionHelper.parseLoanEvent(payload);
+
+    assertThat(result).isNotNull();
+    assertThat(result.getType()).isNull();
   }
 
   @Test
-  void parseLoanEventShouldDetermineDcbStatusBasedOnIsDcbField() {
-    // TestMate-cfdf83db95a1c3b069df2d438e83c809
-    // Given
-    String itemId = "8db107f5-12aa-479f-9c07-39e7c9cf2e4d";
-    String payloadMissingIsDcb = """
+  void parseLoanEventShouldDefaultIsDcbToTrueWhenMissing() {
+    var itemId = "8db107f5-12aa-479f-9c07-39e7c9cf2e4d";
+    var payload = """
       {
         "type": "UPDATED",
         "data": {
@@ -138,7 +150,18 @@ class TransactionHelperTest {
         }
       }
       """.formatted(itemId);
-    String payloadIsDcbTrue = """
+
+    var result = TransactionHelper.parseLoanEvent(payload);
+
+    assertThat(result).isNotNull()
+      .extracting(EventData::isDcb)
+      .isEqualTo(true);
+  }
+
+  @Test
+  void parseLoanEventShouldPreserveIsDcbWhenTrue() {
+    var itemId = "8db107f5-12aa-479f-9c07-39e7c9cf2e4d";
+    var payload = """
       {
         "type": "UPDATED",
         "data": {
@@ -149,7 +172,18 @@ class TransactionHelperTest {
         }
       }
       """.formatted(itemId);
-    String payloadIsDcbFalse = """
+
+    var result = TransactionHelper.parseLoanEvent(payload);
+
+    assertThat(result).isNotNull()
+      .extracting(EventData::isDcb)
+      .isEqualTo(true);
+  }
+
+  @Test
+  void parseLoanEventShouldPreserveIsDcbWhenFalse() {
+    var itemId = "8db107f5-12aa-479f-9c07-39e7c9cf2e4d";
+    var payload = """
       {
         "type": "UPDATED",
         "data": {
@@ -160,23 +194,20 @@ class TransactionHelperTest {
         }
       }
       """.formatted(itemId);
-    // When
-    EventData resultMissing = TransactionHelper.parseLoanEvent(payloadMissingIsDcb);
-    EventData resultTrue = TransactionHelper.parseLoanEvent(payloadIsDcbTrue);
-    EventData resultFalse = TransactionHelper.parseLoanEvent(payloadIsDcbFalse);
-    // Then
-    assertThat(resultMissing.isDcb()).isTrue();
-    assertThat(resultTrue.isDcb()).isTrue();
-    assertThat(resultFalse.isDcb()).isFalse();
+
+    var result = TransactionHelper.parseLoanEvent(payload);
+
+    assertThat(result).isNotNull()
+      .extracting(EventData::isDcb)
+      .isEqualTo(false);
   }
 
   @Test
   void parseLoanEventShouldPopulateLoanStatusWhenPresent() {
     // TestMate-bcbe206fc559de7d897da32b27a7e5ab
-    // Given
-    String itemId = "8db107f5-12aa-479f-9c07-39e7c9cf2e4d";
-    String expectedStatus = "Open - Checked out";
-    String payload = """
+    var itemId = "8db107f5-12aa-479f-9c07-39e7c9cf2e4d";
+    var expectedStatus = "Open - Checked out";
+    var payload = """
       {
         "type": "UPDATED",
         "data": {
@@ -189,9 +220,9 @@ class TransactionHelperTest {
         }
       }
       """.formatted(itemId, expectedStatus);
-    // When
-    EventData result = TransactionHelper.parseLoanEvent(payload);
-    // Then
+
+    var result = TransactionHelper.parseLoanEvent(payload);
+    assertThat(result).isNotNull();
     assertThat(result.getItemId()).isEqualTo(itemId);
     assertThat(result.getLoanStatus()).isEqualTo(expectedStatus);
   }
