@@ -1,13 +1,14 @@
 package org.folio.dcb.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWER;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
 import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
 import static org.folio.dcb.utils.EntityUtils.borrowerDcbTransaction;
 import static org.folio.dcb.utils.EntityUtils.createDcbTransactionByRole;
 import static org.folio.dcb.utils.EntityUtils.createTransactionAuditEntity;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -34,18 +35,18 @@ class TransactionAuditServiceTest {
 
   @Test
   void logTheErrorForExistedTransactionAuditTest() {
-    when(repository.findLatestTransactionAuditEntityByDcbTransactionId(any()))
-      .thenReturn(Optional.of(createTransactionAuditEntity()));
+    var searchResult = Optional.of(createTransactionAuditEntity());
+    when(repository.findLatestTransactionAuditEntityByDcbTransactionId(any())).thenReturn(searchResult);
     transactionAuditService.logErrorIfTransactionAuditExists(DCB_TRANSACTION_ID, "error_message");
-    verify(transactionMapper, times(0)).mapToEntity(any(), any());
+    verify(transactionMapper, never()).mapToEntity(any(), any());
     verify(repository).save(any());
   }
 
   @Test
   void logTheErrorForNotExistedTransactionAuditTest() {
+    var transaction = createDcbTransactionByRole(LENDER);
     when(repository.findLatestTransactionAuditEntityByDcbTransactionId(any())).thenReturn(Optional.empty());
-    transactionAuditService.logErrorIfTransactionAuditNotExists(
-      DCB_TRANSACTION_ID, createDcbTransactionByRole(LENDER), "error_message");
+    transactionAuditService.logErrorIfTransactionAuditNotExists(DCB_TRANSACTION_ID, transaction, "error_message");
     verify(repository).save(any());
   }
 
@@ -91,5 +92,47 @@ class TransactionAuditServiceTest {
       .contains("dcbTransactionId = %s".formatted(DCB_TRANSACTION_ID))
       .contains("role = null")
       .contains("error message = null object error");
+  }
+
+  @Test
+  void testLogErrorIfTransactionAuditNotExistsWhenAuditExistsShouldLogDuplicateError() {
+    // TestMate-fa5231f9fd8fb40f55082244d97512b7
+    var errorMsg = "Duplicate ID";
+    var dcbTransaction = createDcbTransactionByRole(BORROWER);
+    var existingAudit = createTransactionAuditEntity();
+    var searchResult = Optional.of(existingAudit);
+    var auditCaptor = ArgumentCaptor.forClass(TransactionAuditEntity.class);
+    when(repository.findLatestTransactionAuditEntityByDcbTransactionId(DCB_TRANSACTION_ID)).thenReturn(searchResult);
+    when(repository.save(auditCaptor.capture())).then(inv -> inv.getArgument(0));
+
+    transactionAuditService.logErrorIfTransactionAuditNotExists(DCB_TRANSACTION_ID, dcbTransaction, errorMsg);
+
+    var savedAudit = auditCaptor.getValue();
+    assertThat(savedAudit.getAction()).isEqualTo("DUPLICATE_ERROR");
+    assertThat(savedAudit.getTransactionId()).isEqualTo("-1");
+    assertThat(savedAudit.getBefore()).isNull();
+    assertThat(savedAudit.getAfter()).isNull();
+    assertThat(savedAudit.getErrorMessage()).isEqualTo(String.format(
+      "dcbTransactionId = %s; role = %s; error message = %s.", DCB_TRANSACTION_ID, BORROWER, errorMsg));
+  }
+
+  @Test
+  void testLogErrorIfTransactionAuditNotExistsWhenDcbTransactionIsNull() {
+    // TestMate-dbb7ede2a4d44cf4e63907539abcc619
+    var dcbTransactionId = "trn-456";
+    var errorMsg = "Null payload";
+    var auditCaptor = ArgumentCaptor.forClass(TransactionAuditEntity.class);
+    when(repository.findLatestTransactionAuditEntityByDcbTransactionId(dcbTransactionId)).thenReturn(Optional.empty());
+    when(repository.save(auditCaptor.capture())).then(inv -> inv.getArgument(0));
+
+    transactionAuditService.logErrorIfTransactionAuditNotExists(dcbTransactionId, null, errorMsg);
+
+    var savedAudit = auditCaptor.getValue();
+    assertThat(savedAudit.getAction()).isEqualTo("ERROR");
+    assertThat(savedAudit.getTransactionId()).isEqualTo(dcbTransactionId);
+    assertThat(savedAudit.getBefore()).isNull();
+    assertThat(savedAudit.getAfter()).isNull();
+    assertThat(savedAudit.getErrorMessage()).isEqualTo(
+      "dcbTransactionId = trn-456; role = null; error message = Null payload.");
   }
 }

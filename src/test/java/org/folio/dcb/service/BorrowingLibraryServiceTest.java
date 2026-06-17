@@ -1,5 +1,7 @@
 package org.folio.dcb.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWER;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.AWAITING_PICKUP;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CANCELLED;
@@ -12,8 +14,6 @@ import static org.folio.dcb.utils.EntityUtils.DCB_TRANSACTION_ID;
 import static org.folio.dcb.utils.EntityUtils.createDcbTransactionByRole;
 import static org.folio.dcb.utils.EntityUtils.createServicePointRequest;
 import static org.folio.dcb.utils.EntityUtils.createTransactionEntity;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
@@ -55,7 +55,7 @@ class BorrowingLibraryServiceTest {
     borrowingLibraryService.updateTransactionStatus(transactionEntity, transactionStatus);
 
     verify(circulationService).checkInByBarcode(any());
-    assertEquals(AWAITING_PICKUP, transactionEntity.getStatus());
+    assertThat(transactionEntity.getStatus()).isEqualTo(AWAITING_PICKUP);
     verify(transactionRepository).save(any());
   }
 
@@ -69,7 +69,7 @@ class BorrowingLibraryServiceTest {
     borrowingLibraryService.updateTransactionStatus(transactionEntity, transactionStatus);
 
     verify(circulationService).checkInByBarcode(any(), any());
-    assertEquals(OPEN, transactionEntity.getStatus());
+    assertThat(transactionEntity.getStatus()).isEqualTo(OPEN);
   }
 
   @Test
@@ -77,20 +77,21 @@ class BorrowingLibraryServiceTest {
     var transactionEntity = createTransactionEntity();
     transactionEntity.setStatus(CREATED);
     var transactionStatus = TransactionStatus.builder().status(AWAITING_PICKUP).build();
-    assertThrows(IllegalArgumentException.class, () ->
-      borrowingLibraryService.updateTransactionStatus(transactionEntity, transactionStatus));
+    assertThatThrownBy(() -> borrowingLibraryService.updateTransactionStatus(transactionEntity, transactionStatus))
+      .isInstanceOf(IllegalArgumentException.class);
   }
 
   @Test
   void createTransactionTest() {
     var servicePointRequest = createServicePointRequest();
     var dcbTransaction = createDcbTransactionByRole(BORROWER);
+    assertThat(dcbTransaction.getPickup()).isNotNull();
     servicePointRequest.setId(UUID.randomUUID().toString());
     when(servicePointService.createServicePointIfNotExists(dcbTransaction)).thenReturn(servicePointRequest);
 
     borrowingLibraryService.createCirculation(DCB_TRANSACTION_ID, dcbTransaction);
 
-    assertEquals(servicePointRequest.getId(), dcbTransaction.getPickup().getServicePointId());
+    assertThat(dcbTransaction.getPickup().getServicePointId()).isEqualTo(servicePointRequest.getId());
     verify(baseLibraryService).createBorrowingLibraryTransaction(
       DCB_TRANSACTION_ID, dcbTransaction, servicePointRequest.getId());
   }
@@ -103,7 +104,7 @@ class BorrowingLibraryServiceTest {
 
     borrowingLibraryService.updateTransactionStatus(transactionEntity, transactionStatus);
 
-    assertEquals(CLOSED, transactionEntity.getStatus());
+    assertThat(transactionEntity.getStatus()).isEqualTo(CLOSED);
   }
 
   @Test
@@ -116,7 +117,7 @@ class BorrowingLibraryServiceTest {
     borrowingLibraryService.updateTransactionStatus(transactionEntity, transactionStatus);
 
     verify(circulationService).checkOutByBarcode(any());
-    assertEquals(ITEM_CHECKED_OUT, transactionEntity.getStatus());
+    assertThat(transactionEntity.getStatus()).isEqualTo(ITEM_CHECKED_OUT);
   }
 
   @Test
@@ -129,7 +130,7 @@ class BorrowingLibraryServiceTest {
     borrowingLibraryService.updateTransactionStatus(transactionEntity, transactionStatus);
 
     verify(circulationService).checkInByBarcode(any(), any());
-    assertEquals(ITEM_CHECKED_IN, transactionEntity.getStatus());
+    assertThat(transactionEntity.getStatus()).isEqualTo(ITEM_CHECKED_IN);
   }
 
   @Test
@@ -148,7 +149,7 @@ class BorrowingLibraryServiceTest {
     borrowingLibraryService.updateTransactionStatus(transactionEntity, transactionStatus);
 
     verify(circulationService).checkInByBarcode(any(), any(), eq(ClaimedReturnedResolution.FOUND_BY_LIBRARY));
-    assertEquals(ITEM_CHECKED_IN, transactionEntity.getStatus());
+    assertThat(transactionEntity.getStatus()).isEqualTo(ITEM_CHECKED_IN);
   }
 
   @Test
@@ -167,7 +168,7 @@ class BorrowingLibraryServiceTest {
     borrowingLibraryService.updateTransactionStatus(transactionEntity, transactionStatus);
 
     verify(circulationService).checkInByBarcode(any(), any(), eq(ClaimedReturnedResolution.RETURNED_BY_PATRON));
-    assertEquals(ITEM_CHECKED_IN, transactionEntity.getStatus());
+    assertThat(transactionEntity.getStatus()).isEqualTo(ITEM_CHECKED_IN);
   }
 
   @Test
