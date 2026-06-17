@@ -1,5 +1,7 @@
 package org.folio.dcb.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
 import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
@@ -11,25 +13,21 @@ import static org.folio.dcb.utils.EntityUtils.createServicePointRequest;
 import static org.folio.dcb.utils.EntityUtils.createTransactionEntity;
 import static org.folio.dcb.utils.EntityUtils.createTransactionStatus;
 import static org.folio.dcb.utils.EntityUtils.createUser;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.UUID;
 import org.folio.dcb.domain.dto.TransactionStatus;
+import org.folio.dcb.domain.dto.TransactionStatus.StatusEnum;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
-import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.repository.TransactionRepository;
 import org.folio.dcb.service.impl.BaseLibraryService;
 import org.folio.dcb.service.impl.CirculationServiceImpl;
 import org.folio.dcb.service.impl.LendingLibraryServiceImpl;
 import org.folio.dcb.service.impl.RequestServiceImpl;
 import org.folio.dcb.service.impl.UserServiceImpl;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -50,92 +48,91 @@ class LendingLibraryServiceTest {
 
   @Test
   void createTransactionTest() {
-    var user = createUser();
     var dcbTransaction = createDcbTransactionByRole(LENDER);
-    var servicePoint = createServicePointRequest();
-    servicePoint.setId(UUID.randomUUID().toString());
+    assertThat(dcbTransaction.getPatron()).isNotNull();
+    assertThat(dcbTransaction.getItem()).isNotNull();
+    assertThat(dcbTransaction.getPickup()).isNotNull();
 
-    when(userService.fetchOrCreateUser(any()))
-      .thenReturn(user);
-    when(servicePointService.createServicePointIfNotExists(dcbTransaction))
-        .thenReturn(servicePoint);
-    when(requestService.createRequestBasedOnItemStatus(any(), any(), anyString()))
-        .thenReturn(createCirculationRequest());
+    var user = createUser();
+    var servicePoint = createServicePointRequest().id(UUID.randomUUID().toString());
+
+    when(userService.fetchOrCreateUser(any())).thenReturn(user);
+    when(servicePointService.createServicePointIfNotExists(dcbTransaction)).thenReturn(servicePoint);
+    when(requestService.createRequestBasedOnItemStatus(any(), any(), any())).thenReturn(createCirculationRequest());
     doNothing().when(baseLibraryService).saveDcbTransaction(any(), any(), any());
 
     var response = lendingLibraryService.createCirculation(DCB_TRANSACTION_ID, dcbTransaction);
-    Assertions.assertEquals(TransactionStatusResponse.StatusEnum.CREATED, response.getStatus());
+
+    assertThat(response.getStatus()).isEqualTo(TransactionStatusResponse.StatusEnum.CREATED);
     verify(userService).fetchOrCreateUser(dcbTransaction.getPatron());
     verify(requestService).createRequestBasedOnItemStatus(
       user, dcbTransaction.getItem(), dcbTransaction.getPickup().getServicePointId());
     verify(baseLibraryService).saveDcbTransaction(DCB_TRANSACTION_ID, dcbTransaction, CIRCULATION_REQUEST_ID);
-    assertEquals(servicePoint.getId(), dcbTransaction.getPickup().getServicePointId());
+    assertThat(dcbTransaction.getPickup().getServicePointId()).isEqualTo(servicePoint.getId());
   }
 
   @Test
   void transactionStatusFromOpenToAwaitingTest() {
-    TransactionEntity dcbTransaction = createTransactionEntity();
+    var dcbTransaction = createTransactionEntity();
     dcbTransaction.setStatus(TransactionStatus.StatusEnum.OPEN);
     doNothing().when(circulationService).checkInByBarcode(dcbTransaction);
-    lendingLibraryService.updateTransactionStatus(dcbTransaction,
-      TransactionStatus.builder().status(TransactionStatus.StatusEnum.AWAITING_PICKUP).build());
+    var awaitingPickupStatus = TransactionStatus.builder().status(StatusEnum.AWAITING_PICKUP).build();
 
+    lendingLibraryService.updateTransactionStatus(dcbTransaction, awaitingPickupStatus);
+
+    assertThat(dcbTransaction.getStatus()).isEqualTo(TransactionStatus.StatusEnum.AWAITING_PICKUP);
     verify(circulationService).checkInByBarcode(dcbTransaction);
-
-    Assertions.assertEquals(TransactionStatus.StatusEnum.AWAITING_PICKUP, dcbTransaction.getStatus());
   }
 
   @Test
   void transactionStatusFromAwaitingToCheckoutTest() {
-    TransactionEntity dcbTransaction = createTransactionEntity();
+    var dcbTransaction = createTransactionEntity();
     dcbTransaction.setStatus(TransactionStatus.StatusEnum.AWAITING_PICKUP);
     doNothing().when(circulationService).checkOutByBarcode(dcbTransaction);
-    lendingLibraryService.updateTransactionStatus(dcbTransaction,
-      TransactionStatus.builder().status(TransactionStatus.StatusEnum.ITEM_CHECKED_OUT).build());
+    var checkedOutStatus = TransactionStatus.builder().status(StatusEnum.ITEM_CHECKED_OUT).build();
+
+    lendingLibraryService.updateTransactionStatus(dcbTransaction, checkedOutStatus);
 
     verify(circulationService).checkOutByBarcode(dcbTransaction);
-
-    Assertions.assertEquals(TransactionStatus.StatusEnum.ITEM_CHECKED_OUT, dcbTransaction.getStatus());
+    assertThat(dcbTransaction.getStatus()).isEqualTo(TransactionStatus.StatusEnum.ITEM_CHECKED_OUT);
   }
 
   @Test
   void transactionStatusFromCheckoutToCheckInTest() {
-    TransactionEntity dcbTransaction = createTransactionEntity();
+    var dcbTransaction = createTransactionEntity();
     dcbTransaction.setStatus(TransactionStatus.StatusEnum.ITEM_CHECKED_OUT);
-    lendingLibraryService.updateTransactionStatus(dcbTransaction,
-      TransactionStatus.builder().status(TransactionStatus.StatusEnum.ITEM_CHECKED_IN).build());
-
-    Assertions.assertEquals(TransactionStatus.StatusEnum.ITEM_CHECKED_IN, dcbTransaction.getStatus());
+    var checkedInStatus = TransactionStatus.builder().status(StatusEnum.ITEM_CHECKED_IN).build();
+    lendingLibraryService.updateTransactionStatus(dcbTransaction, checkedInStatus);
+    assertThat(dcbTransaction.getStatus()).isEqualTo(TransactionStatus.StatusEnum.ITEM_CHECKED_IN);
   }
 
   @Test
   void transactionStatusFromCreatedToCancelledTest() {
-    TransactionEntity dcbTransaction = createTransactionEntity();
+    var dcbTransaction = createTransactionEntity();
     dcbTransaction.setStatus(TransactionStatus.StatusEnum.CREATED);
-    lendingLibraryService.updateTransactionStatus(dcbTransaction,
-      TransactionStatus.builder().status(TransactionStatus.StatusEnum.CANCELLED).build());
+    var cancelledStatus = TransactionStatus.builder().status(StatusEnum.CANCELLED).build();
+    lendingLibraryService.updateTransactionStatus(dcbTransaction, cancelledStatus);
     verify(baseLibraryService).cancelTransactionRequest(dcbTransaction);
   }
 
   @Test
   void updateTransactionWithWrongStatusTest() {
-    TransactionEntity transactionEntity = createTransactionEntity();
-    TransactionStatus transactionStatus = createTransactionStatus(TransactionStatus.StatusEnum.AWAITING_PICKUP);
-    assertThrows(IllegalArgumentException.class,
-      () -> lendingLibraryService.updateTransactionStatus(transactionEntity, transactionStatus));
+    var transactionEntity = createTransactionEntity();
+    var transactionStatus = createTransactionStatus(TransactionStatus.StatusEnum.AWAITING_PICKUP);
+    assertThatThrownBy(() -> lendingLibraryService.updateTransactionStatus(transactionEntity, transactionStatus))
+      .isInstanceOf(IllegalArgumentException.class);
   }
 
-    @Test
+  @Test
   void testUpdateTransactionStatusFromCreatedToOpenShouldUpdateEntity() {
     // TestMate-1bbc6de8d11f860bac864b25fad8e5ad
-    // Given
-    TransactionEntity dcbTransaction = createTransactionEntity();
+    var dcbTransaction = createTransactionEntity();
     dcbTransaction.setStatus(CREATED);
-    TransactionStatus transactionStatus = createTransactionStatus(OPEN);
-    // When
+    var transactionStatus = createTransactionStatus(OPEN);
+
     lendingLibraryService.updateTransactionStatus(dcbTransaction, transactionStatus);
-    // Then
-    Assertions.assertEquals(OPEN, dcbTransaction.getStatus());
+
+    assertThat(dcbTransaction.getStatus()).isEqualTo(OPEN);
     verify(transactionRepository).save(dcbTransaction);
   }
 }
