@@ -33,8 +33,9 @@ import tools.jackson.databind.json.JsonMapper;
 @IntegrationTest
 class SettingsIT extends BaseTenantIntegrationTest {
 
-  @Autowired private JsonMapper jsonMapper;
   protected static SettingsApiHelper settingsApiHelper;
+
+  @Autowired private JsonMapper jsonMapper;
 
   @BeforeAll
   static void beforeAll() {

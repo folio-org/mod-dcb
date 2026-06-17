@@ -9,7 +9,6 @@ import org.folio.dcb.domain.entity.TransactionEntity;
 import org.folio.dcb.service.LibraryService;
 import org.springframework.stereotype.Service;
 
-
 @Service("borrowingPickupLibraryService")
 @RequiredArgsConstructor
 @Log4j2
@@ -19,12 +18,12 @@ public class BorrowingPickupLibraryServiceImpl implements LibraryService {
 
   @Override
   public TransactionStatusResponse createCirculation(String dcbTransactionId, DcbTransaction dcbTransaction) {
-    return baseLibraryService.createBorrowingLibraryTransaction(dcbTransactionId, dcbTransaction, dcbTransaction.getPickup().getServicePointId());
+    return baseLibraryService.createBorrowingLibraryTransaction(
+      dcbTransactionId, dcbTransaction, dcbTransaction.getPickup().getServicePointId());
   }
 
   @Override
   public void updateTransactionStatus(TransactionEntity dcbTransaction, TransactionStatus transactionStatus) {
     baseLibraryService.updateTransactionStatus(dcbTransaction, transactionStatus);
   }
-
 }

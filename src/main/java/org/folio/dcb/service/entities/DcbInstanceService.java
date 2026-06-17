@@ -1,10 +1,10 @@
 package org.folio.dcb.service.entities;
 
 import static org.folio.dcb.utils.CqlQuery.exactMatchById;
-import static org.folio.dcb.utils.DCBConstants.INSTANCE_ID;
-import static org.folio.dcb.utils.DCBConstants.INSTANCE_TITLE;
-import static org.folio.dcb.utils.DCBConstants.INSTANCE_TYPE_ID;
-import static org.folio.dcb.utils.DCBConstants.SOURCE;
+import static org.folio.dcb.utils.DcbConstants.INSTANCE_ID;
+import static org.folio.dcb.utils.DcbConstants.INSTANCE_TITLE;
+import static org.folio.dcb.utils.DcbConstants.INSTANCE_TYPE_ID;
+import static org.folio.dcb.utils.DcbConstants.SOURCE;
 
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -32,11 +32,11 @@ public class DcbInstanceService implements DcbEntityService<InventoryInstance> {
   public InventoryInstance createDcbEntity() {
     var dcbInstanceType = dcbInstanceTypeService.findOrCreateEntity();
     log.debug("createDcbEntity:: Creating a new DCB Instance");
-    var inventoryInstanceDTO = getDcbInstance(dcbInstanceType.getId());
+    var inventoryInstanceDto = getDcbInstance(dcbInstanceType.getId());
 
-    instanceClient.createInstance(inventoryInstanceDTO);
+    instanceClient.createInstance(inventoryInstanceDto);
     log.info("createDcbEntity:: DCB Instance created");
-    return inventoryInstanceDTO;
+    return inventoryInstanceDto;
   }
 
   @Override

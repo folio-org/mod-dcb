@@ -502,6 +502,8 @@ components:
       $ref: 'schemas/CirculationRequest.yaml#/CirculationRequest'
     CheckInRequest:
       $ref: 'schemas/CheckInRequest.yaml#/CheckInRequest'
+    ClaimedReturnedResolution:
+      $ref: 'schemas/claimedReturnedResolution.yaml#/ClaimedReturnedResolution'
     CheckOutRequest:
       $ref: 'schemas/checkOutRequest.yaml#/CheckOutRequest'
     ServicePointRequest:

@@ -1,8 +1,8 @@
 package org.folio.dcb.service.entities;
 
 import static org.folio.dcb.utils.CqlQuery.exactMatchByName;
-import static org.folio.dcb.utils.DCBConstants.HOLDING_SOURCE;
-import static org.folio.dcb.utils.DCBConstants.SOURCE;
+import static org.folio.dcb.utils.DcbConstants.HOLDING_SOURCE;
+import static org.folio.dcb.utils.DcbConstants.SOURCE;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -31,7 +31,7 @@ public class DcbHoldingSourceService implements DcbEntityService<HoldingSource> 
     log.debug("createDcbEntity:: Creating a new DCB Holding Record source");
     var dcbHoldingSource = getDcbHoldingSource();
 
-    var createdHoldingSource =  holdingSourcesClient.createHoldingsRecordSource(dcbHoldingSource);
+    var createdHoldingSource = holdingSourcesClient.createHoldingsRecordSource(dcbHoldingSource);
     log.info("createDcbEntity:: DCB Holding Record source created");
     return createdHoldingSource;
   }

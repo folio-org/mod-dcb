@@ -1,6 +1,5 @@
 package org.folio.dcb.support.kafka;
 
-import static org.folio.dcb.utils.EntityUtils.TEST_TENANT;
 import static org.testcontainers.utility.DockerImageName.parse;
 
 import java.util.List;
@@ -11,6 +10,7 @@ import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.admin.KafkaAdminClient;
 import org.apache.kafka.clients.admin.NewTopic;
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -21,13 +21,13 @@ import org.testcontainers.utility.DockerImageName;
 public class KafkaContainerExtension implements BeforeAllCallback, AfterAllCallback {
 
   private static final String SPRING_PROPERTY_NAME = "spring.kafka.bootstrap-servers";
-  private static final DockerImageName KAFKA_IMAGE = parse("apache/kafka-native:3.8.0");
+  private static final DockerImageName KAFKA_IMAGE = parse("apache/kafka-native:4.2.1");
   private static final KafkaContainer CONTAINER = new KafkaContainer(KAFKA_IMAGE)
     .withEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false")
     .withStartupAttempts(3);
 
   @Override
-  public void beforeAll(ExtensionContext context) {
+  public void beforeAll(@NonNull ExtensionContext context) {
     if (!CONTAINER.isRunning()) {
       CONTAINER.start();
     }
@@ -36,7 +36,7 @@ public class KafkaContainerExtension implements BeforeAllCallback, AfterAllCallb
   }
 
   @Override
-  public void afterAll(ExtensionContext context) {
+  public void afterAll(@NonNull ExtensionContext context) {
     System.clearProperty(SPRING_PROPERTY_NAME);
   }
 

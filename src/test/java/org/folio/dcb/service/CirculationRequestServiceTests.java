@@ -1,11 +1,18 @@
 package org.folio.dcb.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.folio.dcb.utils.EntityUtils.createCirculationRequest;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.util.UUID;
+import org.folio.dcb.domain.dto.CirculationRequest;
 import org.folio.dcb.integration.circstorage.CancellationReasonClient;
 import org.folio.dcb.integration.circstorage.CirculationRequestClient;
-import org.folio.dcb.domain.dto.CirculationRequest;
+import org.folio.dcb.integration.circulation.model.RequestStatus;
 import org.folio.dcb.service.entities.DcbEntityServiceFacade;
 import org.folio.dcb.service.impl.CirculationRequestServiceImpl;
-import org.folio.dcb.integration.circulation.model.RequestStatus;
 import org.folio.spring.FolioExecutionContext;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -13,15 +20,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.UUID;
 import org.springframework.web.client.HttpClientErrorException;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.folio.dcb.utils.EntityUtils.createCirculationRequest;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class CirculationRequestServiceTests {
