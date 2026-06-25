@@ -16,7 +16,7 @@ import org.folio.dcb.integration.kafka.model.KafkaEvent;
 import org.springframework.messaging.MessageHeaders;
 
 @Log4j2
-public class TransactionHelper {
+public final class TransactionHelper {
 
   private static final String LOAN_ACTION_CHECKED_OUT = "checkedout";
   private static final String LOAN_ACTION_CHECKED_IN = "checkedin";
@@ -24,10 +24,10 @@ public class TransactionHelper {
   private static final String LOAN_ACTION_CHECKED_IN_RETURNED_BY_PATRON = "checkedInReturnedByPatron";
   private static final String CLAIMED_RETURNED_RESOLUTION_FOUND_BY_LIBRARY = "Found by library";
   private static final String CLAIMED_RETURNED_RESOLUTION_RETURNED_BY_PATRON = "Returned by patron";
-  public static final String IS_DCB = "isDcb";
-  public static final String INSTANCE = "instance";
-  public static final String TITLE = "title";
-  public static final String DCB_INSTANCE_TITLE = "DCB_INSTANCE";
+  private static final String IS_DCB = "isDcb";
+  private static final String INSTANCE = "instance";
+  private static final String TITLE = "title";
+  private static final String DCB_INSTANCE_TITLE = "DCB_INSTANCE";
 
   private TransactionHelper() {}
 
@@ -38,27 +38,25 @@ public class TransactionHelper {
   }
 
   public static EventData parseLoanEvent(String eventPayload) {
-      KafkaEvent event = new KafkaEvent(eventPayload);
-      if (event.hasNewNode() && event.getNewNode().has("itemId")) {
-        var eventData = new EventData();
-        eventData.setItemId(event.getNewNode().get("itemId").asString());
-        if (event.getNewNode().has(ACTION)) {
-          var action = event.getNewNode().get(ACTION).asString();
-          if (LOAN_ACTION_CHECKED_OUT.equals(action)){
-            eventData.setType(EventData.EventType.CHECK_OUT);
-          } else if (LOAN_ACTION_CHECKED_IN.equals(action)) {
-            eventData.setType(EventData.EventType.CHECK_IN);
-          }
-          else if (LOAN_ACTION_CHECKED_IN_FOUND_BY_LIBRARY.equals(action)) {
-            eventData.setType(EventData.EventType.CHECK_IN);
-            eventData.setClaimedReturnedResolution(CLAIMED_RETURNED_RESOLUTION_FOUND_BY_LIBRARY);
-          }
-          else if (LOAN_ACTION_CHECKED_IN_RETURNED_BY_PATRON.equals(action)) {
-            eventData.setType(EventData.EventType.CHECK_IN);
-            eventData.setClaimedReturnedResolution(CLAIMED_RETURNED_RESOLUTION_RETURNED_BY_PATRON);
-          }
+    KafkaEvent event = new KafkaEvent(eventPayload);
+    if (event.hasNewNode() && event.getNewNode().has("itemId")) {
+      var eventData = new EventData();
+      eventData.setItemId(event.getNewNode().get("itemId").asString());
+      if (event.getNewNode().has(ACTION)) {
+        var action = event.getNewNode().get(ACTION).asString();
+        if (LOAN_ACTION_CHECKED_OUT.equals(action)) {
+          eventData.setType(EventData.EventType.CHECK_OUT);
+        } else if (LOAN_ACTION_CHECKED_IN.equals(action)) {
+          eventData.setType(EventData.EventType.CHECK_IN);
+        } else if (LOAN_ACTION_CHECKED_IN_FOUND_BY_LIBRARY.equals(action)) {
+          eventData.setType(EventData.EventType.CHECK_IN);
+          eventData.setClaimedReturnedResolution(CLAIMED_RETURNED_RESOLUTION_FOUND_BY_LIBRARY);
+        } else if (LOAN_ACTION_CHECKED_IN_RETURNED_BY_PATRON.equals(action)) {
+          eventData.setType(EventData.EventType.CHECK_IN);
+          eventData.setClaimedReturnedResolution(CLAIMED_RETURNED_RESOLUTION_RETURNED_BY_PATRON);
         }
-        eventData.setDcb(!event.getNewNode().has(IS_DCB) || event.getNewNode().get(IS_DCB).asBoolean());
+      }
+      eventData.setDcb(!event.getNewNode().has(IS_DCB) || event.getNewNode().get(IS_DCB).asBoolean());
 
       if (event.getNewNode().has(STATUS) && event.getNewNode().get(STATUS).has(STATUS_NAME)) {
         eventData.setLoanStatus(event.getNewNode().get(STATUS).get(STATUS_NAME).asString());
