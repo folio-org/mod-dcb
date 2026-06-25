@@ -30,14 +30,14 @@ import org.testcontainers.utility.DockerImageName;
 @Testcontainers
 class FolioDcbApplicationIT {
 
-  private static final Logger LOG = LoggerFactory.getLogger(FolioDcbApplicationIT.class);
-  /** Container logging, requires log4j-slf4j2-impl in test scope */
+  // Container logging, requires log4j-slf4j2-impl in test scope.
   private static final boolean IS_LOG_ENABLED = true;
-  public static final String TENANT = "diku";
+  private static final Logger LOG = LoggerFactory.getLogger(FolioDcbApplicationIT.class);
+  private static final String TENANT = "diku";
   private static final Network NETWORK = Network.newNetwork();
 
   private static final KafkaContainer KAFKA =
-    new KafkaContainer(DockerImageName.parse("apache/kafka-native:3.8.0"))
+    new KafkaContainer(DockerImageName.parse("apache/kafka-native:4.2.1"))
       .withNetwork(NETWORK)
       .withNetworkAliases("ourkafka")
       .withStartupAttempts(3);
@@ -57,16 +57,16 @@ class FolioDcbApplicationIT {
       .withNetwork(NETWORK)
       .withNetworkAliases("okapi")
       .withCopyToContainer(Transferable.of("""
-          server {
-            default_type application/json;
-            return 201 '{"totalRecords": 1}';
-          }
-          """), "/etc/nginx/conf.d/default.conf");
+        server {
+          default_type application/json;
+          return 201 '{"totalRecords": 1}';
+        }
+        """), "/etc/nginx/conf.d/default.conf");
 
   @Container
   private static final GenericContainer<?> MOD_DCB =
     new GenericContainer<>(
-        new ImageFromDockerfile("mod-dcb").withFileFromPath(".", Path.of(".")))
+      new ImageFromDockerfile("mod-dcb").withFileFromPath(".", Path.of(".")))
       .dependsOn(KAFKA, POSTGRES, OKAPI)
       .withNetwork(NETWORK)
       .withNetworkAliases("mod-dcb")
@@ -93,7 +93,7 @@ class FolioDcbApplicationIT {
 
   @BeforeEach
   void beforeEach() {
-    RestAssured.requestSpecification = null;  // unset X-Okapi-Tenant etc.
+    RestAssured.requestSpecification = null; // unset X-Okapi-Tenant etc.
   }
 
   @Test

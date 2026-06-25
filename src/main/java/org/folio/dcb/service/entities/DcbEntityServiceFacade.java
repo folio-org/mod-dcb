@@ -3,12 +3,12 @@ package org.folio.dcb.service.entities;
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.folio.dcb.integration.circstorage.CancellationReasonClient.CancellationReason;
-import org.folio.dcb.integration.invstorage.model.InventoryHolding;
-import org.folio.dcb.integration.circstorage.model.LoanType;
-import org.folio.dcb.integration.invstorage.model.Location;
 import org.folio.dcb.config.DcbFeatureProperties;
 import org.folio.dcb.domain.dto.ServicePointRequest;
+import org.folio.dcb.integration.circstorage.CancellationReasonClient.CancellationReason;
+import org.folio.dcb.integration.circstorage.model.LoanType;
+import org.folio.dcb.integration.invstorage.model.InventoryHolding;
+import org.folio.dcb.integration.invstorage.model.Location;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -26,6 +26,7 @@ public class DcbEntityServiceFacade {
 
   /**
    * Creates all DCB umbrella entities if they do not already exist.
+   *
    * <p>
    * This method orchestrates the creation of all necessary DCB entities in the following order:
    * <ol>
@@ -111,8 +112,8 @@ public class DcbEntityServiceFacade {
   /**
    * Generic method to retrieve or create an entity based on runtime verification settings.
    *
-   * @param <T>                  - the type of entity to retrieve or create
-   * @param valueSupplier        - supplier that provides the actual entity
+   * @param <T> - the type of entity to retrieve or create
+   * @param valueSupplier - supplier that provides the actual entity
    * @param defaultValueSupplier - supplier that provides a default entity value
    * @return the entity from the - appropriate supplier based on runtime verification configuration
    */

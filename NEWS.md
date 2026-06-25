@@ -1,3 +1,9 @@
+## v2.1.0-SNAPSHOT In progress
+
+### Tech Debt
+* Add FOLIO Checkstyle enforcement using shared `folio-java-checkstyle` ruleset ([MODDCB-288](https://folio-org.atlassian.net/browse/MODDCB-288))
+* Use Apache Kafka v4.2.1 in integration tests ([MODDCB-290](https://folio-org.atlassian.net/browse/MODDCB-290))
+
 ## v2.0.0 2026-04-17
 
 ### Breaking changes

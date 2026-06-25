@@ -3,18 +3,18 @@ package org.folio.dcb.service.entities;
 import static org.folio.dcb.service.ServicePointExpirationPeriodService.getSettingsKey;
 import static org.folio.dcb.service.impl.ServicePointServiceImpl.HOLD_SHELF_CLOSED_LIBRARY_DATE_MANAGEMENT;
 import static org.folio.dcb.utils.CqlQuery.exactMatchByName;
-import static org.folio.dcb.utils.DCBConstants.CODE;
-import static org.folio.dcb.utils.DCBConstants.DCB_TYPE;
-import static org.folio.dcb.utils.DCBConstants.DEFAULT_PERIOD;
-import static org.folio.dcb.utils.DCBConstants.NAME;
-import static org.folio.dcb.utils.DCBConstants.SERVICE_POINT_ID;
+import static org.folio.dcb.utils.DcbConstants.CODE;
+import static org.folio.dcb.utils.DcbConstants.DCB_TYPE;
+import static org.folio.dcb.utils.DcbConstants.DEFAULT_PERIOD;
+import static org.folio.dcb.utils.DcbConstants.NAME;
+import static org.folio.dcb.utils.DcbConstants.SERVICE_POINT_ID;
 
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.folio.dcb.integration.invstorage.ServicePointClient;
 import org.folio.dcb.domain.dto.HoldShelfExpiryPeriod;
 import org.folio.dcb.domain.dto.ServicePointRequest;
+import org.folio.dcb.integration.invstorage.ServicePointClient;
 import org.folio.dcb.service.ServicePointExpirationPeriodService;
 import org.springframework.stereotype.Service;
 
