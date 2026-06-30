@@ -18,12 +18,16 @@ import org.springframework.messaging.MessageHeaders;
 @Log4j2
 public final class TransactionHelper {
 
-  public static final String IS_DCB = "isDcb";
-  public static final String INSTANCE = "instance";
-  public static final String TITLE = "title";
-  public static final String DCB_INSTANCE_TITLE = "DCB_INSTANCE";
+  private static final String IS_DCB = "isDcb";
+  private static final String INSTANCE = "instance";
+  private static final String TITLE = "title";
+  private static final String DCB_INSTANCE_TITLE = "DCB_INSTANCE";
   private static final String LOAN_ACTION_CHECKED_OUT = "checkedout";
   private static final String LOAN_ACTION_CHECKED_IN = "checkedin";
+  private static final String LOAN_ACTION_CHECKED_IN_FOUND_BY_LIBRARY = "checkedInFoundByLibrary";
+  private static final String LOAN_ACTION_CHECKED_IN_RETURNED_BY_PATRON = "checkedInReturnedByPatron";
+  private static final String CLAIMED_RETURNED_RESOLUTION_FOUND_BY_LIBRARY = "Found by library";
+  private static final String CLAIMED_RETURNED_RESOLUTION_RETURNED_BY_PATRON = "Returned by patron";
 
   private TransactionHelper() {}
 
@@ -40,10 +44,17 @@ public final class TransactionHelper {
       eventData.setItemId(event.getNewNode().get("itemId").asString());
 
       if (event.getNewNode().has(ACTION)) {
-        if (LOAN_ACTION_CHECKED_OUT.equals(event.getNewNode().get(ACTION).asString())) {
+        var action = event.getNewNode().get(ACTION).asString();
+        if (LOAN_ACTION_CHECKED_OUT.equals(action)) {
           eventData.setType(EventData.EventType.CHECK_OUT);
-        } else if (LOAN_ACTION_CHECKED_IN.equals(event.getNewNode().get(ACTION).asString())) {
+        } else if (LOAN_ACTION_CHECKED_IN.equals(action)) {
           eventData.setType(EventData.EventType.CHECK_IN);
+        } else if (LOAN_ACTION_CHECKED_IN_FOUND_BY_LIBRARY.equals(action)) {
+          eventData.setType(EventData.EventType.CHECK_IN);
+          eventData.setClaimedReturnedResolution(CLAIMED_RETURNED_RESOLUTION_FOUND_BY_LIBRARY);
+        } else if (LOAN_ACTION_CHECKED_IN_RETURNED_BY_PATRON.equals(action)) {
+          eventData.setType(EventData.EventType.CHECK_IN);
+          eventData.setClaimedReturnedResolution(CLAIMED_RETURNED_RESOLUTION_RETURNED_BY_PATRON);
         }
       }
 

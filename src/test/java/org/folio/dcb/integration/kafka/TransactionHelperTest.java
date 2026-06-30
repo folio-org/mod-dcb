@@ -203,6 +203,72 @@ class TransactionHelperTest {
   }
 
   @Test
+  void parseLoanEventShouldMapCheckInFoundByLibraryAction() {
+    var itemId = "8db107f5-12aa-479f-9c07-39e7c9cf2e4d";
+    var payload = """
+      {
+        "type": "UPDATED",
+        "data": {
+          "new": {
+            "itemId": "%s",
+            "action": "checkedInFoundByLibrary"
+          }
+        }
+      }
+      """.formatted(itemId);
+
+    var result = TransactionHelper.parseLoanEvent(payload);
+
+    assertThat(result).isNotNull();
+    assertThat(result.getType()).isEqualTo(EventData.EventType.CHECK_IN);
+    assertThat(result.getClaimedReturnedResolution()).isEqualTo("Found by library");
+  }
+
+  @Test
+  void parseLoanEventShouldMapCheckInReturnedByPatronAction() {
+    var itemId = "8db107f5-12aa-479f-9c07-39e7c9cf2e4d";
+    var payload = """
+      {
+        "type": "UPDATED",
+        "data": {
+          "new": {
+            "itemId": "%s",
+            "action": "checkedInReturnedByPatron"
+          }
+        }
+      }
+      """.formatted(itemId);
+
+    var result = TransactionHelper.parseLoanEvent(payload);
+
+    assertThat(result).isNotNull();
+    assertThat(result.getType()).isEqualTo(EventData.EventType.CHECK_IN);
+    assertThat(result.getClaimedReturnedResolution()).isEqualTo("Returned by patron");
+  }
+
+  @Test
+  void parseLoanEventShouldNotSetClaimedReturnedResolutionForRegularCheckIn() {
+    var itemId = "8db107f5-12aa-479f-9c07-39e7c9cf2e4d";
+    var payload = """
+      {
+        "type": "UPDATED",
+        "data": {
+          "new": {
+            "itemId": "%s",
+            "action": "checkedin"
+          }
+        }
+      }
+      """.formatted(itemId);
+
+    var result = TransactionHelper.parseLoanEvent(payload);
+
+    assertThat(result).isNotNull();
+    assertThat(result.getType()).isEqualTo(EventData.EventType.CHECK_IN);
+    assertThat(result.getClaimedReturnedResolution()).isNull();
+  }
+
+  @Test
   void parseLoanEventShouldPopulateLoanStatusWhenPresent() {
     // TestMate-bcbe206fc559de7d897da32b27a7e5ab
     var itemId = "8db107f5-12aa-479f-9c07-39e7c9cf2e4d";
