@@ -11,6 +11,7 @@ public class EventData {
   private boolean isDcbReRequestCancellation;
   private String loanStatus;
   private String checkInServicePointId;
+  private String claimedReturnedResolution;
 
   public enum EventType {
     CHECK_IN, CHECK_OUT, IN_TRANSIT, AWAITING_PICKUP, CANCEL, EXPIRED
