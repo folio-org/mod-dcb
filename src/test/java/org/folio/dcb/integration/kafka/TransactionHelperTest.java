@@ -2,12 +2,19 @@ package org.folio.dcb.integration.kafka;
 
 import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.stream.Stream;
 import org.folio.dcb.integration.kafka.model.EventData;
+import org.folio.dcb.integration.kafka.model.KafkaEvent;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.MessageHeaders;
 
@@ -291,5 +298,127 @@ class TransactionHelperTest {
     assertThat(result).isNotNull();
     assertThat(result.getItemId()).isEqualTo(itemId);
     assertThat(result.getLoanStatus()).isEqualTo(expectedStatus);
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {
+    "{\"type\": \"UPDATED\"}",
+    "{\"type\": \"UPDATED\", \"data\": {\"new\": null}}",
+    "{\"type\": \"UPDATED\", \"data\": {\"new\": {\"action\": \"checkedout\"}}}"
+  })
+  void parseLoanEventShouldReturnNullWhenRequiredDataMissing(String payload) {
+    // TestMate-f3e1546c9dcc4d07caefcc32b5fb8da0
+    var result = TransactionHelper.parseLoanEvent(payload);
+    assertThat(result).isNull();
+  }
+
+  @Test
+  void kafkaEvent_createdTypeWithNewNode_shouldPopulateEventTypeAndNewNode() {
+    var kafkaEvent = new KafkaEvent("""
+      {
+        "type": "CREATED",
+        "data": {
+          "new": { "id": "1" }
+        }
+      }
+      """);
+
+    assertThat(kafkaEvent.getEventType()).isEqualTo(KafkaEvent.EventType.CREATED);
+    assertThat(kafkaEvent.hasNewNode()).isTrue();
+    assertThat(kafkaEvent.getNewNode()).isNotNull();
+    assertThat(kafkaEvent.getNewNode().get("id").asString()).isEqualTo("1");
+  }
+
+  @Test
+  void kafkaEvent_updatedTypeWithBothNodes_shouldPopulateEventTypeAndBothNodes() {
+    var kafkaEvent = new KafkaEvent("""
+      {
+        "type": "UPDATED",
+        "data": {
+          "new": { "id": "2" },
+          "old": { "id": "1" }
+        }
+      }
+      """);
+
+    assertThat(kafkaEvent.getEventType()).isEqualTo(KafkaEvent.EventType.UPDATED);
+    assertThat(kafkaEvent.hasNewNode()).isTrue();
+    assertThat(kafkaEvent.getNewNode()).isNotNull();
+    assertThat(kafkaEvent.getNewNode().get("id").asString()).isEqualTo("2");
+    assertThat(kafkaEvent.getOldNode()).isNotNull();
+    assertThat(kafkaEvent.getOldNode().get("id").asString()).isEqualTo("1");
+  }
+
+  @Test
+  void kafkaEvent_createdTypeWithoutNodeData_shouldPopulateEventTypeButNotNodes() {
+    var kafkaEvent = new KafkaEvent("""
+      {
+        "type": "CREATED",
+        "data": {}
+      }
+      """);
+
+    assertThat(kafkaEvent.getEventType()).isEqualTo(KafkaEvent.EventType.CREATED);
+    assertThat(kafkaEvent.hasNewNode()).isFalse();
+    assertThat(kafkaEvent.getNewNode()).isNull();
+    assertThat(kafkaEvent.getOldNode()).isNull();
+  }
+
+  @Test
+  void kafkaEvent_updatedTypeWithoutDataField_shouldPopulateEventTypeButNotNodes() {
+    var kafkaEvent = new KafkaEvent("""
+      {
+        "type": "UPDATED"
+      }
+      """);
+
+    assertThat(kafkaEvent.getEventType()).isEqualTo(KafkaEvent.EventType.UPDATED);
+    assertThat(kafkaEvent.hasNewNode()).isFalse();
+    assertThat(kafkaEvent.getNewNode()).isNull();
+    assertThat(kafkaEvent.getOldNode()).isNull();
+  }
+
+  @Test
+  void parseLoanEventShouldReturnNullOnMalformedJson() {
+    // TestMate-06cc4a8754ad50afe2bc1c8b65223b28
+    var malformedPayload = "{ invalid: json }";
+    var result = TransactionHelper.parseLoanEvent(malformedPayload);
+    assertThat(result).isNull();
+  }
+
+  @ParameterizedTest
+  @MethodSource("invalidPayloadProvider")
+  void testConstructorWhenPayloadIsInvalidShouldHandleExceptionsGracefully(String invalidPayload) {
+    // TestMate-033e475dee0e95c33102bf1a0c69e3a6
+    var kafkaEvent = new KafkaEvent(invalidPayload);
+
+    assertThat(kafkaEvent.getEventType()).isNull();
+    assertThat(kafkaEvent.getNewNode()).isNull();
+    assertThat(kafkaEvent.getOldNode()).isNull();
+    assertThat(kafkaEvent.hasNewNode()).isFalse();
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {
+    "{\"type\":\"UPDATED\", \"data\": {\"old\": {\"id\":\"1\"}}}",
+    "{\"type\":\"CREATED\"}",
+    "{\"type\":\"UPDATED\", \"data\": {}}"
+  })
+  void hasNewNodeShouldReturnFalseWhenNewNodeIsMissing(String payload) {
+    // TestMate-18a2a23e9dfa165977b4e0a508955ec4
+    var kafkaEvent = new KafkaEvent(payload);
+    var result = kafkaEvent.hasNewNode();
+    assertThat(result).isFalse();
+    assertThat(kafkaEvent.getNewNode()).isNull();
+  }
+
+  private static Stream<Arguments> invalidPayloadProvider() {
+    return Stream.of(
+      arguments("{\"type\":\"DELETED\"}"),
+      arguments("{\"data\":{}}"),
+      arguments("{invalid-json}"),
+      arguments((String) null),
+      arguments("")
+    );
   }
 }
