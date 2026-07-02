@@ -10,6 +10,7 @@ import static org.folio.dcb.domain.ResultList.empty;
 import static org.folio.dcb.domain.dto.RefreshLocationStatusType.ERROR;
 import static org.folio.dcb.domain.dto.RefreshLocationStatusType.SKIPPED;
 import static org.folio.dcb.domain.dto.RefreshLocationStatusType.SUCCESS;
+import static org.folio.dcb.utils.CqlQuery.exactMatchByNameAndCode;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -35,7 +36,6 @@ import org.folio.dcb.integration.invstorage.LocationsClient;
 import org.folio.dcb.integration.invstorage.model.Location;
 import org.folio.dcb.integration.invstorage.model.LocationUnit;
 import org.folio.dcb.service.entities.DcbEntityServiceFacade;
-import org.folio.dcb.utils.CqlQuery;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,7 +48,6 @@ import org.mockito.stubbing.Answer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException.InternalServerError;
-import static org.mockito.ArgumentMatchers.eq;
 
 @ExtendWith(MockitoExtension.class)
 class ShadowLocationServiceImplTest {
@@ -375,10 +374,9 @@ class ShadowLocationServiceImplTest {
       .hasMessage("Failed to create shadow locations");
   }
 
-    @Test
+  @Test
   void createShadowLocations_positive_partialExistenceHierarchyReuse() {
     // TestMate-34ec793e0eaae755ccfec6a1494f9d1b
-    // Given
     when(dcbFeatureProperties.isFlexibleCirculationRulesEnabled()).thenReturn(true);
     when(dcbEntityServiceFacade.findOrCreateServicePoint()).thenReturn(servicePoint());
     when(locationUnitClient.findInstitutionsByQuery(agencySql(), true, 10, 0)).thenReturn(asSinglePage(institution()));
@@ -389,9 +387,9 @@ class ShadowLocationServiceImplTest {
     when(locationUnitClient.createLibrary(luCaptor.capture())).then(returningFirstArgument());
     when(locationsClient.createLocation(locCaptor.capture())).then(returningFirstArgument());
     var refreshRequest = refreshRequest(List.of(dcbLocation()), emptyList());
-    // When
+
     var result = dcbHubLocationService.createShadowLocations(refreshRequest);
-    // Then
+
     assertThat(result).isEqualTo(new RefreshShadowLocationResponse()
       .addLocationsItem(refreshLocationStatus(SUCCESS))
       .locationUnits(new RefreshLocationUnitsStatus()
@@ -409,16 +407,15 @@ class ShadowLocationServiceImplTest {
     assertThat(capturedCampus.getInstitutionId()).isEqualTo(INSTITUTION_ID);
   }
 
-    @Test
+  @Test
   void createShadowLocations_positive_combinedRequestGrouping() {
     // TestMate-94fcb8ae859525449cb6b22ac8ffa5f8
-    // Given
-    String loc1Name = "Location 1";
-    String loc1Code = "LOC-1";
-    String loc2Name = "Location 2";
-    String loc2Code = "LOC-2";
-    String loc1Sql = CqlQuery.exactMatchByNameAndCode(loc1Name, loc1Code).getQuery();
-    String loc2Sql = CqlQuery.exactMatchByNameAndCode(loc2Name, loc2Code).getQuery();
+    var loc1Name = "Location 1";
+    var loc1Code = "LOC-1";
+    var loc2Name = "Location 2";
+    var loc2Code = "LOC-2";
+    var loc1Sql = exactMatchByNameAndCode(loc1Name, loc1Code).getQuery();
+    var loc2Sql = exactMatchByNameAndCode(loc2Name, loc2Code).getQuery();
     when(dcbFeatureProperties.isFlexibleCirculationRulesEnabled()).thenReturn(true);
     when(dcbEntityServiceFacade.findOrCreateServicePoint()).thenReturn(servicePoint());
     when(locationUnitClient.findInstitutionsByQuery(agencySql(), true, 10, 0)).thenReturn(empty());
@@ -434,9 +431,9 @@ class ShadowLocationServiceImplTest {
     var location1 = dcbLocation(loc1Name, loc1Code, agency);
     var location2 = dcbLocation(loc2Name, loc2Code, agency);
     var refreshRequest = refreshRequest(List.of(location1, location2), List.of());
-    // When
+
     var result = dcbHubLocationService.createShadowLocations(refreshRequest);
-    // Then
+
     assertThat(result).isEqualTo(new RefreshShadowLocationResponse()
       .addLocationsItem(refreshLocationStatus(SUCCESS).code(loc1Code))
       .addLocationsItem(refreshLocationStatus(SUCCESS).code(loc2Code))
@@ -448,41 +445,38 @@ class ShadowLocationServiceImplTest {
     verify(locationUnitClient, times(1)).createCampus(any());
     verify(locationUnitClient, times(1)).createLibrary(any());
     verify(locationsClient, times(2)).createLocation(any());
-    List<Location> capturedLocations = locCaptor.getAllValues();
+    var capturedLocations = locCaptor.getAllValues();
     assertThat(capturedLocations)
       .extracting(Location::getCode, Location::getName)
-      .containsExactlyInAnyOrder(
-        org.assertj.core.groups.Tuple.tuple(loc1Code, loc1Name),
-        org.assertj.core.groups.Tuple.tuple(loc2Code, loc2Name)
-      );
-    String sharedInstitutionId = capturedLocations.get(0).getInstitutionId();
-    String sharedCampusId = capturedLocations.get(0).getCampusId();
-    String sharedLibraryId = capturedLocations.get(0).getLibraryId();
+      .containsExactlyInAnyOrder(tuple(loc1Code, loc1Name), tuple(loc2Code, loc2Name));
+    var sharedInstitutionId = capturedLocations.get(0).getInstitutionId();
+    var sharedCampusId = capturedLocations.get(0).getCampusId();
+    var sharedLibraryId = capturedLocations.get(0).getLibraryId();
     assertThat(capturedLocations.get(1).getInstitutionId()).isEqualTo(sharedInstitutionId);
     assertThat(capturedLocations.get(1).getCampusId()).isEqualTo(sharedCampusId);
     assertThat(capturedLocations.get(1).getLibraryId()).isEqualTo(sharedLibraryId);
   }
 
-    @Test
+  @Test
   void createShadowLocations_positive_partialSuccessMultipleAgencies() {
     // TestMate-f3af2b8f3b8782a468074ae1dee25408
-    // Given
-    String agency1Name = "Agency Fail";
-    String agency1Code = "AG-FAIL";
-    String agency2Name = "Agency Success";
-    String agency2Code = "AG-SUCCESS";
-    String agency1Sql = CqlQuery.exactMatchByNameAndCode(agency1Name, agency1Code).getQuery();
-    String agency2Sql = CqlQuery.exactMatchByNameAndCode(agency2Name, agency2Code).getQuery();
+    var agency1Name = "Agency Fail";
+    var agency1Code = "AG-FAIL";
+    var agency2Name = "Agency Success";
+    var agency2Code = "AG-SUCCESS";
+    var agency1Sql = exactMatchByNameAndCode(agency1Name, agency1Code).getQuery();
     when(dcbFeatureProperties.isFlexibleCirculationRulesEnabled()).thenReturn(true);
     when(dcbEntityServiceFacade.findOrCreateServicePoint()).thenReturn(servicePoint());
     when(locationUnitClient.findInstitutionsByQuery(agency1Sql, true, 10, 0)).thenReturn(empty());
     when(locationUnitClient.createInstitution(any())).thenAnswer(invocation -> {
-      LocationUnit lu = invocation.getArgument(0);
+      var lu = invocation.<LocationUnit>getArgument(0);
       if (agency1Code.equals(lu.getCode())) {
         throw badRequestError("/institutions");
       }
       return lu;
     });
+
+    var agency2Sql = exactMatchByNameAndCode(agency2Name, agency2Code).getQuery();
     when(locationUnitClient.findInstitutionsByQuery(agency2Sql, true, 10, 0)).thenReturn(empty());
     when(locationUnitClient.findCampusesByQuery(agency2Sql, true, 10, 0)).thenReturn(empty());
     when(locationUnitClient.findLibrariesByQuery(agency2Sql, true, 10, 0)).thenReturn(empty());
@@ -493,33 +487,26 @@ class ShadowLocationServiceImplTest {
     var agency1 = new DcbAgency().name(agency1Name).code(agency1Code);
     var agency2 = new DcbAgency().name(agency2Name).code(agency2Code);
     var refreshRequest = refreshRequest(emptyList(), List.of(agency1, agency2));
-    // When
+
     var result = dcbHubLocationService.createShadowLocations(refreshRequest);
-    // Then
     assertThat(result.getLocationUnits().getInstitutions())
       .extracting(RefreshLocationStatus::getCode, RefreshLocationStatus::getStatus)
-      .containsExactlyInAnyOrder(
-        org.assertj.core.groups.Tuple.tuple(agency1Code, ERROR),
-        org.assertj.core.groups.Tuple.tuple(agency2Code, SUCCESS)
-      );
+      .containsExactlyInAnyOrder(tuple(agency1Code, ERROR), tuple(agency2Code, SUCCESS));
+
     assertThat(result.getLocationUnits().getCampuses())
       .extracting(RefreshLocationStatus::getCode, RefreshLocationStatus::getStatus)
-      .containsExactlyInAnyOrder(
-        org.assertj.core.groups.Tuple.tuple(agency1Code, SKIPPED),
-        org.assertj.core.groups.Tuple.tuple(agency2Code, SUCCESS)
-      );
+      .containsExactlyInAnyOrder(tuple(agency1Code, SKIPPED), tuple(agency2Code, SUCCESS));
+
     assertThat(result.getLocations())
       .extracting(RefreshLocationStatus::getCode, RefreshLocationStatus::getStatus)
-      .containsExactlyInAnyOrder(
-        org.assertj.core.groups.Tuple.tuple(agency1Code, SKIPPED),
-        org.assertj.core.groups.Tuple.tuple(agency2Code, SUCCESS)
-      );
+      .containsExactlyInAnyOrder(tuple(agency1Code, SKIPPED), tuple(agency2Code, SUCCESS));
+
     verify(locationUnitClient, times(2)).createInstitution(any());
     verify(locationUnitClient, times(1)).createCampus(any());
     verify(locationsClient, times(1)).createLocation(any());
     assertThat(locCaptor.getAllValues())
       .extracting(Location::getCode, Location::getName)
-      .containsExactly(org.assertj.core.groups.Tuple.tuple(agency2Code, agency2Name));
+      .containsExactly(tuple(agency2Code, agency2Name));
   }
 
   private static ShadowLocationRefreshBody refreshRequest(List<DcbLocation> locations, List<DcbAgency> agencies) {
@@ -549,11 +536,11 @@ class ShadowLocationServiceImplTest {
   }
 
   private static String agencySql() {
-    return CqlQuery.exactMatchByNameAndCode(AGENCY_NAME, AGENCY_CODE).getQuery();
+    return exactMatchByNameAndCode(AGENCY_NAME, AGENCY_CODE).getQuery();
   }
 
   private static String locationSql() {
-    return CqlQuery.exactMatchByNameAndCode(LOCATION_NAME, LOCATION_CODE).getQuery();
+    return exactMatchByNameAndCode(LOCATION_NAME, LOCATION_CODE).getQuery();
   }
 
   private static <T> Answer<T> returningFirstArgument() {
