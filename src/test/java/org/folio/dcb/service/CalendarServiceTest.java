@@ -21,6 +21,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import java.util.Collections;
+import org.folio.dcb.domain.dto.CalendarCollection;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 @ExtendWith(MockitoExtension.class)
 class CalendarServiceTest {
@@ -103,5 +107,45 @@ class CalendarServiceTest {
       .thenReturn(calendarCollection);
     assertThrows(IllegalArgumentException.class,
       () -> calendarService.associateServicePointIdWithDefaultCalendarIfAbsent(servicePointId));
+  }
+
+    @Test
+  void testFindCalendarByName_EmptyCollection() {
+    // TestMate-38edfab7aa6fbd359b174576a85ed904
+    // Given
+    var calendarCollection = new CalendarCollection();
+    calendarCollection.setCalendars(Collections.emptyList());
+    calendarCollection.setTotalRecords(0);
+    when(calendarClient.getAllCalendars(Integer.MAX_VALUE)).thenReturn(calendarCollection);
+    // When
+    var response = calendarService.findCalendarByName(DCB_CALENDAR_NAME);
+    // Then
+    verify(calendarClient).getAllCalendars(Integer.MAX_VALUE);
+    assertNull(response);
+  }
+
+    @ParameterizedTest
+  @CsvSource({
+    "Main Calendar, true",
+    "Main, false",
+    "main calendar, false",
+    "'Main Calendar ', false"
+  })
+  void testFindCalendarByName_ExactMatchLogic(String inputName, boolean shouldMatch) {
+    // TestMate-4b2bf27890ab20d8e60fc02676886bc0
+    // Given
+    String existingCalendarName = "Main Calendar";
+    when(calendarClient.getAllCalendars(Integer.MAX_VALUE))
+      .thenReturn(getCalendarCollection(existingCalendarName));
+    // When
+    var response = calendarService.findCalendarByName(inputName);
+    // Then
+    verify(calendarClient).getAllCalendars(Integer.MAX_VALUE);
+    if (shouldMatch) {
+      assertNotNull(response);
+      assertEquals(existingCalendarName, response.getName());
+    } else {
+      assertNull(response);
+    }
   }
 }

@@ -135,4 +135,18 @@ class TransactionAuditServiceTest {
     assertThat(savedAudit.getErrorMessage()).isEqualTo(
       "dcbTransactionId = trn-456; role = null; error message = Null payload.");
   }
+
+    @Test
+  void testLogErrorIfTransactionAuditExistsWhenAuditNotFoundShouldNotSave() {
+    // TestMate-1a0c9f10f62a5a52977c51aeacb5f897
+    // Given
+    var errorMsg = "error_message";
+    when(repository.findLatestTransactionAuditEntityByDcbTransactionId(DCB_TRANSACTION_ID)).thenReturn(Optional.empty());
+    // When
+    transactionAuditService.logErrorIfTransactionAuditExists(DCB_TRANSACTION_ID, errorMsg);
+    // Then
+    verify(repository).findLatestTransactionAuditEntityByDcbTransactionId(DCB_TRANSACTION_ID);
+    verify(repository, never()).save(any());
+    verify(transactionMapper, never()).mapToEntity(any(), any());
+  }
 }
