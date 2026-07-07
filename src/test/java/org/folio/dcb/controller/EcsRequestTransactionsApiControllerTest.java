@@ -58,4 +58,37 @@ class EcsRequestTransactionsApiControllerTest {
     verify(transactionAuditService).logErrorIfTransactionAuditNotExists(transactionId, dcbTransaction, errorMessage);
     verify(ecsRequestTransactionsService).createEcsRequestTransactions(transactionId, dcbTransaction);
   }
+
+  @Test
+  void updateEcsRequestTransactionShouldReturnOkStatusWhenSuccessful() {
+    // TestMate-b3c9d28477affe116c99ccaaa62a5265
+    var txId = UUID.randomUUID().toString();
+    var dcbTransaction = lenderDcbTransaction();
+    var expectedResponse = new TransactionStatusResponse().status(TransactionStatusResponse.StatusEnum.OPEN);
+    when(ecsRequestTransactionsService.updateEcsRequestTransaction(txId, dcbTransaction))
+      .thenReturn(expectedResponse);
+
+    var actualResponse = ecsRequestTransactionsApiController.updateEcsRequestTransaction(txId, dcbTransaction);
+
+    assertThat(actualResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+    assertThat(actualResponse.getBody()).isEqualTo(expectedResponse);
+    verify(ecsRequestTransactionsService).updateEcsRequestTransaction(txId, dcbTransaction);
+  }
+
+  @Test
+  void updateEcsRequestTransactionShouldLogErrorToAuditAndRethrowWhenServiceFails() {
+    // TestMate-bc4856a5a28a7384fc616339818b9260
+    var txId = UUID.randomUUID().toString();
+    var dcbTransaction = lenderDcbTransaction();
+    var errorMessage = "Update failed";
+    when(ecsRequestTransactionsService.updateEcsRequestTransaction(txId, dcbTransaction))
+      .thenThrow(new RuntimeException(errorMessage));
+
+    assertThatThrownBy(() -> ecsRequestTransactionsApiController.updateEcsRequestTransaction(txId, dcbTransaction))
+      .isInstanceOf(RuntimeException.class)
+      .hasMessage(errorMessage);
+
+    verify(transactionAuditService).logErrorIfTransactionAuditNotExists(txId, dcbTransaction, errorMessage);
+    verify(ecsRequestTransactionsService).updateEcsRequestTransaction(txId, dcbTransaction);
+  }
 }
