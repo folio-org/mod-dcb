@@ -7,14 +7,19 @@ import static org.folio.dcb.utils.EntityUtils.createDcbItem;
 import static org.folio.dcb.utils.EntityUtils.createInventoryItem;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.UUID;
 import org.folio.dcb.domain.ResultList;
 import org.folio.dcb.domain.dto.ItemLastCheckIn;
+import org.folio.dcb.domain.dto.MaterialType;
+import org.folio.dcb.domain.dto.MaterialTypeCollection;
 import org.folio.dcb.exception.InventoryItemNotFound;
 import org.folio.dcb.integration.invstorage.InventoryItemStorageClient;
+import org.folio.dcb.integration.invstorage.MaterialTypeClient;
 import org.folio.dcb.service.impl.ItemServiceImpl;
 import org.folio.dcb.utils.CqlQuery;
 import org.folio.spring.exception.NotFoundException;
@@ -28,6 +33,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class InventoryItemServiceTest {
 
   @InjectMocks private ItemServiceImpl itemService;
+  @Mock private MaterialTypeClient materialTypeClient;
   @Mock private InventoryItemStorageClient inventoryItemStorageClient;
 
   @Test
@@ -122,5 +128,51 @@ class InventoryItemServiceTest {
 
     var expectedMessage = "Matched item not found: %s, %s".formatted(itemId, expectedServicePointId);
     assertEquals(expectedMessage, exception.getMessage());
+  }
+
+  @Test
+  void fetchItemMaterialTypeIdByMaterialTypeNameTest() {
+    // TestMate-0f96f8c42d03650b357196259cdf7e6b
+    var materialTypeName = "book";
+    var materialTypeId = "1a2b3c4d-5e6f-7g8h-9i0j";
+    var materialType = new MaterialType().id(materialTypeId).name(materialTypeName);
+    var materialTypeResultList = new MaterialTypeCollection().addMtypesItem(materialType).totalRecords(1);
+    when(materialTypeClient.fetchMaterialTypeByQuery(anyString())).thenReturn(materialTypeResultList);
+
+    var result = itemService.fetchItemMaterialTypeIdByMaterialTypeName(materialTypeName);
+
+    verify(materialTypeClient).fetchMaterialTypeByQuery("name==\"book\"");
+    assertEquals(materialTypeId, result);
+  }
+
+  @Test
+  void fetchItemMaterialTypeIdByInvalidNameTest() {
+    // TestMate-772865b75acf5b12a75b8a6a3937b4b1
+    var name = "non-existent-type";
+    var materialTypes = new MaterialTypeCollection().totalRecords(0);
+    when(materialTypeClient.fetchMaterialTypeByQuery(anyString())).thenReturn(materialTypes);
+    assertThrows(NotFoundException.class, () -> itemService.fetchItemMaterialTypeIdByMaterialTypeName(name));
+    verify(materialTypeClient).fetchMaterialTypeByQuery("name==\"non-existent-type\"");
+  }
+
+  @Test
+  void fetchItemMaterialTypeIdByMultipleResultsTest() {
+    // TestMate-4b6d139cbb3dac517781e88fd0bd5828
+    var materialTypeName = "text";
+    var mtypeId1 = "11111111-1111-1111-1111-111111111111";
+    var mtypeId2 = "22222222-2222-2222-2222-222222222222";
+    var firstMaterialType = new MaterialType().id(mtypeId1).name(materialTypeName);
+    var secondMaterialType = new MaterialType().id(mtypeId2).name(materialTypeName);
+    var materialTypeResultList = new MaterialTypeCollection()
+      .addMtypesItem(firstMaterialType)
+      .addMtypesItem(secondMaterialType)
+      .totalRecords(2);
+
+    when(materialTypeClient.fetchMaterialTypeByQuery(anyString())).thenReturn(materialTypeResultList);
+
+    var result = itemService.fetchItemMaterialTypeIdByMaterialTypeName(materialTypeName);
+
+    verify(materialTypeClient).fetchMaterialTypeByQuery("name==\"text\"");
+    assertEquals(mtypeId1, result);
   }
 }
