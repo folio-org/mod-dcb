@@ -6,6 +6,7 @@ import static org.folio.dcb.utils.EntityUtils.lenderDcbTransaction;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.UUID;
 import org.folio.dcb.domain.dto.TransactionStatusResponse;
 import org.folio.dcb.domain.dto.TransactionStatusResponse.StatusEnum;
 import org.folio.dcb.service.TransactionAuditService;
@@ -44,7 +45,7 @@ class TransactionApiControllerTest {
   @Test
   void createCirculationRequestShouldLogAuditAndThrowWhenExceptionOccurs() {
     // TestMate-515a8d0a1d8b2ffc0a8908e3322eb24e
-    var dcbTransactionId = "txn-err-1";
+    var dcbTransactionId = UUID.randomUUID().toString();
     var errorMessage = "Service Error";
     var dcbTransaction = lenderDcbTransaction();
     var exception = new RuntimeException(errorMessage);
@@ -54,39 +55,35 @@ class TransactionApiControllerTest {
       transactionApiController.createCirculationRequest(dcbTransactionId, dcbTransaction))
       .isInstanceOf(RuntimeException.class)
       .hasMessage(errorMessage);
-
     verify(transactionsService).createCirculationRequest(dcbTransactionId, dcbTransaction);
     verify(transactionAuditService).logErrorIfTransactionAuditNotExists(dcbTransactionId, dcbTransaction, errorMessage);
   }
 
-    @Test
+  @Test
   void getTransactionStatusByIdTest() {
     // TestMate-5265ce147e6303a6c6059ec4eb249b3a
-    // Given
-    var dcbTransactionId = "txn-123";
+    var dcbTransactionId = UUID.randomUUID().toString();
     var expectedResponse = new TransactionStatusResponse().status(StatusEnum.CREATED);
     when(transactionsService.getTransactionStatusById(dcbTransactionId)).thenReturn(expectedResponse);
-    // When
+
     var responseEntity = transactionApiController.getTransactionStatusById(dcbTransactionId);
-    // Then
+
     assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
     assertThat(responseEntity.getBody()).isEqualTo(expectedResponse);
     verify(transactionsService).getTransactionStatusById(dcbTransactionId);
   }
 
-    @Test
+  @Test
   void getTransactionStatusByIdShouldLogAuditAndThrowWhenExceptionOccurs() {
     // TestMate-340f043d8cb1572c0d7d557ce271239c
-    // Given
-    var dcbTransactionId = "txn-err-1";
+    var dcbTransactionId = UUID.randomUUID().toString();
     var errorMessage = "Database connection failed";
     var exception = new RuntimeException(errorMessage);
     when(transactionsService.getTransactionStatusById(dcbTransactionId)).thenThrow(exception);
-    // When
+
     assertThatThrownBy(() -> transactionApiController.getTransactionStatusById(dcbTransactionId))
       .isInstanceOf(RuntimeException.class)
       .hasMessage(errorMessage);
-    // Then
     verify(transactionsService).getTransactionStatusById(dcbTransactionId);
     verify(transactionAuditService).logErrorIfTransactionAuditExists(dcbTransactionId, errorMessage);
   }
