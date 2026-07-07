@@ -66,6 +66,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
+import java.util.Collections;
 
 @ExtendWith(MockitoExtension.class)
 class TransactionServiceTest {
@@ -416,5 +417,23 @@ class TransactionServiceTest {
     verify(pickupLibraryService).updateTransactionStatus(dcbTransactionEntity, targetStatus);
     verifyNoInteractions(borrowingPickupLibraryService, statusProcessorService,
       lendingLibraryService, borrowingLibraryService);
+  }
+
+    @Test
+  void testUpdateTransactionStatusShouldHandleEmptyStatusChain() {
+    // TestMate-1d3c7c174b6e04da85202d9a0b1f332f
+    // Given
+    var dcbTransactionEntity = createTransactionEntity();
+    dcbTransactionEntity.setStatus(OPEN);
+    dcbTransactionEntity.setRole(LENDER);
+    var targetStatus = TransactionStatus.builder().status(CLOSED).build();
+    when(transactionRepository.findById(DCB_TRANSACTION_ID)).thenReturn(Optional.of(dcbTransactionEntity));
+    when(statusProcessorService.lendingChainProcessor(OPEN, CLOSED)).thenReturn(Collections.emptyList());
+    // When
+    TransactionStatusResponse response = transactionsService.updateTransactionStatus(DCB_TRANSACTION_ID, targetStatus);
+    // Then
+    assertThat(response.getStatus()).isEqualTo(TransactionStatusResponse.StatusEnum.CLOSED);
+    verify(statusProcessorService).lendingChainProcessor(OPEN, CLOSED);
+    verifyNoInteractions(lendingLibraryService, borrowingLibraryService, pickupLibraryService, borrowingPickupLibraryService);
   }
 }

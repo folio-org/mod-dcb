@@ -29,6 +29,8 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import static org.folio.dcb.service.UserServiceTest.randomUuid;
+import static org.folio.dcb.service.UserServiceTest.virtualUser;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
@@ -233,6 +235,22 @@ class UserServiceTest {
     verify(patronGroupService).fetchPatronGroupIdByName("staff");
     verify(usersClient).updateUser(any(), any());
     verify(usersClient, never()).createUser(any());
+  }
+
+    @Test
+  void fetchUser_positive_existingUser() {
+    // TestMate-73ca1e2922a2f9b42ef5244d75b4a0ce
+    // Given
+    var userId = randomUuid();
+    var groupId = randomUuid();
+    var existingUser = virtualUser(userId, groupId);
+    var dcbPatron = dcbPatron(userId);
+    when(usersClient.fetchUserByBarcodeAndId(any())).thenReturn(userCollection(existingUser));
+    // When
+    var result = userService.fetchUser(dcbPatron);
+    // Then
+    assertThat(result).isEqualTo(existingUser);
+    verify(usersClient).fetchUserByBarcodeAndId(any());
   }
 
   private static UserCollection userCollection(User... users) {

@@ -23,6 +23,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.client.HttpClientErrorException;
+import static org.mockito.Mockito.never;
 
 @ExtendWith(MockitoExtension.class)
 class CirculationServiceTest {
@@ -87,5 +88,46 @@ class CirculationServiceTest {
       .thenThrow(HttpClientErrorException.BadRequest.class);
     assertThrows(CirculationRequestException.class, () ->
       circulationService.cancelRequest(transactionEntity, false));
+  }
+
+    @Test
+  void checkInByBarcodeShouldPrioritizeMethodParameterServicePointIdTest() {
+    // TestMate-8336b6a9423d10f6280b51c55a4066cb
+    TransactionEntity transactionEntity = createTransactionEntity();
+    transactionEntity.setServicePointId("ENTITY_SERVICE_POINT");
+    transactionEntity.setItemBarcode("ITEM-123");
+    String explicitServicePointId = "EXPLICIT_SERVICE_POINT";
+    circulationService.checkInByBarcode(transactionEntity, explicitServicePointId, null);
+    verify(circulationClient).checkInByBarcode(argThat(req ->
+      explicitServicePointId.equals(req.getServicePointId()) &&
+        "ITEM-123".equals(req.getItemBarcode())
+    ));
+  }
+
+    @Test
+  void checkInByBarcodeWhenServicePointIsNullShouldStillDelegate() {
+    // TestMate-72b46a8ea31a64a588009299c2871c1b
+    // Given
+    TransactionEntity transactionEntity = createTransactionEntity();
+    transactionEntity.setItemBarcode("99999");
+    transactionEntity.setServicePointId(null);
+    // When
+    circulationService.checkInByBarcode(transactionEntity);
+    // Then
+    verify(circulationClient).checkInByBarcode(argThat(request ->
+      "99999".equals(request.getItemBarcode()) && request.getServicePointId() == null
+    ));
+  }
+
+    @Test
+  void cancelRequestShouldNotUpdateWhenNoOpenRequestFound() {
+    // TestMate-b7855e7929105a63d4324d9664993f01
+    // Given
+    TransactionEntity transactionEntity = createTransactionEntity();
+    when(circulationRequestService.getCancellationRequestIfOpenOrNull(anyString())).thenReturn(null);
+    // When
+    circulationService.cancelRequest(transactionEntity, false);
+    // Then
+    verify(circulationClient, never()).updateRequest(anyString(), any());
   }
 }
