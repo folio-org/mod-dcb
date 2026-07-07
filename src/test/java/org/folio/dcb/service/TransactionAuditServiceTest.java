@@ -1,5 +1,6 @@
 package org.folio.dcb.service;
 
+import static java.util.Optional.empty;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.BORROWER;
 import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
@@ -45,7 +46,7 @@ class TransactionAuditServiceTest {
   @Test
   void logTheErrorForNotExistedTransactionAuditTest() {
     var transaction = createDcbTransactionByRole(LENDER);
-    when(repository.findLatestTransactionAuditEntityByDcbTransactionId(any())).thenReturn(Optional.empty());
+    when(repository.findLatestTransactionAuditEntityByDcbTransactionId(any())).thenReturn(empty());
     transactionAuditService.logErrorIfTransactionAuditNotExists(DCB_TRANSACTION_ID, transaction, "error_message");
     verify(repository).save(any());
   }
@@ -122,7 +123,7 @@ class TransactionAuditServiceTest {
     var dcbTransactionId = "trn-456";
     var errorMsg = "Null payload";
     var auditCaptor = ArgumentCaptor.forClass(TransactionAuditEntity.class);
-    when(repository.findLatestTransactionAuditEntityByDcbTransactionId(dcbTransactionId)).thenReturn(Optional.empty());
+    when(repository.findLatestTransactionAuditEntityByDcbTransactionId(dcbTransactionId)).thenReturn(empty());
     when(repository.save(auditCaptor.capture())).then(inv -> inv.getArgument(0));
 
     transactionAuditService.logErrorIfTransactionAuditNotExists(dcbTransactionId, null, errorMsg);
@@ -136,15 +137,14 @@ class TransactionAuditServiceTest {
       "dcbTransactionId = trn-456; role = null; error message = Null payload.");
   }
 
-    @Test
+  @Test
   void testLogErrorIfTransactionAuditExistsWhenAuditNotFoundShouldNotSave() {
     // TestMate-1a0c9f10f62a5a52977c51aeacb5f897
-    // Given
     var errorMsg = "error_message";
-    when(repository.findLatestTransactionAuditEntityByDcbTransactionId(DCB_TRANSACTION_ID)).thenReturn(Optional.empty());
-    // When
+    when(repository.findLatestTransactionAuditEntityByDcbTransactionId(DCB_TRANSACTION_ID)).thenReturn(empty());
+
     transactionAuditService.logErrorIfTransactionAuditExists(DCB_TRANSACTION_ID, errorMsg);
-    // Then
+
     verify(repository).findLatestTransactionAuditEntityByDcbTransactionId(DCB_TRANSACTION_ID);
     verify(repository, never()).save(any());
     verify(transactionMapper, never()).mapToEntity(any(), any());
