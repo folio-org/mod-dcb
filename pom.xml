@@ -53,7 +53,7 @@
     <jacoco-maven-plugin.version>0.8.15</jacoco-maven-plugin.version>
     <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
     <folio-java-checkstyle.version>1.2.0</folio-java-checkstyle.version>
-    <checkstyle.version>13.7.0</checkstyle.version>
+    <checkstyle.version>13.8.0</checkstyle.version>
   </properties>
 
   <dependencyManagement>
