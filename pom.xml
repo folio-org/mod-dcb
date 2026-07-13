@@ -37,7 +37,7 @@
 
     <!-- test dependencies -->
     <wiremock.version>3.13.2</wiremock.version>
-    <rest-assured.version>6.0.0</rest-assured.version>
+    <rest-assured.version>6.0.1</rest-assured.version>
     <annotations.version>26.1.0</annotations.version>
     <testcontainers.version>2.0.5</testcontainers.version>
 
