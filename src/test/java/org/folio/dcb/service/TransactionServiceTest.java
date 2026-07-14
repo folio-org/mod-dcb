@@ -28,6 +28,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.time.OffsetDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -66,7 +67,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
-import java.util.Collections;
 
 @ExtendWith(MockitoExtension.class)
 class TransactionServiceTest {
@@ -301,7 +301,7 @@ class TransactionServiceTest {
   }
 
   @Test
-  void createCirculationRequestShouldDelegateToBorrowingPickupService() {
+  void createCirculationRequest_positive_ShouldDelegateToBorrowingPickupService() {
     // TestMate-0a2a9520399d5c7abefe2604abee8bb1
     var transaction = createDcbTransactionByRole(BORROWING_PICKUP);
     var expectedResponse = createTransactionResponse();
@@ -317,7 +317,7 @@ class TransactionServiceTest {
   }
 
   @Test
-  void createCirculationRequestShouldDelegateToPickupService() {
+  void createCirculationRequest_positive_shouldDelegateToPickupService() {
     // TestMate-597be30571329e3ce0267cdfff9dfb08
     var transaction = createDcbTransactionByRole(PICKUP);
     var expectedResponse = createTransactionResponse();
@@ -333,7 +333,7 @@ class TransactionServiceTest {
   }
 
   @Test
-  void createCirculationRequestShouldDelegateToBorrowerService() {
+  void createCirculationRequest_positive_shouldDelegateToBorrowerService() {
     // TestMate-7d4eb902b0fe10bf7674b7be235df7bd
     var dcbTransaction = createDcbTransactionByRole(BORROWER);
     var expectedResponse = createTransactionResponse();
@@ -349,7 +349,7 @@ class TransactionServiceTest {
   }
 
   @Test
-  void updateTransactionStatusWhenTransactionNotFoundShouldThrowException() {
+  void updateTransactionStatus_negative_transactionNotFound() {
     // TestMate-dcfec3a2e25a9cd96051a6cf26412215
     var nonExistentId = UUID.randomUUID().toString();
     when(transactionRepository.findById(nonExistentId)).thenReturn(Optional.empty());
@@ -363,7 +363,7 @@ class TransactionServiceTest {
   }
 
   @Test
-  void updateTransactionStatusForBorrowerRoleShouldUseBorrowingChainProcessor() {
+  void updateTransactionStatus_positive_borrowingChainProcessorUsed() {
     // TestMate-e08c55185fe8d0dcaa3a2fd733caef67
     var dcbTransactionEntity = createTransactionEntity();
     dcbTransactionEntity.setStatus(OPEN);
@@ -419,21 +419,21 @@ class TransactionServiceTest {
       lendingLibraryService, borrowingLibraryService);
   }
 
-    @Test
-  void testUpdateTransactionStatusShouldHandleEmptyStatusChain() {
+  @Test
+  void updateTransactionStatus_positive_emptyStatusChain() {
     // TestMate-1d3c7c174b6e04da85202d9a0b1f332f
-    // Given
     var dcbTransactionEntity = createTransactionEntity();
     dcbTransactionEntity.setStatus(OPEN);
     dcbTransactionEntity.setRole(LENDER);
     var targetStatus = TransactionStatus.builder().status(CLOSED).build();
     when(transactionRepository.findById(DCB_TRANSACTION_ID)).thenReturn(Optional.of(dcbTransactionEntity));
     when(statusProcessorService.lendingChainProcessor(OPEN, CLOSED)).thenReturn(Collections.emptyList());
-    // When
-    TransactionStatusResponse response = transactionsService.updateTransactionStatus(DCB_TRANSACTION_ID, targetStatus);
-    // Then
+
+    var response = transactionsService.updateTransactionStatus(DCB_TRANSACTION_ID, targetStatus);
+
     assertThat(response.getStatus()).isEqualTo(TransactionStatusResponse.StatusEnum.CLOSED);
     verify(statusProcessorService).lendingChainProcessor(OPEN, CLOSED);
-    verifyNoInteractions(lendingLibraryService, borrowingLibraryService, pickupLibraryService, borrowingPickupLibraryService);
+    verifyNoInteractions(lendingLibraryService, borrowingLibraryService,
+      pickupLibraryService, borrowingPickupLibraryService);
   }
 }

@@ -17,7 +17,7 @@ public interface UsersClient {
   User createUser(@RequestBody User user);
 
   @GetExchange
-  UserCollection fetchUserByBarcodeAndId(@RequestParam("query") String query);
+  UserCollection fetchByQuery(@RequestParam("query") String query);
 
   @PutExchange("/{userId}")
   void updateUser(@PathVariable String userId, @RequestBody User user);

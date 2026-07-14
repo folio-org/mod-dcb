@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -23,15 +24,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.client.HttpClientErrorException;
-import static org.mockito.Mockito.never;
 
 @ExtendWith(MockitoExtension.class)
 class CirculationServiceTest {
 
   @InjectMocks private CirculationServiceImpl circulationService;
-
   @Mock private CirculationClient circulationClient;
-
   @Mock private CirculationRequestService circulationRequestService;
 
   @Test
@@ -90,44 +88,42 @@ class CirculationServiceTest {
       circulationService.cancelRequest(transactionEntity, false));
   }
 
-    @Test
+  @Test
   void checkInByBarcodeShouldPrioritizeMethodParameterServicePointIdTest() {
     // TestMate-8336b6a9423d10f6280b51c55a4066cb
-    TransactionEntity transactionEntity = createTransactionEntity();
+    var transactionEntity = createTransactionEntity();
     transactionEntity.setServicePointId("ENTITY_SERVICE_POINT");
     transactionEntity.setItemBarcode("ITEM-123");
     String explicitServicePointId = "EXPLICIT_SERVICE_POINT";
+
     circulationService.checkInByBarcode(transactionEntity, explicitServicePointId, null);
+
     verify(circulationClient).checkInByBarcode(argThat(req ->
-      explicitServicePointId.equals(req.getServicePointId()) &&
-        "ITEM-123".equals(req.getItemBarcode())
+      explicitServicePointId.equals(req.getServicePointId())
+        && "ITEM-123".equals(req.getItemBarcode())
     ));
   }
 
-    @Test
-  void checkInByBarcodeWhenServicePointIsNullShouldStillDelegate() {
+  @Test
+  void checkInByBarcode_positive_servicePointIsNull() {
     // TestMate-72b46a8ea31a64a588009299c2871c1b
-    // Given
-    TransactionEntity transactionEntity = createTransactionEntity();
+    var transactionEntity = createTransactionEntity();
     transactionEntity.setItemBarcode("99999");
     transactionEntity.setServicePointId(null);
-    // When
+
     circulationService.checkInByBarcode(transactionEntity);
-    // Then
+
     verify(circulationClient).checkInByBarcode(argThat(request ->
       "99999".equals(request.getItemBarcode()) && request.getServicePointId() == null
     ));
   }
 
-    @Test
-  void cancelRequestShouldNotUpdateWhenNoOpenRequestFound() {
+  @Test
+  void cancelRequest_positive_noOpenRequestFound() {
     // TestMate-b7855e7929105a63d4324d9664993f01
-    // Given
-    TransactionEntity transactionEntity = createTransactionEntity();
+    var transactionEntity = createTransactionEntity();
     when(circulationRequestService.getCancellationRequestIfOpenOrNull(anyString())).thenReturn(null);
-    // When
     circulationService.cancelRequest(transactionEntity, false);
-    // Then
     verify(circulationClient, never()).updateRequest(anyString(), any());
   }
 }

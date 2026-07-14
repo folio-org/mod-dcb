@@ -73,7 +73,7 @@ public class UserServiceImpl implements UserService {
   private User fetchUserByBarcodeAndId(String barcode, String id) {
     log.debug("fetchUserByBarcodeAndId:: Trying to fetch existing user.");
     var query = CqlQuery.exactMatch("barcode", barcode).and(CqlQuery.exactMatchById(id), true).getQuery();
-    return usersClient.fetchUserByBarcodeAndId(query)
+    return usersClient.fetchByQuery(query)
       .getUsers()
       .stream()
       .findFirst()
