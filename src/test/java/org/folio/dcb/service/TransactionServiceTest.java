@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -64,7 +65,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 
@@ -249,7 +249,7 @@ class TransactionServiceTest {
   void getTransactionStatusListTest() {
     var startDate = OffsetDateTime.now().minusDays(1L);
     var endDate = OffsetDateTime.now();
-    var pageMock = Mockito.<Page<TransactionAuditEntity>>mock();
+    Page<TransactionAuditEntity> pageMock = mock();
     when(transactionAuditRepository.findUpdatedTransactionsByDateRange(any(), any(), any())).thenReturn(pageMock);
     when(pageMock.getTotalElements()).thenReturn(10L);
     when(transactionMapper.mapToDto(pageMock))
