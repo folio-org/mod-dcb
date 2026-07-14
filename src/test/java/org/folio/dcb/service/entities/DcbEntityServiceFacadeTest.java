@@ -16,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.folio.dcb.integration.circstorage.CancellationReasonClient.CancellationReason;
 
 @ExtendWith(MockitoExtension.class)
 class DcbEntityServiceFacadeTest {
@@ -125,6 +126,46 @@ class DcbEntityServiceFacadeTest {
     verify(dcbFeatureProperties).isDcbEntitiesRuntimeVerificationEnabled();
     verify(dcbLoanTypeService, never()).findOrCreateEntity();
     verify(dcbLoanTypeService).getDefaultValue();
+  }
+
+    @Test
+  void findOrCreateCancellationReason_positive_shouldCallRealServiceWhenSettingEnabled() {
+    // TestMate-233b10edf4c5abe0192c502e99901811
+    // Arrange
+    CancellationReason expectedReason = CancellationReason.builder()
+      .id("77777777-7777-7777-7777-777777777777")
+      .name("Test Cancellation Reason")
+      .description("Test Description")
+      .build();
+    when(dcbFeatureProperties.isDcbEntitiesRuntimeVerificationEnabled()).thenReturn(true);
+    when(dcbCancellationReasonService.findOrCreateEntity()).thenReturn(expectedReason);
+    // Act
+    var result = dcbEntityServiceFacade.findOrCreateCancellationReason();
+    // Then
+    assertThat(result).isEqualTo(expectedReason);
+    verify(dcbFeatureProperties).isDcbEntitiesRuntimeVerificationEnabled();
+    verify(dcbCancellationReasonService).findOrCreateEntity();
+    verify(dcbCancellationReasonService, never()).getDefaultValue();
+  }
+
+    @Test
+  void findOrCreateCancellationReason_positive_shouldReturnDefaultValueWhenSettingDisable() {
+    // TestMate-27e852d8ac959e89f0f20990af103d9b
+    // Given
+    CancellationReason defaultReason = CancellationReason.builder()
+      .id("77777777-7777-7777-7777-777777777777")
+      .name("Default Cancellation Reason")
+      .description("Default Description")
+      .build();
+    when(dcbFeatureProperties.isDcbEntitiesRuntimeVerificationEnabled()).thenReturn(false);
+    when(dcbCancellationReasonService.getDefaultValue()).thenReturn(defaultReason);
+    // When
+    var result = dcbEntityServiceFacade.findOrCreateCancellationReason();
+    // Then
+    assertThat(result).isEqualTo(defaultReason);
+    verify(dcbFeatureProperties).isDcbEntitiesRuntimeVerificationEnabled();
+    verify(dcbCancellationReasonService, never()).findOrCreateEntity();
+    verify(dcbCancellationReasonService).getDefaultValue();
   }
 
   private static InventoryHolding dcbHolding() {
