@@ -31,6 +31,9 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import java.util.Collections;
+import org.folio.spring.exception.NotFoundException;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
@@ -250,6 +253,24 @@ class UserServiceTest {
     var result = userService.fetchUser(dcbPatron);
 
     assertThat(result).isEqualTo(existingUser);
+  }
+
+    @Test
+  void fetchUser_negative_throwsNotFoundExceptionWhenUserNotFound() {
+    // TestMate-30bdc658e5164870a2af00e4cf5d94d6
+    // Given
+    var userId = "00000000-0000-0000-0000-000000000000";
+    var barcode = "non-existent-barcode";
+    var dcbPatron = dcbPatron(userId);
+    dcbPatron.setBarcode(barcode);
+    var expectedQuery = exactMatch("barcode", barcode).and(exactMatchById(userId), true).getQuery();
+    var emptyCollection = new UserCollection().users(Collections.emptyList()).totalRecords(0);
+    when(usersClient.fetchByQuery(expectedQuery)).thenReturn(emptyCollection);
+    // When
+    var exception = assertThrows(NotFoundException.class, () -> userService.fetchUser(dcbPatron));
+    // Then
+    assertThat(exception.getMessage()).isEqualTo("Unable to find existing user.");
+    verify(usersClient).fetchByQuery(expectedQuery);
   }
 
   private static UserCollection userCollection(User... users) {
