@@ -165,9 +165,11 @@ class BaseLibraryServiceTest {
     when(circulationItemService.checkIfItemExistsAndCreate(any(), any())).thenReturn(createCirculationItem());
     when(transactionRepository.findTransactionsByItemIdAndStatusNotInClosed(any()))
       .thenReturn(List.of(createTransactionEntity()));
+    
+    var transaction = createDcbTransactionByRole(BORROWER);
     assertThrows(ResourceAlreadyExistException.class, () ->
       baseLibraryService.createBorrowingLibraryTransaction(
-        DCB_TRANSACTION_ID, createDcbTransactionByRole(BORROWER), PICKUP_SERVICE_POINT_ID));
+        DCB_TRANSACTION_ID, transaction, PICKUP_SERVICE_POINT_ID));
   }
 
   @Test
