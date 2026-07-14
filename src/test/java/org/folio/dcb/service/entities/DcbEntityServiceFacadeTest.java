@@ -6,7 +6,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.UUID;
 import org.folio.dcb.config.DcbFeatureProperties;
+import org.folio.dcb.integration.circstorage.CancellationReasonClient.CancellationReason;
 import org.folio.dcb.integration.circstorage.model.LoanType;
 import org.folio.dcb.integration.invstorage.model.InventoryHolding;
 import org.folio.dcb.integration.invstorage.model.Location;
@@ -16,7 +18,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.folio.dcb.integration.circstorage.CancellationReasonClient.CancellationReason;
 
 @ExtendWith(MockitoExtension.class)
 class DcbEntityServiceFacadeTest {
@@ -128,40 +129,38 @@ class DcbEntityServiceFacadeTest {
     verify(dcbLoanTypeService).getDefaultValue();
   }
 
-    @Test
+  @Test
   void findOrCreateCancellationReason_positive_shouldCallRealServiceWhenSettingEnabled() {
     // TestMate-233b10edf4c5abe0192c502e99901811
-    // Arrange
-    CancellationReason expectedReason = CancellationReason.builder()
-      .id("77777777-7777-7777-7777-777777777777")
+    var expectedReason = CancellationReason.builder()
+      .id(UUID.randomUUID().toString())
       .name("Test Cancellation Reason")
       .description("Test Description")
       .build();
     when(dcbFeatureProperties.isDcbEntitiesRuntimeVerificationEnabled()).thenReturn(true);
     when(dcbCancellationReasonService.findOrCreateEntity()).thenReturn(expectedReason);
-    // Act
+
     var result = dcbEntityServiceFacade.findOrCreateCancellationReason();
-    // Then
+
     assertThat(result).isEqualTo(expectedReason);
     verify(dcbFeatureProperties).isDcbEntitiesRuntimeVerificationEnabled();
     verify(dcbCancellationReasonService).findOrCreateEntity();
     verify(dcbCancellationReasonService, never()).getDefaultValue();
   }
 
-    @Test
+  @Test
   void findOrCreateCancellationReason_positive_shouldReturnDefaultValueWhenSettingDisable() {
     // TestMate-27e852d8ac959e89f0f20990af103d9b
-    // Given
-    CancellationReason defaultReason = CancellationReason.builder()
-      .id("77777777-7777-7777-7777-777777777777")
+    var defaultReason = CancellationReason.builder()
+      .id(UUID.randomUUID().toString())
       .name("Default Cancellation Reason")
       .description("Default Description")
       .build();
     when(dcbFeatureProperties.isDcbEntitiesRuntimeVerificationEnabled()).thenReturn(false);
     when(dcbCancellationReasonService.getDefaultValue()).thenReturn(defaultReason);
-    // When
+
     var result = dcbEntityServiceFacade.findOrCreateCancellationReason();
-    // Then
+
     assertThat(result).isEqualTo(defaultReason);
     verify(dcbFeatureProperties).isDcbEntitiesRuntimeVerificationEnabled();
     verify(dcbCancellationReasonService, never()).findOrCreateEntity();
