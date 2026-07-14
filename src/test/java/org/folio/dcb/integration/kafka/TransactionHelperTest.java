@@ -2,13 +2,17 @@ package org.folio.dcb.integration.kafka;
 
 import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.folio.dcb.utils.JsonTestUtils.JSON_MAPPER;
+import static org.folio.dcb.utils.JsonTestUtils.toJsonNode;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Stream;
 import org.folio.dcb.integration.kafka.model.EventData;
 import org.folio.dcb.integration.kafka.model.KafkaEvent;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -17,6 +21,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.MessageHeaders;
+import tools.jackson.databind.JsonNode;
 
 @ExtendWith(MockitoExtension.class)
 class TransactionHelperTest {
@@ -144,69 +149,16 @@ class TransactionHelperTest {
     assertThat(result.getType()).isNull();
   }
 
-  @Test
-  void parseLoanEventShouldDefaultIsDcbToTrueWhenMissing() {
-    var itemId = "8db107f5-12aa-479f-9c07-39e7c9cf2e4d";
-    var payload = """
-      {
-        "type": "UPDATED",
-        "data": {
-          "new": {
-            "itemId": "%s"
-          }
-        }
-      }
-      """.formatted(itemId);
-
+  @MethodSource("dcbFlagEventPayloadDataSource")
+  @DisplayName("parseLoanEvent_parameterized_dcbCheck")
+  @ParameterizedTest(name = "[{index}] {0}")
+  void parseLoanEvent_parameterized_dcbCheck(
+    @SuppressWarnings("unused") String name, String payload, boolean expected) {
     var result = TransactionHelper.parseLoanEvent(payload);
 
     assertThat(result).isNotNull()
       .extracting(EventData::isDcb)
-      .isEqualTo(true);
-  }
-
-  @Test
-  void parseLoanEventShouldPreserveIsDcbWhenTrue() {
-    var itemId = "8db107f5-12aa-479f-9c07-39e7c9cf2e4d";
-    var payload = """
-      {
-        "type": "UPDATED",
-        "data": {
-          "new": {
-            "itemId": "%s",
-            "isDcb": true
-          }
-        }
-      }
-      """.formatted(itemId);
-
-    var result = TransactionHelper.parseLoanEvent(payload);
-
-    assertThat(result).isNotNull()
-      .extracting(EventData::isDcb)
-      .isEqualTo(true);
-  }
-
-  @Test
-  void parseLoanEventShouldPreserveIsDcbWhenFalse() {
-    var itemId = "8db107f5-12aa-479f-9c07-39e7c9cf2e4d";
-    var payload = """
-      {
-        "type": "UPDATED",
-        "data": {
-          "new": {
-            "itemId": "%s",
-            "isDcb": false
-          }
-        }
-      }
-      """.formatted(itemId);
-
-    var result = TransactionHelper.parseLoanEvent(payload);
-
-    assertThat(result).isNotNull()
-      .extracting(EventData::isDcb)
-      .isEqualTo(false);
+      .isEqualTo(expected);
   }
 
   @Test
@@ -420,5 +372,26 @@ class TransactionHelperTest {
       arguments((String) null),
       arguments("")
     );
+  }
+
+  public static Stream<Arguments> dcbFlagEventPayloadDataSource() {
+    var itemId = UUID.randomUUID().toString();
+    return Stream.of(
+      arguments("dcb flag is provided as true",
+        eventString(toJsonNode(Map.of("itemId", itemId, "isDcb", true))), true),
+      arguments("dcb flag is provided as false",
+        eventString(toJsonNode(Map.of("itemId", itemId, "isDcb", false))), false),
+      arguments("dcb flag is provided as null",
+        eventString(toJsonNode(Map.of("itemId", itemId))), true)
+    );
+  }
+
+  public static String eventString(JsonNode newData) {
+    var objectNode = JSON_MAPPER.createObjectNode();
+    return objectNode
+      .put("type", "UPDATED")
+      .set("data", JSON_MAPPER.createObjectNode()
+        .set("new", newData))
+      .toString();
   }
 }
