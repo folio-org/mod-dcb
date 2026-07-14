@@ -1,13 +1,13 @@
 package org.folio.dcb.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.folio.dcb.utils.CqlQuery.exactMatch;
 import static org.folio.dcb.utils.CqlQuery.exactMatchById;
 import static org.folio.dcb.utils.EntityUtils.DCB_USER_TYPE;
 import static org.folio.dcb.utils.EntityUtils.createDefaultDcbPatron;
 import static org.folio.dcb.utils.EntityUtils.createUser;
 import static org.folio.dcb.utils.EntityUtils.dcbPatron;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
@@ -265,9 +265,9 @@ class UserServiceTest {
     var emptyCollection = new UserCollection().users(Collections.emptyList()).totalRecords(0);
     when(usersClient.fetchByQuery(expectedQuery)).thenReturn(emptyCollection);
 
-    var exception = assertThrows(NotFoundException.class, () -> userService.fetchUser(dcbPatron));
-
-    assertThat(exception.getMessage()).isEqualTo("Unable to find existing user.");
+    assertThatThrownBy(() -> userService.fetchUser(dcbPatron))
+      .isInstanceOf(NotFoundException.class)
+      .hasMessage("Unable to find existing user.");
     verify(usersClient).fetchByQuery(expectedQuery);
   }
 
