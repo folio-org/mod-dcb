@@ -1,6 +1,8 @@
 package org.folio.dcb.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.folio.dcb.utils.CqlQuery.exactMatch;
+import static org.folio.dcb.utils.CqlQuery.exactMatchById;
 import static org.folio.dcb.utils.EntityUtils.DCB_USER_TYPE;
 import static org.folio.dcb.utils.EntityUtils.createDefaultDcbPatron;
 import static org.folio.dcb.utils.EntityUtils.createUser;
@@ -47,7 +49,7 @@ class UserServiceTest {
   void fetchOrCreateUser_positive_newVirtualUser() {
     var groupId = randomUuid();
 
-    when(usersClient.fetchUserByBarcodeAndId(any())).thenReturn(userCollection());
+    when(usersClient.fetchByQuery(any())).thenReturn(userCollection());
     when(patronGroupService.fetchPatronGroupIdByName(any())).thenReturn(groupId);
     when(usersClient.createUser(userCaptor.capture())).then(inv -> inv.getArgument(0));
 
@@ -57,7 +59,7 @@ class UserServiceTest {
     assertThat(userCaptor.getValue()).isEqualTo(virtualUser(userId, groupId));
 
     verify(usersClient).createUser(any());
-    verify(usersClient).fetchUserByBarcodeAndId(any());
+    verify(usersClient).fetchByQuery(any());
     verify(patronGroupService).fetchPatronGroupIdByName("staff");
   }
 
@@ -68,7 +70,7 @@ class UserServiceTest {
     var newGroupId = randomUuid();
     var founduser = virtualUser(userId, groupId);
 
-    when(usersClient.fetchUserByBarcodeAndId(any())).thenReturn(userCollection(founduser));
+    when(usersClient.fetchByQuery(any())).thenReturn(userCollection(founduser));
     when(patronGroupService.fetchPatronGroupIdByName(any())).thenReturn(newGroupId);
     doNothing().when(usersClient).updateUser(eq(userId), userCaptor.capture());
 
@@ -76,7 +78,7 @@ class UserServiceTest {
 
     assertThat(userCaptor.getValue()).isEqualTo(virtualUser(userId, newGroupId));
 
-    verify(usersClient).fetchUserByBarcodeAndId(any());
+    verify(usersClient).fetchByQuery(any());
     verify(patronGroupService).fetchPatronGroupIdByName("staff");
     verify(usersClient).updateUser(any(), any());
     verify(usersClient, never()).createUser(any());
@@ -87,12 +89,12 @@ class UserServiceTest {
     var userId = randomUuid();
     var groupId = randomUuid();
     var foundUsers = userCollection(virtualUser(userId, groupId));
-    when(usersClient.fetchUserByBarcodeAndId(any())).thenReturn(foundUsers);
+    when(usersClient.fetchByQuery(any())).thenReturn(foundUsers);
     when(patronGroupService.fetchPatronGroupIdByName("staff")).thenReturn(groupId);
 
     userService.fetchOrCreateUser(dcbPatron(userId));
 
-    verify(usersClient).fetchUserByBarcodeAndId(any());
+    verify(usersClient).fetchByQuery(any());
     verify(patronGroupService).fetchPatronGroupIdByName("staff");
     verify(usersClient, never()).updateUser(any(), any());
     verify(usersClient, never()).createUser(any());
@@ -102,7 +104,7 @@ class UserServiceTest {
   void findOrCreateUser_positive_newUserWithDefaultPersonalData() {
     var expectedUser = createUser();
     var userCollection = new UserCollection();
-    when(usersClient.fetchUserByBarcodeAndId(any())).thenReturn(userCollection);
+    when(usersClient.fetchByQuery(any())).thenReturn(userCollection);
     when(usersClient.createUser(userCaptor.capture())).thenReturn(expectedUser);
     when(patronGroupService.fetchPatronGroupIdByName(any())).thenReturn(UUID.randomUUID().toString());
 
@@ -113,7 +115,7 @@ class UserServiceTest {
       .extracting(User::getPersonal)
       .isEqualTo(new Personal().lastName("DcbSystem"));
 
-    verify(usersClient).fetchUserByBarcodeAndId(any());
+    verify(usersClient).fetchByQuery(any());
     verify(patronGroupService).fetchPatronGroupIdByName("staff");
     verify(usersClient).createUser(any());
   }
@@ -122,7 +124,7 @@ class UserServiceTest {
   void findOrCreateUser_positive_newUserWithPersonalData() {
     var userId = randomUuid();
     var groupId = randomUuid();
-    when(usersClient.fetchUserByBarcodeAndId(any())).thenReturn(new UserCollection());
+    when(usersClient.fetchByQuery(any())).thenReturn(new UserCollection());
     when(usersClient.createUser(userCaptor.capture())).then(inv -> inv.getArgument(0));
     when(patronGroupService.fetchPatronGroupIdByName(any())).thenReturn(groupId);
 
@@ -130,7 +132,7 @@ class UserServiceTest {
     var result = userService.fetchOrCreateUser(givenDcbPatron);
 
     assertThat(result).isEqualTo(virtualUser(userId, groupId, personalInfo("John", null, "Doe")));
-    verify(usersClient).fetchUserByBarcodeAndId(any());
+    verify(usersClient).fetchByQuery(any());
     verify(patronGroupService).fetchPatronGroupIdByName("staff");
     verify(usersClient, never()).updateUser(any(), any());
     verify(usersClient).createUser(any());
@@ -142,7 +144,7 @@ class UserServiceTest {
     var groupId = randomUuid();
     var foundUser = virtualUser(userId, groupId, personalInfo("John", "Michael", "Doe"));
 
-    when(usersClient.fetchUserByBarcodeAndId(any())).thenReturn(userCollection(foundUser));
+    when(usersClient.fetchByQuery(any())).thenReturn(userCollection(foundUser));
     when(patronGroupService.fetchPatronGroupIdByName(any())).thenReturn(groupId);
     doNothing().when(usersClient).updateUser(eq(userId), userCaptor.capture());
 
@@ -153,7 +155,7 @@ class UserServiceTest {
     var expectedUser = virtualUser(userId, groupId, expectedPersonalInfo);
     assertThat(result).isEqualTo(expectedUser);
     assertThat(userCaptor.getValue()).isEqualTo(expectedUser);
-    verify(usersClient).fetchUserByBarcodeAndId(any());
+    verify(usersClient).fetchByQuery(any());
     verify(patronGroupService).fetchPatronGroupIdByName("staff");
     verify(usersClient).updateUser(any(), any());
     verify(usersClient, never()).createUser(any());
@@ -164,14 +166,14 @@ class UserServiceTest {
     var userId = randomUuid();
     var groupId = randomUuid();
     var foundUser = virtualUser(userId, groupId, defaultPersonalInfo());
-    when(usersClient.fetchUserByBarcodeAndId(any())).thenReturn(userCollection(foundUser));
+    when(usersClient.fetchByQuery(any())).thenReturn(userCollection(foundUser));
     when(patronGroupService.fetchPatronGroupIdByName(any())).thenReturn(groupId);
 
     var dcbPatron = dcbPatron(userId);
     var result = userService.fetchOrCreateUser(dcbPatron);
 
     assertThat(result).isEqualTo(virtualUser(userId, groupId, defaultPersonalInfo()));
-    verify(usersClient).fetchUserByBarcodeAndId(any());
+    verify(usersClient).fetchByQuery(any());
     verify(patronGroupService).fetchPatronGroupIdByName("staff");
     verify(usersClient, never()).updateUser(any(), any());
     verify(usersClient, never()).createUser(any());
@@ -182,14 +184,14 @@ class UserServiceTest {
     var userId = randomUuid();
     var groupId = randomUuid();
     var foundUser = virtualUser(userId, groupId, personalInfo("John", null, "Doe"));
-    when(usersClient.fetchUserByBarcodeAndId(any())).thenReturn(userCollection(foundUser));
+    when(usersClient.fetchByQuery(any())).thenReturn(userCollection(foundUser));
     when(patronGroupService.fetchPatronGroupIdByName(any())).thenReturn(groupId);
 
     var dcbPatron = dcbPatron(userId, "[John, Doe]");
     var result = userService.fetchOrCreateUser(dcbPatron);
 
     assertThat(result).isEqualTo(virtualUser(userId, groupId, personalInfo("John", null, "Doe")));
-    verify(usersClient).fetchUserByBarcodeAndId(any());
+    verify(usersClient).fetchByQuery(any());
     verify(patronGroupService).fetchPatronGroupIdByName("staff");
     verify(usersClient, never()).updateUser(any(), any());
     verify(usersClient, never()).createUser(any());
@@ -200,14 +202,14 @@ class UserServiceTest {
     var userId = randomUuid();
     var groupId = randomUuid();
     var foundUser = virtualUser(userId, groupId, personalInfo("John", null, "Doe"));
-    when(usersClient.fetchUserByBarcodeAndId(any())).thenReturn(userCollection(foundUser));
+    when(usersClient.fetchByQuery(any())).thenReturn(userCollection(foundUser));
     when(patronGroupService.fetchPatronGroupIdByName(any())).thenReturn(groupId);
 
     var dcbPatron = dcbPatron(userId);
     var result = userService.fetchOrCreateUser(dcbPatron);
 
     assertThat(result).isEqualTo(virtualUser(userId, groupId, personalInfo("John", null, "Doe")));
-    verify(usersClient).fetchUserByBarcodeAndId(any());
+    verify(usersClient).fetchByQuery(any());
     verify(patronGroupService).fetchPatronGroupIdByName("staff");
     verify(usersClient, never()).updateUser(any(), any());
     verify(usersClient, never()).createUser(any());
@@ -219,7 +221,7 @@ class UserServiceTest {
     var groupId = randomUuid();
     var newGroupId = randomUuid();
     var foundUser = virtualUser(userId, groupId, personalInfo("John", null, "Doe"));
-    when(usersClient.fetchUserByBarcodeAndId(any())).thenReturn(userCollection(foundUser));
+    when(usersClient.fetchByQuery(any())).thenReturn(userCollection(foundUser));
     when(patronGroupService.fetchPatronGroupIdByName(any())).thenReturn(newGroupId);
     doNothing().when(usersClient).updateUser(eq(userId), userCaptor.capture());
 
@@ -229,10 +231,25 @@ class UserServiceTest {
     var expectedUser = virtualUser(userId, newGroupId, personalInfo("updJohn", null, "updDoe"));
     assertThat(result).isEqualTo(expectedUser);
     assertThat(userCaptor.getValue()).isEqualTo(expectedUser);
-    verify(usersClient).fetchUserByBarcodeAndId(any());
+    verify(usersClient).fetchByQuery(any());
     verify(patronGroupService).fetchPatronGroupIdByName("staff");
     verify(usersClient).updateUser(any(), any());
     verify(usersClient, never()).createUser(any());
+  }
+
+  @Test
+  void fetchUser_positive_userExists() {
+    // TestMate-73ca1e2922a2f9b42ef5244d75b4a0ce
+    var userId = randomUuid();
+    var groupId = randomUuid();
+    var existingUser = virtualUser(userId, groupId);
+    var dcbPatron = dcbPatron(userId);
+    var expectedQuery = exactMatch("barcode", dcbPatron.getBarcode()).and(exactMatchById(dcbPatron.getId()), true);
+    when(usersClient.fetchByQuery(expectedQuery.getQuery())).thenReturn(userCollection(existingUser));
+
+    var result = userService.fetchUser(dcbPatron);
+
+    assertThat(result).isEqualTo(existingUser);
   }
 
   private static UserCollection userCollection(User... users) {

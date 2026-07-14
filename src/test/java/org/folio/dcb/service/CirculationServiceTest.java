@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -28,9 +29,7 @@ import org.springframework.web.client.HttpClientErrorException;
 class CirculationServiceTest {
 
   @InjectMocks private CirculationServiceImpl circulationService;
-
   @Mock private CirculationClient circulationClient;
-
   @Mock private CirculationRequestService circulationRequestService;
 
   @Test
@@ -87,5 +86,44 @@ class CirculationServiceTest {
       .thenThrow(HttpClientErrorException.BadRequest.class);
     assertThrows(CirculationRequestException.class, () ->
       circulationService.cancelRequest(transactionEntity, false));
+  }
+
+  @Test
+  void checkInByBarcodeShouldPrioritizeMethodParameterServicePointIdTest() {
+    // TestMate-8336b6a9423d10f6280b51c55a4066cb
+    var transactionEntity = createTransactionEntity();
+    transactionEntity.setServicePointId("ENTITY_SERVICE_POINT");
+    transactionEntity.setItemBarcode("ITEM-123");
+    String explicitServicePointId = "EXPLICIT_SERVICE_POINT";
+
+    circulationService.checkInByBarcode(transactionEntity, explicitServicePointId, null);
+
+    verify(circulationClient).checkInByBarcode(argThat(req ->
+      explicitServicePointId.equals(req.getServicePointId())
+        && "ITEM-123".equals(req.getItemBarcode())
+    ));
+  }
+
+  @Test
+  void checkInByBarcode_positive_servicePointIsNull() {
+    // TestMate-72b46a8ea31a64a588009299c2871c1b
+    var transactionEntity = createTransactionEntity();
+    transactionEntity.setItemBarcode("99999");
+    transactionEntity.setServicePointId(null);
+
+    circulationService.checkInByBarcode(transactionEntity);
+
+    verify(circulationClient).checkInByBarcode(argThat(request ->
+      "99999".equals(request.getItemBarcode()) && request.getServicePointId() == null
+    ));
+  }
+
+  @Test
+  void cancelRequest_positive_noOpenRequestFound() {
+    // TestMate-b7855e7929105a63d4324d9664993f01
+    var transactionEntity = createTransactionEntity();
+    when(circulationRequestService.getCancellationRequestIfOpenOrNull(anyString())).thenReturn(null);
+    circulationService.cancelRequest(transactionEntity, false);
+    verify(circulationClient, never()).updateRequest(anyString(), any());
   }
 }
