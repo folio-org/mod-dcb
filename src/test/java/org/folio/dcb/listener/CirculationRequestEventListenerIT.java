@@ -35,7 +35,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -78,7 +77,7 @@ class CirculationRequestEventListenerIT extends BaseTenantIntegrationTest {
   void handleNonDcbRequestTest() {
     MessageHeaders messageHeaders = getMessageHeaders();
     eventListener.handleRequestEvent(REQUEST_EVENT_SAMPLE_NON_DCB, messageHeaders);
-    Mockito.verify(transactionRepository, times(0)).save(any());
+    verify(transactionRepository, times(0)).save(any());
   }
 
   @ParameterizedTest
@@ -89,7 +88,7 @@ class CirculationRequestEventListenerIT extends BaseTenantIntegrationTest {
     when(transactionRepository.findTransactionByRequestIdAndStatusNotInClosed(any()))
       .thenReturn(Optional.of(transactionEntity));
     eventListener.handleRequestEvent(path, messageHeaders);
-    Mockito.verify(transactionRepository, times(executionTimes)).save(any());
+    verify(transactionRepository, times(executionTimes)).save(any());
   }
 
   private static Stream<Arguments> pathToExecutionTimes() {
@@ -113,7 +112,7 @@ class CirculationRequestEventListenerIT extends BaseTenantIntegrationTest {
         .thenReturn(Optional.of(transactionEntity));
     when(circulationItemService.fetchItemById(anyString())).thenReturn(circulationItem);
     eventListener.handleRequestEvent(CHECK_IN_EVENT_SAMPLE_FOR_DCB, messageHeaders);
-    Mockito.verify(transactionRepository).save(any());
+    verify(transactionRepository).save(any());
   }
 
   @Test
@@ -129,7 +128,7 @@ class CirculationRequestEventListenerIT extends BaseTenantIntegrationTest {
       .thenReturn(Optional.of(transactionEntity));
     when(circulationItemService.fetchItemById(anyString())).thenReturn(circulationItem);
     eventListener.handleRequestEvent(CHECK_IN_DELIVERY_EVENT_SAMPLE, messageHeaders);
-    Mockito.verify(transactionRepository).save(any());
+    verify(transactionRepository).save(any());
   }
 
   @Test
@@ -145,7 +144,7 @@ class CirculationRequestEventListenerIT extends BaseTenantIntegrationTest {
     when(circulationItemService.fetchItemById(anyString())).thenReturn(circulationItem);
     MessageHeaders messageHeaders = getMessageHeaders();
     eventListener.handleRequestEvent(CHECK_IN_EVENT_SAMPLE_FOR_DCB, messageHeaders);
-    Mockito.verify(transactionRepository).save(any());
+    verify(transactionRepository).save(any());
   }
 
   @Test
@@ -156,7 +155,7 @@ class CirculationRequestEventListenerIT extends BaseTenantIntegrationTest {
     when(transactionRepository.findTransactionByRequestIdAndStatusNotInClosed(any()))
         .thenReturn(Optional.of(transactionEntity));
     eventListener.handleRequestEvent(REQUEST_CANCEL_EVENT_SAMPLE, messageHeaders);
-    Mockito.verify(transactionRepository, times(1)).save(any());
+    verify(transactionRepository, times(1)).save(any());
   }
 
   @Test
@@ -167,7 +166,7 @@ class CirculationRequestEventListenerIT extends BaseTenantIntegrationTest {
     when(transactionRepository.findTransactionByRequestIdAndStatusNotInClosed(any()))
         .thenReturn(Optional.of(transactionEntity));
     eventListener.handleRequestEvent(REQUEST_CANCEL_EVENT_FOR_DCB_SAMPLE, messageHeaders);
-    Mockito.verify(transactionRepository).save(any());
+    verify(transactionRepository).save(any());
   }
 
   @Test
@@ -184,7 +183,7 @@ class CirculationRequestEventListenerIT extends BaseTenantIntegrationTest {
     when(circulationItemService.fetchItemById(anyString())).thenReturn(circulationItem);
     MessageHeaders messageHeaders = getMessageHeaders();
     eventListener.handleRequestEvent(CHECK_IN_TRANSIT_EVENT_SAMPLE, messageHeaders);
-    Mockito.verify(transactionRepository, times(1)).save(any());
+    verify(transactionRepository, times(1)).save(any());
   }
 
   @Test
@@ -201,7 +200,7 @@ class CirculationRequestEventListenerIT extends BaseTenantIntegrationTest {
     when(circulationItemService.fetchItemById(anyString())).thenReturn(circulationItem);
     MessageHeaders messageHeaders = getMessageHeaders();
     eventListener.handleRequestEvent(CHECK_IN_TRANSIT_EVENT_FOR_DCB_SAMPLE, messageHeaders);
-    Mockito.verify(transactionRepository).save(any());
+    verify(transactionRepository).save(any());
   }
 
   @Test
@@ -219,7 +218,7 @@ class CirculationRequestEventListenerIT extends BaseTenantIntegrationTest {
         .thenReturn(Optional.of(transactionEntity));
     when(circulationItemService.fetchItemById(anyString())).thenReturn(circulationItem);
     eventListener.handleRequestEvent(CHECK_IN_UNDEFINED_EVENT_SAMPLE, messageHeaders);
-    Mockito.verify(transactionRepository, times(0)).save(any());
+    verify(transactionRepository, times(0)).save(any());
   }
 
   @Test
@@ -240,7 +239,7 @@ class CirculationRequestEventListenerIT extends BaseTenantIntegrationTest {
     when(circulationItemService.fetchItemById(anyString())).thenReturn(circulationItem);
     eventListener.handleRequestEvent(REQUEST_EXPIRED_EVENT_FOR_DCB_SAMPLE, messageHeaders);
 
-    Mockito.verify(transactionRepository).save(any());
+    verify(transactionRepository).save(any());
     var savedValue = transactionEntityCaptor.getValue();
     assertEquals(TransactionStatus.StatusEnum.EXPIRED, savedValue.getStatus());
   }
@@ -260,7 +259,7 @@ class CirculationRequestEventListenerIT extends BaseTenantIntegrationTest {
     when(transactionRepository.save(transactionEntityCaptor.capture())).then(v -> v.getArgument(0));
     eventListener.handleRequestEvent(REQUEST_EXPIRED_EVENT_FOR_DCB_SAMPLE, messageHeaders);
 
-    Mockito.verify(transactionRepository).save(any());
+    verify(transactionRepository).save(any());
     var savedValue = transactionEntityCaptor.getValue();
     assertEquals(TransactionStatus.StatusEnum.EXPIRED, savedValue.getStatus());
     verify(circulationItemService, never()).fetchItemById(anyString());
