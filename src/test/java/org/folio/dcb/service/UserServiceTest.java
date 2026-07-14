@@ -7,6 +7,7 @@ import static org.folio.dcb.utils.EntityUtils.DCB_USER_TYPE;
 import static org.folio.dcb.utils.EntityUtils.createDefaultDcbPatron;
 import static org.folio.dcb.utils.EntityUtils.createUser;
 import static org.folio.dcb.utils.EntityUtils.dcbPatron;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
@@ -15,6 +16,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import org.folio.dcb.domain.dto.Personal;
@@ -23,6 +25,7 @@ import org.folio.dcb.domain.dto.UserCollection;
 import org.folio.dcb.integration.users.UsersClient;
 import org.folio.dcb.service.impl.PatronGroupServiceImpl;
 import org.folio.dcb.service.impl.UserServiceImpl;
+import org.folio.spring.exception.NotFoundException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,9 +34,6 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import java.util.Collections;
-import org.folio.spring.exception.NotFoundException;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
@@ -255,20 +255,18 @@ class UserServiceTest {
     assertThat(result).isEqualTo(existingUser);
   }
 
-    @Test
+  @Test
   void fetchUser_negative_throwsNotFoundExceptionWhenUserNotFound() {
     // TestMate-30bdc658e5164870a2af00e4cf5d94d6
-    // Given
     var userId = "00000000-0000-0000-0000-000000000000";
     var barcode = "non-existent-barcode";
-    var dcbPatron = dcbPatron(userId);
-    dcbPatron.setBarcode(barcode);
+    var dcbPatron = dcbPatron(userId).barcode(barcode);
     var expectedQuery = exactMatch("barcode", barcode).and(exactMatchById(userId), true).getQuery();
     var emptyCollection = new UserCollection().users(Collections.emptyList()).totalRecords(0);
     when(usersClient.fetchByQuery(expectedQuery)).thenReturn(emptyCollection);
-    // When
+
     var exception = assertThrows(NotFoundException.class, () -> userService.fetchUser(dcbPatron));
-    // Then
+
     assertThat(exception.getMessage()).isEqualTo("Unable to find existing user.");
     verify(usersClient).fetchByQuery(expectedQuery);
   }

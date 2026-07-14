@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.folio.dcb.utils.EntityUtils.createCirculationRequest;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.UUID;
@@ -17,13 +18,12 @@ import org.folio.spring.FolioExecutionContext;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.client.HttpClientErrorException;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
-import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class CirculationRequestServiceTests {
@@ -64,7 +64,6 @@ class CirculationRequestServiceTests {
     var circulationRequest = createCirculationRequest();
     when(circulationStorageClient.fetchRequestById(REQUEST_ID)).thenReturn(circulationRequest);
     var result = circulationRequestService.fetchRequestById(REQUEST_ID);
-
     assertThat(result).isSameAs(circulationRequest);
   }
 
@@ -72,25 +71,22 @@ class CirculationRequestServiceTests {
   void fetchRequestById_negative_notFound() {
     when(circulationStorageClient.fetchRequestById(REQUEST_ID)).thenThrow(HttpClientErrorException.NotFound.class);
     var result = circulationRequestService.fetchRequestById(REQUEST_ID);
-
     assertThat(result).isNull();
   }
 
-    @ParameterizedTest
+  @ParameterizedTest
   @ValueSource(strings = {"Open - Not yet filled", "Open - In transit", "Open - Awaiting delivery"})
   void getCancellationRequestIfOpenOrNull_positive_differentOpenStatuses(String openStatus) {
     // TestMate-60a75c2b5853a535ea01adc9980310e2
-    // Given
-    CirculationRequest openRequest = createCirculationRequest();
-    openRequest.setStatus(openStatus);
+    var openRequest = createCirculationRequest().status(openStatus);
     when(circulationStorageClient.fetchRequestById(REQUEST_ID)).thenReturn(openRequest);
     when(folioExecutionContext.getUserId()).thenReturn(UUID.fromString("00000000-0000-0000-0000-000000000001"));
     var cancellationReason = new CancellationReasonClient.CancellationReason();
     cancellationReason.setId(UUID.fromString("00000000-0000-0000-0000-000000000002").toString());
     when(dcbEntityServiceFacade.findOrCreateCancellationReason()).thenReturn(cancellationReason);
-    // When
+
     var result = circulationRequestService.getCancellationRequestIfOpenOrNull(REQUEST_ID);
-    // Then
+
     assertThat(RequestStatus.from(result.getStatus())).isEqualTo(RequestStatus.CLOSED_CANCELLED);
     verify(circulationStorageClient).fetchRequestById(REQUEST_ID);
     verify(dcbEntityServiceFacade).findOrCreateCancellationReason();
