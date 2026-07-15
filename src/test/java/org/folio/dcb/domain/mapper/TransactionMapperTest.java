@@ -1,6 +1,7 @@
 package org.folio.dcb.domain.mapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import java.util.stream.Stream;
 import org.folio.dcb.domain.dto.DcbItem;
@@ -38,12 +39,12 @@ class TransactionMapperTest {
     var validPatron = DcbPatron.builder().id("patron-id").barcode("patron-barcode").build();
     var validPickup = DcbPickup.builder().servicePointId("sp-id").libraryCode("lib-code").build();
     return Stream.of(
-      Arguments.of("null transaction", null),
-      Arguments.of("valid item & patron & pickup ",
+      arguments("null transaction", null),
+      arguments("valid item & patron & pickup ",
         DcbTransaction.builder().item(null).patron(validPatron).pickup(validPickup).build()),
-      Arguments.of("valid item & pickup & null patron",
+      arguments("valid item & pickup & null patron",
         DcbTransaction.builder().item(validItem).patron(null).pickup(validPickup).build()),
-      Arguments.of("valid item & patron & null pickup",
+      arguments("valid item & patron & null pickup",
         DcbTransaction.builder().item(validItem).patron(validPatron).pickup(null).build())
     );
   }
