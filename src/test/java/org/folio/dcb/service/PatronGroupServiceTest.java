@@ -71,4 +71,24 @@ class PatronGroupServiceTest {
     verify(groupClient).fetchGroupByName("group==\"Faculty Staff\"");
     assertEquals(expectedId, response);
   }
+
+    @Test
+  void fetchPatronGroupIdByNameMultipleResultsShouldReturnFirstTest() {
+    // TestMate-8895663b05bdec863ce34fc9ac9e8933
+    // Given
+    var groupName = "students";
+    var firstId = "11111111-1111-1111-1111-111111111111";
+    var secondId = "22222222-2222-2222-2222-222222222222";
+    var firstUserGroup = new UserGroup().group(groupName).id(firstId);
+    var secondUserGroup = new UserGroup().group(groupName).id(secondId);
+    var userGroupCollection = new UserGroupCollection()
+      .usergroups(List.of(firstUserGroup, secondUserGroup))
+      .totalRecords(2);
+    when(groupClient.fetchGroupByName(anyString())).thenReturn(userGroupCollection);
+    // When
+    var result = patronGroupService.fetchPatronGroupIdByName(groupName);
+    // Then
+    verify(groupClient).fetchGroupByName("group==\"students\"");
+    assertEquals(firstId, result);
+  }
 }
