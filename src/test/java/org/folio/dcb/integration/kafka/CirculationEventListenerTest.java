@@ -48,8 +48,8 @@ class CirculationEventListenerTest {
   @ParameterizedTest
   @MethodSource("checkoutRolesThatShouldUpdate")
   void handleDcbLoanCheckOutEventTest_shouldUpdate(RoleEnum role) {
-    var payload = eventPayload("checkedout", ITEM_ID, true, "OPEN");
-    var transactionEntity = transactionEntity(role, ITEM_ID, false);
+    var payload = eventPayload("checkedout", true, "OPEN");
+    var transactionEntity = transactionEntity(role, false);
 
     doAnswer(invokeRunnable()).when(systemUserScopedExecutionService)
       .executeAsyncSystemUserScoped(eq(TENANT_ID), any(Runnable.class));
@@ -64,8 +64,8 @@ class CirculationEventListenerTest {
 
   @Test
   void handleDcbLoanCheckOutEventTest_shouldNotUpdate() {
-    var payload = eventPayload("checkedout", ITEM_ID, true, "OPEN");
-    var transactionEntity = transactionEntity(RoleEnum.LENDER, ITEM_ID, false);
+    var payload = eventPayload("checkedout", true, "OPEN");
+    var transactionEntity = transactionEntity(RoleEnum.LENDER, false);
 
     doAnswer(invokeRunnable()).when(systemUserScopedExecutionService)
       .executeAsyncSystemUserScoped(eq(TENANT_ID), any(Runnable.class));
@@ -83,8 +83,8 @@ class CirculationEventListenerTest {
   @MethodSource("roleAndExpectedCheckInStatus")
   void handleDcbLoanCheckInEventTest(RoleEnum role, TransactionStatus.StatusEnum expectedStatus) {
     // TestMate-1af11fa062b0ceb09d9d307311ecc386
-    var payload = eventPayload("checkedin", ITEM_ID, true, "OPEN");
-    var transactionEntity = transactionEntity(role, ITEM_ID, false);
+    var payload = eventPayload("checkedin", true, "OPEN");
+    var transactionEntity = transactionEntity(role, false);
 
     doAnswer(invokeRunnable()).when(systemUserScopedExecutionService)
       .executeAsyncSystemUserScoped(eq(TENANT_ID), any(Runnable.class));
@@ -99,8 +99,8 @@ class CirculationEventListenerTest {
 
   @Test
   void handleNonDcbLoanCheckOutSelfBorrowingTest_shouldUpdate() {
-    var payload = eventPayload("checkedout", ITEM_ID, false, "OPEN");
-    var transactionEntity = transactionEntity(BORROWING_PICKUP, ITEM_ID, true);
+    var payload = eventPayload("checkedout", false, "OPEN");
+    var transactionEntity = transactionEntity(BORROWING_PICKUP, true);
 
     doAnswer(invokeRunnable()).when(systemUserScopedExecutionService)
       .executeAsyncSystemUserScoped(eq(TENANT_ID), any(Runnable.class));
@@ -116,8 +116,8 @@ class CirculationEventListenerTest {
   @ParameterizedTest
   @MethodSource("selfBorrowingCheckoutNoUpdateScenarios")
   void handleLoanEvent_parameterized_selfBorrowingShouldNotUpdate(RoleEnum role, boolean selfBorrowing) {
-    var payload = eventPayload("checkedout", ITEM_ID, false, "OPEN");
-    var transactionEntity = transactionEntity(role, ITEM_ID, selfBorrowing);
+    var payload = eventPayload("checkedout", false, "OPEN");
+    var transactionEntity = transactionEntity(role, selfBorrowing);
 
     doAnswer(invokeRunnable()).when(systemUserScopedExecutionService)
       .executeAsyncSystemUserScoped(eq(TENANT_ID), any(Runnable.class));
@@ -133,8 +133,8 @@ class CirculationEventListenerTest {
   @Test
   void handleLoanEvent_positive_shouldUpdateForBorrowingPickupAndSelfBorrowing() {
     // TestMate-34641872294c85ba1b5d8ff881c954fa - Closed loan status should update to CLOSED
-    var payload = eventPayload("checkedin", ITEM_ID, false, "Closed");
-    var transactionEntity = transactionEntity(BORROWING_PICKUP, ITEM_ID, true);
+    var payload = eventPayload("checkedin", false, "Closed");
+    var transactionEntity = transactionEntity(BORROWING_PICKUP, true);
 
     doAnswer(invokeRunnable()).when(systemUserScopedExecutionService)
       .executeAsyncSystemUserScoped(eq(TENANT_ID), any(Runnable.class));
@@ -150,8 +150,8 @@ class CirculationEventListenerTest {
   @Test
   void handleNonDcbLoanCheckInSelfBorrowingTest_shouldNotUpdate() {
     // TestMate-34641872294c85ba1b5d8ff881c954fa - Open status should not update
-    var payload = eventPayload("checkedin", ITEM_ID, false, "OPEN");
-    var transactionEntity = transactionEntity(BORROWING_PICKUP, ITEM_ID, true);
+    var payload = eventPayload("checkedin", false, "OPEN");
+    var transactionEntity = transactionEntity(BORROWING_PICKUP, true);
 
     doAnswer(invokeRunnable()).when(systemUserScopedExecutionService)
       .executeAsyncSystemUserScoped(eq(TENANT_ID), any(Runnable.class));
@@ -167,7 +167,7 @@ class CirculationEventListenerTest {
   @Test
   void handleDcbLoanEventWhenTransactionNotFoundTest() {
     // TestMate-c1139da62a64caa3ed1f26bbc783a5b3 - DCB transaction
-    var payload = eventPayload("checkedin", ITEM_ID, true, "OPEN");
+    var payload = eventPayload("checkedin", true, "OPEN");
 
     doAnswer(invokeRunnable()).when(systemUserScopedExecutionService)
       .executeAsyncSystemUserScoped(eq(TENANT_ID), any(Runnable.class));
@@ -183,7 +183,7 @@ class CirculationEventListenerTest {
   @Test
   void handleNonDcbLoanEventWhenTransactionNotFoundTest() {
     // TestMate-c1139da62a64caa3ed1f26bbc783a5b3 - Non-DCB transaction
-    var payload = eventPayload("checkedin", ITEM_ID, false, "OPEN");
+    var payload = eventPayload("checkedin", false, "OPEN");
 
     doAnswer(invokeRunnable()).when(systemUserScopedExecutionService)
       .executeAsyncSystemUserScoped(eq(TENANT_ID), any(Runnable.class));
@@ -218,9 +218,9 @@ class CirculationEventListenerTest {
     );
   }
 
-  private static TransactionEntity transactionEntity(RoleEnum role, String itemId, boolean selfBorrowing) {
+  private static TransactionEntity transactionEntity(RoleEnum role, boolean selfBorrowing) {
     return TransactionEntity.builder()
-      .itemId(itemId)
+      .itemId(ITEM_ID)
       .role(role)
       .status(TransactionStatus.StatusEnum.OPEN)
       .selfBorrowing(selfBorrowing)
@@ -231,7 +231,7 @@ class CirculationEventListenerTest {
     return new MessageHeaders(Map.of(TENANT, TENANT_ID.getBytes(UTF_8)));
   }
 
-  private static String eventPayload(String action, String itemId, boolean isDcb, String status) {
+  private static String eventPayload(String action, boolean isDcb, String status) {
     return """
       {
         "type": "UPDATED",
@@ -246,7 +246,7 @@ class CirculationEventListenerTest {
           }
         }
       }
-      """.formatted(itemId, action, isDcb, status);
+      """.formatted(ITEM_ID, action, isDcb, status);
   }
 
   private static Answer<Void> invokeRunnable() {
