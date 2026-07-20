@@ -65,36 +65,34 @@ public final class TransactionHelper {
 
       eventData.setDcb(!event.getNewNode().has(IS_DCB) || event.getNewNode().get(IS_DCB).asBoolean());
 
-        if (kafkaEvent.getNewNode().has(STATUS) && kafkaEvent.getNewNode().get(STATUS).has(STATUS_NAME)) {
-          eventData.setLoanStatus(kafkaEvent.getNewNode().get(STATUS).get(STATUS_NAME).asText());
-        }
-        return eventData;
+      if (event.getNewNode().has(STATUS) && event.getNewNode().get(STATUS).has(STATUS_NAME)) {
+        eventData.setLoanStatus(event.getNewNode().get(STATUS).get(STATUS_NAME).asString());
       }
+
+      return eventData;
+    }
     return null;
   }
 
-  public static EventData parseRequestEvent(String eventPayload){
-      KafkaEvent kafkaEvent = new KafkaEvent(eventPayload);
-      if(kafkaEvent.getEventType() == KafkaEvent.EventType.UPDATED && kafkaEvent.hasNewNode()
-        && kafkaEvent.getNewNode().has(STATUS)){
-        EventData eventData = new EventData();
-        eventData.setRequestId(kafkaEvent.getNewNode().get("id").asText());
-        eventData.setDcbReRequestCancellation(
-          getNodeAsBooleanOrDefault(kafkaEvent, "dcbReRequestCancellation", false));
-        RequestStatus requestStatus = RequestStatus.from(kafkaEvent.getNewNode().get(STATUS).asText());
-        switch (requestStatus) {
-          case OPEN_IN_TRANSIT -> eventData.setType(EventData.EventType.IN_TRANSIT);
-          case OPEN_AWAITING_PICKUP, OPEN_AWAITING_DELIVERY ->
-            eventData.setType(EventData.EventType.AWAITING_PICKUP);
-          case CLOSED_CANCELLED, CLOSED_UNFILLED ->
-            eventData.setType(EventData.EventType.CANCEL);
-          case CLOSED_PICKUP_EXPIRED ->
-            eventData.setType(EventData.EventType.EXPIRED);
-          default -> log.info("parseRequestEvent:: Request status {} is not supported", requestStatus);
-        }
-        eventData.setDcb(checkDcbRequest(kafkaEvent));
-        return eventData;
+  public static EventData parseRequestEvent(String eventPayload) {
+    var event = new KafkaEvent(eventPayload);
+    if (event.getEventType() == KafkaEvent.EventType.UPDATED && event.hasNewNode() && event.getNewNode().has(STATUS)) {
+      var eventData = new EventData();
+      eventData.setRequestId(event.getNewNode().get("id").asString());
+      eventData.setDcbReRequestCancellation(getNodeAsBooleanOrDefault(event, "dcbReRequestCancellation", false));
+
+      var requestStatus = RequestStatus.from(event.getNewNode().get(STATUS).asString());
+      switch (requestStatus) {
+        case OPEN_IN_TRANSIT -> eventData.setType(EventData.EventType.IN_TRANSIT);
+        case OPEN_AWAITING_PICKUP, OPEN_AWAITING_DELIVERY -> eventData.setType(EventData.EventType.AWAITING_PICKUP);
+        case CLOSED_CANCELLED, CLOSED_UNFILLED -> eventData.setType(EventData.EventType.CANCEL);
+        case CLOSED_PICKUP_EXPIRED -> eventData.setType(EventData.EventType.EXPIRED);
+        default -> log.info("parseRequestEvent:: Request status {} is not supported", requestStatus);
       }
+
+      eventData.setDcb(checkDcbRequest(event));
+      return eventData;
+    }
     return null;
   }
 
@@ -111,19 +109,16 @@ public final class TransactionHelper {
     return null;
   }
 
-  private static boolean getNodeAsBooleanOrDefault(KafkaEvent kafkaEvent, String name,
-    boolean defaultValue) {
-
-    JsonNode booleanNode = kafkaEvent.getNewNode().get(name);
-    return Objects.nonNull(booleanNode)
-      ? booleanNode.asBoolean()
-      : defaultValue;
+  @SuppressWarnings("SameParameterValue")
+  private static boolean getNodeAsBooleanOrDefault(KafkaEvent kafkaEvent, String name, boolean defaultValue) {
+    var booleanNode = kafkaEvent.getNewNode().get(name);
+    return Objects.nonNull(booleanNode) ? booleanNode.asBoolean() : defaultValue;
   }
 
   private static boolean checkDcbRequest(KafkaEvent kafkaEvent) {
     var newNode = kafkaEvent.getNewNode();
     return newNode.has(INSTANCE)
       && newNode.get(INSTANCE).has(TITLE)
-      && Objects.equals(DCB_INSTANCE_TITLE, newNode.get(INSTANCE).get(TITLE).asText());
+      && Objects.equals(DCB_INSTANCE_TITLE, newNode.get(INSTANCE).get(TITLE).asString());
   }
 }
