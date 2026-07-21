@@ -106,8 +106,7 @@ public class TransactionsServiceImpl implements TransactionsService {
           .forEach(statusEnum -> lendingLibraryService.updateTransactionStatus(dcbTransaction, TransactionStatus.builder().status(statusEnum).build()));
         case BORROWING_PICKUP -> borrowingPickupLibraryService.updateTransactionStatus(dcbTransaction, transactionStatus);
         case PICKUP -> pickupLibraryService.updateTransactionStatus(dcbTransaction, transactionStatus);
-        case BORROWER -> statusProcessorService.borrowingChainProcessor(dcbTransaction.getStatus(), transactionStatus.getStatus())
-          .forEach(statusEnum -> borrowingLibraryService.updateTransactionStatus(dcbTransaction, TransactionStatus.builder().status(statusEnum).build()));
+        case BORROWER -> processBorrowerTransaction(transactionStatus, dcbTransaction);
       }
 
       return TransactionStatusResponse.builder()
@@ -230,6 +229,12 @@ public class TransactionsServiceImpl implements TransactionsService {
     }
 
     setRenewalNumberForVirtualLoan(transactionEntity, 0);
+  }
+
+  private void processBorrowerTransaction(TransactionStatus status, TransactionEntity transaction) {
+    statusProcessorService.borrowingChainProcessor(transaction.getStatus(), status.getStatus())
+      .forEach(statusEnum -> borrowingLibraryService.updateTransactionStatus(transaction,
+        TransactionStatus.builder().status(statusEnum).context(status.getContext()).build()));
   }
 
   private void validateLoanPolicy(String loanPolicyId, LoanPolicy loanPolicy) {

@@ -1,3 +1,8 @@
+## v2.0.1 2026-07-20
+
+* Use claim returned resolution during check-in ([MODDCB-292](https://folio-org.atlassian.net/browse/MODDCB-292))
+* Handle claimed returned check-in loan actions ([MODDCB-293](https://folio-org.atlassian.net/browse/MODDCB-293))
+
 ## v2.0.0 2026-04-17
 
 ### Breaking changes
