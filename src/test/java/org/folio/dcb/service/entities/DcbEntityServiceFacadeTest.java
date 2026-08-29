@@ -18,6 +18,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.folio.dcb.domain.dto.ServicePointRequest;
 
 @ExtendWith(MockitoExtension.class)
 class DcbEntityServiceFacadeTest {
@@ -33,6 +34,8 @@ class DcbEntityServiceFacadeTest {
   @Mock private DcbLocationService dcbLocationService;
   @Mock private DcbFeatureProperties dcbFeatureProperties;
   @Mock private DcbCancellationReasonService dcbCancellationReasonService;
+
+    @Mock private DcbServicePointService dcbServicePointService;
 
   @AfterEach
   void tearDown() {
@@ -165,6 +168,44 @@ class DcbEntityServiceFacadeTest {
     verify(dcbFeatureProperties).isDcbEntitiesRuntimeVerificationEnabled();
     verify(dcbCancellationReasonService, never()).findOrCreateEntity();
     verify(dcbCancellationReasonService).getDefaultValue();
+  }
+
+    @Test
+  void findOrCreateServicePoint_positive_shouldCallRealServiceWhenSettingEnabled() {
+    // TestMate-f15a491a22f67aa18c13de8f320841b9
+    // Given
+    var servicePoint = ServicePointRequest.builder()
+      .id("789e4567-e89b-12d3-a456-426614174000")
+      .name("DCB Service Point")
+      .build();
+    when(dcbFeatureProperties.isDcbEntitiesRuntimeVerificationEnabled()).thenReturn(true);
+    when(dcbServicePointService.findOrCreateEntity()).thenReturn(servicePoint);
+    // When
+    var result = dcbEntityServiceFacade.findOrCreateServicePoint();
+    // Then
+    assertThat(result).isEqualTo(servicePoint);
+    verify(dcbFeatureProperties).isDcbEntitiesRuntimeVerificationEnabled();
+    verify(dcbServicePointService).findOrCreateEntity();
+    verify(dcbServicePointService, never()).getDefaultValue();
+  }
+
+    @Test
+  void findOrCreateServicePoint_positive_shouldReturnDefaultValueWhenSettingDisable() {
+    // TestMate-81ba568b37134c15dd397be23498b85b
+    // Given
+    var defaultServicePoint = ServicePointRequest.builder()
+      .id("789e4567-e89b-12d3-a456-426614174000")
+      .name("Default Service Point")
+      .build();
+    when(dcbFeatureProperties.isDcbEntitiesRuntimeVerificationEnabled()).thenReturn(false);
+    when(dcbServicePointService.getDefaultValue()).thenReturn(defaultServicePoint);
+    // When
+    var result = dcbEntityServiceFacade.findOrCreateServicePoint();
+    // Then
+    assertThat(result).isEqualTo(defaultServicePoint);
+    verify(dcbFeatureProperties).isDcbEntitiesRuntimeVerificationEnabled();
+    verify(dcbServicePointService).getDefaultValue();
+    verify(dcbServicePointService, never()).findOrCreateEntity();
   }
 
   private static InventoryHolding dcbHolding() {
