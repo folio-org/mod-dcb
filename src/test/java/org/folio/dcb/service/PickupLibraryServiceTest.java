@@ -24,6 +24,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.folio.dcb.domain.dto.DcbTransaction;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 
 @ExtendWith(MockitoExtension.class)
 class PickupLibraryServiceTest {
@@ -58,5 +62,26 @@ class PickupLibraryServiceTest {
     verify(userService).fetchOrCreateUser(patron);
     verify(circulationItemService).checkIfItemExistsAndCreate(item, PICKUP_SERVICE_POINT_ID);
     verify(requestService).createHoldItemRequest(user, item, PICKUP_SERVICE_POINT_ID);
+  }
+
+    @Test
+  void createCirculationShouldThrowExceptionWhenOpenTransactionExists() {
+    // TestMate-86f915fb85d5758ef4ec03db3af7106a
+    // Arrange
+    var item = createDcbItem();
+    var user = createUser();
+    var circulationItem = createCirculationItem();
+    circulationItem.setId(item.getId());
+    DcbTransaction dcbTransaction = createDcbTransactionByRole(PICKUP);
+    when(userService.fetchOrCreateUser(any())).thenReturn(user);
+    when(circulationItemService.checkIfItemExistsAndCreate(any(), any())).thenReturn(circulationItem);
+    doThrow(new RuntimeException("Open transaction exists")).when(baseLibraryService).checkOpenTransactionExistsAndThrow(item.getId());
+    // Act
+    assertThrows(RuntimeException.class, () -> pickupLibraryService.createCirculation(DCB_TRANSACTION_ID, dcbTransaction));
+    // Assert
+    verify(userService).fetchOrCreateUser(any());
+    verify(circulationItemService).checkIfItemExistsAndCreate(item, PICKUP_SERVICE_POINT_ID);
+    verify(baseLibraryService).checkOpenTransactionExistsAndThrow(item.getId());
+    verify(requestService, never()).createHoldItemRequest(any(), any(), anyString());
   }
 }
