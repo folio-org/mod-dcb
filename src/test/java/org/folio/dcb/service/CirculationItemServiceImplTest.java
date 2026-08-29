@@ -32,6 +32,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import static org.mockito.ArgumentMatchers.eq;
 
 @ExtendWith(MockitoExtension.class)
 class CirculationItemServiceImplTest {
@@ -411,6 +412,31 @@ class CirculationItemServiceImplTest {
     verify(circulationItemClient).createCirculationItem(any(), circulationItemArgumentCaptor.capture());
     CirculationItem capturedItem = circulationItemArgumentCaptor.getValue();
     assertEquals(DcbConstants.LOCATION_ID, capturedItem.getEffectiveLocationId());
+    assertEquals(createdItem, result);
+  }
+
+    @Test
+  void checkIfItemExistsAndCreate_ShouldUseDefaultMaterialType_WhenDcbItemMaterialTypeIsBlank() {
+    // TestMate-15f5078caf4cf0ef7482c0da02658108
+    // Given
+    var materialTypeId = "material-type-id-123";
+    var dcbItem = dcbItem();
+    dcbItem.setMaterialType("");
+    when(dcbHubProperties.isFlexibleCirculationRulesEnabled()).thenReturn(false);
+    when(circulationItemClient.fetchItemByCqlQuery(any())).thenReturn(emptyCirculationItems());
+    when(dcbEntityServiceFacade.findOrCreateHolding()).thenReturn(dcbHolding());
+    when(dcbEntityServiceFacade.findOrCreateLocation()).thenReturn(dcbLocation());
+    when(dcbEntityServiceFacade.findOrCreateLoanType()).thenReturn(dcbLoanType());
+    when(itemService.fetchItemMaterialTypeIdByMaterialTypeName("book")).thenReturn(materialTypeId);
+    var createdItem = circulationItem();
+    when(circulationItemClient.createCirculationItem(any(), any())).thenReturn(createdItem);
+    // When
+    var result = circulationItemService.checkIfItemExistsAndCreate(dcbItem, TEST_SERVICE_POINT_ID);
+    // Then
+    verify(itemService).fetchItemMaterialTypeIdByMaterialTypeName("book");
+    ArgumentCaptor<CirculationItem> captor = ArgumentCaptor.forClass(CirculationItem.class);
+    verify(circulationItemClient).createCirculationItem(any(), captor.capture());
+    assertEquals(materialTypeId, captor.getValue().getMaterialTypeId());
     assertEquals(createdItem, result);
   }
 
