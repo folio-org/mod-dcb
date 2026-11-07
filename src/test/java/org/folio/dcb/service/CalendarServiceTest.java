@@ -23,6 +23,8 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import java.util.ArrayList;
+import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
 class CalendarServiceTest {
@@ -145,5 +147,30 @@ class CalendarServiceTest {
 
     verify(calendarClient).getAllCalendars(MAX_VALUE);
     assertThat(response).isNull();
+  }
+
+    @Test
+  void testAssociateServicePointIdWithDefaultCalendar_AssociatedWithDifferentCalendar() {
+    // TestMate-78d03799a966eb623a87af2179207c16
+    // Given
+    UUID servicePointId = UUID.fromString("77777777-7777-7777-7777-777777777777");
+    
+    Calendar defaultCalendar = Calendar.builder()
+      .name(DCB_CALENDAR_NAME)
+      .assignments(new ArrayList<>())
+      .build();
+    Calendar otherCalendar = Calendar.builder()
+      .name("General Library Calendar")
+      .assignments(new ArrayList<>(List.of(servicePointId)))
+      .build();
+    CalendarCollection calendarCollection = new CalendarCollection()
+      .calendars(List.of(defaultCalendar, otherCalendar))
+      .totalRecords(2);
+    when(calendarClient.getAllCalendars(MAX_VALUE)).thenReturn(calendarCollection);
+    // When
+    calendarService.associateServicePointIdWithDefaultCalendarIfAbsent(servicePointId);
+    // Then
+    verify(calendarClient).getAllCalendars(MAX_VALUE);
+    verify(calendarClient, never()).updateCalendar(any(), any());
   }
 }

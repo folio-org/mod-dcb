@@ -126,4 +126,41 @@ class CirculationServiceTest {
     circulationService.cancelRequest(transactionEntity, false);
     verify(circulationClient, never()).updateRequest(anyString(), any());
   }
+
+    @Test
+  void checkOutByBarcodeTest() {
+    // TestMate-cbede54e61b377c837c70259d4001b54
+    // Given
+    TransactionEntity transactionEntity = createTransactionEntity();
+    transactionEntity.setId("TRANSACTION-001");
+    transactionEntity.setItemBarcode("ITEM-123");
+    transactionEntity.setPatronBarcode("PATRON-456");
+    transactionEntity.setServicePointId("SP-789");
+    // When
+    circulationService.checkOutByBarcode(transactionEntity);
+    // Then
+    verify(circulationClient).checkOutByBarcode(argThat(request ->
+      "ITEM-123".equals(request.getItemBarcode()) &&
+        "PATRON-456".equals(request.getUserBarcode()) &&
+        "SP-789".equals(request.getServicePointId())
+    ));
+  }
+
+    @Test
+  void checkOutByBarcode_positive_servicePointIsNull() {
+    // TestMate-516fb67d92eaf9028055dcddb3cf3839
+    // Given
+    TransactionEntity transactionEntity = createTransactionEntity();
+    transactionEntity.setItemBarcode("ITEM-999");
+    transactionEntity.setPatronBarcode("PATRON-888");
+    transactionEntity.setServicePointId(null);
+    // When
+    circulationService.checkOutByBarcode(transactionEntity);
+    // Then
+    verify(circulationClient).checkOutByBarcode(argThat(request ->
+      "ITEM-999".equals(request.getItemBarcode()) &&
+        "PATRON-888".equals(request.getUserBarcode()) &&
+        request.getServicePointId() == null
+    ));
+  }
 }
