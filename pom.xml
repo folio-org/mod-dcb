@@ -325,7 +325,8 @@
                 <dateLibrary>java8</dateLibrary>
                 <interfaceOnly>true</interfaceOnly>
                 <useTags>true</useTags>
-                <useSpringBoot3>true</useSpringBoot3>
+                <useJackson3>true</useJackson3>
+                <useSpringBoot4>true</useSpringBoot4>
               </configOptions>
             </configuration>
           </execution>
