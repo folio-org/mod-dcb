@@ -4,6 +4,7 @@ import static io.restassured.RestAssured.given;
 import static io.restassured.RestAssured.when;
 import static org.hamcrest.Matchers.is;
 
+import java.time.Duration;
 import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
@@ -20,6 +21,7 @@ import org.testcontainers.containers.Network;
 import org.testcontainers.containers.NginxContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 import org.testcontainers.images.builder.Transferable;
 import org.testcontainers.junit.jupiter.Container;
@@ -78,7 +80,10 @@ class FolioDcbApplicationIT {
       .withEnv("DB_DATABASE", "postgres")
       .withEnv("KAFKA_HOST", "ourkafka")
       .withEnv("FOLIO_SYSTEMUSER_ENABLED", "false")
-      .withEnv("DCB_ENTITIES_RUNTIME_VERIFICATION_ENABLED", "false");
+      .withEnv("DCB_ENTITIES_RUNTIME_VERIFICATION_ENABLED", "false")
+      .waitingFor(Wait.forHttp("/admin/health")
+        .forStatusCode(200)
+        .withStartupTimeout(Duration.ofSeconds(120)));
 
   @BeforeAll
   static void beforeAll() {
