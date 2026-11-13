@@ -46,6 +46,21 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.folio.dcb.exception.CirculationRequestException;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.ERROR;
+import static org.mockito.Mockito.doThrow;
+import org.folio.dcb.domain.dto.CirculationItem;
+import org.folio.dcb.domain.dto.CirculationRequest;
+import org.folio.dcb.domain.dto.DcbItem;
+import org.folio.dcb.domain.dto.DcbPatron;
+import org.folio.dcb.domain.dto.DcbUpdateItem;
+import org.folio.dcb.domain.dto.User;
+import org.mockito.ArgumentCaptor;
+import java.util.Collections;
+import java.util.UUID;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @ExtendWith(MockitoExtension.class)
 class BaseLibraryServiceTest {
@@ -242,5 +257,103 @@ class BaseLibraryServiceTest {
     baseLibraryService.saveDcbTransaction(
         DCB_TRANSACTION_ID, createDcbTransactionByRole(BORROWER), CIRCULATION_REQUEST_ID);
     verify(transactionRepository).save(any());
+  }
+
+    @Test
+  void cancelTransactionRequest_negative_shouldUpdateStatusToErrorWhenCirculationFails() {
+    // TestMate-4fb4669c771be6fc64a27fa97c03a18e
+    // Given
+    TransactionEntity transactionEntity = createTransactionEntity();
+    transactionEntity.setStatus(OPEN);
+    doThrow(new CirculationRequestException("Circulation failure"))
+      .when(circulationService).cancelRequest(any(TransactionEntity.class), eq(false));
+    // When
+    baseLibraryService.cancelTransactionRequest(transactionEntity);
+    // Then
+    assertEquals(ERROR, transactionEntity.getStatus());
+    verify(transactionRepository).save(transactionEntity);
+  }
+
+    @Test
+  void updateTransactionDetailsShouldSuccessfullyUpdateItemAndRequest() {
+    // TestMate-4b7b31d38c5fbbad70aee8e7eecd953b
+    // Given
+    String newBarcode = "NEW-ITEM-001";
+    String newMaterialType = "book";
+    String newLendingLibraryCode = "LEND_001";
+    String newCirculationItemId = "f5a28723-144a-463d-8f24-91221764722d";
+    String newRequestId = "d290f1ee-6c54-4b01-90e6-d701748f0851";
+    TransactionEntity transactionEntity = createTransactionEntity();
+    transactionEntity.setStatus(OPEN);
+    DcbUpdateItem dcbUpdateItem = DcbUpdateItem.builder()
+      .barcode(newBarcode)
+      .materialType(newMaterialType)
+      .lendingLibraryCode(newLendingLibraryCode)
+      .build();
+    DcbItem dcbItem = createDcbItem();
+    dcbItem.setBarcode(newBarcode);
+    dcbItem.setMaterialType(newMaterialType);
+    dcbItem.setLendingLibraryCode(newLendingLibraryCode);
+    CirculationItem circulationItem = createCirculationItem();
+    circulationItem.setId(newCirculationItemId);
+    circulationItem.setBarcode(newBarcode);
+    circulationItem.setLendingLibraryCode(newLendingLibraryCode);
+    DcbPatron dcbPatron = createDcbPatronWithExactPatronId(EXISTED_PATRON_ID);
+    User user = createUser();
+    CirculationRequest holdRequest = createCirculationRequest();
+    holdRequest.setId(newRequestId);
+    when(transactionMapper.convertTransactionUpdateItemToDcbItem(dcbUpdateItem, transactionEntity)).thenReturn(dcbItem);
+    when(itemService.fetchItemByBarcode(newBarcode)).thenReturn(new ResultList<>());
+    when(circulationItemService.checkIfItemExistsAndCreate(dcbItem, transactionEntity.getServicePointId())).thenReturn(circulationItem);
+    when(transactionRepository.findTransactionsByItemIdAndStatusNotInClosed(UUID.fromString(newCirculationItemId))).thenReturn(Collections.emptyList());
+    when(transactionMapper.mapTransactionEntityToDcbPatron(transactionEntity)).thenReturn(dcbPatron);
+    when(userService.fetchUser(dcbPatron)).thenReturn(user);
+    when(requestService.createHoldItemRequest(user, dcbItem, transactionEntity.getServicePointId())).thenReturn(holdRequest);
+    // When
+    baseLibraryService.updateTransactionDetails(transactionEntity, dcbUpdateItem);
+    // Then
+    verify(circulationService).cancelRequest(transactionEntity, true);
+    verify(requestService).createHoldItemRequest(user, dcbItem, transactionEntity.getServicePointId());
+    ArgumentCaptor<TransactionEntity> entityCaptor = ArgumentCaptor.forClass(TransactionEntity.class);
+    verify(transactionRepository).save(entityCaptor.capture());
+    TransactionEntity savedEntity = entityCaptor.getValue();
+    assertThat(savedEntity.getItemId()).isEqualTo(newCirculationItemId);
+    assertThat(savedEntity.getItemBarcode()).isEqualTo(newBarcode);
+    assertThat(savedEntity.getRequestId()).isEqualTo(UUID.fromString(newRequestId));
+    assertThat(savedEntity.getLendingLibraryCode()).isEqualTo(newLendingLibraryCode);
+    assertThat(savedEntity.getMaterialType()).isEqualTo(newMaterialType);
+    assertThat(savedEntity.getStatus()).isEqualTo(CREATED);
+  }
+
+    @Test
+  void updateTransactionDetailsShouldThrowExceptionWhenItemHasOpenTransaction() {
+    // TestMate-9f8b4f7597c8691c3441b70fea5c7a10
+    // Given
+    String newBarcode = "NEW-ITEM-BARCODE";
+    UUID newItemId = UUID.fromString("00000000-1111-2222-3333-444444444444");
+    TransactionEntity transactionEntity = createTransactionEntity();
+    transactionEntity.setStatus(OPEN);
+    
+    DcbUpdateItem dcbUpdateItem = DcbUpdateItem.builder()
+      .barcode(newBarcode)
+      .materialType("book")
+      .lendingLibraryCode("LEND_001")
+      .build();
+    DcbItem dcbItem = createDcbItem();
+    dcbItem.setBarcode(newBarcode);
+    CirculationItem circulationItem = createCirculationItem();
+    circulationItem.setId(newItemId.toString());
+    when(transactionMapper.convertTransactionUpdateItemToDcbItem(dcbUpdateItem, transactionEntity)).thenReturn(dcbItem);
+    when(itemService.fetchItemByBarcode(newBarcode)).thenReturn(new ResultList<>());
+    when(circulationItemService.checkIfItemExistsAndCreate(dcbItem, transactionEntity.getServicePointId())).thenReturn(circulationItem);
+    when(transactionRepository.findTransactionsByItemIdAndStatusNotInClosed(newItemId)).thenReturn(List.of(createTransactionEntity()));
+    // When
+    assertThatThrownBy(() -> baseLibraryService.updateTransactionDetails(transactionEntity, dcbUpdateItem))
+      .isInstanceOf(ResourceAlreadyExistException.class)
+      .hasMessageContaining(String.format("Item with id %s already has an open DCB transaction", newItemId));
+    // Then
+    verify(circulationService, never()).cancelRequest(any(), any(Boolean.class));
+    verify(requestService, never()).createHoldItemRequest(any(), any(), any());
+    verify(transactionRepository, never()).save(any());
   }
 }
