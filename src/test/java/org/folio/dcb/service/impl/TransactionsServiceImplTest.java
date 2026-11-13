@@ -30,6 +30,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.CREATED;
+import org.folio.dcb.domain.dto.DcbUpdateItem;
+import org.folio.dcb.domain.dto.DcbUpdateTransaction;
+import org.folio.dcb.service.impl.BaseLibraryService;
+import static org.folio.dcb.domain.dto.TransactionStatus.StatusEnum.OPEN;
+import static org.folio.dcb.domain.dto.DcbTransaction.RoleEnum.LENDER;
 
 @ExtendWith(MockitoExtension.class)
 class TransactionsServiceImplTest {
@@ -40,6 +46,8 @@ class TransactionsServiceImplTest {
   @InjectMocks private TransactionsServiceImpl transactionsService;
   @Mock private CirculationClient circulationClient;
   @Mock private TransactionRepository transactionRepository;
+
+    @Mock private BaseLibraryService baseLibraryService;
 
   @AfterEach
   void tearDown() {
@@ -126,6 +134,63 @@ class TransactionsServiceImplTest {
 
     var expectedLoanToUpdate = virtualItemLoan().renewalCount("0");
     verify(circulationClient).updateLoan(LOAN_ID, expectedLoanToUpdate);
+  }
+
+    @Test
+  void updateTransactionDetails_positive_shouldUpdateDetailsForBorrowerRole() {
+    // TestMate-b5a1cfc679e42fa5aa0652531c28a4a7
+    // Given
+    var dcbUpdateItem = DcbUpdateItem.builder()
+      .barcode("test-barcode")
+      .materialType("book")
+      .lendingLibraryCode("LEND")
+      .build();
+    var dcbUpdateTransaction = new DcbUpdateTransaction().item(dcbUpdateItem);
+    var transactionEntity = txEntity(BORROWER, CREATED);
+    when(transactionRepository.findById(TX_ID)).thenReturn(Optional.of(transactionEntity));
+    // When
+    transactionsService.updateTransactionDetails(TX_ID, dcbUpdateTransaction);
+    // Then
+    verify(transactionRepository).findById(TX_ID);
+    verify(baseLibraryService).updateTransactionDetails(transactionEntity, dcbUpdateItem);
+  }
+
+    @Test
+  void updateTransactionDetails_negative_shouldThrowExceptionWhenStatusIsNotCreated() {
+    // TestMate-25e3121c88fed23aaa32f5672d4c1a15
+    // Given
+    var dcbUpdateItem = DcbUpdateItem.builder()
+      .barcode("test-barcode")
+      .build();
+    var dcbUpdateTransaction = new DcbUpdateTransaction().item(dcbUpdateItem);
+    var transactionEntity = txEntity(BORROWER, OPEN);
+    when(transactionRepository.findById(TX_ID)).thenReturn(Optional.of(transactionEntity));
+    // When
+    assertThatThrownBy(() -> transactionsService.updateTransactionDetails(TX_ID, dcbUpdateTransaction))
+      .isInstanceOf(StatusException.class)
+      .hasMessage("Transaction details should not be updated from OPEN status, it can be updated only from CREATED status");
+    // Then
+    verify(transactionRepository).findById(TX_ID);
+    verify(baseLibraryService, never()).updateTransactionDetails(any(), any());
+  }
+
+    @Test
+  void updateTransactionDetails_negative_shouldThrowExceptionForLenderRole() {
+    // TestMate-80fcaef1289d593b1343efa66da18067
+    // Given
+    var dcbUpdateItem = DcbUpdateItem.builder()
+      .barcode("lender-update-barcode")
+      .build();
+    var dcbUpdateTransaction = new DcbUpdateTransaction().item(dcbUpdateItem);
+    var transactionEntity = txEntity(LENDER, CREATED);
+    when(transactionRepository.findById(TX_ID)).thenReturn(Optional.of(transactionEntity));
+    // When
+    assertThatThrownBy(() -> transactionsService.updateTransactionDetails(TX_ID, dcbUpdateTransaction))
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessage("Item details cannot be updated for lender role");
+    // Then
+    verify(transactionRepository).findById(TX_ID);
+    verify(baseLibraryService, never()).updateTransactionDetails(any(), any());
   }
 
   private static TransactionEntity validTxEntity() {
