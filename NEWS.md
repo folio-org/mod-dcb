@@ -1,3 +1,8 @@
+## v2.0.2 2026-11-18
+
+### Dependencies
+* Bump `spring-boot` from `4.0.5` to `4.1.1` and `folio-spring-support` from `10.0.0` to `10.0.1` ([MODDCB-306](https://folio-org.atlassian.net/browse/MODDCB-306))
+
 ## v2.0.1 2026-07-20
 
 * Use claim returned resolution during check-in ([MODDCB-292](https://folio-org.atlassian.net/browse/MODDCB-292))
